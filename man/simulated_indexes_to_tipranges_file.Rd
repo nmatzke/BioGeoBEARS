@@ -1,0 +1,75 @@
+\name{simulated_indexes_to_tipranges_file}
+\alias{simulated_indexes_to_tipranges_file}
+\title{Convert simulated Qmat 0-based indexes to a tipranges file}
+\usage{
+  simulated_indexes_to_tipranges_file(simulated_states_by_node,
+    areas_list, states_list, trfn,
+    out_geogfn = "lagrange_area_data_file.data")
+}
+\arguments{
+  \item{simulated_states_by_node}{The simulated
+  states/geographic ranges, in 0-based index form, ordered
+  as the tips & nodes are ordered in a
+  \code{pruningwise}-ordered \code{phylo} object in
+  \code{APE}.}
+
+  \item{areas_list}{A list of the desired area
+  names/abbreviations/letters.}
+
+  \item{states_list}{A list of the possible
+  states/geographic ranges, in 0-based index form.}
+
+  \item{trfn}{The filename of the source Newick tree.}
+
+  \item{out_geogfn}{The output filename.}
+}
+\value{
+  \code{out_geogfn} The output filename.
+}
+\description{
+  This function takes simulated state indices (ranging from
+  0 to numstates-1, i.e. number of possible geographic
+  ranges-1) and converts them to a
+  C++-\code{LAGRANGE}-style PHYLIP geographic ranges file.
+}
+\note{
+  Go BEARS!
+}
+\examples{
+testval=1
+}
+\author{
+  Nicholas J. Matzke \email{matzke@berkeley.edu}
+}
+\references{
+  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+  \url{https://code.google.com/p/lagrange/}
+
+  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
+  package dramatically improves likelihoods and alters
+  parameter inference in Dispersal-Extinction-Cladogenesis
+  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
+  1), pp. 210. ISSN 1948-6596, Poster abstract published in
+  the Conference Program and Abstracts of the International
+  Biogeography Society 6th Biannual Meeting, Miami,
+  Florida. Poster Session P10: Historical and
+  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
+  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+
+  Ree RH and Smith SA (2008). "Maximum likelihood inference
+  of geographic range evolution by dispersal, local
+  extinction, and cladogenesis." _Systematic Biology_,
+  *57*(1), pp. 4-14. <URL:
+  http://dx.doi.org/10.1080/10635150701883881>, <URL:
+  http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Citation&list_uids=18253896>.
+
+  Smith SA and Ree RH (2010). "lagrange: Likelihood
+  analysis of geographic range evolution." <URL:
+  https://code.google.com/p/lagrange/>.
+}
+\seealso{
+  \code{\link{define_tipranges_object}},
+  \code{\link{getareas_from_tipranges_object}},
+  \code{\link{simulated_indexes_to_tipranges_object}}
+}
+
