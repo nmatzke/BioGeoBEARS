@@ -1026,6 +1026,10 @@ get_infparams_optimx <- function(results_object, inffn)
 get_inf_LgL_etc_optimx <- function(results_object)
 	{
 	inference_stats = results_object$optim_result[2:length(results_object$optim_result)]
+	
+	# Rename "fvalues" to "LnL"
+	names(inference_stats)[names(inference_stats)=="fvalues"] = "LnL"
+	
 	return(inference_stats)
 	}
 

@@ -1,6 +1,7 @@
 \name{normat}
 \alias{normat}
-\title{Utility functions to help deal with matrices}
+\title{Utility functions to help deal with matrices
+Normalize a transition matrix}
 \usage{
   normat(relative_matrix)
 }
@@ -13,9 +14,6 @@
   (Qmat)
 }
 \description{
-  Normalize a transition matrix
-}
-\details{
   \code{normat} normalizes a square transition matrix, such
   that each row sums to 0, and the diagonal equals the
   negative of the sum of the rest of the cells in the row.
@@ -23,7 +21,8 @@
   \code{t} (time or another measure of branch length) to
   produce transition probabilities for any given value of
   \code{t}.
-
+}
+\details{
   See \cite{Foster (2001)} for a succinct summary of
   transition matrices and their exponentiation.
 }
