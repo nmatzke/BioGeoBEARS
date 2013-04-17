@@ -1244,7 +1244,7 @@ get_simparams <- function(simhist_row)
 # Process the ancestral state probs
 #######################################################
 #######################################################
-# get_ML_states2
+# get_ML_states_from_relprobs
 #######################################################
 #' Extract the ML states at each node, from a table of relative probabilities -- old version
 #' 
@@ -1288,7 +1288,7 @@ get_simparams <- function(simhist_row)
 #' @examples
 #' testval=1
 #' 
-get_ML_states2 <- function(relprobs, statenames, returnwhat="states")
+get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states")
 	{
 	# Get the maximum probability values for each row of the relative probs
 	maxprobs = apply(relprobs, 1, max)

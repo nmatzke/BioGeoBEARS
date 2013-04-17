@@ -1,0 +1,510 @@
+Identification_Information:
+  Citation:
+    Citation_Information:
+      Originator: State of Hawaii, Office of Planning
+      Publication_Date: June, 1997
+      Title: Coastline
+      Edition: 1
+      Geospatial_Data_Presentation_Form: map
+      Publication_Information:
+        Publication_Place: Honolulu, Hawaii
+        Publisher: State of Hawaii, Office of Planning
+      Online_Linkage:
+        GIS System:  Statewide GIS (HP System)
+        Layer:  coast
+        url:  http://www.hawaii.gov/dbedt/gis
+  Description:
+    Abstract: Coastlines of the main hawaiian islands.
+    Purpose:
+    Supplemental_Information:
+  Time_Period_of_Content:
+    Time_Period_Information:
+      Single_Date/Time:
+        Calendar_Date: Unknown
+    Currentness_Reference:
+  Status:
+    Progress: Complete
+    Maintenance_and_Update_Frequency: Irregular
+  Spatial_Domain:
+    Bounding_Coordinates:
+      West_Bounding_Coordinate: -161.0
+      East_Bounding_Coordinate: -154.0
+      North_Bounding_Coordinate: 23.0
+      South_Bounding_Coordinate: 18.0
+  Keywords:
+    Theme:
+      Theme_Keyword_Thesaurus: None
+      Theme_Keyword: hawaiian islands
+      Theme_Keyword: coastline
+    Place:
+      Place_Keyword_Thesaurus: None
+      Place_Keyword: State of Hawaii
+      Place_Keyword: Main Hawaiian Islands
+      Place_Keyword: Niihau
+      Place_Keyword: Kauai
+      Place_Keyword: Oahu
+      Place_Keyword: Molokai
+      Place_Keyword: Lanai
+      Place_Keyword: Maui
+      Place_Keyword: Kahoolawe
+      Place_Keyword: Hawaii
+  Access_Constraints: None
+  Use_Constraints:
+    There are no expressed warranties associated with the release of
+    these databases.  Specifically, no warranty is made that the GIS data
+    or any subsequent updates will be error free and no warranty is made
+    regarding the positional or thematic accuracy of the GIS data.  The
+    GIS data and any features it depicts do not represent or confer any
+    legal rights, privileges, benefits, boundaries or claims of any kind.
+
+    The State of Hawaii encourages GIS data users to verify the suitability
+    of the data before use.  Please report any discrepancies or errors
+    found to Joan Delos Santos, Office of Planning, P.O. Box 2359, Honolulu,
+    Hi.  96804.  Phone:  (808) 587-2895; fax:  (808) 587-2899; email:
+    JDelos_Santos@dbedt.hawaii.gov.
+  Point_of_Contact:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: State of Hawaii, Office of Planning
+        Contact_Person: Craig Tasaka
+        Contact_Person: Joan Delos Santos
+      Contact_Address:
+        Address_Type: mailing address
+        Address: P.O. Box 2359
+        City: Honolulu
+        State_or_Province: Hawaii
+        Postal_Code: 96804
+        Country: U.S.A.
+      Contact_Address:
+        Address_Type: physical address
+        Address: 235 S. Beretania St., 6th Floor
+        City: Honolulu
+        State_or_Province: Hawaii
+        Postal_Code: 96813
+        Country: U.S.A.
+      Contact_Voice_Telephone:
+        Craig Tasaka
+        (808) 587-2894
+      Contact_Voice_Telephone:
+        Joan Delos Santos
+        (808) 587-2895
+      Contact_Facsimile_Telephone: (808) 587-2899
+      Contact_Electronic_Mail_Address:
+        Craig Tasaka
+        ctasaka@dbedt.hawaii.gov
+      Contact_Electronic_Mail_Address:
+        Joan Delos Santos
+        JDelos_Santos@dbedt.hawaii.gov
+      Hours_of_Service: 7:45 a.m. to 4:30 p.m.
+  Browse_Graphic:
+    Browse_Graphic_File_Name:
+    Browse_Graphic_File_Description:
+    Browse_Graphic_File_Type:
+  Data_Set_Credit: State of Hawaii, Office of Planning
+  Security_Information:
+    Security_Classification_System:
+    Security_Classification:
+    Security_Handling_Description:
+  Native_Data_Set_Environment: Arc/Info 7.0.1 on HP-UX 10.10
+Data_Quality_Information:
+  Attribute_Accuracy:
+    Attribute_Accuracy_Report: Good - attribute accuracy "verified" using test plots
+    Quantitative_Attribute_Accuracy_Assessment:
+      Attribute_Accuracy_Value: Unknown
+      Attribute_Accuracy_Explanation:
+  Logical_Consistency_Report:
+  Completeness_Report: Complete for main hawaiian islands
+  Positional_Accuracy:
+    Horizontal_Positional_Accuracy:
+      Horizontal_Positional_Accuracy_Report:
+        Accurate to 1.219 meters (one line width at 1:24,000) -
+        based on check plots at 1:24,000
+      Quantitative_Horizontal_Positional_Accuracy_Assessment:
+        Horizontal_Positional_Accuracy_Value:
+        Horizontal_Positional_Accuracy_Explanation:
+    Vertical_Positional_Accuracy:
+      Vertical_Positional_Accuracy_Report: Unknown
+      Quantitative_Vertical_Positional_Accuracy_Assessment:
+        Vertical_Positional_Accuracy_Value:
+        Vertical_Positional_Accuracy_Explanation:
+  Lineage:
+    Source_Information:
+      Source_Citation:
+        Citation_Information:
+          Originator: United States Geological Survey
+          Publication_Date: 1983
+          Publication_Time: Unknown
+          Title:
+            State of Hawaii 7.5' Quadrangle Maps (1:24,000)
+            Digital Line Graphs
+          Edition: Unknown
+          Geospatial_Data_Presentation_Form: map
+          Series_Information:
+            Series_Name:
+            Issue_Identification:
+          Publication_Information:
+            Publication_Place:
+            Publisher: United State Geological Survey
+          Online_Linkage: Unknown
+          Other_Citation_Details:
+            1983 DLG files were compiled as updates to original USGS 7.5'
+            Quadrangle maps (circa 1950), using aerial photography flown
+            during the mid to late 1970's.
+      Source_Scale_Denominator: 24,000
+      Source_Scale_Denominator: 25,000
+      Type_of_Source_Media: magnetic tape
+      Source_Contribution:
+        Contributed digital representation of features found on USGS
+        7.5' Quadrangle maps.
+    Process_Step:
+      Process_Description:
+        Using ARC/Info v. 6.x, arcs were extracted from USGS Digital Line
+        Graph files (primarily hydrography layer), then overlayed with
+        hard copy USGS 7.5' quads to check for accuracy.
+      Process_Date: circa 1991
+      Process_Contact:
+        Contact_Information:
+          Contact_Organization_Primary:
+            Contact_Organization: State of Hawaii, Office of Planning
+            Contact_Person: Craig Tasaka
+          Contact_Position: GIS Program Manager
+          Contact_Address:
+            Address_Type: mailing address
+            Address: PO Box 2359
+            City: Honolulu
+            State_or_Province: Hawaii
+            Postal_Code: 96804
+            Country: USA
+          Contact_Voice_Telephone:
+            Craig Tasaka, (808) 587-2894
+            Joan Delos Santos, (808) 587-2895
+          Contact_TDD/TTY_Telephone:
+          Contact_Facsimile_Telephone: (808) 587-2899
+          Contact_Electronic_Mail_Address:
+            Craig Tasaka, ctasaka@dbedt.hawaii.gov
+            Joan Delos Santos, JDelos_Santos@dbedt.hawaii.gov
+          Hours_of_Service: 7:45 a.m. to 4:30 p.m.
+Spatial_Data_Organization_Information:
+  Indirect_Spatial_Reference:
+  Direct_Spatial_Reference_Method: Vector
+  Point_and_Vector_Object_Information:
+    VPF_Terms_Description:
+      VPF_Point_and_Vector_Object_Type: Edge (Arc)
+      Point_and_Vector_Object_Count: 91,805
+    VPF_Terms_Description:
+      VPF_Point_and_Vector_Object_Type: Face (Polygon)
+      Point_and_Vector_Object_Count: 13
+Spatial_Reference_Information:
+  Horizontal_Coordinate_System_Definition:
+    Planar:
+      Grid_Coordinate_System:
+        Universal_Transverse_Mercator:
+          UTM_Zone_Number: 4
+    Geodetic_Model:
+      Horizontal_Datum_Name: NAD 83
+      Ellipsoid_Name: GRS 80
+Entity_and_Attribute_Information:
+  Overview_Description:
+    Entity_and_Attribute_Overview: Polygon layer, containing coastlines of the main hawaiian islands.
+    Entity_and_Attribute_Detail_Citation:
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: Island Coastline Polygon
+      Entity_Type_Definition:
+      Entity_Type_Definition_Source:
+    Attribute:
+      Attribute_Label: Area
+      Attribute_Definition:
+        Area of the Polygon (PAT)
+        8,18,F,5
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: any real number, can be greater than or less than 0
+          Range_Domain_Maximum: any real number, can be greater than or less than 0.
+      Attribute_Units_of_Measure: Square Meters
+      Attribute_Measurement_Resolution:
+    Attribute:
+      Attribute_Label: Perimeter
+      Attribute_Definition:
+        Perimeter of the Polygon (PAT)
+        8,18,F,5
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: any real number, can be greater than or less than 0
+          Range_Domain_Maximum: any real number, can be greater than or less than 0
+      Attribute_Units_of_Measure: Meters
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: coast#
+      Attribute_Definition:
+        Polygon Internal Number (PAT)
+        4,5,B
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: 2,147,483,647
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: coast-id
+      Attribute_Definition:
+        Polygon ID (PAT)
+        4,5,B
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: 2,147,483,647
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+Entity_and_Attribute_Information:
+  Overview_Description:
+    Entity_and_Attribute_Overview: Arcs defining coastlines of the main hawaiian islands.
+    Entity_and_Attribute_Detail_Citation:
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: Coastline Arc
+      Entity_Type_Definition:
+      Entity_Type_Definition_Source:
+    Attribute:
+      Attribute_Label: FNODE#
+      Attribute_Definition:
+        From Node Number (AAT)
+        4,5,B
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: ((2**31) - 1)
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: TNODE#
+      Attribute_Definition:
+        To Node Number (AAT)
+        4,5,B
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: ((2**31) - 1)
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: LPOLY#
+      Attribute_Definition:
+        Left Polygon Number (AAT)
+        4,5,B
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: ((2**31) - 1)
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: RPOLY#
+      Attribute_Definition:
+        Right Polygon Number (AAT)
+        4,5,B
+      Attribute_Definition_Source: n/a
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: ((2**31) - 1)
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: Length
+      Attribute_Definition:
+        Length of the arc (AAT)
+        8,18,F,5
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: Any real number >= 0
+      Attribute_Units_of_Measure: meters
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: coast#
+      Attribute_Definition:
+        Arc Internal Number (AAT)
+        4,5,B
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: ((2**31) - 1)
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: coast-id
+      Attribute_Definition:
+        Arc ID (AAT)
+        4,5,B
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0
+          Range_Domain_Maximum: ((2**31) - 1_
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+    Attribute:
+      Attribute_Label: Flag
+      Attribute_Definition:
+        Flag - Source of Arc (AAT)
+        1,1,I
+      Attribute_Definition_Source:
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: 0
+          Enumerated_Domain_Value_Definition: Digitized arc
+          Enumerated_Domain_Value: 1
+          Enumerated_Domain_Value_Definition: Extracted arc
+          Enumerated_Domain_Value: 2
+          Enumerated_Domain_Value_Definition: Closure arc
+          Enumerated_Domain_Value: 3
+          Enumerated_Domain_Value_Definition: Coastline arc
+          Enumerated_Domain_Value: 9
+          Enumerated_Domain_Value_Definition: Other
+      Attribute_Units_of_Measure: n/a
+      Attribute_Value_Accuracy_Information:
+        Attribute_Value_Accuracy:
+        Attribute_Value_Accuracy_Explanation:
+Distribution_Information:
+  Distributor:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization:
+          State of Hawaii
+          Office of Planning
+        Contact_Person: Craig Tasaka
+      Contact_Position: GIS Planning Program Manager
+      Contact_Address:
+        Address_Type: mailing address
+        Address: P.O. Box 2359
+        City: Honolulu
+        State_or_Province: Hawaii
+        Postal_Code: 96804
+        Country: USA
+      Contact_Address:
+        Address_Type: physical
+        Address: 235 S. Beretania, 6th Floor
+        City: Honolulu
+        State_or_Province: Hawaii
+        Postal_Code: 96813
+        Country: USA
+      Contact_Voice_Telephone: (808) 587-2894
+      Contact_Facsimile_Telephone: (808) 587-2899
+      Contact_Electronic_Mail_Address: ctasaka@dbedt.hawaii.gov
+      Hours_of_Service: 7:45 a.m. to 4:30 p.m.
+  Resource_Description: coast
+  Distribution_Liability:
+    The State of Hawaii, Office of Planning assumes no liability
+    with respect to this data set, or any possible errors therein.
+  Standard_Order_Process:
+    Non-digital_Form: None
+    Digital_Form:
+      Digital_Transfer_Information:
+        Format_Name: ARCE
+        Format_Version_Number: 7.0.2
+        Format_Version_Date: Sept. 15, 1994
+        Format_Specification:
+        Format_Information_Content:
+        File_Decompression_Technique: No compression applied
+        Transfer_Size: 3 MB
+      Digital_Transfer_Option:
+        Online_Option:
+          Computer_Contact_Information:
+            Network_Address:
+              Network_Resource_Name:
+                http://www.hawaii.gov/dbedt/gis
+          Access_Instructions:
+          Online_Computer_and_Operating_System:
+        Offline_Option:
+          Offline_Media: 4 mm cartridge tape
+          Recording_Capacity:
+            Recording_Density:
+            Recording_Density_Units:
+          Recording_Format: tar
+          Compatibility_Information:
+        Offline_Option:
+          Offline_Media: 8 mm cartridge tape
+          Recording_Capacity:
+            Recording_Density:
+            Recording_Density_Units:
+          Recording_Format: tar
+          Compatibility_Information:
+        Offline_Option:
+          Offline_Media: 1/4-inch cartridge tape
+          Recording_Capacity:
+            Recording_Density:
+            Recording_Density_Units:
+          Recording_Format: tar
+          Compatibility_Information:
+    Fees: Cost of media
+    Ordering_Instructions: Download from web site, or write letter to request offline options.
+    Turnaround: Varies
+  Technical_Prerequisites: Ability to read Arc/Info Export or Shape files.
+Metadata_Reference_Information:
+  Metadata_Date: 19970604
+  Metadata_Review_Date:  20001031
+  Metadata_Future_Review_Date:
+  Metadata_Contact:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: State of Hawaii, Office of Planning
+        Contact_Person: Joan Delos Santos
+      Contact_Position: Systems Analyst, GIS Program
+      Contact_Address:
+        Address_Type: mailing address
+        Address: P.O. Box 2359
+        City: Honolulu
+        State_or_Province: Hawaii
+        Postal_Code: 96804
+        Country: USA
+      Contact_Address:
+        Address_Type: physical address
+        Address: 235 S. Beretania St.
+        City: Honolulu
+        State_or_Province: Hawaii
+        Postal_Code: 96813
+        Country: USA
+      Contact_Voice_Telephone: (808) 587-2895
+      Contact_TDD/TTY_Telephone:
+      Contact_Facsimile_Telephone: (808) 587-2899
+      Contact_Electronic_Mail_Address: JDelos_Santos@dbedt.hawaii.gov
+      Hours_of_Service: 7:45 a.m. to 4:30 p.m.
+      Contact_Instructions:
+  Metadata_Standard_Name: FGDC Content Standards for Digital Geospatial Metadata
+  Metadata_Standard_Version: Content Standard for Geospatial Metadata, Version 1.0, 6/8/94
+  Metadata_Time_Convention: local time
+  Metadata_Access_Constraints:
+  Metadata_Use_Constraints:
+  Metadata_Security_Information:
+    Metadata_Security_Classification_System:
+    Metadata_Security_Classification:
+    Metadata_Security_Handling_Description:

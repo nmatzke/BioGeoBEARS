@@ -1,0 +1,57 @@
+Layer Name:	Coastline
+
+Coverage Name:	COAST
+
+Layer Type:	Polygon
+
+Status:		Complete
+
+Geog. Extent:	Main Hawaiian Islands
+
+Projection:	Universal Trans Mercator, Zone 4 (Meters)
+
+Datum:		NAD 83
+
+Description:	Coastlines for the main hawaiian islands.
+		
+Source:		USGS Digital Line Graphs, 1983 version.		
+
+History:	Extracted by OSP staff from the 1983 1:24,000
+		USGS Digital Line Graphs.
+		
+Attributes:	Polygons:
+
+		AREA		area of polygon (sq. meters)
+		PERIMETER	perimeter of polygon (meters)
+		COAST#		Polygon internal number (for Arc/Info use)
+		COAST-ID	Polygon ID (for Arc/Info use)
+		
+		
+		
+		Arcs:
+		
+		FNODE#		From Node Number (for Arc/Info use)
+		TNODE#		To Node Number (for Arc/Info use)
+		LPOLY#		Left Polygon Number (for Arc/Info use)
+		RPOLY#		Right Polygon Number (for Arc/Info use)
+		LENGTH		Length (meters)
+		COAST#		Arc Internal Number (for Arc/Info use)
+		COAST-ID	Arc ID (for Arc/Info use)
+		FLAG		Source of Arc
+		
+		
+		FLAG		Definition
+		
+		0		Digitized arc
+		1		Extracted arc (from 1:24,000 DLGs)
+		2		Closure arc	
+		3		Coastline arc
+		9		Other
+		
+Note:  For more complete layer information, please refer to coast.met
+		
+Contact:	Joan Delos Santos, Office of Planning, State of Hawaii, 
+		PO Box 2359, Honolulu, Hi.  96804; (808) 587-2895.
+		email:  JDelos_Santos@dbedt.hawaii.gov
+					
+
