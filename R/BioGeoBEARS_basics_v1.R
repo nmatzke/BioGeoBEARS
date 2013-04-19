@@ -43,7 +43,8 @@ require(cladoRcpp)
 #' @rdname tipranges-class
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}},
-#' \code{\link{areas_list_to_states_list_old}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
+#' \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{areas_list_to_states_list_new}},
+#' \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
@@ -130,7 +131,8 @@ normat <- function(relative_matrix)
 #' means the function will produce a temporary \code{data.frame} as an example.
 #' @return \code{tipranges_object} The tipranges object, of class \code{tipranges}
 #' @export
-#' @seealso \code{\link{getareas_from_tipranges_object}}, \code{\link{areas_list_to_states_list_old}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
+#' @seealso \code{\link{getareas_from_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -193,7 +195,8 @@ define_tipranges_object <- function(tmpdf=NULL)
 #' @param tipranges An object of class \code{tipranges}.
 #' @return \code{areanames}, a list of the names of the areas
 #' @export
-#' @seealso \code{\link{define_tipranges_object}}, \code{\link{areas_list_to_states_list_old}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
+#' @seealso \code{\link{define_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
@@ -237,7 +240,9 @@ getareas_from_tipranges_object <- function(tipranges)
 #' @param maxareas The maximum number of areas in a geographic range, if the user does 
 #' @return \code{tip_condlikes_of_data_on_each_state} For each tip/row, likelihood of that tip's data under each possible true geographic range (columns)
 #' @export
-#' @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}}, \code{\link{areas_list_to_states_list_old}}, \code{\link{binary_ranges_to_letter_codes}}
+#' @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}}, 
+#' \code{\link{areas_list_to_states_list_new}}, 
+#' \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{binary_ranges_to_letter_codes}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -260,7 +265,12 @@ getareas_from_tipranges_object <- function(tipranges)
 #' 
 #' # Here, we will assume the maximum range size is all areas, but it could be smaller
 #' maxareas = length(areanames)
+#' \dontrun{
 #' states_list = areas_list_to_states_list_old(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
+#' states_list
+#' }
+#' 
+#' states_list = areas_list_to_states_list_new(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
 #' states_list
 #' 
 #' tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges=tipranges_object, phy=phy, states_list=states_list, maxareas=maxareas )
@@ -273,6 +283,7 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 	phy
 	maxareas=length(getareas_from_tipranges_object(tipranges))
 	'
+	require(cladoRcpp)
 	
 	# Reorder the edge matrix into pruningwise order
 	# This (may be) CRUCIAL!!
@@ -286,7 +297,7 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 		{
 		cat("Note: tipranges_to_tip_condlikes_of_data_on_each_state() is\n")
 		cat("      creating 'states_list' automatically.\n")
-		states_list = areas_list_to_states_list_old(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
+		states_list = cladoRcpp:::areas_list_to_states_list_old(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
 		}
 	
 	# Check for ranges greater than the maximum number of areas in states_list
@@ -321,6 +332,124 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 	
 	return(tip_condlikes_of_data_on_each_state)
 	}
+
+
+
+
+
+#######################################################
+# areas_list_to_states_list_new
+#######################################################
+#' Convert a list of areas to a list of geographic ranges (states); R version
+#' 
+#' R version of areas_list_to_states_list_old, which makes use of \code{\link[cladoRcpp]{cladoRcpp}}'s
+#' \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}}. 
+#' 
+#' This is the original R version of the function which converts a list of possible areas to
+#' a list of all possible states (geographic ranges).  This gets slow for large numbers of areas.
+#' 
+#' The function is mostly replaced by \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}} in optimized code, but is still used in some places
+#' for display purposes.
+#' 
+#' @param areas a list of areas (character or number; the function converts these to numbers, starting with 0)
+#' @param maxareas maximum number of areas in this analyses
+#' @param include_null_range \code{TRUE} or \code{FALSE}, should the \code{NULL} range be included in the possible states? (e.g., LAGRANGE default is yes)
+#' @param split_ABC \code{TRUE} or \code{FALSE} If \code{TRUE} the output will consist of a list of lists (c("A","B","C"), c("A","B"), c("A","D"), etc.); 
+#' if \code{FALSE}, the list of areas will be collapsed ("ABC", "AB", "AD", etc.).
+#' @return \code{states_list} A list of the states.
+#' @export
+#' @seealso \code{\link{numstates_from_numareas}}, \code{\link{rcpp_areas_list_to_states_list}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/cladoRcpp_setup/cladoRcpp_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#' @examples
+#' areas = c("A","B","C")
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=TRUE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=TRUE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=FALSE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=FALSE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=TRUE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=TRUE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=FALSE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=FALSE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=TRUE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=TRUE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=FALSE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=FALSE, split_ABC=FALSE)
+#' 
+areas_list_to_states_list_new <- function(areas=c("A","B","C"), maxareas=length(areas), include_null_range=TRUE, split_ABC=TRUE)
+	{
+	
+	# Error trap
+	if (maxareas > length(areas))
+		{
+		maxareas = length(areas)
+		}
+	
+	
+	# Initialize the states_list to the correct size
+	nstates = numstates_from_numareas(numareas=length(areas), maxareas=maxareas, include_null_range=include_null_range)
+	states_list = rep(NA, times=nstates)
+
+	if (split_ABC == TRUE)
+		{
+		# Option #1: Don't split states
+		# Add range combinations to the list
+		states_list_area_indexes = rcpp_areas_list_to_states_list(areas=areas, include_null_range=include_null_range, maxareas=maxareas)
+		
+		# +1 to indexes
+		states_list_area_indexes = lapply(X=states_list_area_indexes, FUN="+", 1)
+		
+		# convert to letters
+		tmpfun <- function(x, abbr) { abbr[x] }
+		states_list_areas = lapply(X=states_list_area_indexes, FUN=tmpfun, abbr=areas)
+		states_list_areas
+
+		states_list_areas = lapply(X=states_list_area_indexes, FUN=tmpfun, abbr=areas)
+		states_list_areas
+		
+		# convert NA to "_"
+		states_list_areas[is.na(states_list_areas)] = "_"
+		return(states_list_areas)
+		}
+
+
+	if (split_ABC == FALSE)
+		{
+		# Option #1: Don't split states
+		# Add range combinations to the list
+		states_list_area_indexes = rcpp_areas_list_to_states_list(areas=areas, include_null_range=include_null_range, maxareas=maxareas)
+		
+		# +1 to indexes
+		states_list_area_indexes = lapply(X=states_list_area_indexes, FUN="+", 1)
+		
+		# convert to letters
+		tmpfun <- function(x, abbr) { abbr[x] }
+		states_list_areas = lapply(X=states_list_area_indexes, FUN=tmpfun, abbr=areas)
+		states_list_areas
+
+		states_list_areas = lapply(X=states_list_area_indexes, FUN=tmpfun, abbr=areas)
+		states_list_areas
+		
+		# convert NA to "_"
+		states_list_areas[is.na(states_list_areas)] = "_"
+		
+		# Collapse the ranges
+		states_list_areas = lapply(X=states_list_areas, FUN=paste, collapse="")
+		states_list_areas
+		
+		return(states_list_areas)
+		}
+
+	return(stop("areas_list_to_states_list_new(): ERROR, you shouldn't reach this."))
+	}
+	
+
 
 
 
@@ -1071,7 +1200,7 @@ make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=list("_", c
 #' 
 #' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_old(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
 #' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
@@ -2221,7 +2350,8 @@ paste_rows_without_zeros <- function(tmpmat)
 #' @param null_sym The character(s) denoting a null range.
 #' @return \code{tmpmat3} The revised matrix.
 #' @export
-#' @seealso \code{\link{areas_list_to_states_list_old}}, \code{\link{make_relprob_matrix_de}}
+#' @seealso \code{\link{areas_list_to_states_list_new}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' \code{\link{make_relprob_matrix_de}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -2234,7 +2364,7 @@ paste_rows_without_zeros <- function(tmpmat)
 #' testval=1
 #' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_old(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
 #' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
@@ -2287,7 +2417,8 @@ remove_null_rowcols_from_mat <- function(tmpmat, null_sym="()")
 #' @return \code{dedf_vals} The output \code{\link[base]{data.frame}}, contains the 
 #' numeric results of the formulas calculating the transition probability matrix.
 #' @export
-#' @seealso \code{\link{areas_list_to_states_list_old}}, \code{\link{make_relprob_matrix_de}}
+#' @seealso \code{\link{areas_list_to_states_list_new}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' \code{\link{make_relprob_matrix_de}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -2299,7 +2430,7 @@ remove_null_rowcols_from_mat <- function(tmpmat, null_sym="()")
 #' 
 #' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_old(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
 #' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
@@ -2367,7 +2498,7 @@ symbolic_to_P_matrix <- function(dedf, cellsplit="\\+", mergesym="+", diags_sum_
 #' @param ... Additional arguments to pass to \code{\link[base]{strsplit}}.
 #' @return \code{cellval} The output cell value.
 #' @export
-#' @seealso \code{\link{areas_list_to_states_list_old}}, \code{\link{make_relprob_matrix_de}}
+#' @seealso \code{\link{symbolic_to_P_matrix}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -2428,7 +2559,8 @@ symbolic_cell_to_relprob_cell <- function(charcell, cellsplit="", mergesym="*", 
 #' @param ... Additional arguments to pass to \code{\link{symbolic_cell_to_relprob_cell}} via \code{\link[base]{sapply}}, and thence to cell\code{\link[base]{strsplit}}.
 #' @return \code{dedf_vals} The output \code{\link[base]{data.frame}}, contains the Q matrix 
 #' @export
-#' @seealso \code{\link{areas_list_to_states_list_old}}, \code{\link{make_relprob_matrix_de}}
+#' @seealso \code{\link{areas_list_to_states_list_new}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' \code{\link{make_relprob_matrix_de}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -2441,7 +2573,7 @@ symbolic_cell_to_relprob_cell <- function(charcell, cellsplit="", mergesym="*", 
 #' 
 #' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_old(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
 #' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
@@ -2514,7 +2646,8 @@ symbolic_to_Q_matrix <- function(dedf, cellsplit="\\+", mergesym="*", d=0.1, e=0
 #' @param ... Additional arguments to pass to \code{\link{symbolic_cell_to_relprob_cell}} via \code{\link[base]{sapply}}, and thence to cell\code{\link[base]{strsplit}}.
 #' @return \code{dedf_vals} The output \code{\link[base]{data.frame}}, contains the Q matrix 
 #' @export
-#' @seealso \code{\link{areas_list_to_states_list_old}}, \code{\link{make_relprob_matrix_de}}
+#' @seealso \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{make_relprob_matrix_de}}
+#' \code{\link{areas_list_to_states_list_new}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -2527,7 +2660,7 @@ symbolic_to_Q_matrix <- function(dedf, cellsplit="\\+", mergesym="*", d=0.1, e=0
 #' 
 #' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_old(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
 #' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))

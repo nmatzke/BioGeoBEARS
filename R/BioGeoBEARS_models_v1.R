@@ -4155,7 +4155,7 @@ bears_2param_standard_slowQ_slowSP <- function(trfn = "Psychotria_timescaled.new
 
 	
 	# Old/slow way of getting the list of states and speciation matrix (slow)
-	old_states_list = areas_list_to_states_list_old(areas, include_null_range=TRUE)
+	old_states_list = cladoRcpp:::areas_list_to_states_list_old(areas, include_null_range=TRUE)
 	old_states_list
 	spmat = make_relprob_matrix_bi(old_states_list)
 	spmat

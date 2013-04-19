@@ -1,10 +1,10 @@
 #######################################################
 # Calc loglike speciation -- separated to its own file, because it's such a huge function
 #######################################################
-require(ape)
-require(rexpokit)
-require(cladoRcpp)
-require(parallel)
+require("ape")
+require("rexpokit")
+require("cladoRcpp")
+require("parallel")
 
 #######################################################
 # Helper functions to try to speed things up
@@ -163,6 +163,234 @@ mapply_likelihoods = compiler::cmpfun(mapply_likelihoods_prebyte)
 
 
 
+
+
+
+
+
+#######################################################
+# calc_prob_forward_onebranch_dense
+#######################################################
+#' Dense matrix exponentiation forward on a branch, with rexpokit
+#' 
+#' Take input probabilities, and get the probabilities at the end of a branch using matrix exponentiation.
+#' 
+#' The \code{\link{calc_loglike_sp}} function calculates most transition probabilities internally
+#' via \code{\link[rexpokit]{rexpokit}}.  These are then stored and can be used again
+#' when an uppass is being done for ancestral state estimates.  However, if there is a root
+#' branch below the lowest fork, the uppass needs to calculate the forward probabilities.
+#' 
+#' @param relprobs_branch_bottom The relative probability of each state at the base of the branch (should sum to 1).
+#' @param branch_length The length of the branch.
+#' @param Qmat A Q transition matrix in square (dense) format
+#' @return \code{actual_probs_after_forward_exponentiation} The probabilities of each state at the top of the branch.
+#' @export
+#' @seealso \code{\link{expokit_dgpadm_Qmat2}}, \code{\link[rexpokit]{expokit_dgpadm_Qmat}}, \code{\link[rexpokit]{rexpokit}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{http://www.bioinf.org/molsys/data/idiots.pdf}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite FosterIdiots
+#' @examples
+#' # Make a square instantaneous rate matrix (Q matrix)
+#' # This matrix is taken from Peter Foster's (2001) "The Idiot's Guide
+#' # to the Zen of Likelihood in a Nutshell in Seven Days for Dummies,
+#' # Unleashed" at:
+#' # \url{http://www.bioinf.org/molsys/data/idiots.pdf}
+#' #
+#' # The Q matrix includes the stationary base freqencies, which Pmat 
+#' # converges to as t becomes large.
+#' Qmat = matrix(c(-1.218, 0.504, 0.336, 0.378, 0.126, -0.882, 0.252, 0.504, 0.168, 0.504, -1.05, 0.378, 0.126, 0.672, 0.252, -1.05), nrow=4, byrow=TRUE)
+#' 
+#' relprobs_branch_bottom = c(0.25, 0.25, 0.25, 0.25)
+#' 
+#' # Make a series of t values
+#' branch_length = 0.1
+#' 
+#' calc_prob_forward_onebranch_dense(relprobs_branch_bottom, branch_length, Qmat)
+#' calc_prob_forward_onebranch_dense(relprobs_branch_bottom, branch_length=0.5, Qmat)
+#' calc_prob_forward_onebranch_dense(relprobs_branch_bottom, branch_length=1, Qmat)
+#' calc_prob_forward_onebranch_dense(relprobs_branch_bottom, branch_length=2, Qmat)
+#' calc_prob_forward_onebranch_dense(relprobs_branch_bottom, branch_length=10, Qmat)
+#' calc_prob_forward_onebranch_dense(relprobs_branch_bottom, branch_length=20, Qmat)
+#' 
+calc_prob_forward_onebranch_dense <- function(relprobs_branch_bottom, branch_length, Qmat)
+	{
+	defaults='
+	relprobs_branch_bottom = rep(1/nrow(Qmat), nrow(Qmat))
+	branch_length = 1
+	'
+	
+	# Dense matrix exponentiation, FORWARD
+	# To get forward behavior, in this case, do transpose; what matters is the order in which you use %*%
+	
+	# cond_probs, aka independent_likelihoods
+	# branch_length = 1
+	cond_probs_after_forward_exponentiation = expokit_dgpadm_Qmat2(times=branch_length, Qmat=Qmat, transpose_needed=TRUE)
+	cond_probs_after_forward_exponentiation
+	
+	# Probabilities of states at the top of the branch
+	actual_probs_after_forward_exponentiation = relprobs_branch_bottom %*% cond_probs_after_forward_exponentiation
+	actual_probs_after_forward_exponentiation
+	
+	return(actual_probs_after_forward_exponentiation)
+	}
+
+
+
+
+#######################################################
+# calc_prob_forward_onebranch_sparse
+#######################################################
+#' Sparse matrix exponentiation forward on a branch, with rexpokit
+#' 
+#' Take input probabilities, and get the probabilities at the end of a branch using matrix exponentiation.
+#' 
+#' The \code{\link{calc_loglike_sp}} function calculates most transition probabilities internally
+#' via \code{\link[rexpokit]{rexpokit}}.  These are then stored and can be used again
+#' when an uppass is being done for ancestral state estimates.  However, if there is a root
+#' branch below the lowest fork, the uppass needs to calculate the forward probabilities.
+#' 
+#' @param relprobs_branch_bottom The relative probability of each state at the base of the branch (should sum to 1).
+#' @param branch_length The length of the branch.
+#' @param tmpQmat_in_REXPOKIT_coo_fmt A Q transition matrix in sparse (COO) format.  See \code{\link[rexpokit]{mat2coo}}.
+#' @param coo_n If a COO matrix is input, \code{coo_n} specified the order (# rows, equals # columns) of the matrix.
+#' @param anorm \code{dgexpv} requires an initial guess at the norm of the matrix. Using the
+#' R function \code{\link{norm}} might get slow with large matrices. If so, the user
+#' can input a guess manually (\code{Lagrange} seems to just use 1 or 0, if I
+#' recall correctly).
+#' @param check_for_0_rows If TRUE or a numeric value, the input Qmat is checked for all-zero rows, since these will crash the FORTRAN 
+#' \code{wrapalldmexpv} function. A small nonzero value set to check_for_0_rows or the default (0.0000000000001) is input to  off-diagonal
+#' cells in the row (and the diagonal value is normalized), which should fix the problem.
+#' @param TRANSPOSE_because_forward For non-time-reversible models, the forward calculation is different than the backward one.  
+#' Fortunately this just means switching the rows and columns of a transition matrix.
+#' @return \code{actual_probs_after_forward_exponentiation} The probabilities of each state at the top of the branch.
+#' @export
+#' @seealso \code{\link{expokit_dgpadm_Qmat2}}, \code{\link[rexpokit]{expokit_dgpadm_Qmat}}, \code{\link[rexpokit]{rexpokit}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{http://www.bioinf.org/molsys/data/idiots.pdf}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite FosterIdiots
+#' @examples
+#' # Make a square instantaneous rate matrix (Q matrix)
+#' # This matrix is taken from Peter Foster's (2001) "The Idiot's Guide
+#' # to the Zen of Likelihood in a Nutshell in Seven Days for Dummies,
+#' # Unleashed" at:
+#' # \url{http://www.bioinf.org/molsys/data/idiots.pdf}
+#' #
+#' # The Q matrix includes the stationary base freqencies, which Pmat 
+#' # converges to as t becomes large.
+#' require("rexpokit")
+#' 
+#' Qmat = matrix(c(-1.218, 0.504, 0.336, 0.378, 0.126, -0.882, 0.252, 0.504, 0.168, 0.504, -1.05, 0.378, 0.126, 0.672, 0.252, -1.05), nrow=4, byrow=TRUE)
+#' tmpQmat_in_REXPOKIT_coo_fmt = mat2coo(Qmat)
+#' 
+#' relprobs_branch_bottom = c(0.25, 0.25, 0.25, 0.25)
+#' 
+#' # Make a series of t values
+#' branch_length = 0.1
+#' 
+#' calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=4, anorm=1, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+#' calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length=0.5, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=4, anorm=1, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+#' calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length=1, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=4, anorm=1, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+#' calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length=2, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=4, anorm=1, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+#' calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length=10, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=4, anorm=1, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+#' calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length=20, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=4, anorm=1, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+#' 
+calc_prob_forward_onebranch_sparse <- function(relprobs_branch_bottom, branch_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+	{
+	defaults='
+
+	relprobs_branch_bottom = rep(1/nrow(Qmat), nrow(Qmat))
+	branch_length = 1
+
+	# tmpQmat_in_REXPOKIT_coo_fmt = Qmat
+	tmpQmat_in_REXPOKIT_coo_fmt = mat2coo(Qmat)
+	tmpQmat_in_REXPOKIT_coo_fmt_original = tmpQmat_in_REXPOKIT_coo_fmt
+	coo_n = 16
+	anorm = 1
+	'
+	
+	# Sparse matrix exponentiation, FORWARD
+	
+	#condlikes_Left = try (
+	#			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[i], inputprobs_for_fast=relative_probs_of_each_state[left_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
+	
+	# Note 2013-04-16: transpose_needed only works on dense matrices!
+	# For sparse matrices, switch columns manually
+	if (TRANSPOSE_because_forward == TRUE)
+		{
+		tmpQmat_in_REXPOKIT_coo_fmt_transposed = tmpQmat_in_REXPOKIT_coo_fmt
+		tmpQmat_in_REXPOKIT_coo_fmt_transposed[,1:2] = tmpQmat_in_REXPOKIT_coo_fmt[,2:1]
+		}
+	
+	
+	cond_probs_top = try(
+		expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt_transposed, 
+			t=branch_length, 
+			inputprobs_for_fast=relprobs_branch_bottom, 
+			transpose_needed=FALSE, 
+			transform_to_coo_TF=FALSE, 
+			coo_n=coo_n, 
+			anorm=anorm, 
+			check_for_0_rows=TRUE)
+		)
+	cond_probs_top
+
+	# Error check
+	if (class(cond_probs_top) == "try-error")
+		{
+		cat("\n\ncalc_prob_forward_onebranch_sparse():\n\n")
+		cat("\n\ntry-error on expokit_dmexpv_Qmat():\n\n")
+		cat("t=", branch_length, "\n")
+		print(tmpQmat_in_REXPOKIT_coo_fmt)
+		print(coo_n)
+		print(anorm)
+		}
+
+	if (any(is.nan(cond_probs_top)))
+		{
+		cat("\n\ncalc_prob_forward_onebranch_sparse():\n\n")
+		cat("\n\nnan error on expokit_dmexpv_Qmat():\n\n")
+		cat("\n\nBranch is the root branch:\n\n")
+		cat("t=", branch_length, "\n")
+		print(tmpQmat_in_REXPOKIT_coo_fmt)
+		print(coo_n)
+		print(anorm)
+		}
+	
+	actual_probs_after_forward_exponentiation = cond_probs_top
+	
+	return(actual_probs_after_forward_exponentiation)
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #######################################################
 # Calc loglike speciation
 #######################################################
@@ -226,6 +454,8 @@ mapply_likelihoods = compiler::cmpfun(mapply_likelihoods_prebyte)
 #' a cluster, specify the cluster here.  E.g. \code{cluster_already_open = makeCluster(rep("localhost",num_cores_to_use), type = "SOCK")}.  Note: this will work on 
 #' most platforms, including Macs running R from command line, but will NOT work on Macs running the R GUI \code{R.app}, because parallel processing functions like
 #' \code{MakeCluster} from e.g. \code{library(parallel)} for some reason crash R.app.  The program runs a check for R.app and will just run on 1 node if found. 
+#' @param calc_ancprobs Should ancestral state estimation be performed (adds an uppass at the end).
+#' @param null_range_allowed Does the state space include the null range?
 #' Default is \code{NULL} which means running on a single processor.
 #' @return Return whatever is specified by \code{return_what}.
 #' @export
@@ -242,7 +472,7 @@ mapply_likelihoods = compiler::cmpfun(mapply_likelihoods_prebyte)
 #' @examples
 #' testval=1
 #'
-calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL)
+calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE)
 	{
 	defaults='
 	# Phylogeny
@@ -251,7 +481,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 
 	# Areas: A=Africa, B=Not Africa
 	areas = c("A","B")
-	states_list = areas_list_to_states_list(areas, include_null_range=FALSE)
+	states_list = areas_list_to_states_list_old(areas, include_null_range=FALSE)
 	dedf = make_relprob_matrix_de(states_list)
 	Qmat = symbolic_to_Q_matrix(dedf, d=0.1, e=0.1)
 	
@@ -281,9 +511,19 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	#print("Qmat#1")
 	#print(Qmat)
 	
-	
+	#######################################################
+	# Calculating ancestral probs via an uppass requires the
+	# downpass splitlikes be saved.
+	#######################################################
+	if (calc_ancprobs == TRUE)
+		{
+		# Also, cppSpMethod must be 3 (I'm not going to program the other ones!!)
+		if (cppSpMethod != 3)
+			{
+			stop("ERROR: You must have cppSpMethod=3 if calc_ancprobs=TRUE or save_downpass_splitprobs=TRUE")
+			}
+		}
 
-	
 	
 	#######################################################
 	# ERROR CHECK
@@ -406,14 +646,47 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	tipnums <- 1:numtips
 
 	# Put in the sums of the probabilities of the states at each tip
+	# (This only works if the tip data are 0000100000, etc...)
 	computed_likelihoods_at_each_node[tipnums] = rowSums(tip_condlikes_of_data_on_each_state)
 	
-
+	
+	#######################################################
+	# Initialize matrices for downpass and uppass storage of state probabilities
+	#######################################################
+	
+	# This is all you need for a standard likelihood calculation
+	# relative_probs_of_each_state = rel probs AT A NODE
 	relative_probs_of_each_state <- matrix(data=0, nrow=numnodes, ncol=numstates)
 	relative_probs_of_each_state[tipnums, ] = tip_condlikes_of_data_on_each_state
 	condlikes_of_each_state = relative_probs_of_each_state
 	#relative_probs_of_each_state[tipnums, ] <- 1
 	
+	
+	# But, if you want to do ancestral states properly, and get marginal
+	# reconstructions, you've gotta store:
+	# 1. Probability of the states at the bottom of each branch on downpass
+	# 2. Probability of the states at the bottom of each branch on UP-pass
+	# 3. Probability of the states at the top of each branch on UP-pass
+	# Combine 0-3 to get the ML marginal probability of states at
+	# 4. The bottom of each branch
+	# 5. The top of each branch
+	# Combine 4 & 5 to get:
+	# 6. MAYBE The ML marginal probability of each split scenario at each node - i.e. #5(top) * #4(left bot) * #4(right bot)
+	# 
+	if (calc_ancprobs == TRUE)
+		{
+		# Every node (except maybe the root) has a branch below it, and there is also a 
+		# relative_probs_of_each_state at the bottom of this branch
+		relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS <- matrix(data=NA, nrow=numnodes, ncol=numstates)
+		relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS <- matrix(data=NA, nrow=numnodes, ncol=numstates)
+		relative_probs_of_each_state_at_branch_top_AT_node_UPPASS <- matrix(data=NA, nrow=numnodes, ncol=numstates)
+		ML_marginal_prob_each_state_at_branch_bottom_below_node <- matrix(data=NA, nrow=numnodes, ncol=numstates)
+		ML_marginal_prob_each_state_at_branch_top_AT_node <- matrix(data=NA, nrow=numnodes, ncol=numstates)
+		ML_marginal_prob_each_split_at_branch_top_AT_node = list()
+		}
+
+
+
 	
 	# If you want to use standard dense matrix exponentiation, rexpokit's dgpadm is best,
 	# and you can run it through mapply on the branch lengths of all branches at once
@@ -617,7 +890,11 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		}
 	
 	
-	
+	#######################################################
+	#######################################################
+	# THIS IS A DOWNPASS FROM THE TIPS TO THE ROOT
+	#######################################################
+	#######################################################
 	for (i in edges_to_visit)
 		{
 		# First edge visited is i
@@ -631,7 +908,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		left_desc_nodenum <- phy2$edge[i, 2]
 		right_desc_nodenum <- phy2$edge[j, 2]
 		
-		# And for the ancestor edge
+		# And for the ancestor edge (i or j shouldn't matter, should produce the same result!!!)
 		anc <- phy2$edge[i, 1]
 		
 		txt = paste("anc:", anc, " left:", left_desc_nodenum, " right:", right_desc_nodenum, sep="")
@@ -679,7 +956,6 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				condlikes_Right = independent_likelihoods_on_each_branch[[j]] %*% relative_probs_of_each_state[right_desc_nodenum,]
 				}
 
-
 			
 			if (printlevel >= 2) {
 			txt = paste("condlikes at bottom of L: ", paste(round(condlikes_Left, 4), collapse=" ", sep=""), sep="")
@@ -701,6 +977,9 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			#condlikes_Right <- exp(Qmat * phy$edge.length[j]) %*% relative_probs_of_each_state[right_desc_nodenum, 
 			#  ]
 			} else {
+			#######################################################
+			# Sparse matrix exponentiation
+			#######################################################
 			# sparse == TRUE
 
 			# For rapid exponentiation of sparse matrices, we use myDMEXPV, and input
@@ -718,7 +997,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				print("sparse matrix exponentiation")
 				}
 			
-			# Conditional likelihoods of states at the bottom of left branch
+			# Conditional likelihoods of data given the states at the bottom of left branch
 			condlikes_Left = try (
 			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[i], inputprobs_for_fast=relative_probs_of_each_state[left_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
 			)
@@ -750,7 +1029,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				print(anorm)
 				}
 	
-			# Conditional likelihoods of states at the bottom of right branch
+			# Conditional likelihoods of data given the states at the bottom of right branch
 			condlikes_Right = try(
 			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[j], inputprobs_for_fast=relative_probs_of_each_state[right_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
 			)
@@ -764,7 +1043,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				print(tmpQmat_in_REXPOKIT_coo_fmt)
 				print(phy2)
 				print(relative_probs_of_each_state)
-				print(relative_probs_of_each_state[left_desc_nodenum,])
+				print(relative_probs_of_each_state[right_desc_nodenum,])
 				print(coo_n)
 				print(anorm)
 				}
@@ -772,21 +1051,36 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 
 			if (any(is.nan(condlikes_Right)))
 				{
-				cat("\n\ntry-error on expokit_dmexpv_Qmat():\n\n")
+				cat("\n\nexpokit_dmexpv_Qmat() returned NaNs:\n\n")
 				cat("j=", j, "\n")
 				cat("phy2$edge.length[j]=", phy2$edge.length[j], "\n")
 				print(tmpQmat_in_REXPOKIT_coo_fmt)
 				print(phy2)
 				print(relative_probs_of_each_state)
-				print(relative_probs_of_each_state[left_desc_nodenum,])
+				print(relative_probs_of_each_state[right_desc_nodenum,])
 				print(coo_n)
 				print(anorm)
 				}
 
 			#print(c(condlikes_Left))
 			#print(c(condlikes_Right))
-			
 			}		
+		
+		
+		
+		
+		# Save the conditional likelihoods of the data at the bottoms of each branch 
+		# (needed for marginal ancestral state probabilities)
+		if (calc_ancprobs == TRUE)
+			{
+			# Every node (except maybe the root) has a branch below it, and there is also a 
+			# relative_probs_of_each_state at the bottom of this branch
+			relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[left_desc_nodenum,] = condlikes_Left / sum(condlikes_Left)
+			relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[right_desc_nodenum,] = condlikes_Right / sum(condlikes_Right)
+			}			
+			
+		
+		
 		
 		# If there is no speciational model, you are assuming 100% sympatry (range duplication)
 		# at each speciation event
@@ -850,7 +1144,13 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				
 				# Exclude "_" ranges from this calculation, as if there is speciation,
 				# they are not going extinct
-				probs_of_each_desc_pair = c(base::t(outer(c(condlikes_Left[-1]), c(condlikes_Right[-1]), "*")))
+				
+				if (null_range_allowed == TRUE)
+					{
+					probs_of_each_desc_pair = c(base::t(outer(c(condlikes_Left[-1]), c(condlikes_Right[-1]), "*")))
+					} else {
+					probs_of_each_desc_pair = c(base::t(outer(c(condlikes_Left), c(condlikes_Right), "*")))
+					}
 				#sum(probs_of_each_desc_pair)
 	
 				# Make a matrix with the probability of each pair, in each cell
@@ -871,7 +1171,12 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				
 				# Add the 0 back in, representing 0 probability of "_"
 				# range just below speciation event
-				node_likelihood = c(0, node_likelihood_with_speciation)
+				if (null_range_allowed == TRUE)
+					{
+					node_likelihood = c(0, node_likelihood_with_speciation)
+					} else {
+					node_likelihood = node_likelihood_with_speciation
+					}
 				}
 			} else {
 			# use_cpp == TRUE
@@ -916,7 +1221,13 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						
 						# Exclude "_" ranges from this calculation, as if there is speciation,
 						# they are not going extinct
-						probs_of_each_desc_pair = c(base::t(outer(c(condlikes_Left[-1]), c(condlikes_Right[-1]), "*")))
+						
+						if (null_range_allowed == TRUE)
+							{
+							probs_of_each_desc_pair = c(base::t(outer(c(condlikes_Left[-1]), c(condlikes_Right[-1]), "*")))
+							} else {
+							probs_of_each_desc_pair = c(base::t(outer(c(condlikes_Left), c(condlikes_Right), "*")))
+							}
 						#sum(probs_of_each_desc_pair)
 			
 						# Make a matrix with the probability of each pair, in each cell
@@ -937,7 +1248,12 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						
 						# Add the 0 back in, representing 0 probability of "_"
 						# range just below speciation event
-						node_likelihood = c(0, node_likelihood_with_speciation)
+						if (null_range_allowed == TRUE)
+							{
+							node_likelihood = c(0, node_likelihood_with_speciation)
+							} else {
+							node_likelihood = node_likelihood_with_speciation
+							}
 						}
 					} else {
 					if (printlevel >= 1)
@@ -955,8 +1271,14 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 					# Calculate the likelihoods at each node,
 					# give the speciation model, and input probs for 
 					# each branch
-					ca = condlikes_Left[-1]
-					cb = condlikes_Right[-1]
+					if (null_range_allowed == TRUE)
+						{
+						ca = condlikes_Left[-1]
+						cb = condlikes_Right[-1]
+						} else {
+						ca = condlikes_Left
+						cb = condlikes_Right						
+						}
 					
 					# Rcpp does weird alterations to the input variables, so use each only once!
 					#tmpca_1 = ca
@@ -1021,7 +1343,13 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 					print("node_likelihood_with_speciation:")
 					print(node_likelihood_with_speciation)
 					}
-					node_likelihood = c(0, node_likelihood_with_speciation)				
+	
+					if (null_range_allowed == TRUE)
+						{
+						node_likelihood = c(0, node_likelihood_with_speciation)
+						} else {
+						node_likelihood = node_likelihood_with_speciation
+						}
 					}
 				}
 			}
@@ -1065,6 +1393,10 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		
 		#print(relative_probs_of_each_state)
 		}
+	#######################################################
+	# END DOWNPASS FROM THE TIPS TO THE ROOT
+	#######################################################
+
 	relative_probs_of_each_state
 	# relative_probs_of_each_state2 = relative_probs_of_each_state
 
@@ -1075,7 +1407,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	#phy2$root.edge = 0.1
 	if ( (rootedge == TRUE) && (!is.null(phy2$root.edge)) && (phy2$root.edge > 0) )
 		{
-		phy2$root.edge = 1.1
+		#phy2$root.edge = 1.1
 		root_edge_length = phy2$root.edge
 		independent_likelihoods_on_root_edge = expokit_dgpadm_Qmat(Qmat=Qmat, t=root_edge_length, transpose_needed=TRUE)
 		
@@ -1108,8 +1440,251 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	#output_loglike = 2 * sum(log(comp[-TIPS]))
 	
 	total_loglikelihood = sum(log(computed_likelihoods_at_each_node))
+	
+		
+	#######################################################
+	# Calculating the probabilities of ancestral states at
+	# nodes (and immediately after nodes) is not just a 
+	# matter of normalizing the downpass conditional
+	# likelihoods so they sum to 1.
+	#
+	# With traditional reversible models, one would re-root 
+	# the phylogeny at each node (or just do an uppass),
+	# but here we need to do an uppass with the FORWARD
+	# model to get the ancprobs.
+	#######################################################
+	if (calc_ancprobs == TRUE)
+		{
+		if (printlevel >= 0)
+			{
+			cat("\nUppass starting for marginal ancestral states estimation!\n", sep="")
+			}
 
 
+		# First, figure out the probs AT THE LOWEST FORK (different from bottom of the root branch,
+		# which may or may not exist)
+		starting_probs = NULL
+		
+		# If there was a root edge, start with that:
+		if ( (rootedge == TRUE) && (!is.null(phy2$root.edge)) && (phy2$root.edge > 0) )
+			{
+			#######################################################
+			# THERE IS A ROOT EDGE
+			#######################################################
+
+			# Do sparse or dense matrix exponentiation
+			if (sparse==FALSE)
+				{
+				# Dense matrix exponentiation
+				# Need to do a forward matrix exponentiation
+				actual_probs_after_forward_exponentiation = calc_prob_forward_onebranch_dense(relprobs_branch_bottom=relative_probs_of_each_state_at_bottom_of_root_branch, branch_length=root_edge_length, Qmat)
+				} else {
+				# Sparse matrix exponentiation
+				actual_probs_after_forward_exponentiation = calc_prob_forward_onebranch_sparse(relprobs_branch_bottom=relative_probs_of_each_state_at_bottom_of_root_branch, branch_length=root_edge_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
+				}
+			
+			# Combine this uppass probability with the downpass condlikes for the states just below the root node.
+			# anc is the ancestral node
+			
+			# relative_probs_of_each_state = results_object$relative_probs_of_each_state
+			# anc=20
+			
+			# Multiply the probs, then divide by the sum
+			multiplied_probs = actual_probs_after_forward_exponentiation * relative_probs_of_each_state[anc, ]
+			starting_probs = multiplied_probs / sum(multiplied_probs)
+			} else {
+			#######################################################
+			# NO ROOT EDGE
+			#######################################################
+			# Otherwise, just start with the bottom fork
+			starting_probs = relative_probs_of_each_state[anc, ]
+			}
+		
+		
+		#######################################################
+		#######################################################
+		# THIS IS AN UPPASS FROM THE TIPS TO THE ROOT
+		#######################################################
+		#######################################################
+
+		# Check to make sure you have the necessary inputs
+		if (exists("COO_weights_columnar") == FALSE)
+			{
+			stop("\nERROR_A: calc_loglike_sp requires 'COO_weights_columnar', 'Rsp_rowsums', and cppSpMethod==3 for marginal ancestral state estimations.\n")
+			}
+		if (exists("Rsp_rowsums") == FALSE)
+			{
+			stop("\nERROR_B: calc_loglike_sp requires 'COO_weights_columnar', 'Rsp_rowsums', and cppSpMethod==3 for marginal ancestral state estimations.\n")
+			}
+		if (cppSpMethod != 3)
+			{
+			stop("\nERROR_C: calc_loglike_sp requires 'COO_weights_columnar', 'Rsp_rowsums', and cppSpMethod==3 for marginal ancestral state estimations.\n")
+			}
+
+		# OK, from the starting probs at the bottom fork, we just need to do an uppass from anc, reversing the downpass
+		# Get the descendant node nums
+		
+		# Keep track of the uppass probabilities
+		relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[anc, ] = starting_probs
+		
+		# Vist edges in reverse order from the downpass
+		edges_to_visit_uppass = seq(from=(num_internal_nodes*2), by=-2, length.out=num_internal_nodes)
+		# Since we are going backwards
+		#print(edges_to_visit_uppass)
+		#print(i)
+		#print(j)
+		#cat("\n")
+		
+		#for (i in edges_to_visit_uppass)
+		#j=edges_to_visit_uppass[1]
+		for (j in edges_to_visit_uppass)		# Since we are going backwards
+			{
+			# First edge visited is i
+			#print(i)
+			
+			# Its sister is j 
+			#j <- i - 1
+			i <- j - 1		# Since we are going backwards
+			
+			# Get the node numbers at the tips of these two edges		
+			left_desc_nodenum <- phy2$edge[i, 2]
+			right_desc_nodenum <- phy2$edge[j, 2]
+
+			# And for the ancestor edge (i or j shouldn't matter, should produce the same result!!!)
+			anc <- phy2$edge[i, 1]
+			
+			# get the correct edges
+			left_edge_TF = phy2$edge[,2] == left_desc_nodenum
+			right_edge_TF = phy2$edge[,2] == right_desc_nodenum
+			
+			# Check the branchlength of each edge
+			# It's a hook if either branch is super-short
+			is_leftbranch_hook_TF = phy2$edge.length[left_edge_TF] < min_branchlength
+			is_rightbranch_hook_TF = phy2$edge.length[right_edge_TF] < min_branchlength
+			hooknode_TF = (is_leftbranch_hook_TF + is_rightbranch_hook_TF) > 0
+
+
+			#cat(i, j, left_desc_nodenum, right_desc_nodenum, hooknode_TF, "\n", sep="	")
+			
+			
+			# You start with these uppass probs
+			relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[anc, ]
+			
+			# Apply speciation model to get the uppass probs at the base of the two descendant branches
+			if (hooknode_TF == TRUE)
+				{
+				# Just copy the probs up, since a time-continuous model was assumed.
+				relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[left_desc_nodenum, ] = relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[anc, ]
+				relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum, ] = relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[anc, ]
+				# You're done
+				
+				} else {
+				# Apply regular speciation model, with the weights given in COO_weights_columnar, and the 
+				# normalization factor (sum of the weights across each row/ancestral state) in Rsp_rowsums.
+				num_nonzero_split_scenarios = length(COO_weights_columnar[[1]])
+				
+				relprobs_just_after_speciation_UPPASS_Left = rep(0, numstates)
+				relprobs_just_after_speciation_UPPASS_Right = rep(0, numstates)
+				
+				# Go through each ancestral state
+				for (ii in 1:numstates)
+					{
+					ancprob = relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[anc, ii]
+					
+					# A certain number of rows in COO_weights_columnar[[1]] will match this ancstate
+					# (be sure to convert R 1-based index to C++ 0-based index
+					ancstate_matches_TF = ((ii-1) == COO_weights_columnar[[1]])
+					
+					# For range inheritance scenarios which have this ancestor, get the 
+					# Right and Left state indexes (1-based)
+					if (null_range_allowed == TRUE)
+						{
+						# You have to add another 1, since the speciational models EXCLUDE
+						# the first "range", the null range
+						Lstate_1based_indexes = COO_weights_columnar[[2]][ancstate_matches_TF] + 1 + 1
+						Rstate_1based_indexes = COO_weights_columnar[[3]][ancstate_matches_TF] + 1 + 1
+						} else {
+						Lstate_1based_indexes = COO_weights_columnar[[2]][ancstate_matches_TF] + 1						
+						Rstate_1based_indexes = COO_weights_columnar[[3]][ancstate_matches_TF] + 1
+						}
+				
+					# And get the probability of each transition
+					# AND multiply by the prob of this ancestor
+					split_probs_for_this_ancestor = ancprob * COO_weights_columnar[[4]][ancstate_matches_TF]
+					
+					# Then add to the uppass probs for these branch bottoms
+					relprobs_just_after_speciation_UPPASS_Left[Lstate_1based_indexes] = relprobs_just_after_speciation_UPPASS_Left[Lstate_1based_indexes] + split_probs_for_this_ancestor
+					relprobs_just_after_speciation_UPPASS_Right[Rstate_1based_indexes] = relprobs_just_after_speciation_UPPASS_Right[Rstate_1based_indexes] + split_probs_for_this_ancestor
+					
+					} # That should be it for calculating the relative probs. Still have to normalize!
+				
+				# Normalize the probs by their sum.
+				relprobs_just_after_speciation_UPPASS_Left = relprobs_just_after_speciation_UPPASS_Left / sum(relprobs_just_after_speciation_UPPASS_Left)				
+				relprobs_just_after_speciation_UPPASS_Right = relprobs_just_after_speciation_UPPASS_Right / sum(relprobs_just_after_speciation_UPPASS_Right)
+				
+				# Store these uppass probs for the branch bases
+				relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[left_desc_nodenum, ] = relprobs_just_after_speciation_UPPASS_Left
+				relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum, ] = relprobs_just_after_speciation_UPPASS_Right
+				
+				} # End if hooknode_TF
+
+				
+			# Finally, we have to retrieve the matrix exponentiations to calculate the probabilities
+			# at the branch tops, from the probabilities at the branch bottoms.
+	
+			# Do sparse or dense matrix exponentiation
+			if (sparse==FALSE)
+				{
+				# Dense matrix exponentiation, which has been done already!
+				if (is.null(cluster_already_open))
+					{
+					# Relative probabilities of states at the top of left branch
+					condprobs_Left_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[left_desc_nodenum,] %*% independent_likelihoods_on_each_branch[,,i]
+								
+					# Relative probabilities of states at the top of right branch
+					condprobs_Right_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum,] %*% independent_likelihoods_on_each_branch[,,j]
+					} else {
+					
+					# Here, the independent_likelihoods_on_each_branch are stored in a list of matrices
+					# Relative probabilities of states at the top of left branch
+					condprobs_Left_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[left_desc_nodenum,] %*% independent_likelihoods_on_each_branch[[i]]
+								
+					# Relative probabilities of states at the top of right branch
+					condprobs_Right_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum,] %*% independent_likelihoods_on_each_branch[[j]]
+					}
+				
+				} else {
+				# Sparse matrix exponentiation
+				# These are done on the fly, as the transition matrices cannot be stored, really
+				
+				# Left branch
+				relprobs_branch_bottom = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[left_desc_nodenum,]
+				branch_length = phy2$edge.length[i]
+				
+				condprobs_Left_branch_top = calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+				
+				# Right branch
+				relprobs_branch_bottom = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum,]
+				branch_length = phy2$edge.length[j]
+				
+				condprobs_Right_branch_top = calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+				}		
+			
+			# Normalize and save these probabilities
+			relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[left_desc_nodenum,] = condprobs_Left_branch_top / sum(condprobs_Left_branch_top)
+			relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[right_desc_nodenum,] = condprobs_Right_branch_top / sum(condprobs_Right_branch_top)
+			
+			} # End uppass loop
+
+
+		#######################################################
+		# End of loop for this pair of branches.  Move to next pair
+		#######################################################
+		if (printlevel >= 0)
+			{
+			cat("\nUppass completed for marginal ancestral states estimation!\n", sep="")
+			}
+		} # End IF calc_ancprobs==TRUE
 
 
 	if (printlevel >= 1)
@@ -1135,14 +1710,31 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		{
 		calc_loglike_sp_results = list()
 		calc_loglike_sp_results$computed_likelihoods_at_each_node = computed_likelihoods_at_each_node
-		calc_loglike_sp_results$total_loglikelihood = total_loglikelihood
 		calc_loglike_sp_results$relative_probs_of_each_state = relative_probs_of_each_state
 		calc_loglike_sp_results$condlikes_of_each_state = condlikes_of_each_state
+
+		if (calc_ancprobs == TRUE)
+			{
+			calc_loglike_sp_results$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS = relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS
+			calc_loglike_sp_results$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS
+			calc_loglike_sp_results$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS = relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+			}
+
 		calc_loglike_sp_results$relative_probs_of_each_state_at_bottom_of_root_branch = relative_probs_of_each_state_at_bottom_of_root_branch
+		calc_loglike_sp_results$total_loglikelihood = total_loglikelihood
+
 		class(calc_loglike_sp_results) = "calc_loglike_sp_results"
 		return(calc_loglike_sp_results)
 		}
 	}
+
+
+
+
+
+
+
+
 
 
 
@@ -1235,8 +1827,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 #' a cluster, specify the cluster here.  E.g. \code{cluster_already_open = makeCluster(rep("localhost",num_cores_to_use), type = "SOCK")}.  Note: this will work on 
 #' most platforms, including Macs running R from command line, but will NOT work on Macs running the R GUI \code{R.app}, because parallel processing functions like
 #' \code{MakeCluster} from e.g. \code{library(parallel)} for some reason crash R.app.  The program runs a check for R.app and will just run on 1 node if found. 
-#' Default is \code{NULL} which means running on a single processor.
-#' @return Return whatever is specified by \code{return_what}.
+#' @param calc_ancprobs Should ancestral state estimation be performed (adds an uppass at the end).
+#' @param null_range_allowed Does the state space include the null range?#' @return Return whatever is specified by \code{return_what}.
 #' @export
 #' @seealso \code{\link{calc_loglike_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOprobs}}, 
 #' \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOweights_faster}}, \code{\link[rexpokit]{mat2coo}}, 
@@ -1252,8 +1844,6 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 #' testval=1
 #'
 calc_loglike_sp = compiler::cmpfun(calc_loglike_sp_prebyte)
-
-
 
 
 

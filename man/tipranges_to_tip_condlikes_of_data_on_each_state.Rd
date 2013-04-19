@@ -63,7 +63,12 @@ phy = read.tree(file="", text=newick_str)
 
 # Here, we will assume the maximum range size is all areas, but it could be smaller
 maxareas = length(areanames)
+\dontrun{
 states_list = areas_list_to_states_list_old(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
+states_list
+}
+
+states_list = areas_list_to_states_list_new(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
 states_list
 
 tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges=tipranges_object, phy=phy, states_list=states_list, maxareas=maxareas )
@@ -101,7 +106,8 @@ tip_condlikes_of_data_on_each_state
 \seealso{
   \code{\link{define_tipranges_object}},
   \code{\link{getareas_from_tipranges_object}},
-  \code{\link{areas_list_to_states_list_old}},
+  \code{\link{areas_list_to_states_list_new}},
+  \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
   \code{\link{binary_ranges_to_letter_codes}}
 }
 

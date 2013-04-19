@@ -2,10 +2,10 @@
 \alias{get_ML_states}
 \title{Get ML states from a BioGeoBEARS model results list}
 \usage{
-  get_ML_states(results_object)
+  get_ML_states(relprobs_matrix)
 }
 \arguments{
-  \item{results_object}{The results returned by
+  \item{relprobs_matrix}{The results returned by
   \code{\link{bears_2param_standard_fast}} or a similar
   function.}
 }

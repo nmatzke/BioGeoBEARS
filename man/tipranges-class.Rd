@@ -53,7 +53,8 @@ tipranges_object
 \seealso{
   \code{\link{define_tipranges_object}},
   \code{\link{getareas_from_tipranges_object}},
-  \code{\link{areas_list_to_states_list_old}},
+  \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+  \code{\link{areas_list_to_states_list_new}},
   \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 }
 

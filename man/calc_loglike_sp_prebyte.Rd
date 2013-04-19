@@ -8,7 +8,8 @@
     probs_of_states_at_root = NULL, rootedge = FALSE,
     sparse = FALSE, printlevel = 1, use_cpp = TRUE,
     input_is_COO = FALSE, spPmat_inputs = NULL,
-    cppSpMethod = 3, cluster_already_open = NULL)
+    cppSpMethod = 3, cluster_already_open = NULL,
+    calc_ancprobs = FALSE, null_range_allowed = TRUE)
 }
 \arguments{
   \item{tip_condlikes_of_data_on_each_state}{A numeric
@@ -135,8 +136,14 @@
   parallel processing functions like \code{MakeCluster}
   from e.g. \code{library(parallel)} for some reason crash
   R.app.  The program runs a check for R.app and will just
-  run on 1 node if found. Default is \code{NULL} which
-  means running on a single processor.}
+  run on 1 node if found.}
+
+  \item{calc_ancprobs}{Should ancestral state estimation be
+  performed (adds an uppass at the end).}
+
+  \item{null_range_allowed}{Does the state space include
+  the null range? Default is \code{NULL} which means
+  running on a single processor.}
 }
 \value{
   Return whatever is specified by \code{return_what}.

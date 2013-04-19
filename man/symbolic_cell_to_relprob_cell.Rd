@@ -75,7 +75,6 @@ cellval
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
 }
 \seealso{
-  \code{\link{areas_list_to_states_list_old}},
-  \code{\link{make_relprob_matrix_de}}
+  \code{\link{symbolic_to_P_matrix}}
 }
 

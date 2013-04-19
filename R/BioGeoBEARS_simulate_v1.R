@@ -473,7 +473,7 @@ simulated_indexes_to_tipranges_file <- function(simulated_states_by_node, areas_
 #' an up-pass from the root, calculating the probabilities on the forward model and multiplying by likelihoods from the downpass.  
 #' However, this has not yet been implemented.
 #'
-#' @param results_object The results returned by \code{\link{bears_2param_standard_fast}} or a similar function.
+#' @param relprobs_matrix The results returned by \code{\link{bears_2param_standard_fast}} or a similar function.
 #' @return \code{inf_statesvec} The inferred vector of states.
 #' @export
 #' @seealso \code{\link{get_ML_probs}}, \code{\link{bears_2param_standard_fast}}, \code{\link{get_ML_state_indices}}
@@ -488,23 +488,30 @@ simulated_indexes_to_tipranges_file <- function(simulated_states_by_node, areas_
 #' @examples
 #' testval=1
 #' 
-get_ML_states <- function(results_object)
+get_ML_states <- function(relprobs_matrix)
 	{
-	inf_statesvec = as.list(rep(-1, times=nrow(results_object$relative_probs_of_each_state)))
+	inf_statesvec = as.list(rep(-1, times=nrow(relprobs_matrix)))
 	
-	state_indexes_0based = seq(0, ncol(results_object$relative_probs_of_each_state)-1, 1)
+	state_indexes_0based = seq(0, ncol(relprobs_matrix)-1, 1)
 	
 	#state_indexes_0based_matrix = matrix(data=state_indexes_0based, nrow=nrow(results_object$relative_probs_of_each_state), ncol=ncol(results_object$relative_probs_of_each_state), byrow=TRUE)
 	
 	
-	maxprobs = apply(X=results_object$relative_probs_of_each_state, MARGIN=1, FUN=max)
+	maxprobs = apply(X=relprobs_matrix, MARGIN=1, FUN=max)
 	maxprobs
 	
 	# Which match max
-	for (rownum in 1:nrow(results_object$relative_probs_of_each_state))
+	for (rownum in 1:nrow(relprobs_matrix))
 		{
-		match_max_TF = results_object$relative_probs_of_each_state[rownum,] == maxprobs[rownum]
-	
+		match_max_TF = relprobs_matrix[rownum,] == maxprobs[rownum]
+		
+		# Fix NA
+		if (is.na(match_max_TF))
+			{
+			inf_statesvec[[rownum]] = NA
+			next()
+			}
+		
 		# Number of matches
 		nummatches_TF = sum(match_max_TF)
 		nummatches_TF
@@ -517,6 +524,10 @@ get_ML_states <- function(results_object)
 	# Return the list of states
 	return(inf_statesvec)
 	}
+
+
+
+
 
 
 
