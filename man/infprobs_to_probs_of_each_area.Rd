@@ -2,13 +2,19 @@
 \alias{infprobs_to_probs_of_each_area}
 \title{Convert probabilities of each state, to the probabilities of presence in each area}
 \usage{
-  infprobs_to_probs_of_each_area(results_object,
+  infprobs_to_probs_of_each_area(relprobs_matrix,
     states_list)
 }
 \arguments{
-  \item{results_object}{The results returned by
-  \code{\link{bears_2param_standard_fast}} or a similar
-  function.}
+  \item{relprobs_matrix}{A relative probabilities matrix
+  returned by \code{\link{bears_2param_standard_fast}} or a
+  similar function. The user should specify WHICH matrix in
+  the results_object -- i.e., scaled conditional
+  likelihoods on downpass or uppass, or actual marginal
+  probabilities of ancestral states.  (The latter is the
+  main thing of interest.)  This specification is done via
+  e.g. \code{relprobs_matrix =
+  results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..}
 
   \item{states_list}{A list of the possible
   states/geographic ranges, in 0-based index form.}

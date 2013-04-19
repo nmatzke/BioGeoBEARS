@@ -394,7 +394,8 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -402,6 +403,7 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -786,7 +788,8 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -794,6 +797,7 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -1195,7 +1199,8 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_timescaled.new
 
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 
@@ -1204,12 +1209,412 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_timescaled.new
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
 
 
 
+
+
+
+
+
+#######################################################
+# bears_2param_standard_fast_symOnly_simp
+#######################################################
+#' 2-parameter model, no cladogenesis model (as in BayArea or other purely continuous-time model)
+#' 
+#' (Forcing no speciation model.) This implements a 2-parameter model, as in LAGRANGE or \code{\link{bears_2param_standard_fast}}, 
+#' but omits the speciation/cladogenesis
+#' model.  This means that the model is purely continuous-time, as when biogeographic range is treated as a discrete character in 
+#' software designed for inference on morphological () or molecular data ().  This model is that implemented in \code{BayArea}, if no 
+#' distance-dependent effect on dispersal probability is assumed.  Such distance-dependence could easily be added with a third parameter, 
+#' however.
+#' 
+#' \code{BayArea} is a new program by Landis, Matzke, Moore, and Huelsenbeck; see \cite{Landis_Matzke_etal_2013_BayArea}. 
+#' However, BayArea does not currently implement cladogenesis models; it only has continuous-time model for evolutionary change along branches.  In effect,
+#' this means that the cladogenesis model is sympatric speciation with complete range copying with probability 1.
+#' 
+#' @param trfn The filename of the phylogenetic tree, in NEWICK format (\url{http://evolution.genetics.washington.edu/phylip/newicktree.html}).  
+#' Tipnames should match the names in geogfn.  See \code{\link[ape]{read.tree}} in APE for reading in phylogenetic trees.
+#' @param geogfn A PHYLIP-style file with geographic range data (see \code{\link{getranges_from_LagrangePHYLIP}}) for each tipname. This is the same format
+#' used by C++ LAGRANGE (\cite{SmithRee2010_CPPversion}).
+#' @param max_range_size The maximum rangesize, in number of areas.  Having a smaller maximum range size means that you can have more areas (the size of the
+#' state space is greatly reduced; see \code{\link[cladoRcpp]{numstates_from_numareas}}.
+#' @param num_cores_to_use If >1, parallel processing will be attempted. \bold{Note:} parallel processing via \code{library (parallel)} will work in Mac command-line
+#' R, but not in Mac GUI \code{R.app}.
+#' @return \code{bears_output} A list of outputs.  bears_output$optim_result
+#' @export
+#' @seealso \code{\link[cladoRcpp]{numstates_from_numareas}}, \code{\link{getranges_from_LagrangePHYLIP}}, \code{\link[ape]{read.tree}}, \code{\link{calc_loglike_sp}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' Felsenstein, Joe.  The Newick tree format.  \url{http://evolution.genetics.washington.edu/phylip/newicktree.html}
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#'	 @cite Ree2009configurator
+#'	 @cite SmithRee2010_CPPversion
+#'	 @cite Landis_Matzke_etal_2013_BayArea
+#' @examples
+#' 
+#' # Get the example files directory
+#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#'
+#' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
+#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' tr = read.tree(file=trfn)
+#' 
+#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' 
+#' # Look at the tree and ranges, for kicks
+#' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
+#' tr
+#' 
+#' \dontrun{
+#' # Run the ML search
+#' bears_output = bears_2param_standard_fast_symOnly(trfn=trfn, geogfn=geogfn)
+#' bears_output
+#' }
+#'
+bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_timescaled.newick", geogfn = "Psychotria_geog.data", max_range_size=NULL, num_cores_to_use=NULL)
+	{
+	defaults='
+	trfn = "Psychotria_timescaled.newick"
+	geogfn = "Psychotria_geog.data"
+	'
+	
+	require(cladoRcpp)
+	require(rexpokit)
+
+	# Get geographic ranges at tips
+	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
+
+
+	# Get the list of geographic areas
+	areas = getareas_from_tipranges_object(tipranges)
+	areas_list = seq(0, length(areas)-1, 1)
+
+	# Change the names to tipranges@df:
+	names(tipranges@df) = areas_list
+
+	
+	# Old/slow way of getting the list of states and speciation matrix (slow)
+	# old_states_list = areas_list_to_states_list(areas, include_null_range=TRUE)
+	# old_states_list
+	# spmat = make_relprob_matrix_bi(old_states_list)
+	# spmat
+	
+	# max_numareas = max(sapply(X=old_states_list, FUN=length), na.rm=TRUE)
+	# max_numareas
+
+	#######################################################
+	# Set the maximum range size (can be thought of as
+	# a free parameter
+	#######################################################
+	if (is.null(max_range_size))
+		{
+		max_range_size = length(areas)
+		fix_rangesize = TRUE
+		} else {
+		fix_rangesize = FALSE
+		}
+
+
+	# Take the list of areas, and get list of possible states
+	states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+	states_list
+
+	if (fix_rangesize == FALSE)
+		{
+		max_numareas = max(sapply(X=states_list, FUN=length), na.rm=TRUE)
+		max_numareas
+
+		# Check for large rate matrix (>= 7 areas; here, sparse matrices will work better)
+		if (max_numareas >= 8)
+			{
+			force_sparse = TRUE
+			} else {
+			force_sparse = FALSE
+			}	
+
+		} else {
+		max_numareas = max_range_size
+		}
+	# Check for large rate matrix (>= 7 areas; here, sparse matrices will work better)
+	if (max_numareas >= 8)
+		{
+		force_sparse = TRUE
+		} else {
+		force_sparse = FALSE
+		}	
+	
+	
+	# Load the phylogenetic tree
+	phy = read.tree(file=trfn)
+
+
+	# The likelihood of each state at the tips
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state
+
+	maxent_constraint_01 = 0.9999
+
+
+	#######################################################
+	# Set up the function for optimization
+	#######################################################	
+	function_to_optim <- function(params, phy, tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)
+		{
+		# Lagrange-like (all new species are within the geographic range of the ancestor)
+
+		# Set the dispersal and extinction rate
+		d = params[1]
+		e = params[2]
+
+		# Equal dispersal in all directions (unconstrained)
+		# Equal extinction probability for all areas
+		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
+
+		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		elist = rep(e, length(areas))
+		
+		# Set up the instantaneous rate matrix (Q matrix)
+		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	
+		# Cladogenic model
+		ys = 1
+		j = 0
+		v = 0
+		sum_SPweights = ys + j + v
+
+		# Text version of speciation matrix	
+		maxent_constraint_01v = maxent_constraint_01
+		#spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\+", mergesym="*", ys=ys, j=j, v=v, maxent_constraint_01=maxent_constraint_01, maxent_constraint_01v=maxent_constraint_01v, max_numareas=max_numareas)
+			
+		# Set the parameter controlling the size distribution of 
+		# the smaller descendant species
+		maxent01s_param = 0.0001
+		maxent01v_param = 0.0001
+		maxent01j_param = 0.0001
+		maxent01y_param = maxent_constraint_01
+
+
+		# Cladogenesis model inputs
+		spPmat_inputs = NULL
+		states_indices = states_list
+		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+		spPmat_inputs$l = states_indices
+		spPmat_inputs$s = 0.0001
+		spPmat_inputs$v = v
+		spPmat_inputs$j = j
+		spPmat_inputs$y = ys - spPmat_inputs$s
+		spPmat_inputs$dmat = distances_mat
+		spPmat_inputs$maxent01s_param = maxent01s_param
+		spPmat_inputs$maxent01v_param = maxent01v_param
+		spPmat_inputs$maxent01j_param = maxent01j_param
+		spPmat_inputs$maxent01y_param = maxent01y_param
+
+
+		if (print_optim == TRUE)
+			{
+			# Before calculating the log likelihood, print it, in case there is e.g. a bug
+			cat("d=", d, "; e=", e, "; j=", j, "; ys=", ys, "; v=", v, "; sum=", sum_SPweights, "; LnL=", sep="")
+			}
+
+		# Calculate the log-likelihood of the data, given the model parameters during this iteration	
+		ttl_loglike = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="loglike", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=NULL, printlevel=0, cluster_already_open=cluster_already_open)
+		ttl_loglike
+	
+		if (print_optim == TRUE)
+			{
+			# If the log likelihood is successful, print it
+			cat(ttl_loglike, "\n", sep="")
+			}
+
+		return(ttl_loglike)
+		}
+
+	
+	# defaults for optimization
+	# We are using "L-BFGS-B", which is:
+	#####################################################################################################
+	# Method "L-BFGS-B" is that of Byrd et. al. (1995) which allows box constraints, that is each
+	# variable can be given a lower and/or upper bound. The initial value must satisfy the constraints.
+	# This uses a limited-memory modification of the BFGS quasi-Newton method. If non-trivial bounds
+	# are supplied, this method will be selected, with a warning.
+	# 
+	# [...]
+	#
+	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
+	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	#####################################################################################################
+	#
+	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
+	params = c(0.01, 0.01)
+	minj = 1e-05
+	# start on Lagrange results
+	#params = c(3.11882,  2.51741)
+	lower = c(1e-15,1e-15)
+	upper = c(1,1)
+	
+	# High performance computing
+	# HPC using parallel package in R 2.15 or higher, which allows
+	# mcmapply (multicore apply)
+	# Don't use multicore if using R.app ('AQUA')
+	if (.Platform$GUI != "AQUA" && ((is.null(num_cores_to_use) == TRUE) || (num_cores_to_use > 1)) )
+		{
+		# We are doing manual, optional processing on several cores;
+		# this seems to have less overhead/hassle/incompatibility issues
+		# than using mcmapply, mclapply, etc...
+		require("parallel") #<- do this higher up
+
+		num_cores_computer_has = detectCores()
+		
+		if (is.null(num_cores_to_use))
+			{
+			num_cores_to_use = num_cores_computer_has
+			}
+
+		# Don't do this, if the cluster is already open
+		cat("\nYour computer has ", num_cores_computer_has, " cores. You have chosen to use:\nnum_cores_to_use = ", num_cores_to_use, " cores for the matrix exponentiations in the likelihood calculations.\n", sep="")
+
+		cluster_already_open = makeCluster(rep("localhost",num_cores_to_use), type = "SOCK")
+		cat("Started cluster with ", num_cores_to_use, " cores.\n\n", sep="")
+		
+		# Flag so that you remember to close cluster at the end
+		cluster_open=TRUE
+		} else {
+		cluster_already_open = NULL
+		}
+
+	
+	
+	
+	# Run optimization	
+	use_optimx = TRUE
+	if (use_optimx == FALSE)
+		{
+		optim_result2 = optim(par=params, fn=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
+	
+	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
+		} else {
+		# Compare methods with optimx
+		require(optimx)
+		
+		
+		
+		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+
+		# Run with all methods, for testing:
+		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+
+		#######################################################
+		# Compare optimization routines
+		#######################################################
+		
+		# BEARS_results_7areas_2param
+		#                        par   fvalues   method fns grs itns conv  KKT1 KKT2  xtimes
+		# 6 0.010165217, 0.009422923 -57.81254   bobyqa  30  NA NULL    0 FALSE TRUE  29.761
+		# 1 0.010180679, 0.009492254 -57.81255 L-BFGS-B  33  33 NULL    0 FALSE TRUE 151.137
+		# 4   0.01017895, 0.00970706 -57.81263   Rcgmin  32   7 NULL    0 FALSE TRUE  42.461
+		# 2 0.010242504, 0.009822486 -57.81284   nlminb  40   6    3    1 FALSE TRUE  43.399
+		# 3   0.01017850, 0.01001962 -57.81293      spg  68  NA   47    0 FALSE TRUE 150.932
+		# 5               0.01, 0.01 -57.81366   Rvmmin  20   1 NULL    0 FALSE TRUE  21.456
+
+
+		#return (optim_result2)
+	}
+	
+
+	if (exists("cluster_open") && (cluster_open == TRUE))
+		{
+		cat("\n\nStopping cluster with ", num_cores_to_use, " cores.\n\n", sep="")
+		stopCluster(cluster_already_open)
+		}
+	
+	
+	
+	
+	#######################################################
+	# Summarize results 
+	#######################################################
+
+	# Set the dispersal and extinction rate
+	if (use_optimx == FALSE)
+		{
+		# Set the dispersal and extinction rate
+		d = optim_result2$par[1]
+		e = optim_result2$par[2]
+		} else {
+		d = optim_result2$par[[1]][1]
+		e = optim_result2$par[[1]][2]
+		}
+
+	# Equal dispersal in all directions (unconstrained)
+	# Equal extinction probability for all areas
+	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
+
+	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	elist = rep(e, length(areas))
+	
+	# Set up the instantaneous rate matrix (Q matrix)
+	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+
+	# Cladogenic model
+	ys = 1
+	j = 0
+	v = 0
+	sum_SPweights = ys + j + v
+
+	# Text version of speciation matrix	
+	maxent_constraint_01v = maxent_constraint_01
+	#spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\+", mergesym="*", ys=ys, j=j, v=v, maxent_constraint_01=maxent_constraint_01, maxent_constraint_01v=maxent_constraint_01v, max_numareas=max_numareas)
+		
+	# Set the parameter controlling the size distribution of 
+	# the smaller descendant species
+	maxent01s_param = 0.0001
+	maxent01v_param = 0.0001
+	maxent01j_param = 0.0001
+	maxent01y_param = maxent_constraint_01
+
+
+	# Cladogenesis model inputs
+	spPmat_inputs = NULL
+	states_indices = states_list
+	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	spPmat_inputs$l = states_indices
+	spPmat_inputs$s = 0.0001
+	spPmat_inputs$v = v
+	spPmat_inputs$j = j
+	spPmat_inputs$y = ys - spPmat_inputs$s
+	spPmat_inputs$dmat = distances_mat
+	spPmat_inputs$maxent01s_param = maxent01s_param
+	spPmat_inputs$maxent01v_param = maxent01v_param
+	spPmat_inputs$maxent01j_param = maxent01j_param
+	spPmat_inputs$maxent01y_param = maxent01y_param
+
+
+	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=FALSE)
+
+
+
+
+	#######################################################
+	# Store results in a BEARS result
+	#######################################################
+	bears_output = model_results
+	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
+	
+	return(bears_output)
+	}
 
 
 
@@ -1598,7 +2003,8 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 	spPmat_inputs$maxent01y_param = maxent01y_param
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -1606,6 +2012,7 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -1995,7 +2402,8 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_timescaled.newick"
 	spPmat_inputs$maxent01y_param = maxent01y_param
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -2003,6 +2411,7 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_timescaled.newick"
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -2411,7 +2820,8 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 	spPmat_inputs$maxent01y_param = maxent01y_param
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -2419,6 +2829,7 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -2815,7 +3226,8 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 	spPmat_inputs$maxent01y_param = maxent01y_param
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -2823,6 +3235,7 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_timescaled.newick", ge
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -3214,7 +3627,8 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_timescaled.n
 	spPmat_inputs$maxent01y_param = maxent01y_param
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -3222,6 +3636,7 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_timescaled.n
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -3625,7 +4040,8 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_timescaled.newick", 
 
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -3633,6 +4049,7 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_timescaled.newick", 
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}
@@ -4038,7 +4455,8 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_timescaled.newick
 
 
 	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0)
+	model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+
 
 
 	#######################################################
@@ -4046,6 +4464,7 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_timescaled.newick
 	#######################################################
 	bears_output = model_results
 	bears_output$optim_result = optim_result2
+	bears_output$spPmat_inputs = spPmat_inputs
 	
 	return(bears_output)
 	}

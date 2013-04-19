@@ -473,7 +473,10 @@ simulated_indexes_to_tipranges_file <- function(simulated_states_by_node, areas_
 #' an up-pass from the root, calculating the probabilities on the forward model and multiplying by likelihoods from the downpass.  
 #' However, this has not yet been implemented.
 #'
-#' @param relprobs_matrix The results returned by \code{\link{bears_2param_standard_fast}} or a similar function.
+#' @param relprobs_matrix A relative probabilities matrix returned by \code{\link{bears_2param_standard_fast}} or a similar function. 
+#' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
+#' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
+#' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}.
 #' @return \code{inf_statesvec} The inferred vector of states.
 #' @export
 #' @seealso \code{\link{get_ML_probs}}, \code{\link{bears_2param_standard_fast}}, \code{\link{get_ML_state_indices}}
@@ -494,7 +497,7 @@ get_ML_states <- function(relprobs_matrix)
 	
 	state_indexes_0based = seq(0, ncol(relprobs_matrix)-1, 1)
 	
-	#state_indexes_0based_matrix = matrix(data=state_indexes_0based, nrow=nrow(results_object$relative_probs_of_each_state), ncol=ncol(results_object$relative_probs_of_each_state), byrow=TRUE)
+	#state_indexes_0based_matrix = matrix(data=state_indexes_0based, nrow=nrow(relprobs_matrix), ncol=ncol(relprobs_matrix), byrow=TRUE)
 	
 	
 	maxprobs = apply(X=relprobs_matrix, MARGIN=1, FUN=max)
@@ -506,18 +509,30 @@ get_ML_states <- function(relprobs_matrix)
 		match_max_TF = relprobs_matrix[rownum,] == maxprobs[rownum]
 		
 		# Fix NA
-		if (is.na(match_max_TF))
+		#if (is.na(match_max_TF))
+		if (any(sapply(X=match_max_TF, FUN=is.na)))
 			{
 			inf_statesvec[[rownum]] = NA
 			next()
 			}
 		
 		# Number of matches
-		nummatches_TF = sum(match_max_TF)
-		nummatches_TF
+		nummatches = sum(match_max_TF)
+		nummatches
+		print(nummatches)
 		
-		#ML_probs_vec[[rownum]] = c(results_object$relative_probs_of_each_state[rownum,][match_max_TF])
-		inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF])
+		if (nummatches == 1)
+			{
+			#ML_probs_vec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
+			inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF])
+			} 
+		
+		if (nummatches > 1)
+			{
+			cat("multiple states tied\n")
+			inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF])
+			} 
+		
 		}
 	
 	
@@ -546,7 +561,10 @@ get_ML_states <- function(relprobs_matrix)
 #' Note, though, that it is somewhat peculiar and arbitrary to focus on the ancestral states just at nodes, particularly in the context of
 #' fossils with time ranges and geographic ranges.
 #'
-#' @param results_object The results returned by \code{\link{bears_2param_standard_fast}} or a similar function.
+#' @param relprobs_matrix A relative probabilities matrix returned by \code{\link{bears_2param_standard_fast}} or a similar function. 
+#' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
+#' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
+#' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..
 #' @return \code{inf_probsvec} The inferred vector of probabilities of ML states.
 #' @export
 #' @seealso \code{\link{get_ML_probs}}, \code{\link{bears_2param_standard_fast}}, \code{\link{get_ML_state_indices}}
@@ -561,29 +579,47 @@ get_ML_states <- function(relprobs_matrix)
 #' @examples
 #' testval=1
 #' 
-get_ML_probs <- function(results_object)
+get_ML_probs <- function(relprobs_matrix)
 	{
-	inf_probsvec = as.list(rep(-1, times=nrow(results_object$relative_probs_of_each_state)))
+	inf_probsvec = as.list(rep(-1, times=nrow(relprobs_matrix)))
 	
-	#state_indexes_0based = seq(0, ncol(results_object$relative_probs_of_each_state)-1, 1)
+	#state_indexes_0based = seq(0, ncol(relprobs_matrix)-1, 1)
 	
-	#state_indexes_0based_matrix = matrix(data=state_indexes_0based, nrow=nrow(results_object$relative_probs_of_each_state), ncol=ncol(results_object$relative_probs_of_each_state), byrow=TRUE)
+	#state_indexes_0based_matrix = matrix(data=state_indexes_0based, nrow=nrow(relprobs_matrix), ncol=ncol(relprobs_matrix), byrow=TRUE)
 	
 	
-	maxprobs = apply(X=results_object$relative_probs_of_each_state, MARGIN=1, FUN=max)
+	maxprobs = apply(X=relprobs_matrix, MARGIN=1, FUN=max)
 	maxprobs
 	
 	# Which match max
-	for (rownum in 1:nrow(results_object$relative_probs_of_each_state))
+	for (rownum in 1:nrow(relprobs_matrix))
 		{
-		match_max_TF = results_object$relative_probs_of_each_state[rownum,] == maxprobs[rownum]
+		match_max_TF = relprobs_matrix[rownum,] == maxprobs[rownum]
+
+		# Fix NA
+		#if (is.na(match_max_TF))
+		if (any(sapply(X=match_max_TF, FUN=is.na)))
+			{
+			inf_probsvec[[rownum]] = NA
+			next()
+			}
 	
 		# Number of matches
-		nummatches_TF = sum(match_max_TF)
-		nummatches_TF
+		nummatches = sum(match_max_TF)
+		nummatches
+
+		if (nummatches == 1)
+			{
+			#ML_probs_vec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
+			inf_probsvec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
+			} 
 		
-		#ML_probs_vec[[rownum]] = c(results_object$relative_probs_of_each_state[rownum,][match_max_TF])
-		inf_probsvec[[rownum]] = c(results_object$relative_probs_of_each_state[rownum,][match_max_TF])
+		if (nummatches > 1)
+			{
+			cat("multiple states tied\n")
+			inf_probsvec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
+			} 
+
 		}
 	
 	
@@ -638,7 +674,10 @@ get_simstates <- function(simhist_row)
 #' ranges into the probability of presence/absence in each area.  This can typically be 
 #' inferred with much higher confidence.
 #' 
-#' @param results_object The results returned by \code{\link{bears_2param_standard_fast}} or a similar function.
+#' @param relprobs_matrix A relative probabilities matrix returned by \code{\link{bears_2param_standard_fast}} or a similar function. 
+#' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
+#' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
+#' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..
 #' @param states_list A list of the possible states/geographic ranges, in 0-based index form.
 #' @return \code{area_probs} The probability of presence in each area.
 #' @export
@@ -652,7 +691,7 @@ get_simstates <- function(simhist_row)
 #' @examples
 #' testval=1
 #' 
-infprobs_to_probs_of_each_area <- function(results_object, states_list)
+infprobs_to_probs_of_each_area <- function(relprobs_matrix, states_list)
 	{
 	# Get the areas from the states list
 	areas = unique(unlist(states_list))
@@ -660,7 +699,7 @@ infprobs_to_probs_of_each_area <- function(results_object, states_list)
 	areas = areas[!is.na(areas)]
 	
 	# Area probabilities table for each node
-	area_probs = matrix(0, nrow=nrow(results_object$relative_probs_of_each_state), ncol=length(areas))
+	area_probs = matrix(0, nrow=nrow(relprobs_matrix), ncol=length(areas))
 
 	# Go through the states
 	for (i in 1:length(states_list))
@@ -673,10 +712,10 @@ infprobs_to_probs_of_each_area <- function(results_object, states_list)
 			areas_in_this_state = states_list[[i]] + 1
 
 			# Go through the rows (the ancestral nodes)
-			for (rownum in 1:nrow(results_object$relative_probs_of_each_state))
+			for (rownum in 1:nrow(relprobs_matrix))
 				{
 				# Prob of a particular state
-				tmpprob = results_object$relative_probs_of_each_state[rownum,i]
+				tmpprob = relprobs_matrix[rownum,i]
 				
 				# Every area in this state gets this probability
 				area_probs[rownum,areas_in_this_state] = area_probs[rownum,areas_in_this_state] + tmpprob
@@ -703,7 +742,7 @@ infprobs_to_probs_of_each_area <- function(results_object, states_list)
 #' ranges into the probability of presence/absence in each area.  This can typically be 
 #' inferred with much higher confidence.
 #' 
-#' @param relative_probs_of_each_state A matrix with nrows for nodes and columns for states, with each
+#' @param relprobs_matrix A matrix with nrows for nodes and columns for states, with each
 #' cell holding the relative probability of that state at that node.
 #' @param states_list A list of the possible states/geographic ranges, in 0-based index form.
 #' @return \code{area_probs} The probability of presence in each area.
@@ -718,7 +757,7 @@ infprobs_to_probs_of_each_area <- function(results_object, states_list)
 #' @examples
 #' testval=1
 #' 
-infprobs_to_probs_of_each_area_from_relprobs <- function(relative_probs_of_each_state, states_list)
+infprobs_to_probs_of_each_area_from_relprobs <- function(relprobs_matrix, states_list)
 	{
 	# Get the areas from the states list
 	areas = unique(unlist(states_list))
@@ -726,7 +765,7 @@ infprobs_to_probs_of_each_area_from_relprobs <- function(relative_probs_of_each_
 	areas = areas[!is.na(areas)]
 	
 	# Area probabilities table for each node
-	area_probs = matrix(0, nrow=nrow(relative_probs_of_each_state), ncol=length(areas))
+	area_probs = matrix(0, nrow=nrow(relprobs_matrix), ncol=length(areas))
 
 	# Go through the states
 	for (i in 1:length(states_list))
@@ -739,10 +778,10 @@ infprobs_to_probs_of_each_area_from_relprobs <- function(relative_probs_of_each_
 			areas_in_this_state = states_list[[i]] + 1
 
 			# Go through the rows (the ancestral nodes)
-			for (rownum in 1:nrow(relative_probs_of_each_state))
+			for (rownum in 1:nrow(relprobs_matrix))
 				{
 				# Prob of a particular state
-				tmpprob = relative_probs_of_each_state[rownum,i]
+				tmpprob = relprobs_matrix[rownum,i]
 				
 				# Every area in this state gets this probability
 				area_probs[rownum,areas_in_this_state] = area_probs[rownum,areas_in_this_state] + tmpprob
@@ -766,7 +805,10 @@ infprobs_to_probs_of_each_area_from_relprobs <- function(relative_probs_of_each_
 #' 
 #' @param simulated_states_by_node The simulated states by node (0-based indices).
 #' @param states_list A list of the possible states/geographic ranges, in 0-based index form.
-#' @param results_object The results returned by \code{\link{bears_2param_standard_fast}} or a similar function.
+#' @param relprobs_matrix A relative probabilities matrix returned by \code{\link{bears_2param_standard_fast}} or a similar function. 
+#' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
+#' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
+#' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..
 #' @return \code{area_probs} The probability of presence in each area.
 #' @export
 #' @seealso \code{\link{simulate_biogeog_history}}, \code{\link{infprobs_to_probs_of_each_area}}
@@ -779,7 +821,7 @@ infprobs_to_probs_of_each_area_from_relprobs <- function(relative_probs_of_each_
 #' @examples
 #' testval=1
 #'
-simstates_to_probs_of_each_area <- function(simulated_states_by_node, states_list, results_object)
+simstates_to_probs_of_each_area <- function(simulated_states_by_node, states_list, relprobs_matrix)
 	{
 	# Convert simulated states from 0-based to 1-based
 	simulated_states_by_node_1based = simulated_states_by_node + 1
@@ -790,7 +832,7 @@ simstates_to_probs_of_each_area <- function(simulated_states_by_node, states_lis
 	areas = areas[!is.na(areas)]
 	
 	# Area probabilities table for each node
-	area_probs = matrix(0, nrow=nrow(results_object$relative_probs_of_each_state), ncol=length(areas))
+	area_probs = matrix(0, nrow=nrow(relprobs_matrix), ncol=length(areas))
 	
 	# Go through the nodes (rows)
 	for (rownum in 1:length(simulated_states_by_node_1based))
@@ -827,7 +869,10 @@ simstates_to_probs_of_each_area <- function(simulated_states_by_node, states_lis
 #' probability 0 for the other states/geographic ranges.  These data -- the simulated truth -- can then be compared to the inferred 
 #' probabilities for the states, from e.g. \code{\link{get_ML_probs}}.
 #' 
-#' @param results_object The results returned by \code{\link{bears_2param_standard_fast}} or a similar function.
+#' @param relprobs_matrix A relative probabilities matrix returned by \code{\link{bears_2param_standard_fast}} or a similar function. 
+#' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
+#' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
+#' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..
 #' @param simhist_row A row from a table, which must have a column named \code{simulated_states_by_node_txt}.
 #' @return \code{infprobs_of_simstates} The probability of each state at each node (all 1s and 0s).
 #' @export
@@ -841,18 +886,18 @@ simstates_to_probs_of_each_area <- function(simulated_states_by_node, states_lis
 #' @examples
 #' testval=1
 #'
-get_infprobs_of_simstates <- function(results_object, simhist_row)
+get_infprobs_of_simstates <- function(relprobs_matrix, simhist_row)
 	{
-	infprobs_of_simstates = as.list(rep(-1, times=nrow(results_object$relative_probs_of_each_state)))
+	infprobs_of_simstates = as.list(rep(-1, times=nrow(relprobs_matrix)))
 	
 	# Get true simulated states
 	simulated_states_by_node = get_simstates(simhist_row)
 	
 	# Get the probs of these states
 	# Which match these states
-	for (rownum in 1:nrow(results_object$relative_probs_of_each_state))
+	for (rownum in 1:nrow(relprobs_matrix))
 		{
-		infprobs_of_simstates[[rownum]] = results_object$relative_probs_of_each_state[rownum,(1+simulated_states_by_node[rownum])]
+		infprobs_of_simstates[[rownum]] = relprobs_matrix[rownum,(1+simulated_states_by_node[rownum])]
 		}
 	
 	return(infprobs_of_simstates)
@@ -866,7 +911,7 @@ get_infprobs_of_simstates <- function(results_object, simhist_row)
 #' Get the inferred parameters from an ML optimization
 #' 
 #' This function extracts the ML parameter values, and associated statistics and codes, from the 
-#' \code{results_object} returned by \code{\link{bears_2param_standard_fast}} and similar functions.
+#' \code{relprobs_matrix} returned by \code{\link{bears_2param_standard_fast}} and similar functions.
 #'
 #' The function has subroutines for recognizing a variety of currently-implemented models, assuming they
 #' used \code{\link[optimx]{optimx}} internally to do the ML search.  New models 
@@ -905,7 +950,7 @@ get_infparams_optimx <- function(results_object, inffn)
 		
 		# Calculate the actual weights
 		ysv = 1-infparams$j
-		v = ysv * 0.5
+		v = ysv * 0.0
 		ys = ysv - v
 
 		infparams$v = v
@@ -1091,13 +1136,13 @@ get_infparams_optimx_nosim <- function(results_object, inffn)
 		
 		# Calculate the actual weights
 		ysv = 1-infparams$j
-		v = ysv * 0.5
+		v = ysv * 0.0
 		ys = ysv - v
 
 		infparams$v = v
 		infparams$ys = ys
 		infparams$maxent01 = 1
-		infparams$maxent01v = 1
+		infparams$maxent01v = NA
 		return(infparams)
 		}
 

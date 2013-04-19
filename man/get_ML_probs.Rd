@@ -2,12 +2,18 @@
 \alias{get_ML_probs}
 \title{Get the probability of the ML state for each node, from a BioGeoBEARS model results list}
 \usage{
-  get_ML_probs(results_object)
+  get_ML_probs(relprobs_matrix)
 }
 \arguments{
-  \item{results_object}{The results returned by
-  \code{\link{bears_2param_standard_fast}} or a similar
-  function.}
+  \item{relprobs_matrix}{A relative probabilities matrix
+  returned by \code{\link{bears_2param_standard_fast}} or a
+  similar function. The user should specify WHICH matrix in
+  the results_object -- i.e., scaled conditional
+  likelihoods on downpass or uppass, or actual marginal
+  probabilities of ancestral states.  (The latter is the
+  main thing of interest.)  This specification is done via
+  e.g. \code{relprobs_matrix =
+  results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..}
 }
 \value{
   \code{inf_probsvec} The inferred vector of probabilities

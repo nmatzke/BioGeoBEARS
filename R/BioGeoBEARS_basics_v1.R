@@ -297,7 +297,7 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 		{
 		cat("Note: tipranges_to_tip_condlikes_of_data_on_each_state() is\n")
 		cat("      creating 'states_list' automatically.\n")
-		states_list = cladoRcpp:::areas_list_to_states_list_old(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
+		states_list = areas_list_to_states_list_new(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
 		}
 	
 	# Check for ranges greater than the maximum number of areas in states_list

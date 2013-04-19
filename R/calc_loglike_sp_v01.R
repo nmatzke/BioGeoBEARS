@@ -321,7 +321,7 @@ calc_prob_forward_onebranch_sparse <- function(relprobs_branch_bottom, branch_le
 	# Sparse matrix exponentiation, FORWARD
 	
 	#condlikes_Left = try (
-	#			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[i], inputprobs_for_fast=relative_probs_of_each_state[left_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
+	#			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[i], inputprobs_for_fast=relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
 	
 	# Note 2013-04-16: transpose_needed only works on dense matrices!
 	# For sparse matrices, switch columns manually
@@ -655,11 +655,11 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	#######################################################
 	
 	# This is all you need for a standard likelihood calculation
-	# relative_probs_of_each_state = rel probs AT A NODE
-	relative_probs_of_each_state <- matrix(data=0, nrow=numnodes, ncol=numstates)
-	relative_probs_of_each_state[tipnums, ] = tip_condlikes_of_data_on_each_state
-	condlikes_of_each_state = relative_probs_of_each_state
-	#relative_probs_of_each_state[tipnums, ] <- 1
+	# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = rel probs AT A NODE
+	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS <- matrix(data=0, nrow=numnodes, ncol=numstates)
+	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] = tip_condlikes_of_data_on_each_state
+	condlikes_of_each_state = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
+	#relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] <- 1
 	
 	
 	# But, if you want to do ancestral states properly, and get marginal
@@ -676,7 +676,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	if (calc_ancprobs == TRUE)
 		{
 		# Every node (except maybe the root) has a branch below it, and there is also a 
-		# relative_probs_of_each_state at the bottom of this branch
+		# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS at the bottom of this branch
 		relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS <- matrix(data=NA, nrow=numnodes, ncol=numstates)
 		relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS <- matrix(data=NA, nrow=numnodes, ncol=numstates)
 		relative_probs_of_each_state_at_branch_top_AT_node_UPPASS <- matrix(data=NA, nrow=numnodes, ncol=numstates)
@@ -821,8 +821,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			max_minsize_as_function_of_ancsize = apply(X=maxprob_as_function_of_ancsize_and_decsize, MARGIN=1, FUN=maxsize)
 
 
-			tmpca_1 = rep(1, (ncol(relative_probs_of_each_state)-1))
-			tmpcb_1 = rep(1, (ncol(relative_probs_of_each_state)-1))
+			tmpca_1 = rep(1, (ncol(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)-1))
+			tmpcb_1 = rep(1, (ncol(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)-1))
 
 			# Print the matrix to screen from C++
 			printmat = FALSE
@@ -923,8 +923,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			#cat("p=", p, ", rate=", rate, "\n", sep=" ")
 			#print(Q)
 			#print(phy$edge.length[i])
-			#condlikes_Left <- matexpo(Qmat * phy2$edge.length[i]) %*% relative_probs_of_each_state[left_desc_nodenum,]
-			#condlikes_Right <- matexpo(Qmat * phy2$edge.length[j]) %*% relative_probs_of_each_state[right_desc_nodenum,]
+			#condlikes_Left <- matexpo(Qmat * phy2$edge.length[i]) %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
+			#condlikes_Right <- matexpo(Qmat * phy2$edge.length[j]) %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
 
 
 			if (printlevel >= 1)
@@ -936,24 +936,24 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			if (is.null(cluster_already_open))
 				{
 				# Conditional likelihoods of states at the bottom of left branch
-				condlikes_Left = independent_likelihoods_on_each_branch[,,i] %*% relative_probs_of_each_state[left_desc_nodenum,]
+				condlikes_Left = independent_likelihoods_on_each_branch[,,i] %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
 							
 				# Conditional likelihoods of states at the bottom of right branch
-				condlikes_Right = independent_likelihoods_on_each_branch[,,j] %*% relative_probs_of_each_state[right_desc_nodenum,]
+				condlikes_Right = independent_likelihoods_on_each_branch[,,j] %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
 				} else {
 				
 				#cat("dim(independent_likelihoods_on_each_branch[[i]]):\n", sep="")
 				#cat(dim(independent_likelihoods_on_each_branch))
 				#cat("\n\n")
 				
-				#cat("length(relative_probs_of_each_state[left_desc_nodenum,]):\n", sep="")
-				#cat(length(relative_probs_of_each_state[left_desc_nodenum,]))
+				#cat("length(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]):\n", sep="")
+				#cat(length(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]))
 				#cat("\n\n")
 				
-				condlikes_Left = independent_likelihoods_on_each_branch[[i]] %*% relative_probs_of_each_state[left_desc_nodenum,]
+				condlikes_Left = independent_likelihoods_on_each_branch[[i]] %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
 							
 				# Conditional likelihoods of states at the bottom of right branch
-				condlikes_Right = independent_likelihoods_on_each_branch[[j]] %*% relative_probs_of_each_state[right_desc_nodenum,]
+				condlikes_Right = independent_likelihoods_on_each_branch[[j]] %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
 				}
 
 			
@@ -966,15 +966,15 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			txt = paste("condlikes at bottom of R: ", paste(round(condlikes_Right, 4), collapse=" ", sep=""), sep="")
 			print(txt)
 			}
-			#condlikes_Left <- expm(Qmat * phy$edge.length[i], method="Ward77") %*% relative_probs_of_each_state[left_desc_nodenum, 
+			#condlikes_Left <- expm(Qmat * phy$edge.length[i], method="Ward77") %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum, 
 			#  ]
-			#condlikes_Right <- expm(Qmat * phy$edge.length[j], method="Ward77") %*% relative_probs_of_each_state[right_desc_nodenum, 
+			#condlikes_Right <- expm(Qmat * phy$edge.length[j], method="Ward77") %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum, 
 			#  ]
 			
 			
-			#condlikes_Left <- exp(Qmat * phy$edge.length[i]) %*% relative_probs_of_each_state[left_desc_nodenum, 
+			#condlikes_Left <- exp(Qmat * phy$edge.length[i]) %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum, 
 			#  ]
-			#condlikes_Right <- exp(Qmat * phy$edge.length[j]) %*% relative_probs_of_each_state[right_desc_nodenum, 
+			#condlikes_Right <- exp(Qmat * phy$edge.length[j]) %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum, 
 			#  ]
 			} else {
 			#######################################################
@@ -999,7 +999,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			
 			# Conditional likelihoods of data given the states at the bottom of left branch
 			condlikes_Left = try (
-			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[i], inputprobs_for_fast=relative_probs_of_each_state[left_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
+			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[i], inputprobs_for_fast=relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
 			)
 			
 			# Error check
@@ -1010,8 +1010,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				cat("phy2$edge.length[i]=", phy2$edge.length[i], "\n")
 				print(tmpQmat_in_REXPOKIT_coo_fmt)
 				print(phy2)
-				print(relative_probs_of_each_state)
-				print(relative_probs_of_each_state[left_desc_nodenum,])
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,])
 				print(coo_n)
 				print(anorm)
 				}
@@ -1023,15 +1023,15 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				cat("phy2$edge.length[i]=", phy2$edge.length[i], "\n")
 				print(tmpQmat_in_REXPOKIT_coo_fmt)
 				print(phy2)
-				print(relative_probs_of_each_state)
-				print(relative_probs_of_each_state[left_desc_nodenum,])
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,])
 				print(coo_n)
 				print(anorm)
 				}
 	
 			# Conditional likelihoods of data given the states at the bottom of right branch
 			condlikes_Right = try(
-			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[j], inputprobs_for_fast=relative_probs_of_each_state[right_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
+			expokit_dmexpv_Qmat(Qmat=tmpQmat_in_REXPOKIT_coo_fmt, t=phy2$edge.length[j], inputprobs_for_fast=relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,], transpose_needed=FALSE, transform_to_coo_TF=FALSE, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
 			)
 
 			# Error check
@@ -1042,8 +1042,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				cat("phy2$edge.length[j]=", phy2$edge.length[j], "\n")
 				print(tmpQmat_in_REXPOKIT_coo_fmt)
 				print(phy2)
-				print(relative_probs_of_each_state)
-				print(relative_probs_of_each_state[right_desc_nodenum,])
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,])
 				print(coo_n)
 				print(anorm)
 				}
@@ -1056,8 +1056,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				cat("phy2$edge.length[j]=", phy2$edge.length[j], "\n")
 				print(tmpQmat_in_REXPOKIT_coo_fmt)
 				print(phy2)
-				print(relative_probs_of_each_state)
-				print(relative_probs_of_each_state[right_desc_nodenum,])
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)
+				print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,])
 				print(coo_n)
 				print(anorm)
 				}
@@ -1074,7 +1074,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		if (calc_ancprobs == TRUE)
 			{
 			# Every node (except maybe the root) has a branch below it, and there is also a 
-			# relative_probs_of_each_state at the bottom of this branch
+			# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS at the bottom of this branch
 			relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[left_desc_nodenum,] = condlikes_Left / sum(condlikes_Left)
 			relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[right_desc_nodenum,] = condlikes_Right / sum(condlikes_Right)
 			}			
@@ -1388,17 +1388,17 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		
 		computed_likelihoods_at_each_node[anc] = total_likelihood_for_node
 		
-		relative_probs_of_each_state[anc, ] = node_likelihood / total_likelihood_for_node
+		relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ] = node_likelihood / total_likelihood_for_node
 		condlikes_of_each_state[anc, ] = node_likelihood
 		
-		#print(relative_probs_of_each_state)
+		#print(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)
 		}
 	#######################################################
 	# END DOWNPASS FROM THE TIPS TO THE ROOT
 	#######################################################
 
-	relative_probs_of_each_state
-	# relative_probs_of_each_state2 = relative_probs_of_each_state
+	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
+	# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS2 = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
 
 	# You are now at the anc (ancestor node; in Psychotria, node 20)
 	# If you want, you could calculate the likelihood down to the bottom of a root edge
@@ -1413,7 +1413,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		
 		# Get the likelihoods at the bottom of the branch, condition on the relative likelihoods at the top 
 		# (here, the node at the "top" is the Last Common Ancestor node on the tree)
-		conditional_likelihoods_at_bottom_of_root_branch = c(independent_likelihoods_on_root_edge %*% relative_probs_of_each_state[anc, ])
+		conditional_likelihoods_at_bottom_of_root_branch = c(independent_likelihoods_on_root_edge %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ])
 		total_likelihood_for_bottom_of_root_branch = sum(conditional_likelihoods_at_bottom_of_root_branch)
 		total_likelihood_for_bottom_of_root_branch
 		
@@ -1426,12 +1426,12 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		computed_likelihoods_at_each_node = c(computed_likelihoods_at_each_node, total_likelihood_for_bottom_of_root_branch)
 		
 		# Add a bottom row to the relative_probs
-		relative_probs_of_each_state = rbind(relative_probs_of_each_state, relative_probs_of_each_state_at_bottom_of_root_branch)
+		relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = rbind(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS, relative_probs_of_each_state_at_bottom_of_root_branch)
 		condlikes_of_each_state = rbind(condlikes_of_each_state, conditional_likelihoods_at_bottom_of_root_branch)
 
 		} else {
-		# Otherwise, the root relative probabilities are just the last relative_probs_of_each_state[anc, ]
-		relative_probs_of_each_state_at_bottom_of_root_branch = relative_probs_of_each_state[anc, ]
+		# Otherwise, the root relative probabilities are just the last relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ]
+		relative_probs_of_each_state_at_bottom_of_root_branch = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ]
 		}
 	
 	
@@ -1478,26 +1478,30 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				# Dense matrix exponentiation
 				# Need to do a forward matrix exponentiation
 				actual_probs_after_forward_exponentiation = calc_prob_forward_onebranch_dense(relprobs_branch_bottom=relative_probs_of_each_state_at_bottom_of_root_branch, branch_length=root_edge_length, Qmat)
+				actual_probs_after_forward_exponentiation[1] = 0 	# NULL range is impossible
+				actual_probs_after_forward_exponentiation = actual_probs_after_forward_exponentiation / sum(actual_probs_after_forward_exponentiation)
 				} else {
 				# Sparse matrix exponentiation
 				actual_probs_after_forward_exponentiation = calc_prob_forward_onebranch_sparse(relprobs_branch_bottom=relative_probs_of_each_state_at_bottom_of_root_branch, branch_length=root_edge_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE)
+				actual_probs_after_forward_exponentiation[1] = 0 	# NULL range is impossible
+				actual_probs_after_forward_exponentiation = actual_probs_after_forward_exponentiation / sum(actual_probs_after_forward_exponentiation)
 				}
 			
 			# Combine this uppass probability with the downpass condlikes for the states just below the root node.
 			# anc is the ancestral node
 			
-			# relative_probs_of_each_state = results_object$relative_probs_of_each_state
+			# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
 			# anc=20
 			
 			# Multiply the probs, then divide by the sum
-			multiplied_probs = actual_probs_after_forward_exponentiation * relative_probs_of_each_state[anc, ]
+			multiplied_probs = actual_probs_after_forward_exponentiation * relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ]
 			starting_probs = multiplied_probs / sum(multiplied_probs)
 			} else {
 			#######################################################
 			# NO ROOT EDGE
 			#######################################################
 			# Otherwise, just start with the bottom fork
-			starting_probs = relative_probs_of_each_state[anc, ]
+			starting_probs = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ]
 			}
 		
 		
@@ -1640,17 +1644,21 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 					{
 					# Relative probabilities of states at the top of left branch
 					condprobs_Left_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[left_desc_nodenum,] %*% independent_likelihoods_on_each_branch[,,i]
+					condprobs_Left_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 								
 					# Relative probabilities of states at the top of right branch
 					condprobs_Right_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum,] %*% independent_likelihoods_on_each_branch[,,j]
+					condprobs_Right_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 					} else {
 					
 					# Here, the independent_likelihoods_on_each_branch are stored in a list of matrices
 					# Relative probabilities of states at the top of left branch
 					condprobs_Left_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[left_desc_nodenum,] %*% independent_likelihoods_on_each_branch[[i]]
+					condprobs_Left_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 								
 					# Relative probabilities of states at the top of right branch
 					condprobs_Right_branch_top = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum,] %*% independent_likelihoods_on_each_branch[[j]]
+					condprobs_Right_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 					}
 				
 				} else {
@@ -1662,12 +1670,15 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				branch_length = phy2$edge.length[i]
 				
 				condprobs_Left_branch_top = calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+				condprobs_Left_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
+				
 				
 				# Right branch
 				relprobs_branch_bottom = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[right_desc_nodenum,]
 				branch_length = phy2$edge.length[j]
 				
 				condprobs_Right_branch_top = calc_prob_forward_onebranch_sparse(relprobs_branch_bottom, branch_length, tmpQmat_in_REXPOKIT_coo_fmt, coo_n=coo_n, anorm=anorm, check_for_0_rows=TRUE, TRANSPOSE_because_forward=TRUE)
+				condprobs_Right_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 				}		
 			
 			# Normalize and save these probabilities
@@ -1699,7 +1710,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 
 	if (return_what == "nodelikes")
 		{
-		return(relative_probs_of_each_state)
+		return(relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS)
 		}
 
 	if (return_what == "rootprobs")
@@ -1710,7 +1721,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		{
 		calc_loglike_sp_results = list()
 		calc_loglike_sp_results$computed_likelihoods_at_each_node = computed_likelihoods_at_each_node
-		calc_loglike_sp_results$relative_probs_of_each_state = relative_probs_of_each_state
+		calc_loglike_sp_results$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
 		calc_loglike_sp_results$condlikes_of_each_state = condlikes_of_each_state
 
 		if (calc_ancprobs == TRUE)
@@ -1718,6 +1729,43 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			calc_loglike_sp_results$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS = relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS
 			calc_loglike_sp_results$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS = relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS
 			calc_loglike_sp_results$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS = relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+			
+			# Calculate marginal estimates of ancestral states
+			
+			#######################################################
+			# For branch bottoms
+			#######################################################
+			ML_marginal_prob_each_state_at_branch_bottom_below_node = relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS * relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS
+
+			# print
+			ML_marginal_prob_each_state_at_branch_bottom_below_node
+			rowSums(ML_marginal_prob_each_state_at_branch_bottom_below_node)
+			
+			ML_marginal_prob_each_state_at_branch_bottom_below_node = ML_marginal_prob_each_state_at_branch_bottom_below_node / rowSums(ML_marginal_prob_each_state_at_branch_bottom_below_node)
+
+			# print
+			ML_marginal_prob_each_state_at_branch_bottom_below_node
+			rowSums(ML_marginal_prob_each_state_at_branch_bottom_below_node)
+			
+			#######################################################
+			# For branch tops
+			#######################################################
+			ML_marginal_prob_each_state_at_branch_top_AT_node = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS * relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+			
+			# print
+			ML_marginal_prob_each_state_at_branch_top_AT_node
+			rowSums(ML_marginal_prob_each_state_at_branch_top_AT_node)
+			
+			ML_marginal_prob_each_state_at_branch_top_AT_node = ML_marginal_prob_each_state_at_branch_top_AT_node / rowSums(ML_marginal_prob_each_state_at_branch_top_AT_node)
+			
+			# print
+			ML_marginal_prob_each_state_at_branch_top_AT_node
+			rowSums(ML_marginal_prob_each_state_at_branch_top_AT_node)
+			
+			# Save them
+			calc_loglike_sp_results$ML_marginal_prob_each_state_at_branch_bottom_below_node = ML_marginal_prob_each_state_at_branch_bottom_below_node
+			calc_loglike_sp_results$ML_marginal_prob_each_state_at_branch_top_AT_node = ML_marginal_prob_each_state_at_branch_top_AT_node
+			
 			}
 
 		calc_loglike_sp_results$relative_probs_of_each_state_at_bottom_of_root_branch = relative_probs_of_each_state_at_bottom_of_root_branch

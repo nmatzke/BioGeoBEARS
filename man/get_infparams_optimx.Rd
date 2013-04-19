@@ -18,7 +18,7 @@
 \description{
   This function extracts the ML parameter values, and
   associated statistics and codes, from the
-  \code{results_object} returned by
+  \code{relprobs_matrix} returned by
   \code{\link{bears_2param_standard_fast}} and similar
   functions.
 }

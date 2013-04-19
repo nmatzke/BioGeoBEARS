@@ -5,9 +5,15 @@
   get_ML_states(relprobs_matrix)
 }
 \arguments{
-  \item{relprobs_matrix}{The results returned by
-  \code{\link{bears_2param_standard_fast}} or a similar
-  function.}
+  \item{relprobs_matrix}{A relative probabilities matrix
+  returned by \code{\link{bears_2param_standard_fast}} or a
+  similar function. The user should specify WHICH matrix in
+  the results_object -- i.e., scaled conditional
+  likelihoods on downpass or uppass, or actual marginal
+  probabilities of ancestral states.  (The latter is the
+  main thing of interest.)  This specification is done via
+  e.g. \code{relprobs_matrix =
+  results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}.}
 }
 \value{
   \code{inf_statesvec} The inferred vector of states.
