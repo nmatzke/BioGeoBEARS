@@ -21,7 +21,7 @@
   trailing slashes in working directories etc.
 }
 \examples{
-tmpstr = "/Library/Frameworks/R.framework/Versions/2.15/Resources/library/modiscloud/extdata/2002_raw_MYD//MYD03.A2002185.0645.005.2009192031332.hdf"
+tmpstr = "/Library/Frameworks//R.framework/Versions/"
 
 outstr = slashslash(tmpstr)
 outstr

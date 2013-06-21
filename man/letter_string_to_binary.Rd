@@ -31,10 +31,12 @@ letter_string = "ABD"
 letter_string_to_binary(letter_string, letter_codes_in_desired_order="alphabet")
 
 letter_string = "ABD"
-letter_string_to_binary(letter_string, letter_codes_in_desired_order=c("A","B","C","D","E","F"))
+letter_string_to_binary(letter_string,
+letter_codes_in_desired_order=c("A","B","C","D","E","F"))
 
 letter_string = "ABD"
-letter_string_to_binary(letter_string, letter_codes_in_desired_order=strsplit("ABCDEF", split="")[[1]])
+letter_string_to_binary(letter_string,
+letter_codes_in_desired_order=strsplit("ABCDEF", split="")[[1]])
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

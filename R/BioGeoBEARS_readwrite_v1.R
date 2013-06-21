@@ -32,7 +32,8 @@ require("cladoRcpp")
 #'   @cite Matzke_2012_IBS
 #' @examples
 #' extdata_dir = system.file("extdata", package="BioGeoBEARS")
-#' trfn = slashslash(paste(extdata_dir, "/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep=""))
+#' trfn = slashslash(paste(extdata_dir, 
+#' "/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(trfn)
 #' node_numbers_matrix = get_pruningwise_nodenums(tr)
 #' node_numbers_matrix

@@ -977,7 +977,7 @@ unlist_df4 <- function(df, ...)
 #' @seealso \code{\link[base]{getwd}}, \code{\link[base]{setwd}}, \code{\link[base]{gsub}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
 #' @examples
-#' tmpstr = "/Library/Frameworks/R.framework/Versions/2.15/Resources/library/modiscloud/extdata/2002_raw_MYD//MYD03.A2002185.0645.005.2009192031332.hdf"
+#' tmpstr = "/Library/Frameworks//R.framework/Versions/"
 #'
 #' outstr = slashslash(tmpstr)
 #' outstr
@@ -1008,7 +1008,8 @@ slashslash <- function(tmpstr)
 #' outstr = addslash(tmpstr)
 #' outstr
 #'
-#' # Annoying, getwd() often doesn't return the ending slash, which can make life hard for paste() later on
+#' # Annoying, getwd() often doesn't return the ending slash, which 
+#' # can make life hard for paste() later on
 #' tmpstr = getwd()
 #' tmpstr
 #' outstr = addslash(tmpstr)
@@ -1246,7 +1247,8 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' @examples
 #' test=1
 #' 
-#' input_table = adf(c(143514514514532, -42.235235, -42.0000000, 0.0000, 0.0001, 0.00001, 0.0000111))
+#' input_table = adf(c(143514514514532, -42.235235, -42.0000000, 
+#' 0.0000, 0.0001, 0.00001, 0.0000111))
 #' conditional_format_table(input_table=input_table)
 #' 
 conditional_format_table <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4)
@@ -1297,7 +1299,7 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #'	 @cite ReeSmith2008
 #'	 @cite FosterIdiots
 #' @examples
-#' get_path_last("/Users/nickm/Library/R/2.15/library/BioGeoBEARS/extdata/Psychotria_geog.data")
+#' get_path_last("/Users/nickm/Psychotria_geog.data")
 #' 
 get_path_last <- function(path)
 	{
@@ -1327,7 +1329,7 @@ get_path_last <- function(path)
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
-#' get_path_first("/Users/nickm/Library/R/2.15/library/BioGeoBEARS/extdata/Psychotria_geog.data")
+#' get_path_first("/Users/nickm/Library/Psychotria_geog.data")
 #' 
 get_path_first <- function(inpath, addslash="FALSE")
 	{
@@ -1368,7 +1370,7 @@ get_path_first <- function(inpath, addslash="FALSE")
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
-#' get_fn_prefix("/Users/nickm/Library/R/2.15/library/BioGeoBEARS/extdata/Psychotria_geog.data")
+#' get_fn_prefix("/Users/nickm/Library/R/Psychotria_geog.data")
 #' get_fn_prefix("Psychotria_geog.data")
 #' 
 get_fn_prefix <- function(fn)
@@ -1891,7 +1893,8 @@ AICstats_2models <- function(LnL_1, LnL_2, numparams1, numparams2)
 #' 
 #' tmptable = adf(c(40, 50, 60))
 #' names(tmptable) = "AIC"
-#' AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref(restable=tmptable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
+#' AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref(
+#' restable=tmptable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
 #' 
 AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref <- function(restable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
 	{
@@ -2559,10 +2562,12 @@ get_Akaike_weights_from_rel_likes_pairwise <- function(rel_likes_AIC_pairwise)
 #' rel_likes_AIC_pairwise = rel_likes_from_deltaAICs_pairwise(deltaAICs)
 #' rel_likes_AIC_pairwise
 #' 
-#' Akaike_weights_pairwise = get_Akaike_weights_from_rel_likes_pairwise(rel_likes_AIC_pairwise)
+#' Akaike_weights_pairwise = get_Akaike_weights_from_rel_likes_pairwise(
+#' rel_likes_AIC_pairwise)
 #' Akaike_weights_pairwise
 #' 
-#' Akaike_weight_ratios_pairwise = get_Akaike_weight_ratio_from_Akaike_pairwise_weights(Akaike_weights_pairwise)
+#' Akaike_weight_ratios_pairwise = get_Akaike_weight_ratio_from_Akaike_pairwise_weights(
+#' Akaike_weights_pairwise)
 #' Akaike_weight_ratios_pairwise
 #' 
 get_Akaike_weight_ratio_from_Akaike_pairwise_weights <- function(Akaike_weights_pairwise)
@@ -2847,7 +2852,8 @@ get_relative_prob_model2old <- function(AICval_1, AICval_2)
 #' 
 #' # Setup data
 #' \dontrun{
-#' data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,  18.551051, 5.483625,  3.590745,  18.772389)
+#' data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,  
+#' 18.551051, 5.483625,  3.590745,  18.772389)
 #' result = matrix(data, nrow=3, byrow=TRUE)
 #' result = as.data.frame(result)
 #' names(result) = c("CV", "LCB", "UCB")
@@ -2923,7 +2929,8 @@ pdfit <- function(table_vals, file_prefix="tmptable", size="\\tiny", gettex=FALS
 #' 
 #' # Setup data
 #' \dontrun{
-#' data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,  18.551051, 5.483625,  3.590745,  18.772389)
+#' data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,  
+#' 18.551051, 5.483625,  3.590745,  18.772389)
 #' result = matrix(data, nrow=3, byrow=TRUE)
 #' result = as.data.frame(result)
 #' names(result) = c("CV", "LCB", "UCB")

@@ -46,15 +46,18 @@ testval=1
 charcell = "1*d+1*d"
 
 # Right
-cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="yadda", mergesym="", d=0.1, e=0.01)
+cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="yadda",
+mergesym="", d=0.1, e=0.01)
 cellval
 
 # Wrong
-cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\\\+", mergesym="*", d=0.1, e=0.01)
+cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\\\+",
+mergesym="*", d=0.1, e=0.01)
 cellval
 
 # Right
-cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\\\+", mergesym="+", d=0.1, e=0.01)
+cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\\\+",
+mergesym="+", d=0.1, e=0.01)
 cellval
 }
 \author{

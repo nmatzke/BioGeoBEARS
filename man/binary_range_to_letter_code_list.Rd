@@ -28,7 +28,8 @@
 testval=1
 tipranges_row = c(1, 0, 1, 0)
 areanames = c("A", "B", "C", "D")
-list_of_areas_in_the_state = binary_range_to_letter_code_list(tipranges_row, areanames)
+list_of_areas_in_the_state = binary_range_to_letter_code_list(tipranges_row,
+areanames)
 list_of_areas_in_the_state
 }
 \author{

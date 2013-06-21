@@ -31,7 +31,8 @@ tipranges_object
 areanames = getareas_from_tipranges_object(tipranges_object)
 areanames
 
-letter_code_ranges = binary_ranges_to_letter_codes(tipranges=tipranges_object, areanames)
+letter_code_ranges = binary_ranges_to_letter_codes(tipranges=tipranges_object,
+areanames)
 letter_code_ranges
 }
 \author{

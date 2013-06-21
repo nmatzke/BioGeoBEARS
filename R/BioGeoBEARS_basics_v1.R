@@ -252,14 +252,17 @@ get_tiplabel_ranges <- function(tipranges, tr, sep="")
 #' # Here, we will assume the maximum range size is all areas, but it could be smaller
 #' maxareas = length(areanames)
 #' \dontrun{
-#' states_list = areas_list_to_states_list_old(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
+#' states_list = areas_list_to_states_list_old(areas=areanames, include_null_range=TRUE, 
+#' maxareas=maxareas)
 #' states_list
 #' }
 #' 
-#' states_list = areas_list_to_states_list_new(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
+#' states_list = areas_list_to_states_list_new(areas=areanames, include_null_range=TRUE, 
+#' maxareas=maxareas)
 #' states_list
 #' 
-#' tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges=tipranges_object, phy=phy, states_list=states_list, maxareas=maxareas )
+#' tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(
+#' tipranges=tipranges_object, phy=phy, states_list=states_list, maxareas=maxareas )
 #' tip_condlikes_of_data_on_each_state
 #' 
 tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, states_list=NULL, maxareas=length(getareas_from_tipranges_object(tipranges)) )
@@ -355,18 +358,30 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 #'	 @cite ReeSmith2008
 #' @examples
 #' areas = c("A","B","C")
-#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=TRUE, split_ABC=TRUE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=TRUE, split_ABC=FALSE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=FALSE, split_ABC=TRUE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=FALSE, split_ABC=FALSE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=TRUE, split_ABC=TRUE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=TRUE, split_ABC=FALSE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=FALSE, split_ABC=TRUE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=FALSE, split_ABC=FALSE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=TRUE, split_ABC=TRUE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=TRUE, split_ABC=FALSE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=FALSE, split_ABC=TRUE)
-#' areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=FALSE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), 
+#' include_null_range=TRUE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), 
+#' include_null_range=TRUE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), 
+#' include_null_range=FALSE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), 
+#' include_null_range=FALSE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, 
+#' include_null_range=TRUE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, 
+#' include_null_range=TRUE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, 
+#' include_null_range=FALSE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=2, 
+#' include_null_range=FALSE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, 
+#' include_null_range=TRUE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, 
+#' include_null_range=TRUE, split_ABC=FALSE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, 
+#' include_null_range=FALSE, split_ABC=TRUE)
+#' areas_list_to_states_list_new(areas=areas, maxareas=1, 
+#' include_null_range=FALSE, split_ABC=FALSE)
 #' 
 areas_list_to_states_list_new <- function(areas=c("A","B","C"), maxareas=length(areas), include_null_range=TRUE, split_ABC=TRUE)
 	{
@@ -503,7 +518,8 @@ binary_range_to_letter_code_txt <- function(tipranges_row, areanames)
 #' testval=1
 #' tipranges_row = c(1, 0, 1, 0)
 #' areanames = c("A", "B", "C", "D")
-#' list_of_areas_in_the_state = binary_range_to_letter_code_list(tipranges_row, areanames)
+#' list_of_areas_in_the_state = binary_range_to_letter_code_list(tipranges_row, 
+#' areanames)
 #' list_of_areas_in_the_state
 #' 
 binary_range_to_letter_code_list <- function(tipranges_row, areanames)
@@ -545,7 +561,8 @@ binary_range_to_letter_code_list <- function(tipranges_row, areanames)
 #' areanames = getareas_from_tipranges_object(tipranges_object)
 #' areanames
 #'
-#' letter_code_ranges = binary_ranges_to_letter_codes(tipranges=tipranges_object, areanames)
+#' letter_code_ranges = binary_ranges_to_letter_codes(tipranges=tipranges_object, 
+#' areanames)
 #' letter_code_ranges
 #' 
 binary_ranges_to_letter_codes <- function(tipranges, areanames)
@@ -581,10 +598,12 @@ binary_ranges_to_letter_codes <- function(tipranges, areanames)
 #' letter_string_to_binary(letter_string, letter_codes_in_desired_order="alphabet")
 #' 
 #' letter_string = "ABD"
-#' letter_string_to_binary(letter_string, letter_codes_in_desired_order=c("A","B","C","D","E","F"))
+#' letter_string_to_binary(letter_string, 
+#' letter_codes_in_desired_order=c("A","B","C","D","E","F"))
 #' 
 #' letter_string = "ABD"
-#' letter_string_to_binary(letter_string, letter_codes_in_desired_order=strsplit("ABCDEF", split="")[[1]])
+#' letter_string_to_binary(letter_string, 
+#' letter_codes_in_desired_order=strsplit("ABCDEF", split="")[[1]])
 #' 
 letter_string_to_binary <- function(letter_string, letter_codes_in_desired_order="alphabet")
 	{
@@ -647,7 +666,8 @@ letter_string_to_binary <- function(letter_string, letter_codes_in_desired_order
 #' letter_strings_to_tipranges_df(letter_strings)
 #' 
 #' letter_strings = c("A", "B", "C", "AB", "AC", "BC", "ABC")
-#' letter_strings_to_tipranges_df(letter_strings, tipnames_in_order=paste("tip", seq(1,7), sep=""))
+#' letter_strings_to_tipranges_df(letter_strings, 
+#' tipnames_in_order=paste("tip", seq(1,7), sep=""))
 #' 
 letter_strings_to_tipranges_df <- function(letter_strings, letter_codes_in_desired_order="alphabet", tipnames_in_order=NULL)
 	{
@@ -729,7 +749,8 @@ letter_strings_to_tipranges_df <- function(letter_strings, letter_codes_in_desir
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #' # Set the filename (Hawaiian Psychotria from Ree & Smith 2008)
 #' fn = paste(extdata_dir, "Psychotria_geog.data", sep="")
 #' getranges_from_LagrangePHYLIP(lgdata_fn=fn)
@@ -780,7 +801,8 @@ getranges_from_LagrangePHYLIP <- function(lgdata_fn="lagrange_area_data_file.dat
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #' # Set the filename (Hawaiian Psychotria from Ree & Smith 2008)
 #' 
 #' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
@@ -838,7 +860,8 @@ order_tipranges_by_tree_tips <- function(tipranges, tr)
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #' # Set the filename (Hawaiian Psychotria from Ree & Smith 2008)
 #' 
 #' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
@@ -895,8 +918,10 @@ tipranges_to_area_strings <- function(tipranges, areaabbr=NULL)
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
-#' getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), tiparea_names=c("K", "O", "M", "H"), sep="")
-#' getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), tiparea_names=c("K", "O", "M", "H"), sep="_")
+#' getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), 
+#' tiparea_names=c("K", "O", "M", "H"), sep="")
+#' getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), 
+#' tiparea_names=c("K", "O", "M", "H"), sep="_")
 #' 
 getname <- function(TFrow, tiparea_names, sep="")
 	{
@@ -1010,7 +1035,8 @@ states_list_indexes_to_areastxt <- function(states_list, areanames, counting_bas
 #' cat(tmplines, sep="\n")
 #' 
 #' # Again, with areanames
-#' save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges, lgdata_fn=fn, areanames=c("area1","area2","area3"))
+#' save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges, 
+#' lgdata_fn=fn, areanames=c("area1","area2","area3"))
 #'
 #' # Show the file
 #' tmplines = scan(file=fn, what="character", sep="\n")
@@ -1102,16 +1128,20 @@ save_tipranges_to_LagrangePHYLIP <- function(tipranges_object, lgdata_fn="lagran
 #' tmpdf
 #' 
 #' # Read in the file
-#' tmpdf = read_PHYLIP_data(lgdata_fn=fn, regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
-#' tmpdf	# Note that regionnames are only used if they are NOT specified in the file.
+#' tmpdf = read_PHYLIP_data(lgdata_fn=fn, 
+#' regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
+#' tmpdf	# Note that regionnames are only 
+#' # used if they are NOT specified in the file.
 #' # But, you could put them on manually
 #' names(tmpdf) = c("Kauai", "Oahu", "Maui-Nui","Big Island")
 #' tmpdf
 #' 
 #' # This one has no area names
 #' fn = paste(extdata_dir, "Psychotria_geog_noAreaNames.data", sep="")
-#' tmpdf = read_PHYLIP_data(lgdata_fn=fn, regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
-#' tmpdf	# Note that regionnames are only used if they are NOT specified in the file.
+#' tmpdf = read_PHYLIP_data(lgdata_fn=fn, 
+#' regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
+#' tmpdf	# Note that regionnames are only 
+#' # used if they are NOT specified in the file.
 #' 
 read_PHYLIP_data <- function(lgdata_fn="lagrange_area_data_file.data", regionnames=NULL)
 	{
@@ -1302,7 +1332,9 @@ maxsize <- function (areasizes_possible_01)
 #'	 @cite FosterIdiots
 #' @examples
 #' testval=1
-#' make_dispersal_multiplier_matrix(areas=NULL, states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")))
+#' make_dispersal_multiplier_matrix(areas=NULL, 
+#' states_list=list("_", c("A"), c("B"), c("C"), 
+#' c("A","B"), c("B","C"), c("A","C"), c("A","B","C")))
 #' make_dispersal_multiplier_matrix(areas=c("A","B","C","D"))
 #' 
 make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), dispersal_multipliers_matrix=NULL, distances_mat=NULL, x_exponent=0)
@@ -1398,12 +1430,17 @@ make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=list("_", c
 #' @examples
 #' testval=1
 #' 
-#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
+#' states_list = list("_", c("A"), c("B"), c("C"), c
+#' ("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(
+#' areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
-#' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
+#' dedf = make_relprob_matrix_de(states_list=states_list, 
+#' split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, 
+#' add_multiple_Ds=TRUE, 
+#' dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
 #' 
 #' dedf
 #' 
@@ -1600,7 +1637,9 @@ make_relprob_matrix_de <- function(states_list=list("_", c("A"), c("B"), c("C"),
 #'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
-#' spmat_dimensions = size_species_matrix(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), printwarn=1)
+#' spmat_dimensions = size_species_matrix(
+#' states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), 
+#' c("B","C"), c("A","C"), c("A","B","C")), printwarn=1)
 #' spmat_dimensions
 #'
 size_species_matrix <- function(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), printwarn=1)
@@ -1933,7 +1972,10 @@ make_spmat_row = function(Lstates, Rstates, ancareas_txt_tmp, splitval="", code_
 #'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
-#' probmat = make_relprob_matrix_bi(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
+#' probmat = make_relprob_matrix_bi(states_list=list("_", 
+#' c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), 
+#' c("A","B","C")), split_ABC=FALSE, splitval="", 
+#' code_for_overlapping_subsets=NA, printwarn=1)
 #' probmat
 #' 
 make_relprob_matrix_bi <- function(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
@@ -2171,13 +2213,17 @@ divide_probs_by_number_of_options_txt <- function(probmat)
 #' 
 #' 
 #' probmat = spmat
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\+", mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\+", 
+#' mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat
 #' probmat2 = divide_probs_by_number_of_options_nums(spPmat, probmat)
 #' probmat2
 #' 
 #' probmat = spmat1
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\+", mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\+", 
+#' mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat
 #' probmat3 = divide_probs_by_number_of_options_nums(spPmat, probmat)
 #' probmat3
@@ -2278,7 +2324,9 @@ divide_probs_by_number_of_options_nums <- function(spPmat, probmat)
 #'	 @cite Goldberg_Igic_2012_ClaSSE
 #' @examples
 #' testval=1
-#' probmat = make_relprob_matrix_bi(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
+#' probmat = make_relprob_matrix_bi(states_list=list("_", c("A"), 
+#' c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), 
+#' split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
 #' probmat
 #' 
 #' newmat = make_relprob_txtmatrix_sp1(probmat=probmat, split="\\\\|")
@@ -2369,10 +2417,14 @@ make_relprob_txtmatrix_sp1 <- function(probmat, split="\\|")
 #'	 @cite Goldberg_Igic_2012_ClaSSE
 #' @examples
 #' testval=1
-#' spmat = make_relprob_matrix_bi(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
+#' spmat = make_relprob_matrix_bi(states_list=list("_", c("A"), 
+#' c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), 
+#' split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
 #' spmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat
 #' 
 #' newmat = make_relprob_nummatrix_sp1(probmat=spmat, spPmat=spPmat, split="\\\\|")
@@ -2520,7 +2572,9 @@ meval <- function(equation_txt)
 #' @examples
 #' testval=1
 #' 
-#' spmat = make_relprob_matrix_bi(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
+#' spmat = make_relprob_matrix_bi(states_list=list("_", c("A"), 
+#' c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), 
+#' split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
 #' spmat
 #' tmpcol = paste_rows_without_zeros(tmpmat=spmat)
 #' tmpcol
@@ -2562,12 +2616,17 @@ paste_rows_without_zeros <- function(tmpmat)
 #'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
-#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
+#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), 
+#' c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), 
+#' include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
-#' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
+#' dedf = make_relprob_matrix_de(states_list=states_list, 
+#' split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, 
+#' add_multiple_Ds=TRUE, 
+#' dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
 #' 
 #' spmat_noNulls = remove_null_rowcols_from_mat(tmpmat=dedf, null_sym="()")
 #' spmat_noNulls
@@ -2628,24 +2687,32 @@ remove_null_rowcols_from_mat <- function(tmpmat, null_sym="()")
 #' @examples
 #' testval=1
 #' 
-#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
+#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), 
+#' c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), 
+#' include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
-#' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
+#' dedf = make_relprob_matrix_de(states_list=states_list,
+#'  split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, 
+#' add_multiple_Ds=TRUE, 
+#' dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
 #' dedf
 #' 
 #' # Defaults
-#' Pmat = symbolic_to_P_matrix(dedf, cellsplit="\\\\+", mergesym="+", diags_sum_to_1=FALSE, d=0.1, e=0.01)
+#' Pmat = symbolic_to_P_matrix(dedf, cellsplit="\\\\+", mergesym="+", 
+#' diags_sum_to_1=FALSE, d=0.1, e=0.01)
 #' Pmat
 #' 
 #' # Calculate diagonal
-#' Pmat = symbolic_to_P_matrix(dedf, cellsplit="\\\\+", mergesym="+", diags_sum_to_1=TRUE, d=0.1, e=0.01)
+#' Pmat = symbolic_to_P_matrix(dedf, cellsplit="\\\\+", mergesym="+", 
+#' diags_sum_to_1=TRUE, d=0.1, e=0.01)
 #' Pmat
 #' 
 #' # You don't have to split, if the formulas are directly parsable
-#' Pmat = symbolic_to_P_matrix(dedf, cellsplit="yadda", mergesym="", diags_sum_to_1=FALSE, d=0.1, e=0.01)
+#' Pmat = symbolic_to_P_matrix(dedf, cellsplit="yadda", mergesym="", 
+#' diags_sum_to_1=FALSE, d=0.1, e=0.01)
 #' Pmat
 #' 
 symbolic_to_P_matrix <- function(dedf, cellsplit="\\+", mergesym="+", diags_sum_to_1=FALSE, d=0.1, e=0.01, ...)
@@ -2711,15 +2778,18 @@ symbolic_to_P_matrix <- function(dedf, cellsplit="\\+", mergesym="+", diags_sum_
 #' charcell = "1*d+1*d"
 #' 
 #' # Right
-#' cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="yadda", mergesym="", d=0.1, e=0.01)
+#' cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="yadda", 
+#' mergesym="", d=0.1, e=0.01)
 #' cellval
 #' 
 #' # Wrong
-#' cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\+", mergesym="*", d=0.1, e=0.01)
+#' cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\+", 
+#' mergesym="*", d=0.1, e=0.01)
 #' cellval
 #' 
 #' # Right
-#' cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\+", mergesym="+", d=0.1, e=0.01)
+#' cellval = symbolic_cell_to_relprob_cell(charcell, cellsplit="\\+", 
+#' mergesym="+", d=0.1, e=0.01)
 #' cellval
 #' 
 symbolic_cell_to_relprob_cell <- function(charcell, cellsplit="", mergesym="*", d=0.1, e=0.01, ...)
@@ -2771,12 +2841,16 @@ symbolic_cell_to_relprob_cell <- function(charcell, cellsplit="", mergesym="*", 
 #' @examples
 #' testval=1
 #' 
-#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
+#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), 
+#' c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), 
+#' include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
-#' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
+#' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, 
+#' split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, 
+#' dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
 #' dedf
 #' 
 #' # Right
@@ -2858,12 +2932,16 @@ symbolic_to_Q_matrix <- function(dedf, cellsplit="\\+", mergesym="*", d=0.1, e=0
 #' @examples
 #' testval=1
 #' 
-#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C"))
+#' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), 
+#' c("B","C"), c("A","C"), c("A","B","C"))
 #' 
-#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), include_null_range=TRUE, split_ABC=TRUE)
+#' states_list = areas_list_to_states_list_new(areas=c("A","B","C"), 
+#' include_null_range=TRUE, split_ABC=TRUE)
 #' states_list
 #' 
-#' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
+#' dedf = make_relprob_matrix_de(states_list=states_list, split_ABC=FALSE, 
+#' split="", remove_simultaneous_events=TRUE, add_multiple_Ds=TRUE, 
+#' dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list=states_list))
 #' dedf
 #' 
 #' # Right
@@ -2957,28 +3035,59 @@ symbolic_to_Q_matrix_exper <- function(dedf, cellsplit="\\+", mergesym="*", d=0.
 #' testval=1
 #' 
 #' charcell = "y1"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, 
+#' j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, 
+#' maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, 
+#' maxent_constraint_01v=0.0001))
 #' 
 #' charcell = "y1"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, 
+#' j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, 
+#' maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
 #' 
 #' charcell = "j"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, 
+#' j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, 
+#' maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, 
+#' maxent_constraint_01v=0.0001))
 #' 
 #' charcell = "j"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, 
+#' j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, 
+#' maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, 
+#' maxent_constraint_01v=0.0001))
 #' 
 #' charcell = "v1_2"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, 
+#' j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, 
+#' maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, 
+#' maxent_constraint_01v=0.0001))
 #' 
 #' charcell = "v1_2"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1,
+#'  j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, 
+#' maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, 
+#' maxent_constraint_01v=0.0001))
 #' 
 #' charcell = "s1_2"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, 
+#' j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, 
+#' maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, 
+#' maxent_constraint_01v=0.0001))
 #' 
 #' charcell = "s1_2"
-#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", ys=1, j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=3, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, maxent_constraint_01v=0.0001))
+#' symbolic_cell_to_relprob_cell_sp(charcell, cellsplit="\\\\+", mergesym="*", 
+#' ys=1, j=1, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(
+#' max_numareas=3, maxent_constraint_01=0.0001), 
+#' relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=3, 
+#' maxent_constraint_01v=0.0001))
 #' 
 symbolic_cell_to_relprob_cell_sp <- function(charcell, cellsplit="\\+", mergesym="*", ys=1, j=0, v=1, relprob_subsets_matrix=relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001), relprob_vicar_matrix=relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001), ...)
 	{
@@ -3063,41 +3172,60 @@ symbolic_cell_to_relprob_cell_sp <- function(charcell, cellsplit="\\+", mergesym
 #'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
-#' # Generate the text version of the speciation/cladogenesis probability matrix (actually a relative weights matrix
+#' # Generate the text version of the speciation/cladogenesis probability matrix 
+#' # (actually a relative weights matrix
 #' # until the rows are normalized so that each sums to 1).
-#' spmat = make_relprob_matrix_bi(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), split_ABC=FALSE, splitval="", code_for_overlapping_subsets=NA, printwarn=1)
+#' spmat = make_relprob_matrix_bi(states_list=list("_", c("A"), c("B"), c("C"), 
+#' c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), split_ABC=FALSE, splitval="", 
+#' code_for_overlapping_subsets=NA, printwarn=1)
 #' spmat
 #' 
 #' # Look at the conditional probabilities generated by a variety of models
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", 
+#' ys=1, j=0, v=1, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, 
+#' max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=0.5, j=0, v=0.5, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=0.5, j=0, v=0.5, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=1, j=1, v=1, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=1, j=1, v=1, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=0.25, j=0.25, v=0.25, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=0.25, j=0.25, v=0.25, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=1, j=1, v=0, maxent_constraint_01=0.0001, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=1, j=1, v=0, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=1, j=1, v=0, maxent_constraint_01=0.5, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=1, j=1, v=0, maxent_constraint_01=0.5, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=0, maxent_constraint_01=0.5, maxent_constraint_01v=0.0001, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=1, j=0, v=0, maxent_constraint_01=0.5, 
+#' maxent_constraint_01v=0.0001, max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
-#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, maxent_constraint_01v=0.5, max_numareas=3)
+#' spPmat = symbolic_to_relprob_matrix_sp(spmat=spmat, cellsplit="\\\\+", 
+#' mergesym="*", ys=1, j=0, v=1, maxent_constraint_01=0.0001, 
+#' maxent_constraint_01v=0.5, max_numareas=3)
 #' spPmat = adf(spPmat); names(spPmat) = names(spmat); rownames(spPmat) = rownames(spmat)
 #' spPmat
 #' 
@@ -3505,14 +3633,21 @@ get_probvals <- function(die_vals, meanval)
 #' 
 #' # Probabilities of different descendant rangesizes, for the smaller descendant, under sympatric/subset speciation
 #' # (plus sympatric/range-copying, which is folded in):
-#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
-#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
-#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, 
+#' NA_val=NA)
+#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, 
+#' NA_val=NA)
+#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, 
+#' NA_val=NA)
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under vicariant speciation
-#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001, NA_val=NA)
-#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.5, NA_val=NA)
-#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.9999, NA_val=NA)
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under vicariant speciation
+#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001, 
+#' NA_val=NA)
+#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.5, 
+#' NA_val=NA)
+#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.9999, 
+#' NA_val=NA)
 #' 
 relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
 	{
@@ -3665,16 +3800,24 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 #' testval=1
 #' # Examples
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under sympatric/subset speciation
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under sympatric/subset speciation
 #' # (plus sympatric/range-copying, which is folded in):
-#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
-#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
-#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, 
+#' NA_val=NA)
+#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, 
+#' NA_val=NA)
+#' relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, 
+#' NA_val=NA)
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under vicariant speciation
-#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001, NA_val=NA)
-#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.5, NA_val=NA)
-#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.9999, NA_val=NA)
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under vicariant speciation
+#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001, 
+#' NA_val=NA)
+#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.5, 
+#' NA_val=NA)
+#' relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.9999, 
+#' NA_val=NA)
 #' 
 relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constraint_01v=0.0001, NA_val=NA)
 	{
@@ -3786,44 +3929,51 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 #' testval=1
 #' # Examples
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under sympatric/subset speciation
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under sympatric/subset speciation
 #' # (plus sympatric/range-copying, which is folded in):
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
 #' yfunc(charcell="y3", relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
 #' yfunc(charcell="y3", relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
@@ -3831,8 +3981,10 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under vicariant speciation
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001, NA_val=NA)
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under vicariant speciation
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -3844,7 +3996,8 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 #' vfunc(charcell="v2_6", relprob_subsets_matrix)
 #' vfunc(charcell="v3_6", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -3856,7 +4009,8 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 #' vfunc(charcell="v2_6", relprob_subsets_matrix)
 #' vfunc(charcell="v3_6", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -3927,44 +4081,51 @@ sfunc <- function(charcell, relprob_subsets_matrix)
 #' testval=1
 #' # Examples
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under sympatric/subset speciation
+#' # Probabilities of different descendant rangesizes, for the smaller 
+#' # descendant, under sympatric/subset speciation
 #' # (plus sympatric/range-copying, which is folded in):
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
 #' yfunc(charcell="y3", relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
 #' yfunc(charcell="y3", relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
@@ -3972,8 +4133,10 @@ sfunc <- function(charcell, relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under vicariant speciation
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001, NA_val=NA)
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under vicariant speciation
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -3985,7 +4148,8 @@ sfunc <- function(charcell, relprob_subsets_matrix)
 #' vfunc(charcell="v2_6", relprob_subsets_matrix)
 #' vfunc(charcell="v3_6", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -3997,7 +4161,8 @@ sfunc <- function(charcell, relprob_subsets_matrix)
 #' vfunc(charcell="v2_6", relprob_subsets_matrix)
 #' vfunc(charcell="v3_6", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -4096,44 +4261,51 @@ yfunc <- function(charcell, relprob_subsets_matrix)
 #' testval=1
 #' # Examples
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under sympatric/subset speciation
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under sympatric/subset speciation
 #' # (plus sympatric/range-copying, which is folded in):
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' sfunc(charcell="s1_1", relprob_subsets_matrix)
 #' sfunc(charcell="s1_2", relprob_subsets_matrix)
 #' sfunc(charcell="s1_3", relprob_subsets_matrix)
 #' sfunc(charcell="s2_3", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
 #' yfunc(charcell="y3", relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
 #' yfunc(charcell="y3", relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_subsets(max_numareas=6, 
+#' maxent_constraint_01=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' yfunc(charcell="y1", relprob_subsets_matrix)
 #' yfunc(charcell="y2", relprob_subsets_matrix)
@@ -4141,8 +4313,10 @@ yfunc <- function(charcell, relprob_subsets_matrix)
 #' yfunc(charcell="y4", relprob_subsets_matrix)
 #' 
 #' 
-#' # Probabilities of different descendant rangesizes, for the smaller descendant, under vicariant speciation
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.0001, NA_val=NA)
+#' # Probabilities of different descendant rangesizes, for the smaller descendant, 
+#' # under vicariant speciation
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.0001, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -4154,7 +4328,8 @@ yfunc <- function(charcell, relprob_subsets_matrix)
 #' vfunc(charcell="v2_6", relprob_subsets_matrix)
 #' vfunc(charcell="v3_6", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.5, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.5, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)
@@ -4166,7 +4341,8 @@ yfunc <- function(charcell, relprob_subsets_matrix)
 #' vfunc(charcell="v2_6", relprob_subsets_matrix)
 #' vfunc(charcell="v3_6", relprob_subsets_matrix)
 #' 
-#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, maxent_constraint_01v=0.9999, NA_val=NA)
+#' relprob_subsets_matrix = relative_probabilities_of_vicariants(max_numareas=6, 
+#' maxent_constraint_01v=0.9999, NA_val=NA)
 #' relprob_subsets_matrix
 #' vfunc(charcell="v1_1", relprob_subsets_matrix)
 #' vfunc(charcell="v1_2", relprob_subsets_matrix)

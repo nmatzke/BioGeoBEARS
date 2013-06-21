@@ -69,7 +69,8 @@ tmplines = scan(file=fn, what="character", sep="\\n")
 cat(tmplines, sep="\\n")
 
 # Again, with areanames
-save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges, lgdata_fn=fn, areanames=c("area1","area2","area3"))
+save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges,
+lgdata_fn=fn, areanames=c("area1","area2","area3"))
 
 # Show the file
 tmplines = scan(file=fn, what="character", sep="\\n")

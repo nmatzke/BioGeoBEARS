@@ -43,7 +43,8 @@
 #
 # The Q matrix includes the stationary base freqencies, which Pmat
 # converges to as t becomes large.
-Qmat = matrix(c(-1.218, 0.504, 0.336, 0.378, 0.126, -0.882, 0.252, 0.504, 0.168, 0.504, -1.05, 0.378, 0.126, 0.672, 0.252, -1.05), nrow=4, byrow=TRUE)
+Qmat = matrix(c(-1.218, 0.504, 0.336, 0.378, 0.126, -0.882, 0.252, 0.504, 0.168,
+0.504, -1.05, 0.378, 0.126, 0.672, 0.252, -1.05), nrow=4, byrow=TRUE)
 
 relprobs_branch_bottom = c(0.25, 0.25, 0.25, 0.25)
 

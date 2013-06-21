@@ -44,7 +44,8 @@ test=1
 
 # Setup data
 \dontrun{
-data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,  18.551051, 5.483625,  3.590745,  18.772389)
+data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,
+18.551051, 5.483625,  3.590745,  18.772389)
 result = matrix(data, nrow=3, byrow=TRUE)
 result = as.data.frame(result)
 names(result) = c("CV", "LCB", "UCB")

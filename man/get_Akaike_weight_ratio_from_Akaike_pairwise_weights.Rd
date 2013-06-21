@@ -38,10 +38,12 @@ deltaAICs
 rel_likes_AIC_pairwise = rel_likes_from_deltaAICs_pairwise(deltaAICs)
 rel_likes_AIC_pairwise
 
-Akaike_weights_pairwise = get_Akaike_weights_from_rel_likes_pairwise(rel_likes_AIC_pairwise)
+Akaike_weights_pairwise = get_Akaike_weights_from_rel_likes_pairwise(
+rel_likes_AIC_pairwise)
 Akaike_weights_pairwise
 
-Akaike_weight_ratios_pairwise = get_Akaike_weight_ratio_from_Akaike_pairwise_weights(Akaike_weights_pairwise)
+Akaike_weight_ratios_pairwise = get_Akaike_weight_ratio_from_Akaike_pairwise_weights(
+Akaike_weights_pairwise)
 Akaike_weight_ratios_pairwise
 }
 \author{

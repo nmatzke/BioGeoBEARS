@@ -41,7 +41,8 @@ letter_strings = c("A", "B", "C", "AB", "AC", "BC", "ABC")
 letter_strings_to_tipranges_df(letter_strings)
 
 letter_strings = c("A", "B", "C", "AB", "AC", "BC", "ABC")
-letter_strings_to_tipranges_df(letter_strings, tipnames_in_order=paste("tip", seq(1,7), sep=""))
+letter_strings_to_tipranges_df(letter_strings,
+tipnames_in_order=paste("tip", seq(1,7), sep=""))
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

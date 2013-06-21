@@ -56,7 +56,8 @@ require("cladoRcpp")
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
 #' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
@@ -883,7 +884,8 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
 #' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
@@ -1277,7 +1279,8 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
 #' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
@@ -1695,7 +1698,8 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
 #' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
@@ -2098,7 +2102,8 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 #' 
 #' # Get the example files directory
 #' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
 #' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")

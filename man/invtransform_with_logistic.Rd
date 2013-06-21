@@ -1,6 +1,8 @@
 \name{invtransform_with_logistic}
 \alias{invtransform_with_logistic}
-\title{Transform rescaled values back to continuously-sampled parameter on -Inf, +Inf to a boundedly-sampled parameter}
+\title{paramval=0.3, minval=0, maxval=1), minval=0, maxval=1)
+paramval=0.3, minval=0, maxval=5), minval=0, maxval=5)
+Transform rescaled values back to continuously-sampled parameter on -Inf, +Inf to a boundedly-sampled parameter}
 \usage{
   invtransform_with_logistic(transformed_paramval,
     minval = 0, maxval = 1)
@@ -48,8 +50,10 @@ invtransform_with_logistic(transformed_paramval=0.5744425, minval=0, maxval=1)
 invtransform_with_logistic(transformed_paramval=2.872213, minval=0, maxval=5)
 
 # These should transform, then undo the transform
-invtransform_with_logistic(transformed_paramval=transform_with_logistic(paramval=0.3, minval=0, maxval=1), minval=0, maxval=1)
-invtransform_with_logistic(transformed_paramval=transform_with_logistic(paramval=0.3, minval=0, maxval=5), minval=0, maxval=5)
+invtransform_with_logistic(transformed_paramval=transform_with_logistic(
+paramval=0.3, minval=0, maxval=1), minval=0, maxval=1)
+invtransform_with_logistic(transformed_paramval=transform_with_logistic(
+paramval=0.3, minval=0, maxval=5), minval=0, maxval=5)
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

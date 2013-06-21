@@ -46,18 +46,30 @@
 }
 \examples{
 areas = c("A","B","C")
-areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=TRUE, split_ABC=TRUE)
-areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=TRUE, split_ABC=FALSE)
-areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=FALSE, split_ABC=TRUE)
-areas_list_to_states_list_new(areas=areas, maxareas=length(areas), include_null_range=FALSE, split_ABC=FALSE)
-areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=TRUE, split_ABC=TRUE)
-areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=TRUE, split_ABC=FALSE)
-areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=FALSE, split_ABC=TRUE)
-areas_list_to_states_list_new(areas=areas, maxareas=2, include_null_range=FALSE, split_ABC=FALSE)
-areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=TRUE, split_ABC=TRUE)
-areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=TRUE, split_ABC=FALSE)
-areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=FALSE, split_ABC=TRUE)
-areas_list_to_states_list_new(areas=areas, maxareas=1, include_null_range=FALSE, split_ABC=FALSE)
+areas_list_to_states_list_new(areas=areas, maxareas=length(areas),
+include_null_range=TRUE, split_ABC=TRUE)
+areas_list_to_states_list_new(areas=areas, maxareas=length(areas),
+include_null_range=TRUE, split_ABC=FALSE)
+areas_list_to_states_list_new(areas=areas, maxareas=length(areas),
+include_null_range=FALSE, split_ABC=TRUE)
+areas_list_to_states_list_new(areas=areas, maxareas=length(areas),
+include_null_range=FALSE, split_ABC=FALSE)
+areas_list_to_states_list_new(areas=areas, maxareas=2,
+include_null_range=TRUE, split_ABC=TRUE)
+areas_list_to_states_list_new(areas=areas, maxareas=2,
+include_null_range=TRUE, split_ABC=FALSE)
+areas_list_to_states_list_new(areas=areas, maxareas=2,
+include_null_range=FALSE, split_ABC=TRUE)
+areas_list_to_states_list_new(areas=areas, maxareas=2,
+include_null_range=FALSE, split_ABC=FALSE)
+areas_list_to_states_list_new(areas=areas, maxareas=1,
+include_null_range=TRUE, split_ABC=TRUE)
+areas_list_to_states_list_new(areas=areas, maxareas=1,
+include_null_range=TRUE, split_ABC=FALSE)
+areas_list_to_states_list_new(areas=areas, maxareas=1,
+include_null_range=FALSE, split_ABC=TRUE)
+areas_list_to_states_list_new(areas=areas, maxareas=1,
+include_null_range=FALSE, split_ABC=FALSE)
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

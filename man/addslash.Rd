@@ -21,7 +21,8 @@ tmpstr
 outstr = addslash(tmpstr)
 outstr
 
-# Annoying, getwd() often doesn't return the ending slash, which can make life hard for paste() later on
+# Annoying, getwd() often doesn't return the ending slash, which
+# can make life hard for paste() later on
 tmpstr = getwd()
 tmpstr
 outstr = addslash(tmpstr)

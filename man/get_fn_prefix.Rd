@@ -18,7 +18,7 @@
   Go BEARS!
 }
 \examples{
-get_fn_prefix("/Users/nickm/Library/R/2.15/library/BioGeoBEARS/extdata/Psychotria_geog.data")
+get_fn_prefix("/Users/nickm/Library/R/Psychotria_geog.data")
 get_fn_prefix("Psychotria_geog.data")
 }
 \author{

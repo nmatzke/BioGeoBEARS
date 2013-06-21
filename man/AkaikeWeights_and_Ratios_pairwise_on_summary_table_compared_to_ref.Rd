@@ -41,7 +41,8 @@ test=1
 
 tmptable = adf(c(40, 50, 60))
 names(tmptable) = "AIC"
-AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref(restable=tmptable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
+AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref(
+restable=tmptable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

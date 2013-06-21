@@ -25,8 +25,10 @@
   Go BEARS!
 }
 \examples{
-getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), tiparea_names=c("K", "O", "M", "H"), sep="")
-getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), tiparea_names=c("K", "O", "M", "H"), sep="_")
+getname(TFrow=c(FALSE, TRUE, TRUE, FALSE),
+tiparea_names=c("K", "O", "M", "H"), sep="")
+getname(TFrow=c(FALSE, TRUE, TRUE, FALSE),
+tiparea_names=c("K", "O", "M", "H"), sep="_")
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

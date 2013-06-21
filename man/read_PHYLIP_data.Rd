@@ -41,16 +41,20 @@ tmpdf = read_PHYLIP_data(lgdata_fn=fn, regionnames=NULL)
 tmpdf
 
 # Read in the file
-tmpdf = read_PHYLIP_data(lgdata_fn=fn, regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
-tmpdf	# Note that regionnames are only used if they are NOT specified in the file.
+tmpdf = read_PHYLIP_data(lgdata_fn=fn,
+regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
+tmpdf	# Note that regionnames are only
+# used if they are NOT specified in the file.
 # But, you could put them on manually
 names(tmpdf) = c("Kauai", "Oahu", "Maui-Nui","Big Island")
 tmpdf
 
 # This one has no area names
 fn = paste(extdata_dir, "Psychotria_geog_noAreaNames.data", sep="")
-tmpdf = read_PHYLIP_data(lgdata_fn=fn, regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
-tmpdf	# Note that regionnames are only used if they are NOT specified in the file.
+tmpdf = read_PHYLIP_data(lgdata_fn=fn,
+regionnames=c("Kauai", "Oahu", "Maui-Nui","Big Island"))
+tmpdf	# Note that regionnames are only
+# used if they are NOT specified in the file.
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

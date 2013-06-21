@@ -57,7 +57,9 @@
 }
 \examples{
 testval=1
-spmat_dimensions = size_species_matrix(states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), printwarn=1)
+spmat_dimensions = size_species_matrix(
+states_list=list("_", c("A"), c("B"), c("C"), c("A","B"),
+c("B","C"), c("A","C"), c("A","B","C")), printwarn=1)
 spmat_dimensions
 }
 \author{

@@ -23,7 +23,7 @@
   Go BEARS!
 }
 \examples{
-get_path_first("/Users/nickm/Library/R/2.15/library/BioGeoBEARS/extdata/Psychotria_geog.data")
+get_path_first("/Users/nickm/Library/Psychotria_geog.data")
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}
