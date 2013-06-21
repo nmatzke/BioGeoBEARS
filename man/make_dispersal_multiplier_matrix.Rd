@@ -3,7 +3,9 @@
 \title{Make a default matrix of relative dispersal probabilities between areas}
 \usage{
   make_dispersal_multiplier_matrix(areas = NULL,
-    states_list = list("_", c("A"), c("B"), c("C"), c("A", "B"), c("B", "C"), c("A", "C"), c("A", "B", "C")))
+    states_list = list("_", c("A"), c("B"), c("C"), c("A", "B"), c("B", "C"), c("A", "C"), c("A", "B", "C")),
+    dispersal_multipliers_matrix = NULL,
+    distances_mat = NULL, x_exponent = 0)
 }
 \arguments{
   \item{areas}{A list of areas; if \code{NULL}, the states
@@ -12,6 +14,12 @@
   \item{states_list}{A list of states, where each state
   consists of a list of areas. A default example list is
   provided.}
+
+  \item{dispersal_multipliers_matrix}{Default NULL.}
+
+  \item{distances_mat}{Default NULL.}
+
+  \item{x_exponent}{Default 0.}
 }
 \value{
   \code{dispersal_multiplier_matrix} A square matrix, with
@@ -23,6 +31,8 @@
   relative probability of dispersal between areas.  The
   function fills in these dispersals probabilities with the
   value 1.  The user can then modify this as desired.
+  dispersal_multipliers_matrix Default NULL distances_mat
+  Default NULL x_exponent Default 0
 }
 \details{
   If only a states list is given, the list of areas is
@@ -43,21 +53,9 @@ make_dispersal_multiplier_matrix(areas=c("A","B","C","D"))
 \references{
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 
-  Foster PG (2001). "The Idiot's Guide to the Zen of
-  Likelihood in a Nutshell in Seven Days for Dummies,
-  Unleashed." Online PDF, widely copied, <URL:
-  \url{http://www.bioinf.org/molsys/data/idiots.pdf}>.
+  FosterIdiots
 }
 \seealso{
   \code{\link{make_relprob_matrix_de}}

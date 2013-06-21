@@ -80,28 +80,11 @@ tip_condlikes_of_data_on_each_state
 \references{
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 
-  Ree RH and Smith SA (2008). "Maximum likelihood inference
-  of geographic range evolution by dispersal, local
-  extinction, and cladogenesis." _Systematic Biology_,
-  *57*(1), pp. 4-14. <URL:
-  http://dx.doi.org/10.1080/10635150701883881>, <URL:
-  http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Citation&list_uids=18253896>.
+  ReeSmith2008
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 
-  Felsenstein J (2004). _Inferring Phylogenies_. Sinauer
-  Associates, Sunderland, Massachusetts. ISBN 0878931775
-  (pbk.)/ISSN, <URL:
-  http://www.loc.gov/catdir/toc/ecip043/2003008942.html>.
+  Felsenstein2004
 }
 \seealso{
   \code{\link{define_tipranges_object}},

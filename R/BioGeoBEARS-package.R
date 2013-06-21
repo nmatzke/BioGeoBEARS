@@ -9,12 +9,12 @@
 #' LazyLoad: \tab yes\cr
 #' }
 #'
-#' This package performs model-based statistical inference for historical biogeography. This
+#' Summary: This package performs model-based statistical inference for historical biogeography. This
 #' includes inference of model parameters, ancestral states, and model comparison. Currently,
 #' the package performs ML (maximum-likelihood) based inference, but will soon be expanded
 #' to Bayesian analysis.
 #' 
-#' \bold{Details:} BioGeoBEARS allows probabilistic inference of both historical
+#' Details: BioGeoBEARS allows probabilistic inference of both historical
 #' biogeography (ancestral geographic ranges on a phylogeny) as well as
 #' comparison of different models of range evolution.  It reproduces
 #' the model available in LAGRANGE (Ree and Smith 2008), as well as

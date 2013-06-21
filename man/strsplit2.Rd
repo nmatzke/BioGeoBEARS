@@ -20,6 +20,8 @@
   process.
 }
 \examples{
+test=1
+
 # strsplit returns the results inside a list element
 out = strsplit("ABC", split="")
 out

@@ -126,26 +126,9 @@ title(paste("LAGRANGE 'default', mean val=", meanval, sep=""))
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
   \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
 
-  Harte J (2011). _Maximum entropy and ecology : a theory
-  of abundance, distribution, and energetics_, series
-  Oxford series in ecology and evolution. Oxford University
-  Press, Oxford ; New York. ISBN 9780199593415 0199593418
-  9780199593422 (pbk.) 0199593426 (pbk.)/ISSN, 2011284493
-  John Harte.. ill. ; 24 cm. Includes bibliographical
-  references (p. [244]-252) and index. Oxford series in
-  ecology and evolution., <URL:
-  http://socrates.berkeley.edu/~hartelab/MaxEnt.html>.
+  Harte2011
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 }
 \seealso{
   \code{\link{calcZ_part}}, \code{\link{calcP_n}},

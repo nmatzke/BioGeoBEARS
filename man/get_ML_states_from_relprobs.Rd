@@ -76,21 +76,9 @@ testval=1
   \url{http://blog.phytools.org/2013/03/marginal-ancestral-state-reconstruction.html}
   \url{https://code.google.com/p/lagrange/}
 
-  Felsenstein J (2004). _Inferring Phylogenies_. Sinauer
-  Associates, Sunderland, Massachusetts. ISBN 0878931775
-  (pbk.)/ISSN, <URL:
-  http://www.loc.gov/catdir/toc/ecip043/2003008942.html>.
+  Felsenstein2004
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 }
 \seealso{
   \code{\link{get_ML_state_indices}}

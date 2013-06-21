@@ -30,6 +30,8 @@
   Go BEARS!
 }
 \examples{
+test=1
+
 # Get the example files directory
 extdata_dir = system.file("extdata/", package="BioGeoBEARS")
 # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
@@ -59,30 +61,13 @@ bears_output
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
   \url{https://code.google.com/p/lagrange/}
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 
-  Ree RH and Smith SA (2008). "Maximum likelihood inference
-  of geographic range evolution by dispersal, local
-  extinction, and cladogenesis." _Systematic Biology_,
-  *57*(1), pp. 4-14. <URL:
-  http://dx.doi.org/10.1080/10635150701883881>, <URL:
-  http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Citation&list_uids=18253896>.
+  ReeSmith2008
 
-  Ree RH (2009). "Lagrange configurator (beta)." <URL:
-  http://www.reelab.net/lagrange/configurator/index>.
+  Ree2009configurator
 
-  Smith SA and Ree RH (2010). "lagrange: Likelihood
-  analysis of geographic range evolution." <URL:
-  https://code.google.com/p/lagrange/>.
+  SmithRee2010_CPPversion
 }
 \seealso{
   \code{\link[cladoRcpp]{numstates_from_numareas}},

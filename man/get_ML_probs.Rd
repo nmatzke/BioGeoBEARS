@@ -2,7 +2,7 @@
 \alias{get_ML_probs}
 \title{Get the probability of the ML state for each node, from a BioGeoBEARS model results list}
 \usage{
-  get_ML_probs(relprobs_matrix)
+  get_ML_probs(relprobs_matrix, unlist_TF = TRUE)
 }
 \arguments{
   \item{relprobs_matrix}{A relative probabilities matrix
@@ -14,6 +14,8 @@
   main thing of interest.)  This specification is done via
   e.g. \code{relprobs_matrix =
   results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..}
+
+  \item{unlist_TF}{Unlist the output? Default TRUE.}
 }
 \value{
   \code{inf_probsvec} The inferred vector of probabilities
@@ -48,16 +50,7 @@ testval=1
   \url{http://blog.phytools.org/2013/03/marginal-ancestral-state-reconstruction.html}
   \url{https://code.google.com/p/lagrange/}
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 }
 \seealso{
   \code{\link{get_ML_probs}},

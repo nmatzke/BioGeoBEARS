@@ -51,34 +51,13 @@ testval=1
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
   \url{https://code.google.com/p/lagrange/}
 
-  Huelsenbeck JP, Nielsen R and Bollback JP (2003).
-  "Stochastic Mapping of Morphological Characters."
-  _Systematic Biology_, *52*(2), pp. 131-158. <URL:
-  http://dx.doi.org/10.1080/10635150390192780>, <URL:
-  http://sysbio.oxfordjournals.org/content/52/2/131.abstract>.
+  Huelsenbeck_etal_2003_stochastic_mapping
 
-  Bollback J (2005). "Posterior Mapping and Posterior
-  Predictive Distributions." In series Statistics for
-  Biology and Health, chapter 16, pp. 439-462. Springer New
-  York. ISBN 978-0-387-22333-9/ISSN, <URL:
-  http://dx.doi.org/10.1007/0-387-27733-1_16>, <URL:
-  http://dx.doi.org/10.1007/0-387-27733-1_16>.
+  Bollback_2005
 
-  Bollback J (2006). "SIMMAP: Stochastic character mapping
-  of discrete traits on phylogenies." _BMC Bioinformatics_,
-  *7*(1), pp. 88. <URL:
-  http://www.biomedcentral.com/1471-2105/7/88>.
+  Bollback_2006_SIMMAP
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 }
 \seealso{
   \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOweights_faster}}

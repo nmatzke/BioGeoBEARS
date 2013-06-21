@@ -1,18 +1,3 @@
-@Article{Matzke_2012_IBS,
-  author = {Nicholas Matzke},
-  title = {Founder-event speciation in BioGeoBEARS package dramatically improves likelihoods and alters parameter inference in Dispersal-Extinction-Cladogenesis (DEC) analyses},
-  journal = {Frontiers of Biogeography},
-  publisher = {International Biogeography Society},
-  volume = {4},
-  number = {suppl. 1},
-  pages = {210},
-  month = {December, 2012},
-  note = {Poster abstract published in the Conference Program and Abstracts of the International Biogeography Society 6th Biannual Meeting, Miami, Florida. Poster Session P10: Historical and Paleo-Biogeography. Poster 129B. January 11, 2013},
-  url = {\url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}},
-  year = {2012},
-  issn = {1948-6596},
-}
-
 @Misc{FosterIdiots,
   author = {Peter G. Foster},
   title = {The Idiot's Guide to the Zen of Likelihood in a Nutshell in Seven Days for Dummies, Unleashed},
@@ -41,6 +26,21 @@ Likelihood Functions
   doi = {10.1080/10635150701883881},
   url = {http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Citation&list_uids=18253896},
   year = {2008},
+}
+
+@Article{Matzke_2012_IBS,
+  author = {Nicholas Matzke},
+  title = {Founder-event speciation in BioGeoBEARS package dramatically improves likelihoods and alters parameter inference in Dispersal-Extinction-Cladogenesis (DEC) analyses},
+  journal = {Frontiers of Biogeography},
+  publisher = {International Biogeography Society},
+  volume = {4},
+  number = {suppl. 1},
+  pages = {210},
+  month = {December, 2012},
+  note = {Poster abstract published in the Conference Program and Abstracts of the International Biogeography Society 6th Biannual Meeting, Miami, Florida. Poster Session P10: Historical and Paleo-Biogeography. Poster 129B. January 11, 2013},
+  url = {\url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}},
+  year = {2012},
+  issn = {1948-6596},
 }
 
 @Book{Felsenstein2004,
@@ -187,6 +187,15 @@ http://www.loc.gov/catdir/enhancements/fy0816/2001057677-t.html},
   year = {2002},
 }
 
+@Manual{LaplacesDemon_Tutorial,
+  author = {{Statisticat} and {LLC}},
+  year = {2012},
+  title = {LaplacesDemon Tutorial},
+  note = {R package version 12.11.05},
+  url = {http://cran.r-project.org/web/packages/LaplacesDemon/index.html},
+  publisher = {CRAN},
+}
+
 @Misc{Ree2009configurator,
   author = {Richard H. Ree},
   title = {Lagrange configurator (beta)},
@@ -196,6 +205,47 @@ http://www.loc.gov/catdir/enhancements/fy0816/2001057677-t.html},
   abstract = {This web application allows you to configure analyses that reconstruct geographic range evolution (ancestral areas, rates of disersal/range expansion and local extinction/range contraction) on phylogenetic trees using the program Lagrange.},
   url = {http://www.reelab.net/lagrange/configurator/index},
   year = {2009},
+}
+
+@Article{Sanderson_2003_r8s,
+  author = {Michael J. Sanderson},
+  title = {r8s: inferring absolute rates of molecular evolution and divergence times in the absence of a molecular clock},
+  journal = {Bioinformatics},
+  volume = {19},
+  number = {2},
+  pages = {301-302},
+  abstract = {Summary: Estimating divergence times and rates of substitution from sequence data is plagued by the problem of rate variation between lineages. R8s version 1.5 is a program which uses parametric, nonparametric and semiparametric methods to relax the assumption of constant rates of evolution to obtain better estimates of rates and times. Unlike most programs for rate inference or phylogenetics, r8s permits users to convert results to absolute rates and ages by constraining one or more node times to be fixed, minimum or maximum ages (using fossil or other evidence). Version 1.5 uses truncated Newton nonlinear optimization code with bound constraints, offering superior performance over previous versions.Results: Availability: The linux executable, C source code, sample data sets and user manual are available free at http://ginger.ucdavis.edu/r8s.Contact: mjsanderson@ucdavis.edu},
+  doi = {10.1093/bioinformatics/19.2.301},
+  url = {http://bioinformatics.oxfordjournals.org/content/19/2/301.abstract},
+  year = {2003},
+}
+
+@Misc{r8s,
+  author = {Mike Sanderson},
+  title = {r8s version 1.8, Analysis of rates of evolution},
+  publisher = {Mike Sanderson},
+  volume = {2012},
+  month = {November 15, 2012},
+  abstract = {This is a program for estimating absolute rates ({"}r8s{"}) of molecular evolution and divergence times on a phylogenetic tree. It implements several methods for estimating these parameters ranging from fairly standard maximum likelihood methods in the context of global or local molecular clocks to more experimental semiparametric and nonparametric methods that relax the stringency of the clock assumption using smoothing methods. Its starting point is a given phylogenetic tree and a given set of estimated branch lengths (numbers of substitutions along each branch). In addition one or more calibration points can be added to permit scaling of rates and times to real units. These calibrations can take one of two forms: assignment of a fixed age to a node, or enforcement of a minimum or maximum age constraint on a node, which is generally a better reflection of the information content of fossil evidence. Terminal nodes are permitted to occur at any point in time, allowing investigation of rate variation in phylogenies such as those obtained from {"}serial{"} samples of viral lineages through time. Finally, it is possible to assign all divergence times (perhaps based on outside estimates of divergence times) and examine molecular rate variation under several models of smoothing.  In version 1.8 I have added ancestral state reconstruction and model testing for several markov models of morphological evolution (see below). The program reads {"}NEXUS{"} formatted data files (Maddison et al. 1997).},
+  url = {http://loco.biosci.arizona.edu/r8s/},
+  year = {2012},
+}
+
+@Article{Marazzi_etal_Sanderson_2012_r8s_morph,
+  author = {Brigitte Marazzi and Cecile Ane and Marcelo F. Simon and Alfonso Delgado-Salinas and Melissa Luckow and Michael J. Sanderson},
+  title = {Locating evolutionary precursors on a phylogenetic tree},
+  journal = {Evolution},
+  volume = {66},
+  number = {12},
+  pages = {3918-3930},
+  abstract = {Conspicuous innovations in the history of life are often preceded by more cryptic genetic and developmental precursors. In many cases, these appear to be associated with recurring origins of very similar traits in close relatives (parallelisms) or striking convergences separated by deep time (deep homologies). Although the phylogenetic distribution of gain and loss of traits hints strongly at the existence of such precursors, no models of trait evolution currently permit inference about their location on a tree. Here we develop a new stochastic model, which explicitly captures the dependency implied by a precursor and permits estimation of precursor locations. We apply it to the evolution of extrafloral nectaries (EFNs), an ecologically significant trait mediating a widespread mutualism between plants and ants. In legumes, a species-rich clade with morphologically diverse EFNs, the precursor model fits the data on EFN occurrences significantly better than conventional models. The model generates explicit hypotheses about the phylogenetic location of hypothetical precursors, which may help guide future studies of molecular genetic pathways underlying nectary position, development, and function.},
+  keywords = {Deep homology
+extra-floral nectary
+homoplasy
+trait evolution},
+  doi = {10.1111/j.1558-5646.2012.01720.x},
+  url = {http://dx.doi.org/10.1111/j.1558-5646.2012.01720.x},
+  year = {2012},
 }
 
 @Article{Huelsenbeck_etal_2003_stochastic_mapping,

@@ -377,10 +377,50 @@ calc_prob_forward_onebranch_sparse <- function(relprobs_branch_bottom, branch_le
 
 
 
-
-
-
-
+#######################################################
+# check_if_state_is_allowed
+#######################################################
+#' Check if a geographic range/state is allowed, given an areas-allowed matrix.
+#' 
+#' If the user has specified a matrix stating which areas are allowed to be connected
+#' (and thus have a species with a range in both areas), this function checks if the 
+#' input list of areas (as a 0-based vector of areas) in a single state/geographic range
+#' is consistent with the areas-allowed matrix.
+#' 
+#' This function may be used by e.g. \code{\link[base]{apply}}.
+#' 
+#' @param state_0based_indexes The input state is a 0-based vector of area indices.
+#' @param areas_allowed_mat A matrix (number of areas x number of areas) with 1s indicating allowed 
+#' connections between areas, and 0s indicating disallowed connections.
+#' @return \code{TRUE} or \code{FALSE}
+#' @export
+#' @seealso \code{\link[base]{apply}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+check_if_state_is_allowed <- function(state_0based_indexes, areas_allowed_mat)
+	{
+	state_1based_indexes = state_0based_indexes + 1
+	tmp_numareas = length(state_1based_indexes)
+	
+	# Compare to areas_allowed_mat
+	first_area_1based_index = state_1based_indexes[1]
+	is_each_area_in_this_state_allowed = areas_allowed_mat[first_area_1based_index, state_1based_indexes]
+	
+	if (tmp_numareas == sum(is_each_area_in_this_state_allowed))
+		{
+		return(TRUE)	# This state/geographic range is allowed
+		} else {
+		return(FALSE)	# This state/geographic range is DISallowed
+		}
+	
+	return(stop("ERROR in check_if_state_is_allowed(): you shouldn't get here."))
+	}
 
 
 
@@ -457,6 +497,8 @@ calc_prob_forward_onebranch_sparse <- function(relprobs_branch_bottom, branch_le
 #' @param calc_ancprobs Should ancestral state estimation be performed (adds an uppass at the end).
 #' @param null_range_allowed Does the state space include the null range?
 #' Default is \code{NULL} which means running on a single processor.
+#' @param fixnode If the state at a particular node is going to be fixed (e.g. for ML marginal ancestral states), give the node number.
+#' @param fixlikes The state likelihoods to be used at the fixed node.  I.e. 1 for the fixed state, and 0 for the others.
 #' @return Return whatever is specified by \code{return_what}.
 #' @export
 #' @seealso \code{\link{calc_loglike_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOprobs}}, 
@@ -472,7 +514,7 @@ calc_prob_forward_onebranch_sparse <- function(relprobs_branch_bottom, branch_le
 #' @examples
 #' testval=1
 #'
-calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE)
+calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL)
 	{
 	defaults='
 	# Phylogeny
@@ -727,7 +769,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				# mcmapply
 				#library(parallel)
 				#independent_likelihoods_on_each_branch = mcmapply(FUN=expokit_dgpadm_Qmat, Qmat=list(Qmat), t=phy2$edge.length, transpose_needed=TRUE, SIMPLIFY="array", mc.cores=Ncores)
-				independent_likelihoods_on_each_branch = clusterApply(cl=cluster_already_open, x=phy2$edge.length, fun=expokit_dgpadm_Qmat2,Qmat=Qmat, transpose_needed=TRUE)
+				independent_likelihoods_on_each_branch = clusterApply(cl=cluster_already_open, x=phy2$edge.length, fun=expokit_dgpadm_Qmat2, Qmat=Qmat, transpose_needed=TRUE)
 				} else {
 				# Not parallel processing
 				#independent_likelihoods_on_each_branch = mapply(FUN=expokit_dgpadm_Qmat, Qmat=list(Qmat), t=phy2$edge.length, transpose_needed=TRUE, SIMPLIFY="array")
@@ -1167,6 +1209,22 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				node_likelihood_with_speciation = rowSums(outmat2)
 				
 				
+				#######################################################
+				# If the states/likelihood have been fixed at a particular node
+				#######################################################
+				if (!is.null(fixnode))
+					{
+					if (anc == fixnode)
+						{
+						# If the node is fixed, ignore the calculation for this node, and
+						# instead use the fixed likelihoods (i.e., the "known" state) for
+						# this node.
+						# fix the likelihoods of the (NON-NULL) states
+						node_likelihood_with_speciation = node_likelihood_with_speciation * fixlikes
+						}
+					}
+
+				
 				# THIS ZERO IS ALREADY OVER-WRITING THE NULL STATE LIKELIHOOD!!
 				
 				# Add the 0 back in, representing 0 probability of "_"
@@ -1243,6 +1301,23 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						
 						node_likelihood_with_speciation = rowSums(outmat2)
 						
+						
+						
+						#######################################################
+						# If the states/likelihood have been fixed at a particular node
+						#######################################################
+						if (!is.null(fixnode))
+							{
+							if (anc == fixnode)
+								{
+								# If the node is fixed, ignore the calculation for this node, and
+								# instead use the fixed likelihoods (i.e., the "known" state) for
+								# this node.
+								# fix the likelihoods of the (NON-NULL) states
+								node_likelihood_with_speciation = node_likelihood_with_speciation * fixlikes
+								}
+							}
+
 						
 						# THIS ZERO IS ALREADY OVER-WRITING THE NULL STATE LIKELIHOOD!!
 						
@@ -1336,6 +1411,22 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						node_likelihood_with_speciation3 = rcpp_calc_splitlikes_using_COOweights_columnar(Rcpp_leftprobs=tmpca_2, Rcpp_rightprobs=tmpcb_2, COO_weights_columnar=COO_weights_columnar, Rsp_rowsums=Rsp_rowsums, printmat=printmat)
 						#print(node_likelihood_with_speciation2[1:5])
 						node_likelihood_with_speciation = node_likelihood_with_speciation3
+						}
+
+					
+					#######################################################
+					# If the states/likelihood have been fixed at a particular node
+					#######################################################
+					if (!is.null(fixnode))
+						{
+						if (anc == fixnode)
+							{
+							# If the node is fixed, ignore the calculation for this node, and
+							# instead use the fixed likelihoods (i.e., the "known" state) for
+							# this node.
+							# fix the likelihoods of the (NON-NULL) states
+							node_likelihood_with_speciation = node_likelihood_with_speciation * fixlikes
+							}
 						}
 
 					
@@ -1877,6 +1968,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 #' \code{MakeCluster} from e.g. \code{library(parallel)} for some reason crash R.app.  The program runs a check for R.app and will just run on 1 node if found. 
 #' @param calc_ancprobs Should ancestral state estimation be performed (adds an uppass at the end).
 #' @param null_range_allowed Does the state space include the null range?#' @return Return whatever is specified by \code{return_what}.
+#' @param fixnode If the state at a particular node is going to be fixed (e.g. for ML marginal ancestral states), give the node number.
+#' @param fixlikes The state likelihoods to be used at the fixed node.  I.e. 1 for the fixed state, and 0 for the others.
 #' @export
 #' @seealso \code{\link{calc_loglike_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOprobs}}, 
 #' \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOweights_faster}}, \code{\link[rexpokit]{mat2coo}}, 

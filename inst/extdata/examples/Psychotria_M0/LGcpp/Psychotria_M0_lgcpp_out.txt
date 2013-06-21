@@ -1,0 +1,189 @@
+reading tree...
+Tree 1 has 19 leaves.
+reading data...
+Reading species: P_mariniana_Kokee2 1000
+Reading species: P_mariniana_Oahu 0100
+Reading species: P_mariniana_MauiNui 0010
+Reading species: P_hawaiiensis_Makaopuhi 0001
+Reading species: P_wawraeDL7428 1000
+Reading species: P_kaduana_PuuKukuiAS 0010
+Reading species: P_mauiensis_PepeAS 0010
+Reading species: P_hawaiiensis_WaikamoiL1 0010
+Reading species: P_mauiensis_Eke 0010
+Reading species: P_fauriei2 0100
+Reading species: P_hathewayi_1 0100
+Reading species: P_kaduana_HawaiiLoa 0100
+Reading species: P_greenwelliae07 1000
+Reading species: P_greenwelliae907 1000
+Reading species: P_grandiflora_Kal2 1000
+Reading species: P_hobdyi_Kuia 1000
+Reading species: P_hexandra_K1 1000
+Reading species: P_hexandra_M 1000
+Reading species: P_hexandra_Oahu 0100
+checking data...
+initializing nodes...
+initializing branch segments...
+setting default model...
+setting up tips...
+starting likelihood calculations
+initial -ln likelihood: 36.8714
+Optimizing (simplex) -ln likelihood.
+dis: 0.0350117 ext: 0.0282904
+final -ln likelihood: 34.542
+Ancestral splits for:	1
+	M|M	0.98823	(34.5538)
+
+Ancestral states for:	1
+	M	0.98823	(34.5538)
+
+Ancestral splits for:	2
+	O|O	0.982444	(34.5597)
+
+Ancestral states for:	2
+	O	0.982444	(34.5597)
+
+Ancestral splits for:	3
+	M|O	0.931822	(34.6126)
+
+Ancestral states for:	3
+	O_M	0.980038	(34.5621)
+
+Ancestral splits for:	4
+	M|M	0.999563	(34.5424)
+
+Ancestral states for:	4
+	M	0.999563	(34.5424)
+
+Ancestral splits for:	5
+	O_M|M	0.946399	(34.5971)
+
+Ancestral states for:	5
+	O_M	0.955127	(34.5879)
+
+Ancestral splits for:	6
+	O_M|O	0.515682	(35.2042)
+	O|O	0.416161	(35.4187)
+
+Ancestral states for:	6
+	O_M	0.549586	(35.1406)
+	O	0.416161	(35.4187)
+
+Ancestral splits for:	7
+	K|K	0.990151	(34.5519)
+
+Ancestral states for:	7
+	K	0.990151	(34.5519)
+
+Ancestral splits for:	8
+	O|K	0.446944	(35.3473)
+	O_M|K	0.413913	(35.4241)
+	M|K	0.0635359	(37.2981)
+
+Ancestral states for:	8
+	K_O	0.480417	(35.2751)
+	K_O_M	0.425713	(35.396)
+	K_M	0.0699342	(37.2022)
+
+Ancestral splits for:	9
+	M|H	0.486618	(35.2622)
+	M|M	0.0689254	(37.2167)
+	H|H	0.0671787	(37.2424)
+
+Ancestral states for:	9
+	M_H	0.538402	(35.1611)
+	K_M_H	0.0811531	(37.0534)
+
+Ancestral splits for:	10
+	M_H|O	0.16234	(36.36)
+	M|O	0.116031	(36.6959)
+	H|O	0.112483	(36.7269)
+	O|O	0.095075	(36.8951)
+	K|K	0.079093	(37.0791)
+	M|M	0.0545041	(37.4514)
+	H|H	0.052816	(37.4829)
+	K|O	0.048019	(37.5781)
+	M|K	0.0283106	(38.1065)
+	H|K	0.0280619	(38.1153)
+
+Ancestral states for:	10
+	O_M_H	0.174998	(36.2849)
+	O_M	0.142277	(36.4919)
+	O_H	0.137926	(36.523)
+	O	0.095075	(36.8951)
+	K	0.079093	(37.0791)
+	K_O	0.0662898	(37.2557)
+	M	0.0545041	(37.4514)
+	H	0.052816	(37.4829)
+	K_M	0.0413575	(37.7275)
+	K_H	0.0409942	(37.7363)
+	K_O_M	0.0321924	(37.978)
+	K_O_H	0.0316803	(37.994)
+
+Ancestral splits for:	11
+	K|K	0.221002	(36.0516)
+	O|K	0.145336	(36.4707)
+	O_M_H|K	0.103501	(36.8101)
+	O_M|K	0.10046	(36.84)
+	O_H|K	0.0963403	(36.8818)
+	M|K	0.0847865	(37.0096)
+	H|K	0.0822123	(37.0404)
+	K_O|K	0.0324042	(37.9714)
+
+Ancestral states for:	11
+	K	0.221002	(36.0516)
+	K_O	0.189177	(36.207)
+	K_M	0.112554	(36.7263)
+	K_O_M	0.111695	(36.7339)
+	K_O_M_H	0.110042	(36.7489)
+	K_H	0.109137	(36.7571)
+	K_O_H	0.107115	(36.7758)
+	K_M_H	0.033549	(37.9367)
+
+Ancestral splits for:	12
+	K|K	0.634435	(34.997)
+	K_O|K	0.100058	(36.844)
+
+Ancestral states for:	12
+	K	0.634435	(34.997)
+	K_O	0.104353	(36.8019)
+
+Ancestral splits for:	13
+	K|K	0.671399	(34.9404)
+
+Ancestral states for:	13
+	K	0.671399	(34.9404)
+	K_O	0.134266	(36.5499)
+
+Ancestral splits for:	14
+	K|K	0.992332	(34.5497)
+
+Ancestral states for:	14
+	K	0.992332	(34.5497)
+
+Ancestral splits for:	15
+	K|K	0.800718	(34.7642)
+
+Ancestral states for:	15
+	K	0.800718	(34.7642)
+
+Ancestral splits for:	16
+	K|K	0.968912	(34.5736)
+
+Ancestral states for:	16
+	K	0.968912	(34.5736)
+
+Ancestral splits for:	17
+	K|O	0.773252	(34.7991)
+
+Ancestral states for:	17
+	K_O	0.856548	(34.6968)
+
+Ancestral splits for:	18
+	K|K_O	0.41217	(35.4283)
+	K|K	0.278394	(35.8207)
+
+Ancestral states for:	18
+	K_O	0.516739	(35.2022)
+	K	0.278394	(35.8207)
+	K_O_M	0.0730309	(37.1588)
+

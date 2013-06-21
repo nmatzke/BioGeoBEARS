@@ -1,0 +1,2859 @@
+library(LaplacesDemon)#
+library(BioGeoBEARS)
+logit
+sourcedir = '/Dropbox/_njm/'#
+source3 = '_R_tree_functions_v1.R'#
+source(paste(sourcedir, source3, sep=""))#
+#
+tr = read.tree(trfn)#
+attr(tr,"order")
+library(LaplacesDemon)
+interval
+?mapply
+0 + 5*dlogis(x=-10, location=-10, scale=)
+?GIV
+dinvlogis
+?LaplacesDemon
+LaplacesDemon
+ESS
+acf
+?acf
+?ESS
+Posterior1 is the thinned samples, including everything#
+	LIV = length(Fit$Initial.Values)#
+	thinned = Fit$Posterior1#
+	# ESS = estimated sample size#
+	ESS1 <- Rec.Thin <- rep(1, LIV)#
+	for (j in 1:LIV)#
+		{#
+		temp0 <- acf(thinned[, j], lag.max = nrow(acf.temp), plot = FALSE)#
+		acf.temp[, j] <- abs(temp0$acf[2:{nrow(acf.temp) + 1}, , 1])#
+		ESS1[j] <- ESS(thinned[, j])#
+		Rec.Thin[j] <- which(acf.temp[, j] <= 0.1)[1] * Thinning#
+		}#
+	Summ1 <- matrix(NA, LIV, 7, dimnames = list(Data$parm.names, #
+	c("Mean", "SD", "MCSE", "ESS", "LB", "Median", "UB")))#
+    Summ1[, 1] <- colMeans(thinned)#
+    Summ1[, 2] <- apply(thinned, 2, sd)#
+    Summ1[, 3] <- 0#
+    Summ1[, 4] <- ESS1#
+    Summ1[, 5] <- apply(thinned, 2, quantile, c(0.025), na.rm = TRUE)#
+    Summ1[, 6] <- apply(thinned, 2, quantile, c(0.5), na.rm = TRUE)#
+    Summ1[, 7] <- apply(thinned, 2, quantile, c(0.975), na.rm = TRUE)
+Summ1 <- matrix(NA, LIV, 7, dimnames = list(MyData$parm.names, #
+	c("Mean", "SD", "MCSE", "ESS", "LB", "Median", "UB")))
+LIV = length(Fit$Initial.Values)#
+	thinned = Fit$Posterior1#
+	# ESS = estimated sample size#
+	ESS1 <- Rec.Thin <- rep(1, LIV)#
+	for (j in 1:LIV)#
+		{#
+		temp0 <- acf(thinned[, j], lag.max = nrow(acf.temp), plot = FALSE)#
+		acf.temp[, j] <- abs(temp0$acf[2:{nrow(acf.temp) + 1}, , 1])#
+		ESS1[j] <- ESS(thinned[, j])#
+		Rec.Thin[j] <- which(acf.temp[, j] <= 0.1)[1] * Thinning#
+		}
+LIV = length(Fit$Initial.Values)
+invtransform_with_logistic <- function(transformed_paramval, minval=0, maxval=1)#
+	{#
+	# transformed_paramval = minval + maxval * (exp(paramval) / (exp(paramval) + 1))#
+	# (paramval-minval)/maxval = (exp(transformed_paramval) / (exp(transformed_paramval) + 1))#
+	# log((paramval-minval)/maxval) = log(exp(transformed_paramval)) - log((exp(transformed_paramval) + 1))#
+	# log((paramval-minval)/maxval) = transformed_paramval - (transformed_paramval - 1)#
+	# log((paramval-minval)/maxval) = transformed_paramval#
+#
+	# Error check (as in logit())#
+    if ({#
+        any(transformed_paramval < minval)#
+    } || {#
+        any(transformed_paramval > maxval)#
+    }) #
+        stop("transformed_paramval must be in [minval, maxval].")#
+	# Value must be between 0 and 1#
+	val01 = (transformed_paramval-minval)/maxval#
+	paramval = log(val01 / (1-val01))#
+	return(paramval)#
+	}#
+# Re-parameterize output#
+reparam_LapDem_output <- function(Fit, MyData, transfun=transform_with_logistic)#
+	{#
+	require(LaplacesDemon)#
+	# Safety#
+	origFit = Fit#
+	# Get the data#
+	BioGeoBEARS_model_object = MyData$BioGeoBEARS_model_object#
+	params_table = BioGeoBEARS_model_object@params_table#
+	freeTF = params_table$type == "free"#
+	for (i in 1:ncol(Fit$Posterior1))#
+		{#
+		minval = params_table$min[freeTF][i]#
+		maxval = params_table$max[freeTF][i]#
+		########################################################
+		# Posterior1#
+		########################################################
+		# Mark the 0.0s#
+		zerosTF = Fit$Posterior1[, i] == 0.0#
+		# Change the rest to regularspace#
+		Fit$Posterior1[, i] = transfun(paramval=Fit$Posterior1[, i], minval, maxval)#
+		# Convert 0.0s back to 0.0#
+		Fit$Posterior1[zerosTF, i] = 0.0#
+		########################################################
+		# Posterior2#
+		########################################################
+		if ( !is.null(nrow(Fit$Posterior2)) && (nrow(Fit$Posterior2) >= 1)) #
+			{#
+			# Mark the 0.0s#
+			zerosTF = Fit$Posterior2[, i] == 0.0#
+			# Change the rest to regularspace#
+			Fit$Posterior2[, i] = transfun(paramval=Fit$Posterior2[, i], minval, maxval)#
+			# Convert 0.0s back to 0.0#
+			Fit$Posterior2[zerosTF, i] = 0.0#
+			} else {#
+			# If it's 1 row...#
+			for (j in 1:length(Fit$Posterior2))#
+				{#
+				zerosTF = Fit$Posterior2[i] == 0.0#
+				# Change the rest to regularspace#
+				Fit$Posterior2[i] = transfun(paramval=Fit$Posterior2[i], minval, maxval)#
+				# Convert 0.0s back to 0.0#
+				if (zerosTF == TRUE)#
+					{#
+					Fit$Posterior2[i] = 0.0#
+					}#
+				}#
+			}#
+	}#
+	########################################################
+	# Re-do the summary, from the parameter-space posterior sample#
+	########################################################
+	########################################################
+	# re-do the summary, copying from LaplacesDemon()#
+	########################################################
+	# Posterior1 is the thinned samples, including everything#
+	LIV = length(Fit$Initial.Values)#
+	thinned = Fit$Posterior1#
+	thinned.rows <- nrow(thinned)#
+	Thinning = Fit$Thinning#
+    Dev <- Fit$Deviance#
+    Mon <- Fit$Monitor#
+    Num.Mon <- ncol(Mon)#
+	thinned2 = Fit$Posterior2#
+	if ( !is.null(nrow(thinned2)) && (nrow(thinned2) >= 1)) #
+		{#
+		HD <- BMK.Diagnostic(thinned2, batches = 10)#
+		Ind <- 1 * (HD > 0.5)#
+		BurnIn <- thinned.rows#
+		batch.list <- seq(from = 1, to = nrow(thinned2), by = floor(nrow(thinned2)/10))#
+		for (i in 1:9) #
+			{#
+			if (sum(Ind[, i:9]) == 0)#
+				{#
+				BurnIn <- batch.list[i] - 1#
+				break#
+				}#
+			}#
+		Stat.at <- BurnIn + 1#
+		rm(batch.list, HD, Ind, thinned2)#
+    	}#
+    cat("Assessing Thinning and ESS\n")#
+    acf.temp <- matrix(1, trunc(10 * log10(thinned.rows)), LIV)#
+    ESS1 <- Rec.Thin <- rep(1, LIV)#
+    for (j in 1:LIV) {#
+        temp0 <- acf(thinned[, j], lag.max = nrow(acf.temp), #
+            plot = FALSE)#
+        acf.temp[, j] <- abs(temp0$acf[2:{#
+            nrow(acf.temp) + 1#
+        }, , 1])#
+        ESS1[j] <- ESS(thinned[, j])#
+        Rec.Thin[j] <- which(acf.temp[, j] <= 0.1)[1] * Thinning#
+    }#
+    Rec.Thin <- ifelse(is.na(Rec.Thin), nrow(acf.temp), Rec.Thin)#
+    ESS2 <- ESS(Dev)#
+    ESS3 <- ESS(Mon)#
+	if ( !is.null(nrow(thinned2)) && (nrow(thinned2) >= 1)) #
+		{#
+		if (Stat.at < thinned.rows)#
+			{#
+			ESS4 <- ESS(thinned[Stat.at:thinned.rows, ])#
+			ESS5 <- ESS(Dev[Stat.at:thinned.rows, ])#
+			ESS6 <- ESS(Mon[Stat.at:thinned.rows, ])#
+		    }#
+		}#
+    cat("Creating Summaries\n")#
+    Num.Mon <- ncol(Mon)#
+    Summ1 <- matrix(NA, LIV, 7, dimnames = list(MyData$parm.names, #
+        c("Mean", "SD", "MCSE", "ESS", "LB", "Median", "UB")))#
+    Summ1[, 1] <- colMeans(thinned)#
+    Summ1[, 2] <- apply(thinned, 2, sd)#
+    Summ1[, 3] <- 0#
+    Summ1[, 4] <- ESS1#
+    Summ1[, 5] <- apply(thinned, 2, quantile, c(0.025), na.rm = TRUE)#
+    Summ1[, 6] <- apply(thinned, 2, quantile, c(0.5), na.rm = TRUE)#
+    Summ1[, 7] <- apply(thinned, 2, quantile, c(0.975), na.rm = TRUE)#
+    for (i in 1:ncol(thinned)) {#
+        temp <- try(MCSE(thinned[, i]), silent = TRUE)#
+        if (!inherits(temp, "try-error")) #
+            Summ1[i, 3] <- temp#
+        else Summ1[i, 3] <- MCSE(thinned[, i], method = "sample.variance")#
+    }#
+    Deviance <- rep(NA, 7)#
+    Deviance[1] <- mean(Dev)#
+    Deviance[2] <- sd(as.vector(Dev))#
+    temp <- try(MCSE(as.vector(Dev)), silent = TRUE)#
+    if (inherits(temp, "try-error")) #
+        temp <- MCSE(as.vector(Dev), method = "sample.variance")#
+    Deviance[3] <- temp#
+    Deviance[4] <- ESS2#
+    Deviance[5] <- as.numeric(quantile(Dev, probs = 0.025, na.rm = TRUE))#
+    Deviance[6] <- as.numeric(quantile(Dev, probs = 0.5, na.rm = TRUE))#
+    Deviance[7] <- as.numeric(quantile(Dev, probs = 0.975, na.rm = TRUE))#
+    Summ1 <- rbind(Summ1, Deviance)#
+    for (j in 1:Num.Mon) {#
+        Monitor <- rep(NA, 7)#
+        Monitor[1] <- mean(Mon[, j])#
+        Monitor[2] <- sd(as.vector(Mon[, j]))#
+        temp <- try(MCSE(as.vector(Mon[, j])), silent = TRUE)#
+        if (inherits(temp, "try-error")) #
+            temp <- MCSE(Mon[, j], method = "sample.variance")#
+        Monitor[3] <- temp#
+        Monitor[4] <- ESS3[j]#
+        Monitor[5] <- as.numeric(quantile(Mon[, j], probs = 0.025, #
+            na.rm = TRUE))#
+        Monitor[6] <- as.numeric(quantile(Mon[, j], probs = 0.5, #
+            na.rm = TRUE))#
+        Monitor[7] <- as.numeric(quantile(Mon[, j], probs = 0.975, #
+            na.rm = TRUE))#
+        Summ1 <- rbind(Summ1, Monitor)#
+        rownames(Summ1)[nrow(Summ1)] <- MyData$mon.names[j]#
+    }#
+	if ( !is.null(nrow(thinned2)) && (nrow(thinned2) >= 1)) #
+		{#
+#
+		Summ2 <- matrix(NA, LIV, 7, dimnames = list(MyData$parm.names, #
+			c("Mean", "SD", "MCSE", "ESS", "LB", "Median", "UB")))#
+		if (Stat.at < thinned.rows)#
+			{#
+			thinned2 <- matrix(thinned[Stat.at:thinned.rows, ], thinned.rows - #
+				Stat.at + 1, ncol(thinned))#
+			Dev2 <- matrix(Dev[Stat.at:thinned.rows, ], thinned.rows - #
+				Stat.at + 1, ncol(Dev))#
+			Mon2 <- matrix(Mon[Stat.at:thinned.rows, ], thinned.rows - #
+				Stat.at + 1, ncol(Mon))#
+			Summ2[, 1] <- colMeans(thinned2)#
+			Summ2[, 2] <- apply(thinned2, 2, sd)#
+			Summ2[, 3] <- 0#
+			Summ2[, 4] <- ESS4#
+			Summ2[, 5] <- apply(thinned2, 2, quantile, c(0.025), #
+				na.rm = TRUE)#
+			Summ2[, 6] <- apply(thinned2, 2, quantile, c(0.5), na.rm = TRUE)#
+			Summ2[, 7] <- apply(thinned2, 2, quantile, c(0.975), #
+				na.rm = TRUE)#
+			for (i in 1:ncol(thinned2))#
+				{#
+				temp <- try(MCSE(thinned2[, i]), silent = TRUE)#
+				if (!inherits(temp, "try-error")) #
+					Summ2[i, 3] <- temp#
+				else Summ2[i, 3] <- MCSE(thinned2[, i], method = "sample.variance")#
+				}#
+			Deviance <- rep(NA, 7)#
+			Deviance[1] <- mean(Dev2)#
+			Deviance[2] <- sd(as.vector(Dev2))#
+			temp <- try(MCSE(as.vector(Dev2)), silent = TRUE)#
+			if (inherits(temp, "try-error")) #
+				temp <- MCSE(as.vector(Dev2), method = "sample.variance")#
+			Deviance[3] <- temp#
+			Deviance[4] <- ESS5#
+			Deviance[5] <- as.numeric(quantile(Dev2, probs = 0.025, #
+				na.rm = TRUE))#
+			Deviance[6] <- as.numeric(quantile(Dev2, probs = 0.5, #
+				na.rm = TRUE))#
+			Deviance[7] <- as.numeric(quantile(Dev2, probs = 0.975, #
+				na.rm = TRUE))#
+			Summ2 <- rbind(Summ2, Deviance)#
+			for (j in 1:Num.Mon)#
+				{#
+				Monitor <- rep(NA, 7)#
+				Monitor[1] <- mean(Mon2[, j])#
+				Monitor[2] <- sd(as.vector(Mon2[, j]))#
+				temp <- try(MCSE(as.vector(Mon[, j])), silent = TRUE)#
+				if (inherits(temp, "try-error")) #
+					temp <- MCSE(as.vector(Mon[, j]), method = "sample.variance")#
+				Monitor[3] <- temp#
+				Monitor[4] <- ESS6[j]#
+				Monitor[5] <- as.numeric(quantile(Mon2[, j], probs = 0.025, #
+					na.rm = TRUE))#
+				Monitor[6] <- as.numeric(quantile(Mon2[, j], probs = 0.5, #
+					na.rm = TRUE))#
+				Monitor[7] <- as.numeric(quantile(Mon2[, j], probs = 0.975, #
+					na.rm = TRUE))#
+				Summ2 <- rbind(Summ2, Monitor)#
+				rownames(Summ2)[nrow(Summ2)] <- MyData$mon.names[j]#
+				}#
+			}#
+		Fit$Summary2 = Summ2#
+    	}#
+    Fit$Summary1 = Summ1#
+    ########################################################
+	# Find out how much of each parameter equals 0.0#
+	########################################################
+	zeros_TF = Fit$Posterior1 == 0.0#
+	Posterior1_iszero = colSums(zeros_TF) / nrow(Fit$Posterior1)#
+	Fit$Posterior1_iszero = Posterior1_iszero#
+	if ( !is.null(nrow(Fit$Posterior2)) && (nrow(Fit$Posterior2) >= 1)) #
+		{#
+		zeros_TF = Fit$Posterior2 == 0.0#
+		Posterior2_iszero = colSums(zeros_TF) / nrow(Fit$Posterior2)#
+	    Fit$Posterior2_iszero = Posterior2_iszero#
+		}#
+    return(Fit)#
+	}
+Fit
+?LaplacesDemon
+LaplacesDemon
+?BayesFactor
+library(LaplacesDemon)#
+library(BioGeoBEARS)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_univ_model_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_readwrite_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)
+Load the 2-parameter model#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/2_ReParam_RWM_logistic.Rdata")#
+#
+oldFit = Fit#
+Fit = reparam_LapDem_output(oldFit, MyData)#
+Fit#
+Fit$DIC1#
+Fit$DIC2#
+Fit$Posterior1_iszero#
+Fit$Posterior2_iszero#
+#
+Fit_2param = Fit#
+# Load the 3-parameter model#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/3_ReParam_RWM_logistic.Rdata")#
+#
+oldFit = Fit#
+Fit = reparam_LapDem_output(oldFit, MyData)#
+Fit#
+Fit$DIC1#
+Fit$DIC2#
+Fit$Posterior1_iszero#
+Fit$Posterior2_iszero#
+#
+Fit_3param = Fit
+Load the 2-parameter model#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/2_ReParam_RWM_logistic.Rdata")#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/2_ReParam_RWM_logistic.MyData")#
+#
+oldFit = Fit#
+Fit = reparam_LapDem_output(oldFit, MyData)#
+Fit#
+Fit$DIC1#
+Fit$DIC2#
+Fit$Posterior1_iszero#
+Fit$Posterior2_iszero#
+#
+Fit_2param = Fit#
+# Load the 3-parameter model#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/3_ReParam_RWM_logistic.Rdata")#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/3_ReParam_RWM_logistic.MyData")#
+#
+oldFit = Fit#
+Fit = reparam_LapDem_output(oldFit, MyData)#
+Fit#
+Fit$DIC1#
+Fit$DIC2#
+Fit$Posterior1_iszero#
+Fit$Posterior2_iszero#
+#
+Fit_3param = Fit
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)
+Load the 2-parameter model#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/2_ReParam_RWM_logistic.Rdata")#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/2_ReParam_RWM_logistic.MyData")#
+#
+oldFit = Fit#
+Fit = reparam_LapDem_output(oldFit, MyData)#
+Fit#
+Fit$DIC1#
+Fit$DIC2#
+Fit$Posterior1_iszero#
+Fit$Posterior2_iszero#
+#
+Fit_2param = Fit#
+# Load the 3-parameter model#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/3_ReParam_RWM_logistic.Rdata")#
+load(file="/Dropbox/_njm/__packages/BioGeoBEARS_setup/_examples/3_ReParam_RWM_logistic.MyData")#
+#
+oldFit = Fit#
+Fit = reparam_LapDem_output(oldFit, MyData)#
+Fit#
+Fit$DIC1#
+Fit$DIC2#
+Fit$Posterior1_iszero#
+Fit$Posterior2_iszero#
+#
+Fit_3param = Fit
+Fit_3param
+?BayesFactor
+BayesFactor(x=list(Fit_2param, Fit_3param))#
+BayesFactor(x=list(Fit_3param, Fit_2param))
+Fit_3param$LML
+names(Fit_3param)
+Lap
+asdf
+LaplacesDemon
+GIV
+plot.LaplacesDemon
+?plot(x=Fit, Data=MyData, PDF=TRUE, Parms=NULL)
+?LaplacesDemon
+plot.laplace
+LaplacesDemon:::#
+plot.laplace
+LaplacesDemon:::plot.laplace
+Fit_3param$Posterior1
+head(Fit_3param$Posterior1)
+names(Fit_3param$Posterior1)
+names(Fit_3param)
+Fit_3param$Monitor
+head(Fit_3param$Monitor)
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=NULL, LL=Fit_2param$Monitor$LmL, method="NSIS")#
+LML_2param
+Fit_2param$Monitor
+Fit_2param@Monitor
+Fit_2param$Monitor
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=NULL, LL=Fit_2param$Monitor[,"LmL"], method="NSIS")#
+LML_2param
+Fit_2param$Monitor[,"LmL"]
+x=Fit_2param$Monitor
+class(x)
+names(x)
+x
+head(x)
+colnames(x)
+x[,"LnL"]
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=NULL, LL=Fit_2param$Monitor[,"LnL"], method="NSIS")#
+LML_2param#
+LML_3param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=NULL, LL=Fit_3param$Monitor[,"LnL"], method="NSIS")#
+LML_3param
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_2param$Posterior1, LL=Fit_2param$Monitor[,"LnL"], method="NSIS")#
+LML_2param
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+nums = burnin:numsamps
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+nums = burnin:numsamps#
+#
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_2param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_2param#
+LML_3param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_3param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_3param
+seq
+?seq
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+numthinned = 500#
+nums = seq(from=burnin, to=numsamps, length.out=numthinned)#
+nums
+numsamps
+nums = seq(from=burnin, to=numsamps, length.out=numthinned, round)#
+nums
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+numthinned = 500#
+nums = round(seq(from=burnin, to=numsamps, length.out=numthinned))#
+nums
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_2param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_2param#
+LML_3param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_3param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_3param
+Cut out the burnin#
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+numthinned = 500#
+nums = round(seq(from=burnin, to=numsamps, length.out=numthinned))#
+nums#
+#
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_2param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_2param#
+LML_2param$LML = LML_2param#
+#
+LML_3param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_3param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_3param#
+LML_3param$LML = LML_3param#
+BayesFactor(x=list(Fit_2param, Fit_3param))#
+BayesFactor(x=list(Fit_3param, Fit_2param))
+Get the LMLs #
+# (LML = Log-Marginal Likelihood)#
+#  At least 301 stationary samples are required, and the number of parameters#
+# cannot exceed half the number of stationary samples.#
+#
+# Cut out the burnin#
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+numthinned = 500#
+nums = round(seq(from=burnin, to=numsamps, length.out=numthinned))#
+nums#
+#
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_2param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_2param#
+Fit_2param$LML = LML_2param#
+#
+LML_3param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_3param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_3param#
+Fit_3param$LML = LML_3param#
+BayesFactor(x=list(Fit_2param, Fit_3param))#
+BayesFactor(x=list(Fit_3param, Fit_2param))
+LML
+?is.proper
+BayesFactor
+class(Fit_2param)
+BayesFactor(x=list(Fit_2param, Fit_3param))
+x=list(Fit_2param, Fit_3param)
+x=1
+j=1
+x[[i]]$LML - x[[j]]$LML
+x=list(Fit_2param, Fit_3param)
+i=1
+x=list(Fit_2param, Fit_3param)
+x[[i]]$LML - x[[j]]$LML
+x[[j]]$LML
+LML_3param
+LML_3param$LML
+Cut out the burnin#
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+numthinned = 500#
+nums = round(seq(from=burnin, to=numsamps, length.out=numthinned))#
+nums#
+#
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_2param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_2param#
+Fit_2param$LML = LML_2param$LML#
+#
+LML_3param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_3param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_3param#
+Fit_3param$LML = LML_3param$LML#
+BayesFactor(x=list(Fit_2param, Fit_3param))#
+BayesFactor(x=list(Fit_3param, Fit_2param))
+LML_2param
+Cut out the burnin#
+numsamps = nrow(Fit_2param$Posterior1)#
+burnin = 0.1 * numsamps#
+numthinned = 500#
+nums = round(seq(from=burnin, to=numsamps, length.out=numthinned))#
+nums#
+#
+LML_2param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_2param$Posterior1[nums,], LL=Fit_2param$Monitor[nums,"LnL"], method="NSIS")#
+LML_2param#
+Fit_2param$LML = LML_2param$LML#
+#
+LML_3param = LML(Model=NULL, Data=NULL, Modes=NULL, theta=Fit_3param$Posterior1[nums,], LL=Fit_3param$Monitor[nums,"LnL"], method="NSIS")#
+LML_3param#
+Fit_3param$LML = LML_3param$LML#
+BayesFactor(x=list(Fit_2param, Fit_3param))
+BayesFactor(x=list(Fit_3param, Fit_2param))
+Loading the packages#
+########################################################
+# After installing these packages, library() them#
+library(ape)		# R phylogenetics package#
+library(rexpokit)	# Matrix exponentiation package (by Matzke) using the FORTRAN library EXPOKIT#
+					# (by Robert Sidje) to do rapid matrix exponentiation; may require that you#
+					# have the FORTRAN compiler, gfortran, installed.#
+library(cladoRcpp)	# Package for rapid calculation of cladogenesis models (by Matzke) in C++ and Rcpp. #
+library(BioGeoBEARS)# Package using rexpokit & cladoRcpp to do model testing and ancestral range estimation#
+					# for historical biogeography (by Matzke)
+Set your:#
+# - working directory (wd)#
+# - your Newick phylogeny file#
+# - your geography data file#
+########################################################
+# working directory is currently default; you should change it here#
+wd = getwd()	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+#
+# Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)#
+trfn = paste(addslash(extdata_dir), "Psychotria_5.2.newick", sep="")#
+tr = read.tree(file=trfn)#
+#
+geogfn = paste(addslash(extdata_dir), "Psychotria_geog.data", sep="")#
+#
+# Look at the tree and ranges, for kicks#
+getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)#
+tr
+tr
+Run an ML search#
+########################################################
+#
+bears_output1 = bears_2param_standard_fast_symOnly(trfn=trfn, geogfn=geogfn)#
+bears_output1#
+bears_output1$optim_result#
+#
+#bears_output2 = bears_2param_standard_fast_symOnly_simp(trfn=trfn, geogfn=geogfn)#
+#bears_output2#
+#
+bears_output1$optim_result#
+bears_output2$optim_result#
+bears_output = bears_2param_standard_fast(trfn=trfn, geogfn=geogfn)#
+bears_output#
+#
+bears_output3 = bears_2param_DIVA_fast(trfn=trfn, geogfn=geogfn)#
+bears_output3#
+# Extract key parameters and LnL values#
+fn_name = "bears_2param_standard_fast"#
+tmp_params = get_infparams_optimx_nosim(bears_output, fn_name)#
+tmp_LnL = get_inf_LgL_etc_optimx(bears_output)#
+results_row = cbind(fn_name, t(tmp_params), tmp_LnL)#
+results_row
+Source code#
+########################################################
+library(LaplacesDemon)#
+library(BioGeoBEARS)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_basics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_generics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_univ_model_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_readwrite_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_models_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_LaplacesDemon_v1.R', chdir = TRUE)#
+#source('/Dropbox/_njm/_biogeog_sim_utils_v1.R', chdir = TRUE)#
+########################################################
+# File locations#
+########################################################
+# In package#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# development#
+extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+########################################################
+# Input files (tree and tipdata)#
+########################################################
+trfn = paste(addslash(extdata_dir), "Psychotria_5.2.newick", sep="")#
+tr = read.tree(trfn)#
+geogfn = paste(addslash(extdata_dir), "Psychotria_geog.data", sep="")#
+# Get ranges from geogfn#
+tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)#
+tipranges#
+########################################################
+# Do colors#
+########################################################
+# library(grDevices)#
+col2rgb(col="red", alpha=TRUE)	# alpha = opacity#
+col2rgb(col="red", alpha=FALSE)#
+#
+# Get colors, from blue to red#
+numareas = 3#
+#
+get_colors_for_numareas = function(numareas, use_rainbow=FALSE)#
+	{#
+	if (use_rainbow == TRUE)#
+		{#
+		area_colors = rainbow(numareas)#
+		colors_matrix = col2rgb(area_colors)#
+		return(colors_matrix)#
+		}#
+	if (numareas == 2)#
+		{#
+		area_colors = c("black", "white")#
+		}#
+	if (numareas == 3)#
+		{#
+		area_colors = c("blue", "green", "red")#
+		}#
+	if (numareas == 4)#
+		{#
+		area_colors = c("blue", "cyan", "yellow", "red")#
+		}#
+	if (numareas == 5)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red")#
+		}#
+	if (numareas == 6)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas > 7)#
+		{#
+		area_colors = col2rgb(rainbow(numareas))#
+		}#
+	colors_matrix = col2rgb(area_colors)#
+	return(colors_matrix)	#
+	}#
+#
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index)#
+	{#
+	colors_list_for_states = rep(NA, length(states_list))   #matrix(data=NA, nrow=3, ncol=length(states_list))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[,j]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = sum_color_nums / divide_by#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+plot(1:4,1:4) #
+lines(1:4,4:1, col="blue") #
+legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE)
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index)#
+	{#
+	colors_list_for_states = rep(NA, length(states_list))   #matrix(data=NA, nrow=3, ncol=length(states_list))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[,j]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = sum_color_nums / divide_by#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the def
+Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index)#
+colors_list_for_states
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index)#
+	{#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[,j]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = sum_color_nums / divide_by#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index)#
+colors_list_for_states
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt
+Make a legend:#
+plot(1:4,1:4) #
+lines(1:4,4:1, col="blue") #
+legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE)
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n)
+)
+""
+"
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n")
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="o")
+?par
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, col=colors_list_for_states, fill=TRUE)
+colors_list_for_states
+length(areastxt)
+legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE)
+?legend
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, fill=TRUE)
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+colors_matrix
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index)#
+colors_list_for_states
+colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)
+numareas
+tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)
+i=1
+tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)
+Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}
+i=2
+tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[,j]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}
+sum_color_nums
+if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}
+sum_color_nums = sum_color_nums / divide_by
+sum_color_nums
+colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}
+colors_list_for_states
+i=9
+colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)
+tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[,j]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)
+sum_color_nums
+colors_matrix
+sum_color_nums
+j=1
+tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[,j]
+color_nums
+tmparea_1based_index
+j
+color_numstmp_numareas
+tmp_numareas
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index)#
+	{#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+plot(1:4,1:4) #
+lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+rgb(red=0, green=0, blue=0, maxColorValue=255)
+col2rgb
+col2rgb(col="brown")
+rgb(col2rgb(col="brown"), maxColorValue=255)
+col2rgb(col="brown")
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index)#
+	{#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			colors_list_for_states[i] = col2rgb(col="white")#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+plot(1:4,1:4) #
+lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+colors_list_for_states
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index)#
+	{#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index)] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index)] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+states_list_0based_index
+states_list_0based_index[is.na(states_list_0based_index)] = NULL
+states_list_0based_index
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[states_list_0based_index == "NA"] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index)] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index)] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+colors_matrix
+rcpp_areas_list_to_states_list
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[states_list_0based_index == "NA"] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index)] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index)] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas, include_null_range=FALSE)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states)#, fill=TRUE)
+?legend
+Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, text.width=6)#, fill=TRUE)
+Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, ncol=4)#, fill=TRUE)
+Do colors#
+########################################################
+# library(grDevices)#
+col2rgb(col="red", alpha=TRUE)	# alpha = opacity#
+col2rgb(col="red", alpha=FALSE)#
+#
+# Get colors, from blue to red#
+numareas = 3#
+#
+get_colors_for_numareas = function(numareas, use_rainbow=FALSE)#
+	{#
+	if (use_rainbow == TRUE)#
+		{#
+		area_colors = rainbow(numareas)#
+		colors_matrix = col2rgb(area_colors)#
+		return(colors_matrix)#
+		}#
+	if (numareas == 2)#
+		{#
+		area_colors = c("black", "white")#
+		}#
+	if (numareas == 3)#
+		{#
+		area_colors = c("blue", "green", "red")#
+		}#
+	if (numareas == 4)#
+		{#
+		area_colors = c("blue", "green2", "yellow", "red")#
+		}#
+	if (numareas == 5)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red")#
+		}#
+	if (numareas == 6)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas > 7)#
+		{#
+		area_colors = col2rgb(rainbow(numareas))#
+		}#
+	colors_matrix = col2rgb(area_colors)#
+	return(colors_matrix)	#
+	}#
+#
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[states_list_0based_index == "NA"] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index)] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index)] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas, include_null_range=FALSE)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, ncol=4)#, fill=TRUE)
+Do colors#
+########################################################
+# library(grDevices)#
+col2rgb(col="red", alpha=TRUE)	# alpha = opacity#
+col2rgb(col="red", alpha=FALSE)#
+#
+# Get colors, from blue to red#
+numareas = 3#
+#
+get_colors_for_numareas = function(numareas, use_rainbow=FALSE)#
+	{#
+	if (use_rainbow == TRUE)#
+		{#
+		area_colors = rainbow(numareas)#
+		colors_matrix = col2rgb(area_colors)#
+		return(colors_matrix)#
+		}#
+	if (numareas == 2)#
+		{#
+		area_colors = c("black", "white")#
+		}#
+	if (numareas == 3)#
+		{#
+		area_colors = c("blue", "green", "red")#
+		}#
+	if (numareas == 4)#
+		{#
+		area_colors = c("blue", "green", "yellow", "red")#
+		}#
+	if (numareas == 5)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red")#
+		}#
+	if (numareas == 6)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas > 7)#
+		{#
+		area_colors = col2rgb(rainbow(numareas))#
+		}#
+	colors_matrix = col2rgb(area_colors)#
+	return(colors_matrix)	#
+	}#
+#
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[states_list_0based_index == "NA"] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index)] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index)] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas, include_null_range=FALSE)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, ncol=4)#, fill=TRUE)
+Do colors#
+########################################################
+# library(grDevices)#
+col2rgb(col="red", alpha=TRUE)	# alpha = opacity#
+col2rgb(col="red", alpha=FALSE)#
+#
+# Get colors, from blue to red#
+numareas = 3#
+#
+get_colors_for_numareas = function(numareas, use_rainbow=FALSE)#
+	{#
+	if (use_rainbow == TRUE)#
+		{#
+		area_colors = rainbow(numareas)#
+		colors_matrix = col2rgb(area_colors)#
+		return(colors_matrix)#
+		}#
+	if (numareas == 2)#
+		{#
+		area_colors = c("black", "white")#
+		}#
+	if (numareas == 3)#
+		{#
+		area_colors = c("blue", "green", "red")#
+		}#
+	if (numareas == 4)#
+		{#
+		area_colors = c("blue", "green3", "yellow", "red")#
+		}#
+	if (numareas == 5)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red")#
+		}#
+	if (numareas == 6)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas == 7)#
+		{#
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")#
+		}#
+	if (numareas > 7)#
+		{#
+		area_colors = col2rgb(rainbow(numareas))#
+		}#
+	colors_matrix = col2rgb(area_colors)#
+	return(colors_matrix)	#
+	}#
+#
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+	{#
+	if (exclude_null == TRUE)#
+		{#
+		states_list_0based_index[states_list_0based_index == "_"] = NULL#
+		states_list_0based_index[states_list_0based_index == ""] = NULL#
+		states_list_0based_index[states_list_0based_index == "NA"] = NULL#
+		states_list_0based_index[is.na(states_list_0based_index)] = NULL#
+		states_list_0based_index[is.null(states_list_0based_index)] = NULL#
+		}#
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))#
+	# There is a column for each single area#
+	numareas = ncol(colors_matrix)#
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)#
+	# (assures no duplication of colors)#
+	for (i in 1:length(states_list_0based_index))#
+		{#
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]#
+		tmp_numareas = length(tmpareas_in_state_0based_index)#
+		# Check for null etc.#
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))#
+			{#
+			# NULL/empty range gets black#
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)#
+			next()#
+			}#
+		# Fill in the colors for this area#
+		# Make it white, if its all areas#
+		if (tmp_numareas == numareas)#
+			{#
+			# input white#
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)#
+			next()#
+			}#
+		# Otherwise#
+		sum_color_nums = rep(0, 3)#
+		for (j in 1:tmp_numareas)#
+			{#
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]#
+			color_nums = colors_matrix[ ,tmparea_1based_index]#
+			sum_color_nums = sum_color_nums + color_nums#
+			}#
+		if (tmp_numareas >= 2)#
+			{#
+			divide_by = (tmp_numareas - 0.0)#
+			} else {#
+			divide_by = 1#
+			}#
+		sum_color_nums = round(sum_color_nums / divide_by)#
+		# Save the colors as hex format#
+		colors_list_for_states[i] = rgb(#
+			red=sum_color_nums[1], #
+			green=sum_color_nums[2], #
+			blue=sum_color_nums[3], #
+			maxColorValue=255)#
+		}#
+	return(colors_list_for_states)#
+	}#
+# Get the default areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas#
+#
+# Name the areas (Kauai, Oahu, Maui-Nui, Hawaii)#
+#areanames = c("K","O","M","H")#
+areanames = areas#
+#
+# Make states and state indices#
+states = areas_list_to_states_list_old(areas=areas)#
+states#
+states2 = rcpp_areas_list_to_states_list(areas=areas)#
+states2#
+#
+colors_matrix = get_colors_for_numareas(numareas=length(areas), use_rainbow=FALSE)#
+colors_matrix#
+#
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=areas, include_null_range=FALSE)#
+colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)#
+colors_list_for_states#
+#
+areastxt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")#
+areastxt#
+# Make a legend:#
+#plot(1:4,1:4) #
+#lines(1:4,4:1, col="blue") #
+#legend("top",leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, ncol=4)#, fill=TRUE)
+Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, ncol=4, title="Legend", cex=3)#, fill=TRUE)
+Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)#
+plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")#
+#lines(1:4,4:1, col="blue") #
+#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) #
+legend("top", leg=areastxt, fill=colors_list_for_states, ncol=2, title="Legend", cex=2.5)#, fill=TRUE)
+?nodelabels
+MLstates_txt_nodes
+tr2 = reorder(tr, "pruningwise")#
+plot(tr2, label.offset=0.15)#
+nodelabels(MLstates_txt_nodes, bg=rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates_txt_nodes))#
+tiplabels(MLstates_txt_tips, bg=rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates_txt_tips))#
+title("Best states based on downpass cond. likes. at branch tops with\nLAGRANGE 2-parameter model (not real inference)")
+Run a stratified analysis#
+########################################################
+library(BioGeoBEARS)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_generic_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_basics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_univ_model_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_readwrite_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_LaplacesDemon_v1.R', chdir = TRUE)#
+#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_stratified_v1.R', chdir = TRUE)#
+########################################################
+# Set up data#
+########################################################
+wd = getwd()	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+#
+# Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)#
+trfn = paste(addslash(extdata_dir), "Psychotria_5.2.newick", sep="")#
+tr = read.tree(file=trfn)#
+#
+geogfn = paste(addslash(extdata_dir), "Psychotria_geog.data", sep="")#
+#
+# Get geographic ranges at tips#
+tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)#
+#
+# Get the list of geographic areas#
+areas = getareas_from_tipranges_object(tipranges)#
+areas_list = seq(0, length(areas)-1, 1)		# 0-base indexes#
+#
+# Change the names to tipranges@df:#
+names(tipranges@df) = areas_list#
+#
+max_range_size = length(areas)#
+max_numareas = max_range_size#
+states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)#
+#
+force_sparse = FALSE#
+#
+tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy=tr, states_list=states_list, maxareas=max_numareas)#
+tip_condlikes_of_data_on_each_state#
+cluster_already_open = NULL#
+#
+# Look at the tree and ranges, for kicks#
+MyData = NULL#
+(MyData$tipranges = tipranges)#
+MyData$tr = tr#
+MyData$tip_condlikes_of_data_on_each_state = tip_condlikes_of_data_on_each_state#
+MyData$print_optim = TRUE#
+MyData$areas_list = areas_list#
+MyData$states_list = states_list#
+MyData$force_sparse = force_sparse#
+#
+num_cores_to_use = 4#
+#
+if (.Platform$GUI != "AQUA" && ((is.null(num_cores_to_use) == TRUE) || (num_cores_to_use > 1)) )#
+	{#
+	# We are doing manual, optional processing on several cores;#
+	# this seems to have less overhead/hassle/incompatibility issues#
+	# than using mcmapply, mclapply, etc...#
+	require("parallel") #<- do this higher up#
+#
+	num_cores_computer_has = detectCores()#
+	if (is.null(num_cores_to_use))#
+		{#
+		num_cores_to_use = num_cores_computer_has#
+		}#
+#
+	# Don't do this, if the cluster is already open#
+	cat("\nYour computer has ", num_cores_computer_has, " cores. You have chosen to use:\nnum_cores_to_use = ", num_cores_to_use, " cores for the matrix exponentiations in the likelihood calculations.\n", sep="")#
+#
+	cluster_already_open = makeCluster(rep("localhost",num_cores_to_use), type = "SOCK")#
+	cat("Started cluster with ", num_cores_to_use, " cores.\n\n", sep="")#
+	# Flag so that you remember to close cluster at the end#
+	cluster_open=TRUE#
+	} else {#
+	cluster_already_open = NULL#
+	}#
+#
+MyData$cluster_already_open = cluster_already_open#
+########################################################
+# Set up "Model" function, which will return ln(PP) given parameters and data#
+########################################################
+BioGeoBEARS_model_object = define_BioGeoBEARS_model_object()#
+BioGeoBEARS_model_object@params_table["j","type"] = "free"#
+BioGeoBEARS_model_object@params_table["j","init"] = 0.3#
+BioGeoBEARS_model_object@params_table["j","est"] = 0.3#
+#BioGeoBEARS_model_object@params_table["d","min"] = 0.0#
+#BioGeoBEARS_model_object@params_table["e","min"] = 0.0#
+BioGeoBEARS_model_object@params_table["j","min"] = 0.0#
+BioGeoBEARS_model_object@params_table["d","max"] = 5.0#
+BioGeoBEARS_model_object@params_table["e","max"] = 5.0#
+BioGeoBEARS_model_object@params_table["j","max"] = 1.0#
+BioGeoBEARS_model_object = calc_linked_params_BioGeoBEARS_model_object(BioGeoBEARS_model_object)#
+BioGeoBEARS_model_object#
+#
+MyData$BioGeoBEARS_model_object = BioGeoBEARS_model_object#
+#
+allparams = BioGeoBEARS_model_object_to_init_params(BioGeoBEARS_model_object)#
+allparams
+BioGeoBEARS_model_object
+library(BioGeoBEARS)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_generic_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_basics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_univ_model_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_readwrite_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_LaplacesDemon_v1.R', chdir = TRUE)#
+#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_stratified_v1.R', chdir = TRUE)#
+########################################################
+# Set up data#
+########################################################
+wd = getwd()	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+inputs = define_BioGeoBEARS_run()#
+inputs
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_generics_v1.R', chdir = TRUE)
+/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_timeperiods.txt
+times_fn = /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_timeperiods.txt
+times_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_timeperiods.txt"
+times_fn
+times_fn = inputs$times_fn#
+	timeperiods = read.table(times_fn)#
+	timeperiods
+times_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_timeperiods.txt"
+timeperiods = read.table(times_fn)#
+	timeperiods
+length(timeperiods)
+readLines(times_fn)
+readLines(times_fn)
+is.real(NA)
+is.double(NA)
+is.double(NULL)
+is.double(""")
+")
+is.double("a")
+is.character(NA)
+is.character(NULL)
+is.character(1234)
+distances_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_KOMH_distances.txt"
+tmplines = readLines(distances_fn)#
+	list_of_distances_mats = list()#
+	lnum = 0#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		}
+adf4
+adf3
+adf2
+unlist_df4
+read_distances_fn <- function(inputs)#
+	{#
+	defaults='#
+	distances_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_KOMH_distances.txt"#
+	'#
+	distances_fn = inputs$distances_fn#
+	tmplines = readLines(distances_fn)#
+	list_of_distances_mats = list()#
+	lnum = 1#
+	newmat = FALSE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			lnum = lnum + 1#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_distances_mats[[lnum]] = tmpmat#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], sep="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], sep="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	return(list_of_distances_mats)#
+	}
+tmplines = readLines(distances_fn)#
+	list_of_distances_mats = list()#
+	lnum = 1#
+	newmat = FALSE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			lnum = lnum + 1#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_distances_mats[[lnum]] = tmpmat#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], sep="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], sep="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_distances_mats
+?strsplit
+tmplines = readLines(distances_fn)#
+	list_of_distances_mats = list()#
+	lnum = 1#
+	newmat = FALSE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			lnum = lnum + 1#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_distances_mats[[lnum]] = tmpmat#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_distances_mats
+i
+tmplines = readLines(distances_fn)#
+	list_of_distances_mats = list()#
+	lnum = 1
+newmat = FALSE
+print(tmplines[i])
+tmplines = readLines(distances_fn)#
+	list_of_distances_mats = list()#
+	lnum = 1#
+	newmat = TRUE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			lnum = lnum + 1#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_distances_mats[[lnum]] = tmpmat#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_distances_mats
+tmplines = readLines(distances_fn)#
+	list_of_distances_mats = list()#
+	lnum = 1#
+	newmat = TRUE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_distances_mats[[lnum]] = tmpmat#
+			lnum = lnum + 1#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_distances_mats
+dispersal_multipliers_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_KOMH_dispersal_multipliers.txt"
+tmplines = readLines(dispersal_multipliers_fn)#
+	list_of_dispersal_multipliers_mats = list()#
+	lnum = 1#
+	newmat = TRUE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_dispersal_multipliers_mats[[lnum]] = tmpmat#
+			lnum = lnum + 1#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_dispersal_multipliers_mats
+1,883.4+
+area_areas_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_KOMH_area_of_areas.txt"
+if (!is.null(inputs))#
+		{#
+		area_areas_fn = inputs$area_areas_fn#
+		}#
+	if (!is.null(area_areas_fn))#
+		{#
+		area_areas_fn = area_areas_fn#
+		}#
+	tmplines = readLines(area_areas_fn)#
+	list_of_area_areas_mats = list()#
+	lnum = 1#
+	newmat = TRUE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_area_areas_mats[[lnum]] = tmpmat#
+			lnum = lnum + 1#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_area_areas_mats
+area_areas_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_KOMH_area_of_areas.txt"
+tmplines = readLines(area_areas_fn)#
+	list_of_area_areas_mats = list()#
+	lnum = 1
+tmplines
+newmat = TRUE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_area_areas_mats[[lnum]] = tmpmat#
+			lnum = lnum + 1#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_area_areas_mats
+newmat = TRUE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_area_areas_mats[[lnum]] = tmpmat#
+			lnum = lnum + 1#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_area_areas_mats
+tmplines = readLines(area_areas_fn)#
+	list_of_area_areas_mats = list()#
+	lnum = 1#
+	newmat = TRUE#
+	for (i in 1:length(tmplines))#
+		{#
+		print(tmplines[i])#
+		if (tmplines[i] == "")#
+			{#
+			# You've hit the end of a matrix,#
+			# increment list and add#
+			tmpmat = as.matrix(tmprows)#
+			tmpmat = adf2(tmpmat)#
+			names(tmpmat) = nameslist#
+#
+			list_of_area_areas_mats[[lnum]] = tmpmat#
+			lnum = lnum + 1#
+			newmat = TRUE#
+			} else {#
+			if (newmat == TRUE)#
+				{#
+				nameslist = strsplit(tmplines[i], split="\t")[[1]]#
+				newmat = FALSE#
+				tmprows = NULL#
+				} else {#
+				tmprow = as.numeric(strsplit(tmplines[i], split="\t")[[1]])#
+				tmprows = rbind(tmprows, tmprow)#
+				}#
+			}#
+		}#
+	list_of_area_areas_mats
+library(BioGeoBEARS)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_generics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_basics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_univ_model_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_readwrite_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_LaplacesDemon_v1.R', chdir = TRUE)#
+#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_stratified_v1.R', chdir = TRUE)#
+########################################################
+# Set up data#
+########################################################
+wd = getwd()	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+setwd(extdata_dir)#
+inputs = define_BioGeoBEARS_run()#
+inputs#
+#
+# Input the files#
+inputs$trfn = "Psychotria_5.2.newick"#
+inputs$geogfn = "Psychotria_geog.data"#
+inputs$timesfn = "Hawaii_timeperiods.txt"#
+inputs$distsfn = "Hawaii_KOMH_distances.txt"								# distance between areas, for dispersal ~ dist^x#
+inputs$dispersal_multiplier_fn = "Hawaii_KOMH_dispersal_multipliers.txt"	# hard-coded dispersal multiplier (or 0s/1s for constraints)#
+inputs$areas_areas_fn = "Hawaii_KOMH_area_of_areas.txt"					# area of each areas (for extinction ~ area^u)#
+inputs$areas_allowed_fn = "Hawaii_KOMH_areas_allowed.txt"				# if ONLY connected areas are allowed#
+#
+inputs2 = readfiles_BioGeoBEARS_run(inputs)#
+inputs2
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_stratified_v1.R', chdir = TRUE)
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_stratified_v1.R', chdir = TRUE)#
+########################################################
+# Set up data#
+########################################################
+wd = getwd()	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+setwd(extdata_dir)#
+inputs = define_BioGeoBEARS_run()#
+inputs#
+#
+# Input the files#
+inputs$trfn = "Psychotria_5.2.newick"#
+inputs$geogfn = "Psychotria_geog.data"#
+inputs$timesfn = "Hawaii_timeperiods.txt"#
+inputs$distsfn = "Hawaii_KOMH_distances.txt"								# distance between areas, for dispersal ~ dist^x#
+inputs$dispersal_multiplier_fn = "Hawaii_KOMH_dispersal_multipliers.txt"	# hard-coded dispersal multiplier (or 0s/1s for constraints)#
+inputs$areas_areas_fn = "Hawaii_KOMH_area_of_areas.txt"					# area of each areas (for extinction ~ area^u)#
+inputs$areas_allowed_fn = "Hawaii_KOMH_areas_allowed.txt"				# if ONLY connected areas are allowed#
+#
+inputs2 = readfiles_BioGeoBEARS_run(inputs)#
+inputs2
+readfiles_BioGeoBEARS_run
+readfiles_BioGeoBEARS_run <- function(inputs)#
+	{#
+	# Read in all the specified input files#
+	if (is.character(inputs$times_fn))#
+		{#
+		inputs$timeperiods = read_times_fn(inputs)#
+		}#
+	if (is.character(inputs$distances_fn))#
+		{#
+		inputs$list_of_distances_mats = read_distances_fn(inputs)#
+		}#
+#
+	if (is.character(inputs$dispersal_multipliers_fn))#
+		{#
+		inputs$list_of_dispersal_multipliers_mats = read_dispersal_multipliers_fn(inputs)#
+		}	#
+	if (is.character(inputs$area_areas_fn))#
+		{#
+		inputs$list_of_area_areas = read_area_areas_fn(inputs)#
+		}	#
+	if (is.character(inputs$areas_allowed_fn))#
+		{#
+		inputs$list_of_area_areas_mats = read_area_areas_fn(inputs)#
+		}#
+	inputs	#
+	return(inputs)#
+	}
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)
+Set up data#
+########################################################
+wd = getwd()	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+setwd(extdata_dir)#
+inputs = define_BioGeoBEARS_run()#
+inputs#
+#
+# Input the files#
+inputs$trfn = "Psychotria_5.2.newick"#
+inputs$geogfn = "Psychotria_geog.data"#
+inputs$timesfn = "Hawaii_timeperiods.txt"#
+inputs$distsfn = "Hawaii_KOMH_distances.txt"								# distance between areas, for dispersal ~ dist^x#
+inputs$dispersal_multiplier_fn = "Hawaii_KOMH_dispersal_multipliers.txt"	# hard-coded dispersal multiplier (or 0s/1s for constraints)#
+inputs$areas_areas_fn = "Hawaii_KOMH_area_of_areas.txt"					# area of each areas (for extinction ~ area^u)#
+inputs$areas_allowed_fn = "Hawaii_KOMH_areas_allowed.txt"				# if ONLY connected areas are allowed#
+#
+inputs2 = readfiles_BioGeoBEARS_run(inputs)#
+inputs2
+/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/Hawaii_KOMH_areas_allowed.txt
+Set up data#
+########################################################
+wd = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/"	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+inputs = define_BioGeoBEARS_run()#
+inputs#
+#
+# Input the files#
+inputs$trfn = "Psychotria_5.2.newick"#
+inputs$geogfn = "Psychotria_geog.data"#
+inputs$timesfn = "Hawaii_timeperiods.txt"#
+inputs$distsfn = "Hawaii_KOMH_distances.txt"								# distance between areas, for dispersal ~ dist^x#
+inputs$dispersal_multiplier_fn = "Hawaii_KOMH_dispersal_multipliers.txt"	# hard-coded dispersal multiplier (or 0s/1s for constraints)#
+inputs$areas_areas_fn = "Hawaii_KOMH_area_of_areas.txt"					# area of each areas (for extinction ~ area^u)#
+inputs$areas_allowed_fn = "Hawaii_KOMH_areas_allowed.txt"				# if ONLY connected areas are allowed#
+#
+inputs2 = readfiles_BioGeoBEARS_run(inputs)#
+inputs2
+getwd()
+list.files()
+if (!is.null(inputs))#
+		{#
+		area_areas_fn = inputs$area_areas_fn#
+		}#
+	if (!is.null(area_areas_fn))#
+		{#
+		area_areas_fn = area_areas_fn#
+		}
+area_areas_fn
+inputs$area_areas_fn
+inputs
+inputs$areas_areas_fn
+inputs$area_areas_fn
+inputs$area_areas_fn
+library(BioGeoBEARS)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_generics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_basics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_univ_model_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_readwrite_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_LaplacesDemon_v1.R', chdir = TRUE)#
+#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_stratified_v1.R', chdir = TRUE)#
+########################################################
+# Set up data#
+########################################################
+wd = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_dists_stratified/"	# get working directory, store in wd#
+setwd(wd)		# set working directory#
+#
+# Here, I am using the practice files inside the R package;#
+# you can use your own#
+# Normally#
+extdata_dir = system.file("extdata", package="BioGeoBEARS")#
+# tmp hard code NICK FIX: #
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"#
+inputs = define_BioGeoBEARS_run()#
+inputs#
+#
+# Input the files#
+inputs$trfn = "Psychotria_5.2.newick"#
+inputs$geogfn = "Psychotria_geog.data"#
+inputs$timesfn = "Hawaii_timeperiods.txt"#
+inputs$distsfn = "Hawaii_KOMH_distances.txt"								# distance between areas, for dispersal ~ dist^x#
+inputs$dispersal_multiplier_fn = "Hawaii_KOMH_dispersal_multipliers.txt"	# hard-coded dispersal multiplier (or 0s/1s for constraints)#
+inputs$area_of_areas_fn = "Hawaii_KOMH_area_of_areas.txt"					# area of each areas (for extinction ~ area^u)#
+inputs$areas_allowed_fn = "Hawaii_KOMH_areas_allowed.txt"				# if ONLY connected areas are allowed#
+#
+inputs2 = readfiles_BioGeoBEARS_run(inputs)#
+inputs2
+library(BioGeoBEARS)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_generics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_basics_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_classes_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_univ_model_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_readwrite_v1.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/calc_loglike_sp_v01.R', chdir = TRUE)#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_LaplacesDemon_v1.R', chdir = TRUE)#
+#
+source('/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_stratified_v1.R', chdir = TRUE)
+inputs = define_BioGeoBEARS_run()#
+inputs#
+#
+# Input the files#
+inputs$trfn = "Psychotria_5.2.newick"#
+inputs$geogfn = "Psychotria_geog.data"#
+inputs$timesfn = "Hawaii_timeperiods.txt"#
+inputs$distsfn = "Hawaii_KOMH_distances.txt"								# distance between areas, for dispersal ~ dist^x#
+inputs$dispersal_multiplier_fn = "Hawaii_KOMH_dispersal_multipliers.txt"	# hard-coded dispersal multiplier (or 0s/1s for constraints)#
+inputs$area_of_areas_fn = "Hawaii_KOMH_area_of_areas.txt"					# area of each areas (for extinction ~ area^u)#
+inputs$areas_allowed_fn = "Hawaii_KOMH_areas_allowed.txt"				# if ONLY connected areas are allowed#
+#
+inputs2 = readfiles_BioGeoBEARS_run(inputs)#
+inputs2

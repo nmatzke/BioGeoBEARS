@@ -40,22 +40,9 @@ testval=1
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
   \url{https://code.google.com/p/lagrange/}
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 
-  Matzke NJ and Maguire KC (2011). "Effect of fossil range
-  and extinction data in DEC analyses: a case study with
-  Canidae." _Society of Vertebrate Paleontology Annual
-  Meeting, November 2011, Las Vegas_. <URL:
-  http://www.vertpaleo.org/AM/Template.cfm?Section=Past_Meetings&Template=/CM/ContentDisplay.cfm&ContentID=2200>.
+  Matzke_Maguire_2011_SVP
 }
 \seealso{
   \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOweights_faster}},

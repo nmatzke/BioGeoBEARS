@@ -39,9 +39,6 @@ testval=1
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
   \url{https://code.google.com/p/lagrange/}
 
-  Foster PG (2001). "The Idiot's Guide to the Zen of
-  Likelihood in a Nutshell in Seven Days for Dummies,
-  Unleashed." Online PDF, widely copied, <URL:
-  \url{http://www.bioinf.org/molsys/data/idiots.pdf}>.
+  FosterIdiots
 }
 

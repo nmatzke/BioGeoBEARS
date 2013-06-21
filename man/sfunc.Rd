@@ -118,53 +118,19 @@ vfunc(charcell="v3_6", relprob_subsets_matrix)
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
   \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 
-  Harte J (2011). _Maximum entropy and ecology : a theory
-  of abundance, distribution, and energetics_, series
-  Oxford series in ecology and evolution. Oxford University
-  Press, Oxford ; New York. ISBN 9780199593415 0199593418
-  9780199593422 (pbk.) 0199593426 (pbk.)/ISSN, 2011284493
-  John Harte.. ill. ; 24 cm. Includes bibliographical
-  references (p. [244]-252) and index. Oxford series in
-  ecology and evolution., <URL:
-  http://socrates.berkeley.edu/~hartelab/MaxEnt.html>.
+  Harte2011
 
-  Ree RH and Smith SA (2008). "Maximum likelihood inference
-  of geographic range evolution by dispersal, local
-  extinction, and cladogenesis." _Systematic Biology_,
-  *57*(1), pp. 4-14. <URL:
-  http://dx.doi.org/10.1080/10635150701883881>, <URL:
-  http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Citation&list_uids=18253896>.
+  ReeSmith2008
 
-  Ronquist F (1996). _DIVA version 1.1. Computer program
-  and manual (online)._. Uppsala University. <URL:
-  http://www.ebc.uu.se/systzoo/research/diva/manual/dmanual.html>.
+  Ronquist1996_DIVA
 
-  Ronquist F (1997). "Dispersal-Vicariance Analysis: A New
-  Approach to the Quantification of Historical
-  Biogeography." _Systematic Biology_, *46*(1), pp.
-  195-203. <URL: http://www.jstor.org/stable/2413643>.
+  Ronquist_1997_DIVA
 
-  Ronquist F and Sanmartin I (2011). "Phylogenetic Methods
-  in Biogeography." _Annual Review of Ecology, Evolution,
-  and Systematics_, *42*(1), pp. 441-464. <URL:
-  http://dx.doi.org/10.1146/annurev-ecolsys-102209-144710>,
-  <URL:
-  http://www.annualreviews.org/doi/abs/10.1146/annurev-ecolsys-102209-144710>.
+  Ronquist_Sanmartin_2011
 
-  Landis M, Matzke NJ, Moore BR and Huelsenbeck JP (2013).
-  "Statistical Analysis of Biogeography when the Number of
-  Areas is Large." _Systematic Biology_, *submitted*.
+  Landis_Matzke_etal_2013_BayArea
 }
 \seealso{
   \code{\link{yfunc}}, \code{\link{vfunc}},

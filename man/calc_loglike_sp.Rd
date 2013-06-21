@@ -9,7 +9,8 @@
     sparse = FALSE, printlevel = 1, use_cpp = TRUE,
     input_is_COO = FALSE, spPmat_inputs = NULL,
     cppSpMethod = 3, cluster_already_open = NULL,
-    calc_ancprobs = FALSE, null_range_allowed = TRUE)
+    calc_ancprobs = FALSE, null_range_allowed = TRUE,
+    fixnode = NULL, fixlikes = NULL)
 }
 \arguments{
   \item{tip_condlikes_of_data_on_each_state}{A numeric
@@ -143,6 +144,14 @@
 
   \item{null_range_allowed}{Does the state space include
   the null range?#'}
+
+  \item{fixnode}{If the state at a particular node is going
+  to be fixed (e.g. for ML marginal ancestral states), give
+  the node number.}
+
+  \item{fixlikes}{The state likelihoods to be used at the
+  fixed node.  I.e. 1 for the fixed state, and 0 for the
+  others.}
 }
 \value{
   Return whatever is specified by \code{return_what}.
@@ -202,27 +211,11 @@ testval=1
   Nicholas Matzke \email{matzke@berkeley.edu}
 }
 \references{
-  Landis M, Matzke NJ, Moore BR and Huelsenbeck JP (2013).
-  "Statistical Analysis of Biogeography when the Number of
-  Areas is Large." _Systematic Biology_, *submitted*.
+  Landis_Matzke_etal_2013_BayArea
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 
-  Ree RH and Smith SA (2008). "Maximum likelihood inference
-  of geographic range evolution by dispersal, local
-  extinction, and cladogenesis." _Systematic Biology_,
-  *57*(1), pp. 4-14. <URL:
-  http://dx.doi.org/10.1080/10635150701883881>, <URL:
-  http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Citation&list_uids=18253896>.
+  ReeSmith2008
 }
 \seealso{
   \code{\link{calc_loglike_sp}},

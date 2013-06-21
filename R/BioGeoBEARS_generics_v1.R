@@ -1,3 +1,467 @@
+require("ape")
+require("rexpokit")
+require("cladoRcpp")
+
+
+# source all .R files in a directory, except "compile" and "package" files
+
+#######################################################
+# sourceall
+#######################################################
+#' Source all .R files in a directory, except "compile" and "package" files
+#' 
+#' Utility function.
+#' 
+#' @param path The path to source
+#' @param pattern Default is .R
+#' @param ... Additional arguments to source
+#' @return \code{path} The path that was sourced.
+#' @export
+#' @seealso \code{\link[base]{source}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+sourceall <- function(path=path, pattern="\\.R", ...)
+	{
+	Rfiles = list.files(path=path, pattern="\\.R", ...)
+	
+	# Files to remove
+	Rfiles_remove_TF1 = grepl("compile", Rfiles)
+	Rfiles_remove_TF2 = grepl("package", Rfiles)
+	Rfiles_remove_TF = (Rfiles_remove_TF1 + Rfiles_remove_TF2) >= 1
+	
+	Rfiles = Rfiles[Rfiles_remove_TF == FALSE]
+
+	cat("\nSourcing Rfiles in ", path, "...\n", sep="")
+
+	
+	for (Rfile in Rfiles)
+		{
+		cat("Sourcing Rfile: ", Rfile, "\n", sep="")
+		fullfn = slashslash(paste(path, Rfile, sep=""))
+		source(fullfn, chdir=TRUE, ...)
+		}
+
+	cat("\nDone sourcing Rfiles in ", path, "...\n", sep="")
+	return(path)
+	}
+
+
+#######################################################
+# fix Psychotria tree so tips all come to 0
+#######################################################
+#######################################################
+# make_all_tips_come_to_0
+#######################################################
+#' Take a tree, ensure all tips end at 0
+#' 
+#' Makes tree precisely ultrametric (unlike e.g. the default <i>Psychotria</i> tree)
+#' 
+#' @param trfn The Newick tree filename
+#' @param outfn The filename for the resulting file
+#' @return \code{phy} The corrected phylogeny
+#' @export
+#' @seealso \code{\link[ape]{read.tree}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+make_all_tips_come_to_0 <- function(trfn, outfn)
+	{
+	phy = read.tree(trfn)
+
+
+	print("Input tree:")
+	print("is.ultrametric(phy)")
+	print(is.ultrametric(phy))
+	
+	prt_table = prt(phy)
+	
+	
+	prt_table$time_bp
+	
+	for (i in 1:nrow(prt_table))
+		{
+		if ((prt_table$time_bp[i] > 0) && (prt_table$node.type[i] == "tip"))
+			{
+			edgeTF = phy$edge[,2] == i
+			phy$edge.length[edgeTF] = phy$edge.length[edgeTF] + prt_table$time_bp[i]
+			}
+		}
+	
+	print("Putput tree:")
+	print("is.ultrametric(phy)")
+	print(is.ultrametric(phy))
+	
+	prt(phy)
+	
+	#write.tree(phy, file="Psychotria_5.2_ultrametric.newick")
+	write.tree(phy, file=outfn)
+	return(phy)
+	}
+
+
+
+
+
+
+#######################################################
+# strsplit_whitespace
+#######################################################
+#' Split strings on whitespace
+#' 
+#' This function splits strings on whitespace (spaces and tabs), so you don't have
+#' to remember the \code{regexp}/\code{grep} format codes.
+#' 
+#' @param tmpline A string containing text.
+#' @return \code{list_of_strs} 
+#' @export
+#' @seealso \code{\link[base]{strsplit}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' tmpline = "Hello world see	my	tabs."
+#' strsplit_whitespace(tmpline)
+#' 
+strsplit_whitespace <- function(tmpline)
+	{
+	# split on 1 or more whitespaces
+	temp = strsplit(tmpline, "[ \t]+")
+	
+	# get the list
+	list_of_strs = temp[[1]]
+	
+	# remove any leading/trailing ""
+	list_of_strs = list_of_strs[list_of_strs != ""]
+	
+	return(list_of_strs)
+	}
+
+
+#######################################################
+# moref
+#######################################################
+#' print to screen the header of a file
+#' 
+#' This does the rough equivalent of the \code{UNIX} function \code{more}, but within R.
+#' 
+#' @param fn A filename.
+#' @param printnotcat If \code{TRUE}, use \code{\link[base]{print}} instead of \code{\link[base]{cat}}. Default \code{FALSE}.
+#' @return Nothing returned.
+#' @export
+#' @seealso \code{\link[base]{scan}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+#' 
+moref <- function(fn, printnotcat = FALSE)
+	{
+	lines = scan(file=fn, what="character", sep="\n")
+	
+	if (printnotcat == TRUE)
+		{
+		for (i in 1:length(lines))
+			{
+			print(lines[i])
+			}
+		}
+	else
+		{
+		for (i in 1:length(lines))
+			{
+			cat(paste(lines[i], "\n", sep=""))
+			}
+		}
+	}
+
+
+
+
+
+# return matching TRUE/FALSE values
+# list1 (.e.g. a big list) TRUE if it is found in list2 (e.g. a smaller list)
+
+#######################################################
+# match_list1_in_list2
+#######################################################
+#' Return TRUE for list1 items when they occur in list2
+#' 
+#' Return matching TRUE/FALSE values.  E.g. list1 (e.g. a big list) TRUE if it is found
+#' in list2 (e.g. a smaller list)
+#'
+#' Utility function for %in%, when one's brain gets confused.
+#' 
+#' @param list1 The list of things you want to check
+#' @param list2 The list of things you want to check against
+#' @return \code{matchlist} The TRUE/FALSE list for list1
+#' @export
+#' @seealso \code{\link[base]{match}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+match_list1_in_list2 <- function(list1, list2)
+	{
+	matchlist = list1 %in% list2
+	return(matchlist)
+	}
+
+
+
+#######################################################
+# unlist_dtf_cols
+#######################################################
+#' Unlist the columns in a data.frame
+#' 
+#' Utility function. What it says.
+#' 
+#' @param dtf Input \code{\link[base]{data.frame}}
+#' @param printflag Print the results if TRUE.
+#' @return \code{dtf} The data.frame, hopefully without lists for columns
+#' @export
+#' @seealso \code{\link[base]{unlist}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+unlist_dtf_cols <- function(dtf, printflag=FALSE)
+	{
+	# Sometimes cbind makes each column a list, this can screw up use/searching of
+	#  the column later on.  
+	# Unlist each column...
+	for (i in 1:ncol(dtf))
+		{
+		tmpstr = paste("unlisting col: ", names(dtf)[i], "...", sep="")
+		prflag(tmpstr, printflag=printflag)		
+		
+		# catch a possible error from unlisting
+		# the number of rows needs to stay the same!!
+		tmpcol = unlist(dtf[, i])
+		if (length(tmpcol) != length(dtf[, i]))
+			{
+			tmpstr = paste("...failed! unlist(col) length=", length(tmpcol), "; nrow(dtf) = ", nrow(dtf), sep="")
+			prflag(tmpstr, printflag=printflag)
+			} 
+		else
+			{
+			dtf[, i] = tmpcol
+			tmpstr = paste(" ", " ", sep="")
+			prflag(tmpstr, printflag=printflag)
+			}
+		}
+	
+	#dtf2 = adf(dtf)
+	
+	return(dtf)
+	}
+
+
+# NOTE!!! THESE MATCH FUNCTIONS JUST RETURN THE *FIRST* MATCH, *NOT* ALL MATCHES
+# (argh)
+# return indices in 2nd list matching the first list
+# It WILL return one match for each item in the list, though...
+
+#######################################################
+# get_indices_where_list1_occurs_in_list2
+#######################################################
+#' Return (first!) indices in second list matching the first list
+#' 
+#' This function will return one match (the first) for each item in the list; i.e. the second-list
+#' index for each item in the first list.  Only the first hit in the second list is returned.
+#' 
+#' This is used by \code{\link{prt}}.
+#'
+#' @param list1 The first list. 
+#' @param list2 The second list list.
+#' @return \code{match_indices} The match indices.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' list1 = c("N", "I", "C", "K")
+#' list2 = LETTERS
+#' get_indices_where_list1_occurs_in_list2(list1, list2)
+get_indices_where_list1_occurs_in_list2 <- function(list1, list2)
+	{
+	match_indices = match(list1, list2)
+	return(match_indices)
+	}
+
+
+
+
+
+
+#######################################################
+# order_tipranges_by_tr
+#######################################################
+#' Order the tipranges in a tipranges object so they match the order of tips in a tree
+#' 
+#' Utility function. What it says.  Life can get very confusing if you don't do this before plotting.
+#' 
+#' @param tipranges A tipranges object.
+#' @param tr An ape tree object.
+#' @return \code{tipranges} The reordered data.frame
+#' @export
+#' @seealso \code{\link[base]{unlist}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+order_tipranges_by_tr <- function(tipranges, tr)
+	{
+	tipranges_names = rownames(tipranges@df)
+	tr_names = tr$tip.label
+	
+	match_indices = get_indices_where_list1_occurs_in_list2(list1=tr_names, list2=tipranges_names)
+	
+	tmpdf = tipranges@df[match_indices, ]
+	tipranges@df = tmpdf
+	
+	return(tipranges)
+	}
+
+
+
+# Extract just the numbers from a string
+# just the numbers INCLUDING THOSE CONNECTED BY DECIMAL POINTS!!!!
+#######################################################
+# extract_numbers
+#######################################################
+#' Extract just the numbers from a string, including decimal points
+#' 
+#' This function extracts numbers from a string.  Contiguous digits, including
+#' decimal points, are made into a single number. A list of numbers is returned.
+#' 
+#' This saves you having to remember the \code{regexp}/\code{\link[base]{gregexpr}} code for this sort of thing, and
+#' makes it much easier to parse numbers out of the text output of various programs.
+#' 
+#' @param tmpstr An input string.
+#' @return \code{x2} The list of numbers
+#' @export
+#' @seealso \code{\link[base]{gregexpr}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' tmpstr = "190Ma - 65Ma"
+#' extract_numbers(tmpstr)
+#' 
+#' tmpstr = "190.1Ma - 65.5Ma"
+#' extract_numbers(tmpstr)
+#' 
+extract_numbers <- function(tmpstr)
+	{
+	defaults ='
+	tmpstr = "190Ma - 65Ma"
+	'
+	# pull out the numbers / extract the numbers / extract numbers
+	# just the numbers INCLUDING THOSE CONNECTED BY DECIMAL POINTS!!!!
+	# (but not negative symbols)
+	matches = gregexpr("(?:([0-9\\.]+))+", tmpstr)[[1]]
+	
+	# Get the ending points of the matches
+	matches_end = matches-1+attr(matches,"match.length")
+	
+	# Extract the numbers from the string
+	x = mapply(substr, tmpstr, matches, matches_end)
+
+	# Convert to numeric
+	x2 = as.numeric(x)
+	return(x2)
+	}
+
+
+#######################################################
+# list2str
+#######################################################
+#' Convert a list of items to a string
+#' 
+#' This is a shortcut to save time when converting a list of items to a string.
+#' 
+#' @param list1 The list to convert.
+#' @param spacer The space between each item. Default " ".
+#' @return \code{tmpstr} The output string.
+#' @export
+#' @seealso \code{\link[base]{paste}}, \code{\link[base]{as.character}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#'	 @cite FosterIdiots
+#' @examples
+#' test=1
+#' 
+list2str <- function(list1, spacer=" ")
+	{
+	
+	for (i in 1:length(list1))
+		{
+		if (i == 1)
+			{
+			tmpstr = as.character(list1[1])
+			if (length(list1) == 1)
+				{
+				return(tmpstr)
+				}
+			next
+			}
+		addstr = as.character(list1[i])
+		tmpstr = paste(tmpstr, addstr, sep=spacer)
+		}
+	return(tmpstr)
+	}
+
+
+
+
 
 # Get the classes of the columns in a data frame
 #######################################################
@@ -182,7 +646,7 @@ dfnums_to_numeric <- function(dtf, max_NAs=0.5, printout=FALSE, roundval=NULL)
 	
 			# Get one column, convert to numeric:
 			cmdstr = paste("newcol = as.numeric(as.character(dtf$'", dtf_names[i], "'))", sep="")
-			eval(parse(text = cmdstr))			
+			suppressWarnings(eval(parse(text = cmdstr)))
 			
 			# If it's less than 50% NAs (or max_NA NAs), then convert to numeric
 			#print(newcol)
@@ -195,14 +659,14 @@ dfnums_to_numeric <- function(dtf, max_NAs=0.5, printout=FALSE, roundval=NULL)
 				# (if it's a character, you can convert to character anyway...)
 				#cmdstr = paste("dtf$", dtf_names[i], " = as.numeric(as.character(dtf$", dtf_names[i], "))", sep="")
 				cmdstr = paste("dtf$'", dtf_names[i], "' = newcol", sep="")
-				eval(parse(text = cmdstr))
+				suppressWarnings(eval(parse(text = cmdstr)))
 				
 				
 				# If a rounding val is specified, do the rounding
 				if (!is.null(roundval))
 					{
 					cmdstr = paste("dtf$'", dtf_names[i], "' = round(dtf$'", dtf_names[i], "', digits=roundval)", sep="")
-					eval(parse(text = cmdstr))
+					suppressWarnings(eval(parse(text = cmdstr)))
 					}
 				
 				}
@@ -288,6 +752,7 @@ adf2 <- function(x)
 #' @seealso \code{\link[base]{strsplit}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
 #' @examples
+#' test=1
 #' 
 #' # strsplit returns the results inside a list element
 #' out = strsplit("ABC", split="")
@@ -605,6 +1070,7 @@ addslash <- function(tmpstr)
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
+#' test=1
 #' 
 #' cellval = 143514514514532
 #' conditional_format_cell(cellval)
@@ -778,6 +1244,7 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
+#' test=1
 #' 
 #' input_table = adf(c(143514514514532, -42.235235, -42.0000000, 0.0000, 0.0001, 0.00001, 0.0000111))
 #' conditional_format_table(input_table=input_table)
@@ -1002,6 +1469,7 @@ calc_AIC_vals <- function(LnL_vals, nparam_vals)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' LnL_vals = c(-20.9, -20.9, -20.9, -20.9)
 #' nparam_vals = c(3, 4, 5, 6)
@@ -1291,6 +1759,183 @@ AkaikeWeights_on_summary_table <- function(restable, colname_to_use="AIC", add_t
 
 
 
+
+
+#' Calculate all the AIC and LRT stats between two models
+#' 
+#' The Likelihood Ratio Test (LRT) is a standard method for testing whether or not the data likelihood
+#' conferred by a more complex is significantly better than the data likelihood conferred by
+#' the simpler model.  See \code{\link{lrttest}} and \code{\link{lrttest_on_summary_table}} for more discussion.
+#' 
+#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
+#' discussion of AIC and its uses.
+#'
+#' This function assumes that \code{LnL_1} and \code{numparams1} refer to the more complex model, and that \code{LnL_2}
+#' and \code{numparams2} refer to the simpler model nested within the more complex one.
+#' 
+#' @param LnL_1 Log-likelihood of more complex model.
+#' @param LnL_2 Log-likelihood of simpler complex model.
+#' @param numparams1 Number of free parameters of the more complex model.
+#' @param numparams2 Number of free parameters of the less complex model.
+#' @return \code{LRT_AIC_results} A table of LRT and AIC results.
+#' @export
+#' @seealso \code{\link{lrttest}}, \code{\link{lrttest_on_summary_table}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite Burnham_Anderson_2002
+#' @examples
+#' test=1
+AICstats_2models <- function(LnL_1, LnL_2, numparams1, numparams2)
+	{
+	defaults='
+	LnL_1=alt_LnL; LnL_2=null_LnL; numparams1=num_free_branches_nonclock; numparams2=num_free_branches_clock
+	'
+	
+	# Run Likelihood Ratio Test (LRT)	
+	LRT_result = lrttest(LnL_1, LnL_2, numparams1, numparams2, returnwhat="all")
+	
+	# AIC results
+	AIC_results = NULL
+	AIC_results_names = NULL
+	
+	# Combine into list
+	LnLs = c(LnL_1, LnL_2)
+	numparams_list = c(numparams1, numparams2)
+	
+	num_models = length(LnLs)
+	
+	# Make AIC list
+	AIC_list = rep(NA, num_models)
+	
+	for (i in 1:num_models)
+		{
+		AIC_list[i] = getAIC(LnL=LnLs[i], numparams_list[i])
+		}
+	
+	# Get relative weight of each model
+	AICweight_list = rep(NA, num_models)
+	for (i in 1:num_models)
+		{
+		AICweight_list[i] = getAIC_weight_for_model1(AICval_1=AIC_list[i], AICvals=AIC_list)
+		}
+	
+	AICweight_ratio_model1 = get_AICweight_ratio_model1_over_model2(AICval_1=AIC_list[1], AICval_2=AIC_list[2])
+	AICweight_ratio_model2 = get_AICweight_ratio_model1_over_model2(AICval_1=AIC_list[2], AICval_2=AIC_list[1])
+	
+	nums = seq(1, num_models, 1)
+	
+	
+	# Put together the results
+	AIC_results = c(AIC_results, AIC_list)
+	AIC_names = paste("AIC", nums, sep="")
+	
+	AIC_results = c(AIC_results, AICweight_list)
+	AICweight_list_names = paste("AICwt", nums, sep="")
+	
+	AIC_results = c(AIC_results, AICweight_ratio_model1, AICweight_ratio_model2)
+	relprob_names = c("AICweight_ratio_model1", "AICweight_ratio_model2")
+	
+	# Names
+	AIC_results_names = c(AIC_names, AICweight_list_names, relprob_names)
+	
+	AIC_results2 = matrix(AIC_results, nrow=1)
+	AIC_results3 = adf2(AIC_results2)
+	names(AIC_results3) = AIC_results_names
+	
+	AIC_results = AIC_results3
+	
+	
+	# Merge in LRT
+	LRT_AIC_results = cbind(LRT_result, AIC_results)
+	
+	return(LRT_AIC_results)
+	}
+
+
+
+
+# Get the ratio between the pairwise weights
+#######################################################
+# AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref
+#######################################################
+#' Get the ratio between the pairwise Akaike Weights
+#' 
+#' Given the relative likelihoods of the models, calculate the Akaike weight of the models. Akaike
+#' weights sum to 1.
+#' 
+#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
+#' discussion of AIC and its uses.
+#' 
+#' @param restable A \code{\link[base]{data.frame}} with at least columns named "LnL" and "nparams".
+#' @param colname_to_use The name of the column containing AIC values.
+#' @param ref_model What is the row of the reference model?  "best", "worst", or a row number.
+#' @param add_to_table If TRUE, add to the main table and return the main table. If FALSE, return just the Akaike Weights results.
+#' @return \code{restable}, the modified table, or \code{AICstats_pairwise}, the pairwise Akaike statistics.
+#' @export
+#' @seealso \code{\link{get_Akaike_weights_from_rel_likes_pairwise}}, \code{\link{get_Akaike_weights_from_rel_likes}}, 
+#' \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{http://www.brianomeara.info/tutorials/aic}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite Burnham_Anderson_2002
+#' @examples
+#' test=1
+#' 
+#' tmptable = adf(c(40, 50, 60))
+#' names(tmptable) = "AIC"
+#' AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref(restable=tmptable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
+#' 
+AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref <- function(restable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
+	{
+	# Initialize AICvals
+	AICvals = NA
+	
+	# Extract the AIC vals
+	cmdstr = paste("AICvals = restable$", colname_to_use, sep="")
+	eval(parse(text=cmdstr))
+	
+	# Get the pairwise delta AICs
+	get_rownum_ref_model(AICvals, ref_model="best")
+	deltaAICs_pairwise = get_deltaAIC_pairwise_w_ref_model(AICvals, ref_model)
+
+	# Get the pairwise relative likelihoods (likelihoods of the models given the list of models)
+	# n x 2 matrix
+	rel_likes_AIC_pairwise = rel_likes_from_deltaAICs_pairwise(deltaAICs_pairwise)
+	
+	# Calculate the pairwise Akaike weights
+	Akaike_weights_pairwise = get_Akaike_weights_from_rel_likes_pairwise(rel_likes_AIC_pairwise)
+	
+	# Calculate the pairwise ratio (for only the row; the named row is obvious)
+	Akaike_weight_ratios_pairwise = get_Akaike_weight_ratio_from_Akaike_pairwise_weights(Akaike_weights_pairwise)
+	
+	# Make the AICstats_pairwise table	
+	AICstats_pairwise = cbind(deltaAICs_pairwise, rel_likes_AIC_pairwise, Akaike_weights_pairwise, Akaike_weight_ratios_pairwise)
+	
+	# Change the names to specify AIC, AICc, etc.
+	names(AICstats_pairwise) = paste(colname_to_use, "_", names(AICstats_pairwise), sep="")
+	
+	
+	if (add_to_table == TRUE)
+		{
+		restable = cbind(restable, AICstats_pairwise)
+		return(restable)
+		} else {
+		return(AICstats_pairwise)
+		}
+	return("ERROR!")	
+	}
+
+
+
+
 #######################################################
 # Some good functions relating to AIC
 #######################################################
@@ -1544,6 +2189,7 @@ getAICc <- function(LnL, numparams, samplesize)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICvals = c(40, 50, 60)
 #' get_deltaAIC(AICvals)
@@ -1591,6 +2237,7 @@ get_deltaAIC <- function(AICvals)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICvals = c(40, 50, 60)
 #' deltaAICs = get_deltaAIC(AICvals)
@@ -1637,6 +2284,7 @@ rel_likes_from_deltaAICs <- function(deltaAICs)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICvals = c(40, 50, 60)
 #' deltaAICs = get_deltaAIC(AICvals)
@@ -1745,6 +2393,7 @@ get_rownum_ref_model <- function(AICvals, ref_model="best")
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICvals = c(40, 50, 60)
 #' get_deltaAIC(AICvals)
@@ -1802,6 +2451,7 @@ get_deltaAIC_pairwise_w_ref_model <- function(AICvals, ref_model="best")
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICvals = c(40, 50, 60)
 #' deltaAICs = get_deltaAIC_pairwise_w_ref_model(AICvals, ref_model="best")
@@ -1845,6 +2495,7 @@ rel_likes_from_deltaAICs_pairwise <- function(deltaAICs_pairwise)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICvals = c(40, 50, 60)
 #' deltaAICs = get_deltaAIC_pairwise_w_ref_model(AICvals, ref_model="best")
@@ -1899,6 +2550,7 @@ get_Akaike_weights_from_rel_likes_pairwise <- function(rel_likes_AIC_pairwise)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICvals = c(40, 50, 60)
 #' deltaAICs = get_deltaAIC_pairwise_w_ref_model(AICvals, ref_model="best")
@@ -1930,81 +2582,6 @@ get_Akaike_weight_ratio_from_Akaike_pairwise_weights <- function(Akaike_weights_
 
 
 
-# Get the ratio between the pairwise weights
-#######################################################
-# AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref
-#######################################################
-#' Get the ratio between the pairwise Akaike Weights
-#' 
-#' Given the relative likelihoods of the models, calculate the Akaike weight of the models. Akaike
-#' weights sum to 1.
-#' 
-#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
-#' discussion of AIC and its uses.
-#' 
-#' @param restable A \code{\link[base]{data.frame}} with at least columns named "LnL" and "nparams".
-#' @param colname_to_use The name of the column containing AIC values.
-#' @param ref_model What is the row of the reference model?  "best", "worst", or a row number.
-#' @param add_to_table If TRUE, add to the main table and return the main table. If FALSE, return just the Akaike Weights results.
-#' @return \code{restable}, the modified table, or \code{AICstats_pairwise}, the pairwise Akaike statistics.
-#' @export
-#' @seealso \code{\link{get_Akaike_weights_from_rel_likes_pairwise}}, \code{\link{get_Akaike_weights_from_rel_likes}}, 
-#' \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
-#' @examples
-#' 
-#' tmptable = adf(c(40, 50, 60))
-#' names(tmptable) = "AIC"
-#' AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref(restable=tmptable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
-#' 
-AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref <- function(restable, colname_to_use="AIC", ref_model="best", add_to_table=TRUE)
-	{
-	# Initialize AICvals
-	AICvals = NA
-	
-	# Extract the AIC vals
-	cmdstr = paste("AICvals = restable$", colname_to_use, sep="")
-	eval(parse(text=cmdstr))
-	
-	# Get the pairwise delta AICs
-	get_rownum_ref_model(AICvals, ref_model="best")
-	deltaAICs_pairwise = get_deltaAIC_pairwise_w_ref_model(AICvals, ref_model)
-
-	# Get the pairwise relative likelihoods (likelihoods of the models given the list of models)
-	# n x 2 matrix
-	rel_likes_AIC_pairwise = rel_likes_from_deltaAICs_pairwise(deltaAICs_pairwise)
-	
-	# Calculate the pairwise Akaike weights
-	Akaike_weights_pairwise = get_Akaike_weights_from_rel_likes_pairwise(rel_likes_AIC_pairwise)
-	
-	# Calculate the pairwise ratio (for only the row; the named row is obvious)
-	Akaike_weight_ratios_pairwise = get_Akaike_weight_ratio_from_Akaike_pairwise_weights(Akaike_weights_pairwise)
-	
-	# Make the AICstats_pairwise table	
-	AICstats_pairwise = cbind(deltaAICs_pairwise, rel_likes_AIC_pairwise, Akaike_weights_pairwise, Akaike_weight_ratios_pairwise)
-	
-	# Change the names to specify AIC, AICc, etc.
-	names(AICstats_pairwise) = paste(colname_to_use, "_", names(AICstats_pairwise), sep="")
-	
-	
-	if (add_to_table == TRUE)
-		{
-		restable = cbind(restable, AICstats_pairwise)
-		return(restable)
-		} else {
-		return(AICstats_pairwise)
-		}
-	return("ERROR!")	
-	}
-
-
 
 # Older methods
 # NOTE: AIC weight = the model probability, between 0 and 1.  The weights ALWAYS sum to 1
@@ -2034,6 +2611,7 @@ AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref <- function(r
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICval_1 = 20
 #' AICvals = c(20,30,40)
@@ -2086,6 +2664,7 @@ getAIC_weight_for_model1 <- function(AICval_1, AICvals)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICval_1 = 20
 #' AICval_2 = 30
@@ -2133,6 +2712,7 @@ get_AICweight_ratio_model1_over_model2 <- function(AICval_1, AICval_2)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICval_1 = 20
 #' AICval_2 = 30
@@ -2185,6 +2765,7 @@ get_relative_prob_model1old <- function(AICval_1, AICval_2)
 #'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
+#' test=1
 #' 
 #' AICval_1 = 20
 #' AICval_2 = 30
@@ -2222,101 +2803,6 @@ get_relative_prob_model2old <- function(AICval_1, AICval_2)
 #######################################################
 # AICstats_2models
 #######################################################
-
-#' Calculate all LRT and AIC related stats between two models
-#' 
-#' The Likelihood Ratio Test (LRT) is a standard method for testing whether or not the data likelihood
-#' conferred by a more complex is significantly better than the data likelihood conferred by
-#' the simpler model.  See \code{\link{lrttest}} and \code{\link{lrttest_on_summary_table}} for more discussion.
-#' 
-#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
-#' discussion of AIC and its uses.
-#'
-#' This function assumes that \code{LnL_1} and \code{numparams1} refer to the more complex model, and that \code{LnL_2}
-#' and \code{numparams2} refer to the simpler model nested within the more complex one.
-#' 
-#' @param LnL_1 Log-likelihood of more complex model.
-#' @param LnL_2 Log-likelihood of simpler complex model.
-#' @param numparams1 Number of free parameters of the more complex model.
-#' @param numparams2 Number of free parameters of the less complex model.
-#' @return \code{LRT_AIC_results} A table of LRT and AIC results.
-#' @export
-#' @seealso \code{\link{lrttest}}, \code{\link{lrttest_on_summary_table}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
-#' @examples
-#' test=1
-#' 
-AICstats_2models <- function(LnL_1, LnL_2, numparams1, numparams2)
-	{
-	defaults='
-	LnL_1=alt_LnL; LnL_2=null_LnL; numparams1=num_free_branches_nonclock; numparams2=num_free_branches_clock
-	'
-	
-	# Run Likelihood Ratio Test (LRT)	
-	LRT_result = lrttest(LnL_1, LnL_2, numparams1, numparams2, returnwhat="all")
-	
-	# AIC results
-	AIC_results = NULL
-	AIC_results_names = NULL
-	
-	# Combine into list
-	LnLs = c(LnL_1, LnL_2)
-	numparams_list = c(numparams1, numparams2)
-	
-	num_models = length(LnLs)
-	
-	# Make AIC list
-	AIC_list = rep(NA, num_models)
-	
-	for (i in 1:num_models)
-		{
-		AIC_list[i] = getAIC(LnL=LnLs[i], numparams_list[i])
-		}
-	
-	# Get relative weight of each model
-	AICweight_list = rep(NA, num_models)
-	for (i in 1:num_models)
-		{
-		AICweight_list[i] = getAIC_weight_for_model1(AICval_1=AIC_list[i], AICvals=AIC_list)
-		}
-	
-	AICweight_ratio_model1 = get_AICweight_ratio_model1_over_model2(AICval_1=AIC_list[1], AICval_2=AIC_list[2])
-	AICweight_ratio_model2 = get_AICweight_ratio_model1_over_model2(AICval_1=AIC_list[2], AICval_2=AIC_list[1])
-	
-	nums = seq(1, num_models, 1)
-	
-	
-	# Put together the results
-	AIC_results = c(AIC_results, AIC_list)
-	AIC_names = paste("AIC", nums, sep="")
-	
-	AIC_results = c(AIC_results, AICweight_list)
-	AICweight_list_names = paste("AICwt", nums, sep="")
-	
-	AIC_results = c(AIC_results, AICweight_ratio_model1, AICweight_ratio_model2)
-	relprob_names = c("AICweight_ratio_model1", "AICweight_ratio_model2")
-	
-	# Names
-	AIC_results_names = c(AIC_names, AICweight_list_names, relprob_names)
-	
-	AIC_results2 = matrix(AIC_results, nrow=1)
-	AIC_results3 = adf2(AIC_results2)
-	names(AIC_results3) = AIC_results_names
-	
-	AIC_results = AIC_results3
-	
-	
-	# Merge in LRT
-	LRT_AIC_results = cbind(LRT_result, AIC_results)
-	
-	return(LRT_AIC_results)
-	}
 
 
 
@@ -2357,6 +2843,7 @@ AICstats_2models <- function(LnL_1, LnL_2, numparams1, numparams2)
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
+#' test=1
 #' 
 #' # Setup data
 #' \dontrun{
@@ -2432,6 +2919,7 @@ pdfit <- function(table_vals, file_prefix="tmptable", size="\\tiny", gettex=FALS
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
+#' test=1
 #' 
 #' # Setup data
 #' \dontrun{
@@ -2470,6 +2958,10 @@ pdftable <- function(table_vals, pdffn="tmptable.pdf", size="\\tiny", tmpdir="~"
 	
 	return(pdffn)
 	}
+
+
+
+
 
 
 

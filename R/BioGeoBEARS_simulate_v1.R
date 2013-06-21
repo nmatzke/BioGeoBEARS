@@ -1,8 +1,8 @@
 # source("/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_simulate_v1.R")
 
-require(ape)
-require(rexpokit)
-require(cladoRcpp)
+require("ape")
+require("rexpokit")
+require("cladoRcpp")
 
 
 # Qmat contains the d & e probs
@@ -477,6 +477,7 @@ simulated_indexes_to_tipranges_file <- function(simulated_states_by_node, areas_
 #' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
 #' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
 #' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}.
+#' @param unlist_TF Unlist the output? Default TRUE.
 #' @return \code{inf_statesvec} The inferred vector of states.
 #' @export
 #' @seealso \code{\link{get_ML_probs}}, \code{\link{bears_2param_standard_fast}}, \code{\link{get_ML_state_indices}}
@@ -491,7 +492,7 @@ simulated_indexes_to_tipranges_file <- function(simulated_states_by_node, areas_
 #' @examples
 #' testval=1
 #' 
-get_ML_states <- function(relprobs_matrix)
+get_ML_states <- function(relprobs_matrix, unlist_TF=TRUE)
 	{
 	inf_statesvec = as.list(rep(-1, times=nrow(relprobs_matrix)))
 	
@@ -519,7 +520,7 @@ get_ML_states <- function(relprobs_matrix)
 		# Number of matches
 		nummatches = sum(match_max_TF)
 		nummatches
-		print(nummatches)
+		#print(nummatches)
 		
 		if (nummatches == 1)
 			{
@@ -529,14 +530,27 @@ get_ML_states <- function(relprobs_matrix)
 		
 		if (nummatches > 1)
 			{
-			cat("multiple states tied\n")
-			inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF])
+			cat("\nNote: multiple states tied\n")
+			# unlist_TF
+			if (unlist_TF == TRUE)
+				{
+				cat("\nNote: picking the first state in the tie; use unlist_TF=FALSE to see all states.\n")
+				inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF][1])
+				} else {
+				inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF])
+				}
 			} 
 		
 		}
 	
+	if (unlist_TF == TRUE)
+		{
+		inf_statesvec = unlist(inf_statesvec)
+		}
+	
 	
 	# Return the list of states
+	# (as 0-based indices)
 	return(inf_statesvec)
 	}
 
@@ -565,6 +579,7 @@ get_ML_states <- function(relprobs_matrix)
 #' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
 #' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
 #' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}..
+#' @param unlist_TF Unlist the output? Default TRUE.
 #' @return \code{inf_probsvec} The inferred vector of probabilities of ML states.
 #' @export
 #' @seealso \code{\link{get_ML_probs}}, \code{\link{bears_2param_standard_fast}}, \code{\link{get_ML_state_indices}}
@@ -579,7 +594,7 @@ get_ML_states <- function(relprobs_matrix)
 #' @examples
 #' testval=1
 #' 
-get_ML_probs <- function(relprobs_matrix)
+get_ML_probs <- function(relprobs_matrix, unlist_TF=TRUE)
 	{
 	inf_probsvec = as.list(rep(-1, times=nrow(relprobs_matrix)))
 	
@@ -617,11 +632,22 @@ get_ML_probs <- function(relprobs_matrix)
 		if (nummatches > 1)
 			{
 			cat("multiple states tied\n")
-			inf_probsvec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
+			# unlist_TF
+			if (unlist_TF == TRUE)
+				{
+				cat("\nNote: picking the first state in the tie; use unlist_TF=FALSE to see all states.\n")
+				inf_probsvec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF][1])
+				} else {
+				inf_probsvec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
+				}
 			} 
 
 		}
 	
+	if (unlist_TF == TRUE)
+		{
+		inf_probsvec = unlist(inf_probsvec)
+		}
 	
 	# Return the list of states
 	return(inf_probsvec)
@@ -1161,6 +1187,23 @@ get_infparams_optimx_nosim <- function(results_object, inffn)
 		infparams$maxent01v = 0.0001
 		return(infparams)
 		}
+
+	if (grepl(pattern="2param_DIVA_fast", x=inffn))
+		{
+		infparams$j = 0
+		
+		# Calculate the actual weights
+		ysv = 1-infparams$j
+		v = ysv * 0.5
+		ys = ysv - v
+
+		infparams$v = v
+		infparams$ys = ys
+		infparams$maxent01 = 0.0001
+		infparams$maxent01v = 0.5
+		return(infparams)
+		}
+
 	
 	if (grepl(pattern="3param_standard_fast", x=inffn))
 		{

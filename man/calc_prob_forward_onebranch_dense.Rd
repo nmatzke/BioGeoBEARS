@@ -64,21 +64,9 @@ calc_prob_forward_onebranch_dense(relprobs_branch_bottom, branch_length=20, Qmat
   \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
   \url{http://www.bioinf.org/molsys/data/idiots.pdf}
 
-  Matzke N (2012). "Founder-event speciation in BioGeoBEARS
-  package dramatically improves likelihoods and alters
-  parameter inference in Dispersal-Extinction-Cladogenesis
-  (DEC) analyses." _Frontiers of Biogeography_, *4*(suppl.
-  1), pp. 210. ISSN 1948-6596, Poster abstract published in
-  the Conference Program and Abstracts of the International
-  Biogeography Society 6th Biannual Meeting, Miami,
-  Florida. Poster Session P10: Historical and
-  Paleo-Biogeography. Poster 129B. January 11, 2013, <URL:
-  \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}>.
+  Matzke_2012_IBS
 
-  Foster PG (2001). "The Idiot's Guide to the Zen of
-  Likelihood in a Nutshell in Seven Days for Dummies,
-  Unleashed." Online PDF, widely copied, <URL:
-  \url{http://www.bioinf.org/molsys/data/idiots.pdf}>.
+  FosterIdiots
 }
 \seealso{
   \code{\link{expokit_dgpadm_Qmat2}},

@@ -1,62 +1,69 @@
 # source("/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_basics_v1.R")
 
-require(ape)
-require(rexpokit)
-require(cladoRcpp)
+require("ape")
+require("rexpokit")
+require("cladoRcpp")
 
 
 
 
-#######################################################
-# Defining Classes
-#######################################################
-# Based on advice here:
-# http://stackoverflow.com/questions/7368262/how-to-properly-document-s4-class-slots-using-roxygen2
-
+# axisPhylo() with more flexibility in labeling
 
 #######################################################
-# tipranges
+# axisPhylo2
 #######################################################
-#' The tipranges class
-#'
-#' This class holds geographic range data for each tip in a phylogeny.
-#'
-#' Geographic range data can be read into a tipranges class object with BioGeoBEARS functions, e.g. \code{define_tipranges_object} or
-#' \code{getareas_from_tipranges_object}.
-#'
-#' Class \code{tipranges} is an extension of the \code{\link{data.frame}} class.  It is used for holding
-#' discrete geographic range data for the tips on a phylogeny. Geographic ranges are represented with bit 
-#' encoding (0/1) indicating absence or presence in each possible area.
+#' axisPhylo with more flexibility in labeling
 #' 
-#' This is just a data.frame with:
-#' rows = taxanames\cr
-#' columns = area names\cr
-#' cells = 0/1 representing empty/occupied\cr
-#'
-#'@section Slots: 
-#'  \describe{
-#'    \item{\code{df}:}{Data.frame of class \code{"numeric"}, containing data from df}
-#'  }
-#'
+#' Hacking axisPhylo to make it more flexible
+#' 
+#' @param side The side to plot on (default 1, bottom)
+#' @param roundlabels Number of digits to round to, if desired
+#' @param minage Starting age, if desired
+#' @param ... Additional arguments to standard functions
+#' @return nothing
+#' @export
 #' @note Go BEARS!
-#' @name tipranges 
-#' @rdname tipranges-class
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}},
-#' \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{areas_list_to_states_list_new}},
-#' \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
+#'	 @cite FosterIdiots
 #' @examples
-#' tipranges_object = define_tipranges_object()
-#' tipranges_object
-#'
-setClass("tipranges", representation(df="data.frame"),
-    contains = "numeric"
-)
-
+#' testval=1
+#' 
+axisPhylo2 <- function (side = 1, roundlabels=FALSE, minage=0, ...) 
+	{
+    lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
+    if (lastPP$type %in% c("phylogram", "cladogram")) {
+        if (lastPP$direction %in% c("rightwards", "leftwards")) {
+            x <- pretty(lastPP$xx)
+            if (lastPP$direction == "rightwards") 
+                maxi <- max(lastPP$xx)
+            else {
+                maxi <- min(lastPP$xx)
+                x <- -x
+            }
+        }
+        else {
+            x <- pretty(lastPP$yy)
+            if (lastPP$direction == "upwards") 
+                maxi <- max(lastPP$yy)
+            else {
+                maxi <- min(lastPP$yy)
+                x <- -x
+            }
+        }
+    }
+    if (roundlabels)
+		{
+		axis(side = side, at = c(maxi - x), labels = abs(minage+x), ...)
+		}
+	else
+		{
+		axis(side = side, at = c(maxi - x), labels = round(abs(minage+x), digits=roundlabels), ...)
+		}
+	}
 
 
 
@@ -106,82 +113,14 @@ normat <- function(relative_matrix)
 
 
 
+
+
 #######################################################
 # Lagrange-related functions
 #######################################################
 
 
 
-
-#######################################################
-# define_tipranges_object
-#######################################################
-#' Define a tipranges class and object
-#' 
-#' Class \code{tipranges} is an extension of the \code{\link{data.frame}} class.  It is used for holding
-#' discrete geographic range data for the tips on a phylogeny. Geographic ranges are represented with bit 
-#' encoding (0/1) indicating absence or presence in each possible area.
-#' 
-#' This is just a data.frame with:
-#' rows = taxanames\cr
-#' columns = area names\cr
-#' cells = 0/1 representing empty/occupied\cr
-#' 
-#' @param tmpdf The user may input a \code{data.frame} holding the range data, if they like. Default is \code{NULL}, which
-#' means the function will produce a temporary \code{data.frame} as an example.
-#' @return \code{tipranges_object} The tipranges object, of class \code{tipranges}
-#' @export
-#' @seealso \code{\link{getareas_from_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
-#' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' testval=1
-#' tipranges_object = define_tipranges_object()
-#' tipranges_object
-#'
-define_tipranges_object <- function(tmpdf=NULL)
-	{
-	# Define the tipranges class;
-	# Now done separately
-	#tipranges_class = setClass("tipranges", representation(df="data.frame"))
-
-	# Create an instance of the class
-	
-	# junk:
-	## A class that extends the built-in data type "numeric"
-	# setClass("numWithId", representation(id = "character"),
-    #     contains = "numeric")
-	
-	# Default tip ranges data
-	areanames = c("A", "B", "C")
-	tipnames = c("tip1", "tip2", "tip3")
-	tip1_geog = c(1, 0, 0)
-	tip2_geog = c(0, 1, 0)
-	tip3_geog = c(0, 0, 1)
-	
-	# Make a simple default example df if needed
-	if (is.null(tmpdf))
-		{
-		# Make the temporary data frame
-		tmpdf = cbind(tip1_geog, tip2_geog, tip3_geog)
-		tmpdf = adf(tmpdf)
-		names(tmpdf) = areanames
-		row.names(tmpdf) = tipnames
-		}
-	
-	tipranges_object = new("tipranges", df=tmpdf)
-
-	# you can get the dataframe with
-	# tipranges_object@df
-
-
-	return(tipranges_object)
-	}
 
 
 #######################################################
@@ -211,6 +150,53 @@ getareas_from_tipranges_object <- function(tipranges)
 	{
 	areanames = names(tipranges@df)
 	return(areanames)
+	}
+
+
+#######################################################
+# get_tiplabel_ranges
+#######################################################
+#' For each tip, get a text string of the areas in a tipranges object.
+#' 
+#' This function extracts the names of the areas in a \code{tipranges} object.  Just a shortcut for 
+#' \code{names(tipranges@@df)}.
+#' 
+#' @param tipranges An object of class \code{tipranges}.
+#' @param tr An ape phylo object.
+#' @param sep Input to \code{\link[base]{paste}}.
+#' @return \code{areanames}, a list of the names of the areas
+#' @export
+#' @seealso \code{\link{define_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @examples
+#' testval=1
+#' tipranges_object = define_tipranges_object()
+#' tipranges_object
+#'
+#' areanames = getareas_from_tipranges_object(tipranges_object)
+#' areanames
+#'
+get_tiplabel_ranges <- function(tipranges, tr, sep="")
+	{
+	# Make sure the order matches the tr order
+	tipranges = order_tipranges_by_tr(tipranges, tr)
+
+	tmpdf = tipranges@df
+	tmpnames = names(tmpdf)
+	tmpnames_list = list()
+	
+	# TRUE/FALSE occupied
+	tmpdf_TF = (tmpdf != 0)
+	
+	for (i in 1:nrow(tmpdf))
+		{
+		tmpnames_list[[i]] = c(tmpnames[tmpdf_TF[i,]])
+		}
+	
+	tipranges_txt = sapply(FUN=paste, tmpnames_list, collapse="", sep=sep)
+	return(tipranges_txt)
 	}
 
 
@@ -766,6 +752,203 @@ getranges_from_LagrangePHYLIP <- function(lgdata_fn="lagrange_area_data_file.dat
 
 
 
+#######################################################
+# order_tipranges_by_tree_tips
+#######################################################
+#' Reorder the rows in a \code{tipranges} object, to correspond to tree tips
+#' 
+#' The tipranges object, as read from a LAGRANGE/PHYLIP-style geography file, may not
+#' have the species names as the same order as they are in the tips of the tree. This 
+#' function allows the user to reorder them to match the tree
+#'
+#' @param tipranges An object of class \code{\link{tipranges}}.
+#' @param tr A \code{\link[ape]{phylo}} tree object.
+#' @return \code{tipranges} An object of class \code{tipranges}
+#' @export
+#' @seealso \code{\link{tipranges_to_area_strings}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#'	 @cite SmithRee2010_CPPversion
+#' @examples
+#' testval=1
+#' 
+#' # Get the example files directory
+#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # Set the filename (Hawaiian Psychotria from Ree & Smith 2008)
+#' 
+#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' tr = read.tree(trfn)
+#' 
+#' fn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' tipranges1 = getranges_from_LagrangePHYLIP(lgdata_fn=fn)
+#' tipranges1
+#' 
+#' # Reorder the tipranges object
+#' tipranges2 = order_tipranges_by_tree_tips(tipranges1, tr)
+#' tipranges2
+#' 
+order_tipranges_by_tree_tips <- function(tipranges, tr)
+	{
+	# Get the order of the tips
+	matchnums = get_indices_where_list1_occurs_in_list2(list1=tr$tip.label, list2=rownames(tipranges@df))
+	
+	# Reorder the tipranges object
+	tipranges@df = tipranges@df[matchnums,]
+	
+	return(tipranges)
+	}
+
+
+
+
+#######################################################
+# tipranges_to_area_strings
+#######################################################
+#' Convert tipranges binary coding to range strings
+#' 
+#' This function converts the 0110-type format of the tipranges object into a list of strings
+#' describing the geographic ranges.  E.g., 1100 becomes AB, 0111 become BCD (assuming the regions
+#' are abbreviated A, B, C...).  Users can input their preferred abbreviations with \code{areaabbr}.
+#' 
+#' Note that you will HAVE to use \code{\link{order_tipranges_by_tree_tips}} on the tipranges object first,
+#' to make sure the tipranges are in the correct order on the tree tips.
+#'
+#' @param tipranges An object of class \code{\link{tipranges}}.
+#' @param areaabbr A vector of the abbreviations (preferably 1 character each).
+#' @return \code{tiprange_names} A vector of strings.
+#' @export
+#' @seealso \code{\link{order_tipranges_by_tree_tips}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#'	 @cite SmithRee2010_CPPversion
+#' @examples
+#' 
+#' # Get the example files directory
+#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' # Set the filename (Hawaiian Psychotria from Ree & Smith 2008)
+#' 
+#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' tr = read.tree(trfn)
+#' 
+#' fn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' tipranges1 = getranges_from_LagrangePHYLIP(lgdata_fn=fn)
+#' tipranges1
+#' tipranges_to_area_strings(tipranges=tipranges1, areaabbr=NULL)
+#' tipranges_to_area_strings(tipranges=tipranges1, areaabbr=c("K", "O", "M", "H"))
+#' 
+#' # Reorder the tipranges object
+#' tipranges2 = order_tipranges_by_tree_tips(tipranges1, tr)
+#' tipranges2
+#' tipranges_to_area_strings(tipranges=tipranges2, areaabbr=NULL)
+#' tipranges_to_area_strings(tipranges=tipranges2, areaabbr=c("K", "O", "M", "H"))
+#' 
+tipranges_to_area_strings <- function(tipranges, areaabbr=NULL)
+	{
+	if (is.null(areaabbr))
+		{
+		areaabbr = names(tipranges@df)
+		} else {
+		names(tipranges@df) = areaabbr
+		}
+	
+	tiprangesTF = tipranges@df == 1
+	tiprange_names = apply(X=tiprangesTF, 1, getname, tiparea_names=areaabbr)
+	
+	
+	return(tiprange_names)
+	}
+
+
+
+#######################################################
+# getname
+#######################################################
+#' Collapse range abbreviations to strings
+#' 
+#' This is a utility function used by apply in \code{\link{tipranges_to_area_strings}}. It extracts
+#' the present areas and concatenates the abbreviations for one row.
+#'
+#' @param TFrow A list of TRUE and FALSE
+#' @param tiparea_names The names of each area
+#' @param sep The sep argument for \code{\link[base]{paste}}.
+#' @return \code{tiparea} A string.
+#' @export
+#' @seealso \code{\link{order_tipranges_by_tree_tips}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), tiparea_names=c("K", "O", "M", "H"), sep="")
+#' getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), tiparea_names=c("K", "O", "M", "H"), sep="_")
+#' 
+getname <- function(TFrow, tiparea_names, sep="")
+	{
+	words = tiparea_names[TFrow]
+	tiparea = paste(words, sep=sep, collapse="")
+	return(tiparea)
+	}
+
+
+#######################################################
+# states_list_indexes_to_areastxt
+#######################################################
+#' States (ranges) lists to txt string of the areas
+#' 
+#' This is a utility function.
+#'
+#' @param states_list A list of states, where each state consists of a list of areas.
+#' @param areanames A list of areanamess.
+#' @param counting_base Does states_list start indexing areas from 0 (default) or 1?
+#' @param sep Character to merge on, as in \code{\link[base]{paste}}. Default "".
+#' @return \code{tiparea} A string.
+#' @export
+#' @seealso \code{\link{order_tipranges_by_tree_tips}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+#' 
+states_list_indexes_to_areastxt <- function(states_list, areanames, counting_base=0, sep="")
+	{
+	defaults='
+	areas = c("K", "O", "M", "H")
+	states2 = rcpp_areas_list_to_states_list(areas=areas)
+	areanames = c("K", "O", "M", "H")
+	counting_base=0
+	states_list_indexes_to_areanames(states_list=states2, areanames, counting_base=0)
+	'
+	# Increment by 1 if your state indexes are 0-based
+	if (counting_base == 0)
+		{
+		states_list = sapply(X=states_list, FUN="+", 1)
+		}
+	
+	# sapply getname through the list of lists of indexes
+	areastxt = sapply(X=states_list, FUN=getname, tiparea_names=areanames, sep=sep)
+	
+	return(areastxt)
+	}
 
 
 #######################################################
@@ -1095,12 +1278,18 @@ maxsize <- function (areasizes_possible_01)
 #' dispersal matrix giving the relative probability of dispersal between areas.  The function
 #' fills in these dispersals probabilities with the value 1.  The user can then modify this
 #' as desired.
+#' dispersal_multipliers_matrix Default NULL
+#' distances_mat Default NULL
+#' x_exponent Default 0
 #' 
 #' If only a states list is given, the list of areas is calculated by getting \code{\link[base]{unique}} values from
 #' the concatenated states list.
 #' 
 #' @param areas A list of areas; if \code{NULL}, the states list will be used.
 #' @param states_list A list of states, where each state consists of a list of areas. A default example list is provided.
+#' @param dispersal_multipliers_matrix Default NULL.
+#' @param distances_mat Default NULL.
+#' @param x_exponent Default 0.
 #' @return \code{dispersal_multiplier_matrix} A square matrix, with 1s for all cells.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_de}}
@@ -1116,7 +1305,7 @@ maxsize <- function (areasizes_possible_01)
 #' make_dispersal_multiplier_matrix(areas=NULL, states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")))
 #' make_dispersal_multiplier_matrix(areas=c("A","B","C","D"))
 #' 
-make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")))
+make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=list("_", c("A"), c("B"), c("C"), c("A","B"), c("B","C"), c("A","C"), c("A","B","C")), dispersal_multipliers_matrix=NULL, distances_mat=NULL, x_exponent=0)
 	{
 	defaults='
 	areas=NULL
@@ -1140,13 +1329,24 @@ make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=list("_", c
 	# Make a dispersal matrix giving the relative
 	# probabilities of dispersal between
 	# each area (areas, not ranges)
-	numareas = length(areas)
-	dispersal_multiplier_matrix = as.data.frame(matrix(data=rep(1, numareas*numareas), nrow=numareas, ncol=numareas, byrow=TRUE))
-
-	names(dispersal_multiplier_matrix) = areas
-	rownames(dispersal_multiplier_matrix) = areas
+	if (is.null(dispersal_multipliers_matrix))
+		{
+		numareas = length(areas)
+		dispersal_multipliers_matrix = as.data.frame(matrix(data=rep(1, numareas*numareas), nrow=numareas, ncol=numareas, byrow=TRUE))
 	
-	return(dispersal_multiplier_matrix)
+		names(dispersal_multipliers_matrix) = areas
+		rownames(dispersal_multipliers_matrix) = areas
+		}
+	
+	# If the distances matrix is NOT null, multiply it by the distance^-x_exponent matrix
+	if (!is.null(distances_mat))
+		{
+		# By default, x_exponent is 0, i.e., no effect
+		prob_dispersal_by_distance = distances_mat ^ (-1 * x_exponent)
+		dispersal_multipliers_matrix = dispersal_multipliers_matrix * prob_dispersal_by_distance
+		}
+	
+	return(dispersal_multipliers_matrix)
 	}
 
 
@@ -4045,11 +4245,260 @@ nullsym_to_NA <- function(mat, nullsym="-")
 
 
 
+#######################################################
+# Colors and legends
+#######################################################
+
+
+#######################################################
+# get_colors_for_numareas
+#######################################################
+#' Get colors for a certain number of single areas
+#' 
+#' Like it says.
+#' 
+#' @param numareas The number of areas
+#' @param use_rainbow If TRUE, force use of \code{rainbow()}
+#' @return \code{colors_matrix} The colors for the single areas, 1 column per area
+#' @export
+#' @seealso \code{\link[stats]{optim}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' testval=1
+#' 
+get_colors_for_numareas = function(numareas, use_rainbow=FALSE)
+	{
+	if (use_rainbow == TRUE)
+		{
+		area_colors = rainbow(numareas)
+		colors_matrix = col2rgb(area_colors)
+		return(colors_matrix)
+		}
+	
+	if (numareas == 2)
+		{
+		area_colors = c("black", "white")
+		}
+	if (numareas == 3)
+		{
+		area_colors = c("blue", "green", "red")
+		}
+	if (numareas == 4)
+		{
+		area_colors = c("blue", "green3", "yellow", "red")
+		}
+	if (numareas == 5)
+		{
+		area_colors = c("blue", "cyan", "green3", "yellow", "red")
+		}
+	if (numareas == 6)
+		{
+		area_colors = c("blue", "cyan", "green3", "yellow", "red", "violet")
+		}
+	if (numareas == 7)
+		{
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")
+		}
+	if (numareas == 7)
+		{
+		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")
+		}
+	if (numareas > 7)
+		{
+		area_colors = col2rgb(rainbow(numareas))
+		}
+	
+	colors_matrix = col2rgb(area_colors)
+	return(colors_matrix)	
+	}
 
 
 
 
 
+#######################################################
+# mix_colors_for_states
+#######################################################
+#' Mix colors logically to produce colors for multi-area ranges
+#' 
+#' Like it says.
+#' 
+#' @param colors_matrix A column with a color for each single area
+#' @param states_list_0based_index States list giving areas, 0-based
+#' @param exclude_null If TRUE, null ranges are excluded (however coded). Default TRUE.
+#' @return \code{colors_list_for_states} The colors for the ML states
+#' @export
+#' @seealso \code{\link[stats]{optim}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' testval=1
+#' 
+mix_colors_for_states <- function(colors_matrix, states_list_0based_index, exclude_null=TRUE)
+	{
+	if (exclude_null == TRUE)
+		{
+		states_list_0based_index[states_list_0based_index == "_"] = NULL
+		states_list_0based_index[states_list_0based_index == ""] = NULL
+		states_list_0based_index[states_list_0based_index == "NA"] = NULL
+		states_list_0based_index[is.na(states_list_0based_index)] = NULL
+		states_list_0based_index[is.null(states_list_0based_index)] = NULL
+		}
+	
+	
+	colors_list_for_states = rep(NA, length(states_list_0based_index))   #matrix(data=NA, nrow=3, ncol=length(states_list_0based_index))
+	
+	# There is a column for each single area
+	numareas = ncol(colors_matrix)
+	
+	
+	# Combine the colors of the input areas, and, if 2 areas or more, divide by (numareas-0.5)
+	# (assures no duplication of colors)
+	for (i in 1:length(states_list_0based_index))
+		{
+		tmpareas_in_state_0based_index = states_list_0based_index[[i]]
+		tmp_numareas = length(tmpareas_in_state_0based_index)
+		
+		# Check for null etc.
+		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))
+			{
+			# NULL/empty range gets black
+			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)
+			next()
+			}
+		
+		
+		
+		# Fill in the colors for this area
+		
+		# Make it white, if its all areas
+		if (tmp_numareas == numareas)
+			{
+			# input white
+			colors_list_for_states[i] = rgb(red=255, green=255, blue=255, maxColorValue=255)
+			next()
+			}
+		
+		# Otherwise
+		sum_color_nums = rep(0, 3)
+		for (j in 1:tmp_numareas)
+			{
+			tmparea_1based_index = 1 + tmpareas_in_state_0based_index[j]
+			
+			color_nums = colors_matrix[ ,tmparea_1based_index]
+			sum_color_nums = sum_color_nums + color_nums
+			}
+		
+		if (tmp_numareas >= 2)
+			{
+			divide_by = (tmp_numareas - 0.0)
+			} else {
+			divide_by = 1
+			}
+		
+		sum_color_nums = round(sum_color_nums / divide_by)
+		
+		# Save the colors as hex format
+		colors_list_for_states[i] = rgb(
+			red=sum_color_nums[1], 
+			green=sum_color_nums[2], 
+			blue=sum_color_nums[3], 
+			maxColorValue=255)
+		}
+	
+	return(colors_list_for_states)
+	}
+
+
+
+# Convert a list of ranges text (KOM, MH, KOMIH, etc.) 
+#######################################################
+# rangestxt_to_colors
+#######################################################
+#' Convert a list of ranges text (KOM, MH, KOMIH, etc.) 
+#' 
+#' Like it says.
+#' 
+#' @param possible_ranges_list_txt A list of the allowed ranges/states
+#' @param colors_list_for_states The corresponding colors
+#' @param MLstates The ML states for the internal nodes
+#' @return \code{MLcolors} The colors for the ML states
+#' @export
+#' @seealso \code{\link[stats]{optim}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' testval=1
+#' 
+rangestxt_to_colors <- function(possible_ranges_list_txt, colors_list_for_states, MLstates)
+	{
+	if (length(possible_ranges_list_txt) != length(colors_list_for_states))
+		{
+		stop("Error: possible_ranges_list_txt and colors_list_for_states must be the same length")
+		}
+	
+	ranges_colors = 1:length(MLstates)
+	
+	# Nums
+	#nums = 1:length(possible_ranges_list_txt)
+	
+
+	match_indices = get_indices_where_list1_occurs_in_list2(list1=MLstates, list2=possible_ranges_list_txt)
+	MLcolors = colors_list_for_states[match_indices]
+	
+	return(MLcolors)
+	}
+
+
+
+
+#######################################################
+# colors_legend
+#######################################################
+#' Plot a colors legend for geographic ranges
+#' 
+#' Like it says.
+#' 
+#' @param possible_ranges_list_txt A list of the allowed ranges/states
+#' @param colors_list_for_states The corresponding colors
+#' @param ncol Number of columns in the legend, default 2
+#' @param cex Text size multiplier, default 2.5
+#' @return Nothing
+#' @export
+#' @seealso \code{\link[stats]{optim}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' testval=1
+#' 
+colors_legend <- function(possible_ranges_list_txt, colors_list_for_states, ncol=2, cex=2.5)
+	{
+	
+	# Plot, no borders (bty="n"), no labels (xlab, ylab), no tick marks (xaxt, yaxt)
+	plot(1:10, 1:10, pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
+	#lines(1:4,4:1, col="blue") 
+	#legend("top", leg=c("a","b"),col=c("black","blue"), fill=TRUE) 
+	legend("top", legend=possible_ranges_list_txt, fill=colors_list_for_states, ncol=2, title="Legend", cex=2.5)#, fill=TRUE) 
+
+	
+	}
 
 
 
@@ -4125,6 +4574,475 @@ process_optim <- function(optim_results, max_num_params=NULL)
 	return(tmprow3)
 	}
 
+
+
+
+
+#######################################################
+# plot_phylo3_nodecoords
+#######################################################
+#' Modified plot.phylo to return the node coordinates
+#' 
+#' Just the standard plot.phylo (for phylo3 APE objects)
+#' In addition to the standard outputs, this function returns xx and yy,
+#' the plotting coordinates for those nodes.
+#' 
+#' @param x An ape phylo object
+#' @param type Default "phylogram"
+#' @param use.edge.length Default TRUE
+#' @param node.pos Default NULL
+#' @param show.tip.label Default TRUE
+#' @param show.node.label Default FALSE
+#' @param edge.color Default "black"
+#' @param edge.width Default 1
+#' @param edge.lty Default 1
+#' @param font Default 3
+#' @param cex Default par("cex")
+#' @param adj Default NULL
+#' @param srt Default 0
+#' @param no.margin Default FALSE
+#' @param root.edge Default FALSE
+#' @param label.offset Default 0
+#' @param underscore Default FALSE
+#' @param x.lim Default NULL
+#' @param y.lim Default NULL
+#' @param direction Default "rightwards"
+#' @param lab4ut Default "horizontal"
+#' @param tip.color Default "black"
+#' @param plot Default FALSE
+#' @param rotate.tree Default 0
+#' @param ... Additional arguments to standard functions
+#' @return A typical plot object, but with node coordinates added
+#' @export
+#' @seealso \code{\link[stats]{optim}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' testval=1
+#'
+plot_phylo3_nodecoords <- function (x, type = "phylogram", use.edge.length = TRUE, node.pos = NULL, 
+    show.tip.label = TRUE, show.node.label = FALSE, edge.color = "black", 
+    edge.width = 1, edge.lty = 1, font = 3, cex = par("cex"), 
+    adj = NULL, srt = 0, no.margin = FALSE, root.edge = FALSE, 
+    label.offset = 0, underscore = FALSE, x.lim = NULL, y.lim = NULL, 
+    direction = "rightwards", lab4ut = "horizontal", tip.color = "black", 
+    plot = FALSE, rotate.tree = 0, ...) 
+{
+    require("ape")
+    
+    # Try registering foreign functions as in here:
+	# http://cran.r-project.org/doc/manuals/R-exts.html#System-and-foreign-language-interfaces
+    # p_myCfun = R_GetCCallable("packA", "myCfun");
+    
+    Ntip <- length(x$tip.label)
+    if (Ntip == 1) {
+        warning("found only one tip in the tree")
+        return(NULL)
+    }
+    if (any(tabulate(x$edge[, 1]) == 1)) 
+        stop("there are single (non-splitting) nodes in your tree; you may need to use collapse.singles()")
+    .nodeHeight <- function(Ntip, Nnode, edge, Nedge, yy) .C("node_height", 
+        as.integer(Ntip), as.integer(Nnode), as.integer(edge[, 
+            1]), as.integer(edge[, 2]), as.integer(Nedge), as.double(yy), 
+        DUP = FALSE, PACKAGE = "ape")[[6]]
+    .nodeDepth <- function(Ntip, Nnode, edge, Nedge) .C("node_depth", 
+        as.integer(Ntip), as.integer(Nnode), as.integer(edge[, 
+            1]), as.integer(edge[, 2]), as.integer(Nedge), double(Ntip + 
+            Nnode), DUP = FALSE, PACKAGE = "ape")[[6]]
+    .nodeDepthEdgelength <- function(Ntip, Nnode, edge, Nedge, 
+        edge.length) .C("node_depth_edgelength", as.integer(Ntip), 
+        as.integer(Nnode), as.integer(edge[, 1]), as.integer(edge[, 
+            2]), as.integer(Nedge), as.double(edge.length), double(Ntip + 
+            Nnode), DUP = FALSE, PACKAGE = "ape")[[7]]
+    Nedge <- dim(x$edge)[1]
+    Nnode <- x$Nnode
+    ROOT <- Ntip + 1
+    type <- match.arg(type, c("phylogram", "cladogram", "fan", 
+        "unrooted", "radial"))
+    direction <- match.arg(direction, c("rightwards", "leftwards", 
+        "upwards", "downwards"))
+    if (is.null(x$edge.length)) 
+        use.edge.length <- FALSE
+    if (type %in% c("unrooted", "radial") || !use.edge.length || 
+        is.null(x$root.edge) || !x$root.edge) 
+        root.edge <- FALSE
+    if (type == "fan" && root.edge) {
+        warning("drawing root edge with type = 'fan' is not yet supported")
+        root.edge <- FALSE
+    }
+    phyloORclado <- type %in% c("phylogram", "cladogram")
+    horizontal <- direction %in% c("rightwards", "leftwards")
+    xe <- x$edge
+    if (phyloORclado) {
+        phyOrder <- attr(x, "order")
+        if (is.null(phyOrder) || phyOrder != "cladewise") {
+            x <- reorder(x)
+            if (!identical(x$edge, xe)) {
+                ereorder <- match(x$edge[, 2], xe[, 2])
+                if (length(edge.color) > 1) {
+                  edge.color <- rep(edge.color, length.out = Nedge)
+                  edge.color <- edge.color[ereorder]
+                }
+                if (length(edge.width) > 1) {
+                  edge.width <- rep(edge.width, length.out = Nedge)
+                  edge.width <- edge.width[ereorder]
+                }
+                if (length(edge.lty) > 1) {
+                  edge.lty <- rep(edge.lty, length.out = Nedge)
+                  edge.lty <- edge.lty[ereorder]
+                }
+            }
+        }
+        yy <- numeric(Ntip + Nnode)
+        TIPS <- x$edge[x$edge[, 2] <= Ntip, 2]
+        yy[TIPS] <- 1:Ntip
+    }
+    z <- reorder(x, order = "pruningwise")
+    if (phyloORclado) {
+        if (is.null(node.pos)) {
+            node.pos <- 1
+            if (type == "cladogram" && !use.edge.length) 
+                node.pos <- 2
+        }
+        if (node.pos == 1) 
+            yy <- .nodeHeight(Ntip, Nnode, z$edge, Nedge, yy)
+        else {
+            ans <- .C("node_height_clado", as.integer(Ntip), 
+                as.integer(Nnode), as.integer(z$edge[, 1]), as.integer(z$edge[, 
+                  2]), as.integer(Nedge), double(Ntip + Nnode), 
+                as.double(yy), DUP = FALSE, PACKAGE = "ape")
+            xx <- ans[[6]] - 1
+            yy <- ans[[7]]
+        }
+        if (!use.edge.length) {
+            if (node.pos != 2) 
+                xx <- .nodeDepth(Ntip, Nnode, z$edge, Nedge) - 
+                  1
+            xx <- max(xx) - xx
+        }
+        else {
+            xx <- .nodeDepthEdgelength(Ntip, Nnode, z$edge, Nedge, 
+                z$edge.length)
+        }
+    }
+    else {
+        rotate.tree <- 2 * pi * rotate.tree/360
+        switch(type, fan = {
+            TIPS <- x$edge[which(x$edge[, 2] <= Ntip), 2]
+            xx <- seq(0, 2 * pi * (1 - 1/Ntip), 2 * pi/Ntip)
+            theta <- double(Ntip)
+            theta[TIPS] <- xx
+            theta <- c(theta, numeric(Nnode))
+            theta <- .nodeHeight(Ntip, Nnode, z$edge, Nedge, 
+                theta)
+            if (use.edge.length) {
+                r <- .nodeDepthEdgelength(Ntip, Nnode, z$edge, 
+                  Nedge, z$edge.length)
+            } else {
+                r <- .nodeDepth(Ntip, Nnode, z$edge, Nedge)
+                r <- 1/r
+            }
+            theta <- theta + rotate.tree
+            xx <- r * cos(theta)
+            yy <- r * sin(theta)
+        }, unrooted = {
+            nb.sp <- .nodeDepth(Ntip, Nnode, z$edge, Nedge)
+            XY <- if (use.edge.length) unrooted.xy(Ntip, Nnode, 
+                z$edge, z$edge.length, nb.sp, rotate.tree) else unrooted.xy(Ntip, 
+                Nnode, z$edge, rep(1, Nedge), nb.sp, rotate.tree)
+            xx <- XY$M[, 1] - min(XY$M[, 1])
+            yy <- XY$M[, 2] - min(XY$M[, 2])
+        }, radial = {
+            X <- .nodeDepth(Ntip, Nnode, z$edge, Nedge)
+            X[X == 1] <- 0
+            X <- 1 - X/Ntip
+            yy <- c((1:Ntip) * 2 * pi/Ntip, rep(0, Nnode))
+            Y <- .nodeHeight(Ntip, Nnode, z$edge, Nedge, yy)
+            xx <- X * cos(Y + rotate.tree)
+            yy <- X * sin(Y + rotate.tree)
+        })
+    }
+    if (phyloORclado) {
+        if (!horizontal) {
+            tmp <- yy
+            yy <- xx
+            xx <- tmp - min(tmp) + 1
+        }
+        if (root.edge) {
+            if (direction == "rightwards") 
+                xx <- xx + x$root.edge
+            if (direction == "upwards") 
+                yy <- yy + x$root.edge
+        }
+    }
+    if (no.margin) 
+        par(mai = rep(0, 4))
+    if (is.null(x.lim)) {
+        if (phyloORclado) {
+            if (horizontal) {
+                x.lim <- c(0, NA)
+                pin1 <- par("pin")[1]
+                strWi <- strwidth(x$tip.label, "inches")
+                xx.tips <- xx[1:Ntip] * 1.04
+                alp <- try(uniroot(function(a) max(a * xx.tips + 
+                  strWi) - pin1, c(0, 1e+06))$root, silent = TRUE)
+                if (is.character(alp)) 
+                  tmp <- max(xx.tips) * 1.5
+                else {
+                  tmp <- if (show.tip.label) 
+                    max(xx.tips + strWi/alp)
+                  else max(xx.tips)
+                }
+                x.lim[2] <- tmp
+            }
+            else x.lim <- c(1, Ntip)
+        }
+        else switch(type, fan = {
+            if (show.tip.label) {
+                offset <- max(nchar(x$tip.label) * 0.018 * max(yy) * 
+                  cex)
+                x.lim <- c(min(xx) - offset, max(xx) + offset)
+            } else x.lim <- c(min(xx), max(xx))
+        }, unrooted = {
+            if (show.tip.label) {
+                offset <- max(nchar(x$tip.label) * 0.018 * max(yy) * 
+                  cex)
+                x.lim <- c(0 - offset, max(xx) + offset)
+            } else x.lim <- c(0, max(xx))
+        }, radial = {
+            if (show.tip.label) {
+                offset <- max(nchar(x$tip.label) * 0.03 * cex)
+                x.lim <- c(-1 - offset, 1 + offset)
+            } else x.lim <- c(-1, 1)
+        })
+    }
+    else if (length(x.lim) == 1) {
+        x.lim <- c(0, x.lim)
+        if (phyloORclado && !horizontal) 
+            x.lim[1] <- 1
+        if (type %in% c("fan", "unrooted") && show.tip.label) 
+            x.lim[1] <- -max(nchar(x$tip.label) * 0.018 * max(yy) * 
+                cex)
+        if (type == "radial") 
+            x.lim[1] <- if (show.tip.label) 
+                -1 - max(nchar(x$tip.label) * 0.03 * cex)
+            else -1
+    }
+    if (phyloORclado && direction == "leftwards") 
+        xx <- x.lim[2] - xx
+    if (is.null(y.lim)) {
+        if (phyloORclado) {
+            if (horizontal) 
+                y.lim <- c(1, Ntip)
+            else {
+                y.lim <- c(0, NA)
+                pin2 <- par("pin")[2]
+                strWi <- strwidth(x$tip.label, "inches")
+                yy.tips <- yy[1:Ntip] * 1.04
+                alp <- try(uniroot(function(a) max(a * yy.tips + 
+                  strWi) - pin2, c(0, 1e+06))$root, silent = TRUE)
+                if (is.character(alp)) 
+                  tmp <- max(yy.tips) * 1.5
+                else {
+                  tmp <- if (show.tip.label) 
+                    max(yy.tips + strWi/alp)
+                  else max(yy.tips)
+                }
+                y.lim[2] <- tmp
+            }
+        }
+        else switch(type, fan = {
+            if (show.tip.label) {
+                offset <- max(nchar(x$tip.label) * 0.018 * max(yy) * 
+                  cex)
+                y.lim <- c(min(yy) - offset, max(yy) + offset)
+            } else y.lim <- c(min(yy), max(yy))
+        }, unrooted = {
+            if (show.tip.label) {
+                offset <- max(nchar(x$tip.label) * 0.018 * max(yy) * 
+                  cex)
+                y.lim <- c(0 - offset, max(yy) + offset)
+            } else y.lim <- c(0, max(yy))
+        }, radial = {
+            if (show.tip.label) {
+                offset <- max(nchar(x$tip.label) * 0.03 * cex)
+                y.lim <- c(-1 - offset, 1 + offset)
+            } else y.lim <- c(-1, 1)
+        })
+    }
+    else if (length(y.lim) == 1) {
+        y.lim <- c(0, y.lim)
+        if (phyloORclado && horizontal) 
+            y.lim[1] <- 1
+        if (type %in% c("fan", "unrooted") && show.tip.label) 
+            y.lim[1] <- -max(nchar(x$tip.label) * 0.018 * max(yy) * 
+                cex)
+        if (type == "radial") 
+            y.lim[1] <- if (show.tip.label) 
+                -1 - max(nchar(x$tip.label) * 0.018 * max(yy) * 
+                  cex)
+            else -1
+    }
+    if (phyloORclado && direction == "downwards") 
+        yy <- max(yy) - yy
+    if (phyloORclado && root.edge) {
+        if (direction == "leftwards") 
+            x.lim[2] <- x.lim[2] + x$root.edge
+        if (direction == "downwards") 
+            y.lim[2] <- y.lim[2] + x$root.edge
+    }
+    asp <- if (type %in% c("fan", "radial", "unrooted")) 
+        1
+    else NA
+    if (plot)
+    	{  	plot(0, type = "n", xlim = x.lim, ylim = y.lim, ann = FALSE, 
+        	axes = FALSE, asp = asp, ...) 	}
+    if (plot) {
+        if (is.null(adj)) 
+            adj <- if (phyloORclado && direction == "leftwards") 
+                1
+            else 0
+        if (phyloORclado && show.tip.label) {
+            MAXSTRING <- max(strwidth(x$tip.label, cex = cex))
+            loy <- 0
+            if (direction == "rightwards") {
+                lox <- label.offset + MAXSTRING * 1.05 * adj
+            }
+            if (direction == "leftwards") {
+                lox <- -label.offset - MAXSTRING * 1.05 * (1 - 
+                  adj)
+            }
+            if (!horizontal) {
+                psr <- par("usr")
+                MAXSTRING <- MAXSTRING * 1.09 * (psr[4] - psr[3])/(psr[2] - 
+                  psr[1])
+                loy <- label.offset + MAXSTRING * 1.05 * adj
+                lox <- 0
+                srt <- 90 + srt
+                if (direction == "downwards") {
+                  loy <- -loy
+                  srt <- 180 + srt
+                }
+            }
+        }
+        if (type == "phylogram") {
+            phylogram.plot(x$edge, Ntip, Nnode, xx, yy, horizontal, 
+                edge.color, edge.width, edge.lty)
+        }
+        else {
+            if (type == "fan") {
+                ereorder <- match(z$edge[, 2], x$edge[, 2])
+                if (length(edge.color) > 1) {
+                  edge.color <- rep(edge.color, length.out = Nedge)
+                  edge.color <- edge.color[ereorder]
+                }
+                if (length(edge.width) > 1) {
+                  edge.width <- rep(edge.width, length.out = Nedge)
+                  edge.width <- edge.width[ereorder]
+                }
+                if (length(edge.lty) > 1) {
+                  edge.lty <- rep(edge.lty, length.out = Nedge)
+                  edge.lty <- edge.lty[ereorder]
+                }
+                circular.plot(z$edge, Ntip, Nnode, xx, yy, theta, 
+                  r, edge.color, edge.width, edge.lty)
+            }
+            else cladogram.plot(x$edge, xx, yy, edge.color, edge.width, 
+                edge.lty)
+        }
+        if (root.edge) 
+            switch(direction, rightwards = segments(0, yy[ROOT], 
+                x$root.edge, yy[ROOT]), leftwards = segments(xx[ROOT], 
+                yy[ROOT], xx[ROOT] + x$root.edge, yy[ROOT]), 
+                upwards = segments(xx[ROOT], 0, xx[ROOT], x$root.edge), 
+                downwards = segments(xx[ROOT], yy[ROOT], xx[ROOT], 
+                  yy[ROOT] + x$root.edge))
+        if (show.tip.label) {
+            if (is.expression(x$tip.label)) 
+                underscore <- TRUE
+            if (!underscore) 
+                x$tip.label <- gsub("_", " ", x$tip.label)
+            if (phyloORclado) 
+                text(xx[1:Ntip] + lox, yy[1:Ntip] + loy, x$tip.label, 
+                  adj = adj, font = font, srt = srt, cex = cex, 
+                  col = tip.color)
+            if (type == "unrooted") {
+                if (lab4ut == "horizontal") {
+                  y.adj <- x.adj <- numeric(Ntip)
+                  sel <- abs(XY$axe) > 0.75 * pi
+                  x.adj[sel] <- -strwidth(x$tip.label)[sel] * 
+                    1.05
+                  sel <- abs(XY$axe) > pi/4 & abs(XY$axe) < 0.75 * 
+                    pi
+                  x.adj[sel] <- -strwidth(x$tip.label)[sel] * 
+                    (2 * abs(XY$axe)[sel]/pi - 0.5)
+                  sel <- XY$axe > pi/4 & XY$axe < 0.75 * pi
+                  y.adj[sel] <- strheight(x$tip.label)[sel]/2
+                  sel <- XY$axe < -pi/4 & XY$axe > -0.75 * pi
+                  y.adj[sel] <- -strheight(x$tip.label)[sel] * 
+                    0.75
+                  text(xx[1:Ntip] + x.adj * cex, yy[1:Ntip] + 
+                    y.adj * cex, x$tip.label, adj = c(adj, 0), 
+                    font = font, srt = srt, cex = cex, col = tip.color)
+                }
+                else {
+                  adj <- abs(XY$axe) > pi/2
+                  srt <- 180 * XY$axe/pi
+                  srt[adj] <- srt[adj] - 180
+                  adj <- as.numeric(adj)
+                  xx.tips <- xx[1:Ntip]
+                  yy.tips <- yy[1:Ntip]
+                  if (label.offset) {
+                    xx.tips <- xx.tips + label.offset * cos(XY$axe)
+                    yy.tips <- yy.tips + label.offset * sin(XY$axe)
+                  }
+                  font <- rep(font, length.out = Ntip)
+                  tip.color <- rep(tip.color, length.out = Ntip)
+                  cex <- rep(cex, length.out = Ntip)
+                  for (i in 1:Ntip) text(xx.tips[i], yy.tips[i], 
+                    cex = cex[i], x$tip.label[i], adj = adj[i], 
+                    font = font[i], srt = srt[i], col = tip.color[i])
+                }
+            }
+            if (type %in% c("fan", "radial")) {
+                xx.tips <- xx[1:Ntip]
+                yy.tips <- yy[1:Ntip]
+                angle <- atan2(yy.tips, xx.tips)
+                if (label.offset) {
+                  xx.tips <- xx.tips + label.offset * cos(angle)
+                  yy.tips <- yy.tips + label.offset * sin(angle)
+                }
+                s <- xx.tips < 0
+                angle <- angle * 180/pi
+                angle[s] <- angle[s] + 180
+                adj <- as.numeric(s)
+                font <- rep(font, length.out = Ntip)
+                tip.color <- rep(tip.color, length.out = Ntip)
+                cex <- rep(cex, length.out = Ntip)
+                for (i in 1:Ntip) text(xx.tips[i], yy.tips[i], 
+                  x$tip.label[i], font = font[i], cex = cex[i], 
+                  srt = angle[i], adj = adj[i], col = tip.color[i])
+            }
+        }
+        if (show.node.label) 
+            text(xx[ROOT:length(xx)] + label.offset, yy[ROOT:length(yy)], 
+                x$node.label, adj = adj, font = font, srt = srt, 
+                cex = cex)
+    }
+    L <- list(type = type, use.edge.length = use.edge.length, 
+        node.pos = node.pos, show.tip.label = show.tip.label, 
+        show.node.label = show.node.label, font = font, cex = cex, 
+        adj = adj, srt = srt, no.margin = no.margin, label.offset = label.offset, 
+        x.lim = x.lim, y.lim = y.lim, direction = direction, 
+        tip.color = tip.color, Ntip = Ntip, Nnode = Nnode, edge = xe, xx = xx, yy = yy)
+    assign("last_plot.phylo", c(L, list(edge = xe, xx = xx, yy = yy)), 
+        envir = .PlotPhyloEnv)
+    invisible(L)
+}
 
 
 

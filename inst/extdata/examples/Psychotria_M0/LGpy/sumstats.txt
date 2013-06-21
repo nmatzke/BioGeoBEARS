@@ -1,0 +1,2 @@
+dispersal_rates	extinction_rates	final_log_likelihood	splits_table_fn	states_table_fn
+0.03505	0.02831	-34.54	/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LGpy/LGpy_results_splits00001.txt	NA
