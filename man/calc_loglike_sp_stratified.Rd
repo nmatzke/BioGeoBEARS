@@ -11,7 +11,9 @@
     cppSpMethod = 3, cluster_already_open = NULL,
     calc_ancprobs = FALSE, null_range_allowed = TRUE,
     fixnode = NULL, fixlikes = NULL, inputs = inputs,
-    allareas = allareas, all_states_list = all_states_list)
+    allareas = allareas, all_states_list = all_states_list,
+    return_condlikes_table = FALSE,
+    calc_TTL_loglike_from_condlikes_table = TRUE)
 }
 \arguments{
   \item{tip_condlikes_of_data_on_each_state}{A numeric
@@ -149,11 +151,12 @@
 
   \item{fixnode}{If the state at a particular node is going
   to be fixed (e.g. for ML marginal ancestral states), give
-  the node number.}
+  the node number. (Trial implementation for stratified
+  analysis.)}
 
   \item{fixlikes}{The state likelihoods to be used at the
   fixed node.  I.e. 1 for the fixed state, and 0 for the
-  others.}
+  others. (Trial implementation for stratified analysis.)}
 
   \item{inputs}{A list of inputs containing the dispersal
   matrix for each time period, etc.}
@@ -163,9 +166,29 @@
 
   \item{all_states_list}{A list of all the stats in the
   total analysis (0-based coding - ?)}
+
+  \item{return_condlikes_table}{If \code{TRUE}, return the
+  table of ALL conditional likelihood results, including at
+  branch subsections (only some should be used in
+  calculating the final log-likelihood of the geography
+  range data on the tree!)}
+
+  \item{calc_TTL_loglike_from_condlikes_table}{If TRUE,
+  force making of the condlikes table, and use it to
+  calculate the log-likelihood (default=TRUE; matches
+  LAGRANGE).}
 }
 \value{
-  Return whatever is specified by \code{return_what}.
+  grand_total_likelihood The total log-likelihood of the
+  data on the tree (default). Or, if
+  \code{return_condlikes_table==TRUE}, the function returns
+  \code{calc_loglike_sp_stratified_results}, with
+  \code{calc_loglike_sp_stratified_results$condlikes_table}
+  and
+  \code{calc_loglike_sp_stratified_results$grand_total_likelihood}
+  as list items.  This can be useful for debugging
+  stratified analyses, which have a lot of extra
+  book-keeping that is easy to mess up.
 }
 \description{
   This function is the stratified version of

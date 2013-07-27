@@ -38,6 +38,7 @@ get_indices_where_list1_occurs_in_list2(list1, list2)
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link{prt}}, \code{\link[base]{LETTERS}}
+  \code{\link{prt}}, \code{\link[base]{LETTERS}},
+  \code{\link{get_indices_where_list1_occurs_in_list2_noNA}}
 }
 

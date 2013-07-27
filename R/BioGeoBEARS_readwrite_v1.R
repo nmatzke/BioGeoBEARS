@@ -31,9 +31,10 @@ require("cladoRcpp")
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
-#' extdata_dir = system.file("extdata", package="BioGeoBEARS")
-#' trfn = slashslash(paste(extdata_dir, 
-#' "/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep=""))
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' tmpdir = paste(extdata_dir, 
+#' "/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep="")
+#' trfn = np(slashslash(tmpdir))
 #' tr = read.tree(trfn)
 #' node_numbers_matrix = get_pruningwise_nodenums(tr)
 #' node_numbers_matrix
@@ -139,8 +140,10 @@ get_APE_nodenums <- function(tr)
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
-#' extdata_dir = system.file("extdata", package="BioGeoBEARS")
-#' trfn = slashslash(paste(extdata_dir, "/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep=""))
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' tmppath = paste(extdata_dir, 
+#' "/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep="")
+#' trfn = np(slashslash(tmppath))
 #' tr = read.tree(trfn)
 #' downpass_node_matrix = get_lagrange_nodenums(tr)
 #' downpass_node_matrix
@@ -413,6 +416,9 @@ LGpy_MLsplit_per_node <- function(splits)
 
 
 
+
+
+
 # Get the ML state
 #######################################################
 # LGcpp_MLstate_per_node
@@ -672,19 +678,19 @@ add_to_downpass_labels <- function(tr, downpass_node_matrix, currnode)
 
 
 
+
 #######################################################
-# map_LGpy_MLsplits_to_tree
+# get_MLsplitprobs_from_results
 #######################################################
-#' Take the table of ML splits and node number and map on tree (Python version)
+#' Extract the ML probs for the base of each branch above a split
 #' 
-#' Given a table of splits probabilities from \code{\link{LGpy_splits_fn_to_table}}, map the splits on the tree.
+#' This function takes a BioGeoBEARS results_object from a ML search,
+#' extracts the downpass and uppass likelihoods of the data for each
+#' possible state at the base of each left and right branch, and 
+#' produces the ML ancestral split estimates for the bottom of each branch.
 #' 
-#' See \code{\link{get_lagrange_nodenums}} for connecting these node numbers to APE node numbers.
-#' 
-#' @param MLsplits_LGpy A data.frame containing the node numbers, splits, and split probabilities.
-#' @param tr An ape phylo object
-#' @param tiprange_names The geographic ranges at the tips (i.e. the input data)
-#' @return \code{MLsplits_LGpy} A data.frame containing the node numbers, ML splits, and split probabilities; reordered for this plot
+#' @param results_object The results from a BioGeoBEARS ML search.
+#' @return results_object with results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node added
 #' @export
 #' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
 #' @note Go BEARS!
@@ -698,261 +704,38 @@ add_to_downpass_labels <- function(tr, downpass_node_matrix, currnode)
 #' @examples
 #' test=1
 #' 
-map_LGpy_MLsplits_to_tree <- function(MLsplits_LGpy, tr, tiprange_names)
+get_MLsplitprobs_from_results <- function(results_object)
 	{
-	# Order in LAGRANGE order
-	MLsplits_LGpy = MLsplits_LGpy[order(MLsplits_LGpy$nodenum_LGpy),]
-	MLsplits_LGpy
+	#######################################################
+	# Get the marginal probs of the splits (global ML probs, not local)
+	# (These are marginal, rather than joint probs; but not local optima)
+	#######################################################
 	
-	# Get the names of the columns in the MLsplits table
-	tmpnames = names(MLsplits_LGpy)
+	ML_marginal_prob_each_split_at_branch_bottom_BELOW_node = results_object$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS * results_object$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS
 
-	# Add R node numbering, if not already done
-	if (("Rnodes" %in% tmpnames) == FALSE)
-		{
-		downpass_node_matrix = get_lagrange_nodenums(tr)
-		#downpass_node_matrix[,2] = 1:18
-		#downpass_node_matrix = downpass_node_matrix[order(downpass_node_matrix[,1]), ]
+	results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node = ML_marginal_prob_each_split_at_branch_bottom_BELOW_node / rowSums(ML_marginal_prob_each_split_at_branch_bottom_BELOW_node)
 	
-		MLsplits_LGpy = cbind(MLsplits_LGpy, downpass_node_matrix)
-		names(MLsplits_LGpy) = c(tmpnames, "Rnodes", "LGnodes")
-		MLsplits_LGpy
-		}
-	
-	MLsplits_LGpy = MLsplits_LGpy[order(MLsplits_LGpy$Rnodes), ]
-	MLsplits_LGpy
-
-	# Plot them	
-	par(mfrow=c(2,1))
-	plot(tr, label.offset=0.15)
-	nodelabels(text=MLsplits_LGpy$splits, node=20:37)
-	tiplabels(tiprange_names)
-	title("LAGRANGE (python) ML splits")
-	axisPhylo()
-	mtext(text="million years ago", side=1, line=2)
-	
-	plot(tr, label.offset=0.15)
-	pievals = as.matrix(MLsplits_LGpy[,c("relprob","relprob2")])
-	nodelabels(pie=pievals, piecol=c("blue", "white"))
-	tiplabels(tiprange_names)
-	title("LAGRANGE (python) split probs")
-	axisPhylo()
-	mtext(text="million years ago", side=1, line=2)
-
-	return(MLsplits_LGpy)
-	}
-
-
-
-#######################################################
-# map_LG_MLsplits_to_tree
-#######################################################
-#' Take the table of ML splits and node number and map on tree (C++ LAGRANGE version)
-#' 
-#' Given a table of splits probabilities from \code{\link{LGcpp_splits_fn_to_table}}, map the splits on the tree.
-#' 
-#' See \code{\link{get_lagrange_nodenums}} for connecting these node numbers to APE node numbers.
-#' 
-#' @param MLsplits_LGcpp A data.frame containing the node numbers, splits, and split probabilities.
-#' @param tr An ape phylo object
-#' @param tiprange_names The geographic ranges at the tips (i.e. the input data)
-#' @param removechar The character to remove, if needed.
-#' @param type The type of LAGRANGE input (default C++)
-#' @return \code{MLsplits_LGcpp} A data.frame containing the node numbers, ML splits, and split probabilities; reordered for this plot.
-#' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#' @examples
-#' test=1
-#' 
-map_LG_MLsplits_to_tree <- function(MLsplits_LGcpp, tr, tiprange_names, removechar=NULL, type="C++")
-	{
-	defaults='
-	MLsplits_LGpy, tr=tr, tiprange_names=tiprange_names, type="python"
-	'
-	# Order in LAGRANGE order
-	MLsplits_LGcpp = order_LGnodes(MLsplits_LGcpp, tr, removechar, type)
-	
-	
-	# Plot them	
-	par(mfrow=c(2,1))
-	plot(tr, label.offset=0.15)
-	nodelabels(text=MLsplits_LGcpp$splits, node=20:37)
-	tiplabels(tiprange_names)
-	title(paste("LAGRANGE (", type, ") ML splits", sep=""))
-	axisPhylo()
-	mtext(text="million years ago", side=1, line=2)
-	
-	plot(tr, label.offset=0.15)
-	pievals = as.matrix(MLsplits_LGcpp[,c("relprob","relprob2")])
-	nodelabels(pie=pievals, piecol=c("blue", "white"))
-	tiplabels(tiprange_names)
-	title(paste("LAGRANGE (", type, ") split probs", sep=""))
-	axisPhylo()
-	mtext(text="million years ago", side=1, line=2)
-
-	return(MLsplits_LGcpp)
-	}
-
-
-#######################################################
-# get_statesColors_table
-#######################################################
-#' Make a color table for each area and their combinations
-#' 
-#' Given a list of areas, make a color table for the various combinations.
-#' 
-#' @param areanames A list of the area names.
-#' @return \code{statesColors_table} A table giving the colors for each state.
-#' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#' @examples
-#' test=1
-#' 
-get_statesColors_table <- function(areanames=c("K","O","M","H"))
-	{
-	# Make the color matrix for the individual areas
-	colors_matrix = get_colors_for_numareas(numareas=length(areanames), use_rainbow=FALSE)
-	colors_matrix
-	
-	# Get the states
-	states_list_0based_index = rcpp_areas_list_to_states_list(areas=areanames, include_null_range=FALSE)
-	
-	colors_list_for_states = mix_colors_for_states(colors_matrix, states_list_0based_index, exclude_null=TRUE)
-	colors_list_for_states
-
-	possible_ranges_list_txt = states_list_indexes_to_areastxt(states_list=states_list_0based_index, areanames, counting_base=0, sep="")
-	possible_ranges_list_txt
-	
-	statesColors_table = adf2(cbind(possible_ranges_list_txt, colors_list_for_states))
-	names(statesColors_table) = c("range", "color")
-	return(statesColors_table)
-	}
-
-
-#######################################################
-# map_LG_MLsplits_to_tree_corners
-#######################################################
-#' Map splits to the corners on a phylogeny
-#' 
-#' What it says.
-#' 
-#' @param MLsplits A data.frame containing the node numbers, splits, and split probabilities.
-#' @param tr An ape phylo object
-#' @param tipranges Tipranges object
-#' @param removechar The character to remove, if needed.
-#' @param type The type of LAGRANGE input (default C++)
-#' @param statesColors_table If not default, a table with a color for each area combination.
-#' @param bgcol The background color
-#' @param areanames The area names, if different from those in the tipranges object
-#' @param newplot Default TRUE; should there be a new plot, or should the splits be added to another plot?
-#' @param ... Additional arguments to standard functions
-#' @return \code{MLsplits} The splits table, ordered appropriately.
-#' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#' @examples
-#' test=1
-#' 
-map_LG_MLsplits_to_tree_corners <- function(MLsplits, tr, tipranges, removechar=NULL, type="C++", statesColors_table="default", bgcol="green3", areanames="default", newplot=TRUE, ...)
-	{
-	defaults='
-	MLsplits=MLsplits_LGpy
-	type="python"
-	'
-	# Get corner coordinates
-	corners_list = corner_coords(tr)
-	leftcorns = corners_list$leftcorns
-	rightcorns = corners_list$rightcorns
-	
-	# Plot splits on corners
-	# Ensure correct order
-	MLsplits = order_LGnodes(MLsplits, tr, removechar=removechar, type=type)
-	MLsplits
-	
-	
-	# Get the ranges at the tips (in the right order)
-	tipranges = order_tipranges_by_tree_tips(tipranges, tr)
-	tiprange_names = tipranges_to_area_strings(tipranges=tipranges)
-	
-	if (areanames == "default")
-		{
-		areanames = getareas_from_tipranges_object(tipranges=tipranges)
-		}
-	
-	# Colors 
-	if (statesColors_table == "default")
-		{
-		statesColors_table = get_statesColors_table(areanames)
-		tmp_index = get_indices_where_list1_occurs_in_list2(list1=MLsplits$leftBB, list2=statesColors_table$range)
-		left_colors = statesColors_table$color[tmp_index]
-		tmp_index = get_indices_where_list1_occurs_in_list2(list1=MLsplits$rightBB, list2=statesColors_table$range)
-		right_colors = statesColors_table$color[tmp_index]
+	results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node
+	rowSums(results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node)
 		
-		tmp_index = get_indices_where_list1_occurs_in_list2(list1=tiprange_names, list2=statesColors_table$range)
-		tip_colors = statesColors_table$color[tmp_index]
-		} else {
-		left_colors = bgcol
-		right_colors = bgcol
-		tip_colors = bgcol
-		}
-	
-	# Plot them
-	if (newplot == TRUE)
-		{
-		plot(tr, label.offset=0.15)
-		axisPhylo()
-		mtext(text="million years ago", side=1, line=2)
-		}
-	cornerlabels(text=MLsplits$leftBB, coords=leftcorns, bg=left_colors, ...)
-	cornerlabels(text=MLsplits$rightBB, coords=rightcorns, bg=right_colors, ...)
-	tiplabels(text=tiprange_names, bg=tip_colors, ...)
-
-	return(MLsplits)
+	return(results_object)
 	}
 
 
 
+
 #######################################################
-# map_LG_MLstates_to_tree
+# get_leftright_nodes_matrix_from_results
 #######################################################
-#' Map states to the nodes on a phylogeny
+#' Make a table of the Right and Left nodes descending from each node
 #' 
-#' What it says.
+#' This table shows the Right, then Left, descendant nodenums for each node. This
+#' gets used later to plot splits at corners.
 #' 
-#' @param MLstates_LGcpp A data.frame containing the node numbers, states, and states probabilities.
 #' @param tr An ape phylo object
-#' @param tipranges Tipranges object
-#' @param removechar The character to remove, if needed.
-#' @param type The type of LAGRANGE input (default C++)
-#' @param statesColors_table If not default, a table with a color for each area combination.
-#' @param bgcol The background color
-#' @param areanames The area names, if different from those in the tipranges object
-#' @param newplot Default TRUE; should there be a new plot, or should the splits be added to another plot?
-#' @param ... Additional arguments to standard functions
-#' @return \code{MLstates_LGcpp} The states table, ordered appropriately.
+#' @param results_object The results from a BioGeoBEARS ML search.
+#' @param nodes A list of internal node numbers for tree \code{tr}.
+#' @return leftright_nodes_matrix A table with the Right, the Left, nodes
 #' @export
 #' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
 #' @note Go BEARS!
@@ -966,193 +749,26 @@ map_LG_MLsplits_to_tree_corners <- function(MLsplits, tr, tipranges, removechar=
 #' @examples
 #' test=1
 #' 
-map_LG_MLstates_to_tree <- function(MLstates_LGcpp, tr, tipranges, removechar=NULL, type="C++", statesColors_table="default", bgcol="green3", areanames="default", newplot=TRUE, ...)
+get_leftright_nodes_matrix_from_results <- function(tr, results_object, nodes)
 	{
-	# Order in LAGRANGE order
-	MLstates_LGcpp = order_LGnodes(MLstates_LGcpp, tr, removechar, type=type, type2="states")
-	
-	# Get the ranges at the tips (in the right order)
-	tipranges = order_tipranges_by_tree_tips(tipranges, tr)
-	tiprange_names = tipranges_to_area_strings(tipranges=tipranges)
-	
-	if (areanames == "default")
-		{
-		areanames = getareas_from_tipranges_object(tipranges=tipranges)
-		}
-	
-	# Colors 
-	if (statesColors_table == "default")
-		{
-		statesColors_table = get_statesColors_table(areanames)
-		tmp_index = get_indices_where_list1_occurs_in_list2(list1=MLstates_LGcpp$states, list2=statesColors_table$range)
-		state_colors = statesColors_table$color[tmp_index]
+	#######################################################
+	# Get the marginal probs of the splits (global ML probs, not local)
+	# (These are marginal, rather than joint probs; but not local optima)
+	#######################################################
 		
-		tmp_index = get_indices_where_list1_occurs_in_list2(list1=tiprange_names, list2=statesColors_table$range)
-		tip_colors = statesColors_table$color[tmp_index]
-		} else {
-		left_colors = bgcol
-		right_colors = bgcol
-		tip_colors = bgcol
-		}
-
-	# Plot them
-	if (newplot == TRUE)
-		{
-		plot(tr, label.offset=0.15)
-		axisPhylo()
-		mtext(text="million years ago", side=1, line=2)
-		}
-
-	nodelabels(text=MLstates_LGcpp$states, node=20:37, bg=state_colors, ...)
-	tiplabels(tiprange_names, bg=tip_colors, ...)
-	#title(paste("LAGRANGE (", type, ") ML states", sep=""))
-	
-# 	plot(tr, label.offset=0.15)
-# 	pievals = as.matrix(MLstates_LGcpp[,c("relprob","relprob2")])
-# 	nodelabels(pie=pievals, piecol=c("blue", "white"))
-# 	tiplabels(tiprange_names)
-# 	title(paste("LAGRANGE (", type, ") state probs", sep=""))
-# 	axisPhylo()
-# 	mtext(text="million years ago", side=1, line=2)
-
-	return(MLstates_LGcpp)
+	# Make a splits table
+	tr_table = prt(tr, printflag=FALSE)
+	daughter_nds = tr_table$daughter_nds
+	daughter_nds = daughter_nds[nodes]
+	daughter_nds
+	leftright_nodes_matrix = matrix(data=unlist(daughter_nds), ncol=2, byrow=TRUE)
+	leftright_nodes_matrix = as.data.frame(leftright_nodes_matrix)
+	names(leftright_nodes_matrix) = c("right", "left")
+			
+	return(leftright_nodes_matrix)
 	}
 
 
-
-
-
-
-#######################################################
-# order_LGnodes
-#######################################################
-#' Order LAGRANGE-numbered nodes so that they can be plotted in R
-#' 
-#' What it says.
-#' 
-#' @param MLsplits_LGcpp A data.frame containing the node numbers, splits, and split probabilities.
-#' @param tr An ape phylo object
-#' @param removechar The character to remove, if needed.
-#' @param type The type of LAGRANGE input (default C++)
-#' @param type2 "splits" or "states"
-#' @return \code{MLsplits} The splits table, ordered appropriately.
-#' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#' @examples
-#' test=1
-#' 
-order_LGnodes <- function(MLsplits_LGcpp, tr=NULL, removechar=NULL, type="C++", type2="splits")
-	{
-	# Order in LAGRANGE order
-	if (type == "C++")
-		{
-		MLsplits_LGcpp = MLsplits_LGcpp[order(MLsplits_LGcpp$nodenum_LGcpp),]
-		} else {
-		MLsplits_LGcpp = MLsplits_LGcpp[order(MLsplits_LGcpp$nodenum_LGpy),]
-		}
-	MLsplits_LGcpp
-	
-	# Get the names of the columns in the MLsplits table
-	tmpnames = names(MLsplits_LGcpp)
-
-	# Add R node numbering, if not already done
-	if (("Rnodes" %in% tmpnames) == FALSE)
-		{
-		downpass_node_matrix = get_lagrange_nodenums(tr)
-		#downpass_node_matrix[,2] = 1:18
-		#downpass_node_matrix = downpass_node_matrix[order(downpass_node_matrix[,1]), ]
-	
-		MLsplits_LGcpp = cbind(MLsplits_LGcpp, downpass_node_matrix)
-		names(MLsplits_LGcpp) = c(tmpnames, "Rnodes", "LGnodes")
-		MLsplits_LGcpp
-		}
-	
-	MLsplits_LGcpp = MLsplits_LGcpp[order(MLsplits_LGcpp$Rnodes), ]
-	MLsplits_LGcpp
-	
-	# Change e.g. O_M -> OM, K_O_M_H -> KOMH
-	if (!is.null(removechar))	
-		{
-		if (type2 == "splits")
-			{
-			MLsplits_LGcpp$splits = gsub(pattern=removechar, replacement="", x=MLsplits_LGcpp$splits)
-			MLsplits_LGcpp$leftBB = gsub(pattern=removechar, replacement="", x=MLsplits_LGcpp$leftBB)
-			MLsplits_LGcpp$rightBB = gsub(pattern=removechar, replacement="", x=MLsplits_LGcpp$rightBB)
-			} else {
-			MLsplits_LGcpp$states = gsub(pattern=removechar, replacement="", x=MLsplits_LGcpp$states)
-			}
-		}
-	
-	return(MLsplits_LGcpp)
-	}
-
-
-
-#######################################################
-# cornerlabels
-#######################################################
-#' Make labels for plotting ranges on corners
-#' 
-#' What it says.
-#' 
-#' @param text The text to put at the corners.
-#' @param coords The coordinates at which to plot the labels
-#' @param bg The background color
-#' @param col The text color
-#' @param adj Position adjustment; default \code{adj=c(0.5,0.5)}
-#' @param ... Additional arguments to standard functions
-#' @return nothing
-#' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#' @examples
-#' test=1
-#' 
-cornerlabels <- function(text, coords, bg="green3", col="black", adj=c(0.5,0.5), ...)
-	{
-	args <- list(...)
-    CEX <- if ("cex" %in% names(args)) 
-    	{
-	    args$cex
-	    } else {
-	    par("cex")
-	    }
-	   
-	# Draw the rectangles	   
-	width <- strwidth(text, units = "inches", cex = CEX)
-	height <- strheight(text, units = "inches", cex = CEX)
-
-	width <- xinch(width)
-	height <- yinch(height)
-
-	XX = coords$x
-	YY = coords$y	
-	xl <- XX - width * adj[1] - xinch(0.03)
-	xr <- xl + width + xinch(0.03)
-	yb <- YY - height * adj[2] - yinch(0.02)
-	yt <- yb + height + yinch(0.05)
-	rect(xl, yb, xr, yt, col = bg)
-	
-	# Write the text
-	text(XX, YY, text, adj = adj, col = col, ...)
-	
-	return()
-	}
 
 
 #######################################################
@@ -1184,7 +800,8 @@ cornerlabels <- function(text, coords, bg="green3", col="black", adj=c(0.5,0.5),
 #' @examples
 #' test=1
 #' 
-#' # splits_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LAGRANGE_C++/Psychotria_M0_lgcpp_out_splits00001.txt"
+#' # splits_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/
+#' # examples/Psychotria_M0/LAGRANGE_C++/Psychotria_M0_lgcpp_out_splits00001.txt"
 #' # LGcpp_splits_fn_to_table(splits_fn)
 LGcpp_splits_fn_to_table <- function(splits_fn)
 	{
@@ -1256,7 +873,9 @@ LGcpp_splits_fn_to_table <- function(splits_fn)
 #' @examples
 #' test=1
 #' 
-#' # states_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LAGRANGE_C++/Psychotria_M0_lgcpp_out_states00001.txt"
+#' # states_fn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/
+#' # inst/extdata/examples/Psychotria_M0/LAGRANGE_C++/
+#' # Psychotria_M0_lgcpp_out_states00001.txt"
 #' # LGcpp_states_fn_to_table(states_fn)
 LGcpp_states_fn_to_table <- function(states_fn)
 	{
@@ -1635,142 +1254,6 @@ get_nodenum_structural_root <- function(t, print_nodenum=FALSE)
 
 
 
-#######################################################
-# add_corners
-#######################################################
-#' Iterate up through a plotted tree, getting the coordinates of the corners 
-#' 
-#' What it says.
-#'
-#' @param startnode The node to start at (this is a recursive function)
-#' @param tr A tree object in \code{\link[ape]{phylo}} format.
-#' @param nodecoords The accumulating list of node coordinates
-#' @param corners_list The accumulating list of corners
-#' @return \code{corners_list} 
-#' @export
-#' @seealso \code{\link[ape]{phylo}}, \code{\link{get_nodenums}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' blah=1
-#' 
-add_corners <- function(startnode, tr, nodecoords, corners_list)
-	{
-	# Get the daughters of this node 
-	daughtersTF = tr$edge[,1] == startnode
-	
-	# Run through them if they exist
-	if (sum(daughtersTF) > 0)
-		{
-		# Get the daughter nodenums
-		daughters = tr$edge[daughtersTF,2]
-
-		# Get and store node number
-		nums = 1:nrow(corners_list$nodevals)
-		filled_TF = !is.na(corners_list$nodevals)
-		
-		if (sum(filled_TF) > 0)
-			{
-			row_we_are_at = 1 + max(nums[filled_TF])
-			} else {
-			row_we_are_at = 1
-			}
-		
-		# Store the location
-		corners_list$nodevals[row_we_are_at, 1] = startnode
-		
-		# Get left corner
-		# x coordinate
-		corners_list$corner_coords_left[row_we_are_at,1] = nodecoords[startnode,1]
-		# y coordinate
-		corners_list$corner_coords_left[row_we_are_at,2] = nodecoords[daughters[2],2]
-
-		# Get right corner
-		# x coordinate
-		corners_list$corner_coords_right[row_we_are_at,1] = nodecoords[startnode,1]
-		# y coordinate
-		corners_list$corner_coords_right[row_we_are_at,2] = nodecoords[daughters[1],2]
-		
-		# Then propagate up
-		for (d in daughters)
-			{
-			#startnode = d
-			corners_list = add_corners(startnode=d, tr, nodecoords, corners_list)
-			}
-		
-		return(corners_list)
-		} else {
-		return(corners_list)		
-		}
-	return(corners_list)
-	}
-
-# Get the corner coordinates
-#######################################################
-# add_corners
-#######################################################
-#' Get the corner coordinates
-#' 
-#' Gets the coordinates of the corners when the tree is plotted.
-#'
-#' @param tr A tree object in \code{\link[ape]{phylo}} format.
-#' @return \code{corners_list} 
-#' @export
-#' @seealso \code{\link[ape]{phylo}}, \code{\link{get_nodenums}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' blah=1
-#'
-corner_coords <- function(tr)
-	{
-	# Get the coordinates of the vertices in the tree
-	trcoords = plot_phylo3_nodecoords(tr, plot=FALSE)
-	
-	# X and Y coords for nodes, 1-37
-	nodecoords = cbind(trcoords$xx, trcoords$yy)
-	
-	# Go through the edge matrix from the root, take the x coord of the node,
-	# and the y coord of the descendant
-	rootnode = get_nodenum_structural_root(tr)
-	
-	# Get corner coords
-	corners_list = NULL
-	corners_list$corner_coords_left = matrix(NA, ncol=2, nrow=tr$Nnode)
-	corners_list$corner_coords_right = matrix(NA, ncol=2, nrow=tr$Nnode)
-	corners_list$nodevals = matrix(NA, ncol=1, nrow=tr$Nnode)
-	
-	corners_list = add_corners(startnode=rootnode, tr, nodecoords, corners_list)
-	
-	
-	left = corners_list$corner_coords_left
-	right = corners_list$corner_coords_right
-	node = corners_list$nodevals
-	
-	leftcorns = adf(cbind(node, left))
-	names(leftcorns) = c("node", "x", "y")
-	row.names(leftcorns) = node
-
-	rightcorns = adf(cbind(node, right))
-	names(rightcorns) = c("node", "x", "y")
-	row.names(rightcorns) = node
-	
-	corners_list = NULL
-	corners_list$leftcorns = leftcorns
-	corners_list$rightcorns = rightcorns
-	
-	return(corners_list)
-	}
-
-
 
 # print tree in hierarchical format
 #######################################################
@@ -1792,9 +1275,12 @@ corner_coords <- function(tr)
 #' @param add_root_edge Should a root edge be added?  Default \code{TRUE}.
 #' @param get_tipnames Should the list of tipnames descending from each node be printed as a string in another column?  
 #' This is slow-ish, but useful for matching up nodes between differing trees. Default \code{FALSE}.
+#' @param fossils_older_than Tips that are older than \code{fossils_older_than} will be marked as \code{TRUE} in a column called \code{fossil}.
+#' This is not currently set to 0, because Newick files can have slight precision issues etc. that mean not all tips quite come to zero.  You 
+#' can attempt to fix this with \code{\link{average_tr_tips}} (but make sure you do not inappropriately average in fossils!!).
 #' @return \code{dtf} A \code{\link[base]{data.frame}} holding the table. (Similar to the printout of a \code{\link[phylobase]{phylo4}} object.)
 #' @export
-#' @seealso \code{\link[ape]{phylo}}
+#' @seealso \code{\link[ape]{phylo}}, \code{\link{average_tr_tips}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -1804,7 +1290,7 @@ corner_coords <- function(tr)
 #' @examples
 #' test=1
 #' 
-prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=FALSE)
+prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=FALSE, fossils_older_than=0.6)
 	{
 	# assemble beginning table
 	
@@ -1887,48 +1373,80 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 		
 		
 		nontip_nodenums = (length(t$tip.label)+1) : length(ordered_nodenames)
-		nontip_nodenames = ordered_nodenames[nontip_nodenums]
-		nontip_cladelists = sapply(X=nontip_nodenames, FUN=get_all_daughter_tips_of_a_node, t=t)
-		nontip_cladelists
-		
-		nontip_cladelists_alphabetical = sapply(X=nontip_cladelists, FUN=sort)
-		nontip_cladelists_alphabetical
-		
-		nontip_cladelists_alphabetical_str = sapply(X=nontip_cladelists_alphabetical, FUN=paste, collapse=",")
-		nontip_cladelists_alphabetical_str
-		
-		# Store the results
-		list_of_clade_members_lists[nontip_nodenums] = nontip_cladelists_alphabetical_str
-		list_of_clade_members_lists
+		if (length(nontip_nodenums) > 1)
+			{
+			# More than 1 node
+			nontip_nodenames = ordered_nodenames[nontip_nodenums]
+			nontip_cladelists = sapply(X=nontip_nodenames, FUN=get_all_daughter_tips_of_a_node, t=t)
+			nontip_cladelists
+			
+			nontip_cladelists_alphabetical = sapply(X=nontip_cladelists, FUN=sort)
+			nontip_cladelists_alphabetical
+			
+			nontip_cladelists_alphabetical_str = sapply(X=nontip_cladelists_alphabetical, FUN=paste, collapse=",")
+			nontip_cladelists_alphabetical_str
+			
+			# Store the results
+			list_of_clade_members_lists[nontip_nodenums] = nontip_cladelists_alphabetical_str
+			list_of_clade_members_lists
+			} else {
+			# Just one node
+			nontip_nodenames = ordered_nodenames[nontip_nodenums]
+			nontip_cladelists = sapply(X=nontip_nodenames, FUN=get_all_daughter_tips_of_a_node, t=t)
+			nontip_cladewords = unlist(sapply(X=nontip_cladelists, FUN=strsplit, split=","))
+			
+			nontip_cladelists_alphabetical = sort(nontip_cladewords)
+			nontip_cladelists_alphabetical
+			
+			nontip_cladelists_alphabetical_str = paste(nontip_cladelists_alphabetical, collapse=",", sep="")
+			nontip_cladelists_alphabetical_str
+			
+			# Store the results
+			list_of_clade_members_lists[nontip_nodenums] = nontip_cladelists_alphabetical_str
+			list_of_clade_members_lists			
+			}
+			
 		}
 
+	
+	# Add fossils TRUE/FALSE column.  You can turn this off with fossils_older_than=NULL.
+	fossils = times_before_present > fossils_older_than
+
+	# Obviously, internal nodes are irrelevant and should be NA
+	tmpnodenums = (length(t$tip.label)+1) : ( length(t$tip.label) + t$Nnode )
+	fossils[tmpnodenums] = NA
 	
 	if (get_tipnames == FALSE)
 		{
 		# Don't put in the list of clade names
-		tmpdtf = cbind(1:length(ordered_nodenames), ordered_nodenames, levels_for_nodes, node.types, parent_branches, brlen_to_parent, parent_nodes, daughter_nodes, h, round(times_before_present, digits=time_bp_digits), labels)
+		tmpdtf = cbind(1:length(ordered_nodenames), ordered_nodenames, levels_for_nodes, node.types, parent_branches, brlen_to_parent, parent_nodes, daughter_nodes, h, round(times_before_present, digits=time_bp_digits), fossils, labels)
 		
 		dtf = as.data.frame(tmpdtf, row.names=NULL)
 		# nd = node
 		
 		# edge.length is the same as brlen_2_parent
-		names(dtf) = c("node", "ord_ndname", "node_lvl", "node.type", "parent_br", "edge.length", "ancestor", "daughter_nds", "node_ht", "time_bp", "label")
+		names(dtf) = c("node", "ord_ndname", "node_lvl", "node.type", "parent_br", "edge.length", "ancestor", "daughter_nds", "node_ht", "time_bp", "fossils", "label")
 		
 		# convert the cols from class "list" to some natural class
 		dtf = unlist_dtf_cols(dtf, printflag=FALSE)
 		} else {
 		# Put in the list of clade names
-		tmpdtf = cbind(1:length(ordered_nodenames), ordered_nodenames, levels_for_nodes, node.types, parent_branches, brlen_to_parent, parent_nodes, daughter_nodes, h, round(times_before_present, digits=time_bp_digits), labels, list_of_clade_members_lists)
+		tmpdtf = cbind(1:length(ordered_nodenames), ordered_nodenames, levels_for_nodes, node.types, parent_branches, brlen_to_parent, parent_nodes, daughter_nodes, h, round(times_before_present, digits=time_bp_digits), fossils, labels, list_of_clade_members_lists)
 		
 		dtf = as.data.frame(tmpdtf, row.names=NULL)
 		# nd = node
 		
 		# edge.length is the same as brlen_2_parent
-		names(dtf) = c("node", "ord_ndname", "node_lvl", "node.type", "parent_br", "edge.length", "ancestor", "daughter_nds", "node_ht", "time_bp", "label", "tipnames")
+		names(dtf) = c("node", "ord_ndname", "node_lvl", "node.type", "parent_br", "edge.length", "ancestor", "daughter_nds", "node_ht", "time_bp", "fossils", "label", "tipnames")
 		
 		# convert the cols from class "list" to some natural class
 		dtf = unlist_dtf_cols(dtf, printflag=FALSE)		
 		}
+	
+
+	
+	
+	
 	
 	# Add the root edge, if desired
 	# (AND, only if t$root.edge exists)
@@ -1956,17 +1474,234 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 ##########################################
 # LAGRANGE (Python version) utilities
 ##########################################
 
 
 #######################################################
-# parse_lagrange_python_output
+# parse_lagrange_output_old
 #######################################################
-#' Parse the output file from python \code{LAGRANGE}
+#' Parse the output file from python \code{LAGRANGE} -- older version
 #' 
-#' Parse the output of a python \code{LAGRANGE}.  
+#' Parse the output of a C++ \code{LAGRANGE} run.  
+#' 
+#' This function parses the output of \code{LAGRANGE}, obtained by a command such as the following, run at a UNIX/Mac
+#' Terminal command line.  This is an older version useful for automating processing of
+#' many files.
+#' 
+#' \code{cd /Users/nick/Desktop/__projects/_2011-07-15_Hannah_spider_fossils/_data/lagrange_for_nick}
+#' 
+#' \code{./lagrange_cpp palp_no_Lacun_v1_2nd387.lg > lagrange_results_v1_2nd387.txt}
+#' 
+#' C++ LAGRANGE can be obtained at \url{https://code.google.com/p/lagrange/}
+#' 
+#' @param outfn The C++ \code{LAGRANGE} output text file.
+#' @param results_dir The directory \code{outfn} is in.
+#' @param new_splits_fn Should a text file containing a table of the splits and their probabilities be output? Default \code{TRUE}.
+#' @param new_states_fn Should a text file containing a table of the splits and their probabilities be output? Default \code{TRUE}, 
+#' unlike python \code{LAGRANGE}, C++ \code{LAGRANGE} \emph{will} output the states at the nodes.
+#' @param filecount The starting number for the filecount (relevant if one is processing many files).
+#' @return sumstats A \code{\link[base]{data.frame}} containing the summary statistics (LnL, d and e rates, etc.)  The splits
+#' filename is output to screen.
+#' @export
+#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#' @examples
+#' test=1
+#' 
+parse_lagrange_output_old <- function(outfn, results_dir=getwd(), new_splits_fn = TRUE, new_states_fn = TRUE, filecount=0)
+	{
+	setup='
+	outfn = "/Users/nick/Desktop/__projects/_2011-07-15_Hannah_spider_fossils/_data/lagrange_for_nick/_run_3rd226/lagrange_results_v1_3rd226.txt"
+	results_dir = "/Users/nick/Desktop/__projects/_2011-07-15_Hannah_spider_fossils/_data/lagrange_for_nick/_results_3rd226/"
+	'
+
+
+	# Split the file into 1 file for each analysis
+	tmplines = scan(outfn, what="character", sep="\n")
+	
+	results_dir = addslash(results_dir)
+	
+	# Data to store
+	initial_log_likelihood = NULL
+	dispersal_rates = NULL
+	extinction_rates = NULL
+	final_log_likelihood = NULL
+	#ancestral_splits_array = NULL
+	#ancestral_states_array = NULL
+	
+	# Go through the lines
+	#filecount = 0
+	for (i in 1:length(tmplines))
+		{
+		tmpline = tmplines[i]
+		
+		# Start a new output file
+		if (grepl("starting likelihood calculations", tmpline) == TRUE)
+			{
+			filecount = filecount + 1
+			cat("\nProcessing tree #", filecount, sep="")
+			tmpi = sprintf("%05.0f", filecount)
+	
+			new_prefix = get_fn_prefix(fn=get_path_last(path=outfn))
+			splits_table_fn = np(paste(addslash(results_dir), new_prefix, "_splits", tmpi, ".txt", sep=""))
+			states_table_fn = np(paste(addslash(results_dir), new_prefix, "_states", tmpi, ".txt", sep=""))
+	
+			# you need to clear these files
+			#new_splits_fn = TRUE
+			#new_states_fn = TRUE
+			}
+		
+		# parse initial ln likelihood
+		if (grepl("initial -ln likelihood", tmpline) == TRUE)
+			{
+			words = strsplit_whitespace(tmpline)
+			tmpnum = -1 * as.numeric(words[length(words)])
+			initial_log_likelihood = c(initial_log_likelihood, tmpnum)
+			}
+	
+		# parse final ln likelihood
+		if (grepl("final -ln likelihood", tmpline) == TRUE)
+			{
+			words = strsplit_whitespace(tmpline)
+			tmpnum = -1 * as.numeric(words[length(words)])
+			final_log_likelihood = c(final_log_likelihood, tmpnum)
+			}
+	
+		# parse dispersal/extinction lines
+		if (grepl("dis: ", tmpline) == TRUE)
+			{
+			words = strsplit_whitespace(tmpline)
+			tmpnum = as.numeric(words[2])
+			dispersal_rates = c(dispersal_rates, tmpnum)
+	
+			tmpnum = as.numeric(words[4])
+			extinction_rates = c(extinction_rates, tmpnum)
+			}
+		
+		# Ancestral splits
+		if (grepl("Ancestral splits for:", tmpline) == TRUE)
+			{
+			# first line
+			words = strsplit_whitespace(tmpline)
+			tmpnum1 = as.numeric(words[length(words)])
+			
+			# second line
+			for (j in ((i+1):(i+20)))
+				{
+				# Test if the line exists
+				if (is.na(tmplines[j]))
+					{
+					break()
+					}
+	
+				#cat("\nstart", tmplines[j], "end", sep="")
+				if (tmplines[j] == "" || grepl("Ancestral", tmplines[j]) == TRUE || grepl("initializing", tmplines[j]) == TRUE)
+					{
+					break
+					} else {
+					words = strsplit_whitespace(tmplines[j])
+					words[3] = extract_numbers(words[3])
+					outwords = c(tmpnum1, words)
+					outstr = list2str(outwords, spacer="\t")
+	
+					#ancestral_splits_array = rbind(ancestral_splits_array, tmpline)
+					# Append data to end of file
+					if (new_splits_fn == TRUE)
+						{
+						write(outstr, file=splits_table_fn, append=FALSE, sep="\n")
+						new_splits_fn = FALSE
+						} else {
+						write(outstr, file=splits_table_fn, append=TRUE, sep="\n")
+						}
+					}
+				}
+			}
+	
+		# Ancestral states
+		if (grepl("Ancestral states for:", tmpline) == TRUE)
+			{
+			# first line
+			words = strsplit_whitespace(tmpline)
+			tmpnum1 = as.numeric(words[length(words)])
+			
+			# second line
+			for (j in ((i+1):(i+20)))
+				{
+				# Test if the line exists
+				if (is.na(tmplines[j]))
+					{
+					break()
+					}
+	
+				#cat("\nstart", tmplines[j], "end", sep="")
+				if (tmplines[j] == "" || grepl("Ancestral", tmplines[j]) == TRUE || grepl("initializing", tmplines[j]) == TRUE)
+					{
+					break
+					} else {
+					words = strsplit_whitespace(tmplines[j])
+					words[3] = extract_numbers(words[3])
+					outwords = c(tmpnum1, words)
+					outstr = list2str(outwords, spacer="\t")
+					
+					#ancestral_states_array = rbind(ancestral_states_array, tmpline)
+					# Append data to end of file
+					if (new_states_fn == TRUE)
+						{
+						write(outstr, file=states_table_fn, append=FALSE, sep="\n")
+						new_states_fn = FALSE
+						} else {
+						write(outstr, file=states_table_fn, append=TRUE, sep="\n")
+						}
+					}
+				}
+			}
+		#print(outstr)
+		}
+	cat("\n")
+
+	cat("\nStates output to: ", splits_table_fn, "\n", sep="")
+	cat("\nSplits output to: ", splits_table_fn, "\nn", sep="")
+	
+	sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood, splits_table_fn, states_table_fn)
+	sumstats = adf2(sumstats)
+	
+	outfn = np(paste(results_dir, "sumstats.txt", sep=""))
+	write.table(x=sumstats, file=outfn, append=FALSE, quote=FALSE, sep="	", row.names=FALSE, col.names=TRUE)
+	# write_table_good(sumstats, paste(results_dir, "sumstats.txt", sep=""))
+
+	return(sumstats)
+	}
+
+
+
+#######################################################
+# parse_lagrange_python_output_old
+#######################################################
+#' Parse the output file from python \code{LAGRANGE} -- old version
+#' 
+#' Parse the output of a python \code{LAGRANGE} output file.  This is 
+#' an older version useful
+#' for automating the parsing of a large number of files.
 #' 
 #' Python LAGRANGE is run from a UNIX/Terminal command-line
 #' with a command such as "\code{python lagrangefilename.py}".  You will need to have the "lagrange" python directory in 
@@ -1999,7 +1734,7 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 #' @examples
 #' test=1
 #' 
-parse_lagrange_python_output <- function(outfn="output.results.txt", results_dir=getwd(), new_splits_fn = TRUE, new_states_fn = FALSE, filecount=0)
+parse_lagrange_python_output_old <- function(outfn="output.results.txt", results_dir=getwd(), new_splits_fn = TRUE, new_states_fn = FALSE, filecount=0)
 	{
 	setup='
 	wd = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LAGRANGE_python/"
@@ -2039,8 +1774,8 @@ parse_lagrange_python_output <- function(outfn="output.results.txt", results_dir
 			tmpi = sprintf("%05.0f", filecount)
 	
 			new_prefix = get_fn_prefix(fn=get_path_last(path=outfn))
-			splits_table_fn = paste(addslash(results_dir), new_prefix, "_splits", tmpi, ".txt", sep="")
-			states_table_fn = paste(addslash(results_dir), new_prefix, "_states", tmpi, ".txt", sep="")
+			splits_table_fn = np(paste(addslash(results_dir), new_prefix, "_splits", tmpi, ".txt", sep=""))
+			states_table_fn = np(paste(addslash(results_dir), new_prefix, "_states", tmpi, ".txt", sep=""))
 	
 			# you need to clear these files
 			#new_splits_fn = TRUE
@@ -2190,8 +1925,297 @@ parse_lagrange_python_output <- function(outfn="output.results.txt", results_dir
 	
 	sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood, splits_table_fn, states_table_fn)
 	sumstats = adf2(sumstats)
-	outfn = paste(results_dir, "sumstats.txt", sep="")
+	outfn = np(paste(results_dir, "/sumstats.txt", sep=""))
 	write.table(x=sumstats, file=outfn, append=FALSE, quote=FALSE, sep="	", row.names=FALSE, col.names=TRUE)
+	
+	return(sumstats)
+	}
+
+
+
+
+
+
+#######################################################
+# parse_lagrange_python_output
+#######################################################
+#' Parse the output file from python \code{LAGRANGE}
+#' 
+#' Parse the output of a python \code{LAGRANGE}.  
+#' 
+#' Python LAGRANGE is run from a UNIX/Terminal command-line
+#' with a command such as "\code{python lagrangefilename.py}".  You will need to have the "lagrange" python directory in 
+#' your working directory.
+#' 
+#' The input file can be obtained from \url{http://www.reelab.net/lagrange/configurator/index} (\cite{Ree2009configurator}).
+#' 
+#' Python comes installed on many machines, or can be downloaded from the Enthought Python Distribution 
+#' (\url{https://www.enthought.com/products/epd/}).
+#' 
+#' @param outfn The python \code{LAGRANGE} output text file.
+#' @param outputfiles Should parsed output be written to files? Default FALSE.
+#' @param results_dir The directory \code{outfn} is in.
+#' @param new_splits_fn Should a text file containing a table of the splits and their probabilities be output? Default \code{TRUE}.
+#' @param new_states_fn Should a text file containing a table of the states and their probabilities be output? Default \code{FALSE}, 
+#' as I don't believe python \code{LAGRANGE} will output the states at the nodes (C++ \code{LAGRANGE} will, however).
+#' @param filecount The starting number for the filecount (relevant if one is processing many files).
+#' @param append Should results be appended to preexisting file? (default \code{FALSE})
+#' @return sumstats A \code{\link[base]{data.frame}} containing the summary statistics (LnL, d and e rates, etc.)  The splits
+#' filename is output to screen.
+#' @export
+#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{https://code.google.com/p/lagrange/}
+#' \url{https://www.enthought.com/products/epd/}
+#' \url{http://www.reelab.net/lagrange/configurator/index}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#' @examples
+#' test=1
+#' 
+parse_lagrange_python_output <- function(outfn="output.results.txt", outputfiles=FALSE, results_dir=getwd(), new_splits_fn = TRUE, new_states_fn = FALSE, filecount=0, append=FALSE)
+	{
+	setup='
+	wd = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LAGRANGE_python/"
+	setwd(wd)
+	outfn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LGpy/Psychotria_5.2_demo.results.txt"
+	results_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LGpy/"
+	new_splits_fn = TRUE
+	new_states_fn = FALSE
+	filecount=0
+	parse_lagrange_python_output(outfn, results_dir, new_splits_fn = TRUE, new_states_fn = FALSE, filecount=0)
+	'
+
+	# Split the file into 1 file for each analysis
+	tmplines = scan(outfn, what="character", sep="\n")
+	
+	results_dir = addslash(results_dir)
+	
+	# Data to store
+	initial_log_likelihood = NULL
+	dispersal_rates = NULL
+	extinction_rates = NULL
+	final_log_likelihood = NULL
+	#ancestral_splits_array = NULL
+	#ancestral_states_array = NULL
+	
+	# Go through the lines
+	#filecount = 0
+	for (i in 1:length(tmplines))
+		{
+		tmpline = tmplines[i]
+		
+		# Start a new output file
+		if (grepl("Global ML at root node:", tmpline) == TRUE)
+			{
+			filecount = filecount + 1
+			cat("\nProcessing tree #", filecount, sep="")
+			tmpi = sprintf("%05.0f", filecount)
+	
+			new_prefix = get_fn_prefix(fn=get_path_last(path=outfn))
+			if (outputfiles == TRUE)
+				{
+				if (new_splits_fn == TRUE)
+					{
+					splits_table_fn = np(paste(addslash(results_dir), new_prefix, "_splits", tmpi, ".txt", sep=""))
+					}
+				if (new_states_fn == TRUE)
+					{
+					states_table_fn = np(paste(addslash(results_dir), new_prefix, "_states", tmpi, ".txt", sep=""))
+					}
+				}
+	
+			# you need to clear these files
+			#new_splits_fn = TRUE
+			#new_states_fn = TRUE
+			}
+		
+		# parse initial ln likelihood
+		if (grepl("initial -ln likelihood", tmpline) == TRUE)
+			{
+			words = strsplit_whitespace(tmpline)
+			tmpnum = -1 * as.numeric(words[length(words)])
+			initial_log_likelihood = c(initial_log_likelihood, tmpnum)
+			}
+	
+		# parse final ln likelihood
+		if (grepl("-lnL =", tmpline) == TRUE)
+			{
+			words = strsplit_whitespace(tmpline)
+			tmpnum = -1 * as.numeric(words[length(words)])
+			final_log_likelihood = c(final_log_likelihood, tmpnum)
+			}
+	
+		# parse dispersal line
+		if (grepl("dispersal = ", tmpline) == TRUE)
+			{
+			words = strsplit_whitespace(tmpline)
+			tmpnum = as.numeric(words[3])
+			dispersal_rates = c(dispersal_rates, tmpnum)
+			}
+		# parse extinction line
+		if (grepl("extinction = ", tmpline) == TRUE)
+			{
+			words = strsplit_whitespace(tmpline)
+			tmpnum = as.numeric(words[3])
+			extinction_rates = c(extinction_rates, tmpnum)
+			}
+		
+		# Ancestral splits
+		if (grepl("At node N", tmpline) == TRUE)
+			{
+			# first line, e.g. "At node N36:"
+			words = strsplit_whitespace(tmpline)
+			tmpnum3 = words[length(words)]
+			tmpnum2 = gsub(pattern="N", replacement="", x=tmpnum3)
+			tmpnum2 = gsub(pattern="\\:", replacement="", x=tmpnum2)
+			tmpnum1 = as.numeric(tmpnum2)
+
+			# second line (there are only 15 values reported, plus header
+			for (j in ((i+1):(i+20)))
+				{
+				# Test if the line exists
+				if (is.na(tmplines[j]))
+					{
+					break()
+					}
+
+				# Test if the line is header:    split     lnL     Rel.Prob
+				if ( (grepl("split", tmplines[j]) == TRUE) && (grepl("lnL", tmplines[j]) == TRUE) )
+					{
+					next()
+					}
+
+	
+				#cat("\nstart", tmplines[j], "end", sep="")
+				if (tmplines[j] == "" || grepl("At node N", tmplines[j]) == TRUE || grepl("initializing", tmplines[j]) == TRUE)
+					{
+					break()
+					} else {
+					words = strsplit_whitespace(tmplines[j])
+					
+					# Fix splits by removing []
+					words[1] = gsub(pattern="\\[", replacement="", x=words[1])
+					words[1] = gsub(pattern="\\]", replacement="", x=words[1])
+					
+					# -LnL
+					words[2] = -1* as.numeric(extract_numbers(words[2]))
+					
+					# Rel. prob.
+					words[3] = extract_numbers(words[3])
+					outwords = c(tmpnum1, words)
+					outstr = list2str(outwords, spacer="\t")
+	
+					#ancestral_splits_array = rbind(ancestral_splits_array, tmpline)
+					# Append data to end of file
+					# Write data to file, if outputfiles==TRUE
+					if (outputfiles == TRUE)
+						{
+						if (new_splits_fn == TRUE)
+							{
+							write(outstr, file=splits_table_fn, append=append, sep="\n")
+							#new_splits_fn = FALSE
+							} else {
+							pass=1
+							}
+						}
+					}
+				}
+			}
+	
+		# Ancestral states
+		if (grepl("Ancestral states for:", tmpline) == TRUE)
+			{
+			# first line
+			words = strsplit_whitespace(tmpline)
+			tmpnum1 = as.numeric(words[length(words)])
+			
+			# second line
+			for (j in ((i+1):(i+20)))
+				{
+				# Test if the line exists
+				if (is.na(tmplines[j]))
+					{
+					break()
+					}
+	
+				#cat("\nstart", tmplines[j], "end", sep="")
+				if (tmplines[j] == "" || grepl("Ancestral", tmplines[j]) == TRUE || grepl("initializing", tmplines[j]) == TRUE)
+					{
+					break
+					} else {
+					words = strsplit_whitespace(tmplines[j])
+					words[3] = extract_numbers(words[3])
+					outwords = c(tmpnum1, words)
+					outstr = list2str(outwords, spacer="\t")
+					
+					#ancestral_states_array = rbind(ancestral_states_array, tmpline)
+					# Append data to end of file
+					# Write data to file, if outputfiles==TRUE
+					if (outputfiles == TRUE)
+						{
+						if (new_states_fn == TRUE)
+							{
+							write(outstr, file=states_table_fn, append=append, sep="\n")
+							#new_states_fn = FALSE
+							} else {
+							pass=1
+							}
+						}
+					}
+				}
+			}
+		#print(outstr)
+		}
+	cat("\n")
+
+	# If no initial log-likelihood, but there are other values, put in NA
+	if (!is.null(final_log_likelihood))
+		{
+		if (is.null(initial_log_likelihood))
+			{
+			initial_log_likelihood = NA
+			}
+		}
+
+
+	# Write data to file, if outputfiles==TRUE
+	if (outputfiles == TRUE)
+		{
+
+		if (new_splits_fn == TRUE)
+			{
+			cat("\nSplits output to: ", splits_table_fn, "\n", sep="")
+			} else {
+			splits_table_fn = ""
+			}
+
+
+		#cat("\nStates output (if LAGRANGE Python does this, which I don't think it does) to: ", splits_table_fn, "\n", sep="")
+		if (new_states_fn == TRUE)
+			{
+			cat("\nStates output (if LAGRANGE Python does this, which I don't think it does) to: ", states_table_fn, "\n", sep="")
+			} else {
+			states_table_fn = ""
+			}
+
+		# Output to table
+		sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood, splits_table_fn, states_table_fn)
+		sumstats = adf2(sumstats)
+
+
+		# Output sumstats
+		outfn = np(paste(results_dir, "/sumstats.txt", sep=""))
+		write.table(x=sumstats, file=outfn, append=FALSE, quote=FALSE, sep="	", row.names=FALSE, col.names=TRUE)
+		} else {
+		# Output to table
+		sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood)
+		sumstats = adf2(sumstats)
+		}
+	
 	
 	return(sumstats)
 	}
@@ -2225,9 +2249,10 @@ parse_lagrange_python_output <- function(outfn="output.results.txt", results_dir
 #' C++ LAGRANGE can be obtained at \url{https://code.google.com/p/lagrange/}
 #' 
 #' @param outfn The C++ \code{LAGRANGE} output text file.
+#' @param outputfiles Should parsed output be written to files? Default FALSE.
 #' @param results_dir The directory \code{outfn} is in.
-#' @param new_splits_fn Should a text file containing a table of the splits and their probabilities be output? Default \code{TRUE}.
-#' @param new_states_fn Should a text file containing a table of the splits and their probabilities be output? Default \code{TRUE}, 
+#' @param new_splits_fn Should a text file containing a table of the splits and their probabilities be output? Default \code{FALSE}.
+#' @param new_states_fn Should a text file containing a table of the states and their probabilities be output? Default \code{TRUE}, 
 #' unlike python \code{LAGRANGE}, C++ \code{LAGRANGE} \emph{will} output the states at the nodes.
 #' @param filecount The starting number for the filecount (relevant if one is processing many files).
 #' @return sumstats A \code{\link[base]{data.frame}} containing the summary statistics (LnL, d and e rates, etc.)  The splits
@@ -2244,7 +2269,7 @@ parse_lagrange_python_output <- function(outfn="output.results.txt", results_dir
 #' @examples
 #' test=1
 #' 
-parse_lagrange_output <- function(outfn, results_dir=getwd(), new_splits_fn = TRUE, new_states_fn = TRUE, filecount=0)
+parse_lagrange_output <- function(outfn, outputfiles=FALSE, results_dir=getwd(), new_splits_fn=FALSE, new_states_fn=TRUE, filecount=0)
 	{
 	setup='
 	outfn = "/Users/nick/Desktop/__projects/_2011-07-15_Hannah_spider_fossils/_data/lagrange_for_nick/_run_3rd226/lagrange_results_v1_3rd226.txt"
@@ -2279,8 +2304,17 @@ parse_lagrange_output <- function(outfn, results_dir=getwd(), new_splits_fn = TR
 			tmpi = sprintf("%05.0f", filecount)
 	
 			new_prefix = get_fn_prefix(fn=get_path_last(path=outfn))
-			splits_table_fn = paste(addslash(results_dir), new_prefix, "_splits", tmpi, ".txt", sep="")
-			states_table_fn = paste(addslash(results_dir), new_prefix, "_states", tmpi, ".txt", sep="")
+			if (outputfiles == TRUE)
+				{
+				if (new_splits_fn == TRUE)
+					{
+					splits_table_fn = np(paste(addslash(results_dir), new_prefix, "_splits", tmpi, ".txt", sep=""))
+					}
+				if (new_states_fn == TRUE)
+					{
+					states_table_fn = np(paste(addslash(results_dir), new_prefix, "_states", tmpi, ".txt", sep=""))
+					}
+				}
 	
 			# you need to clear these files
 			#new_splits_fn = TRUE
@@ -2341,13 +2375,16 @@ parse_lagrange_output <- function(outfn, results_dir=getwd(), new_splits_fn = TR
 					outstr = list2str(outwords, spacer="\t")
 	
 					#ancestral_splits_array = rbind(ancestral_splits_array, tmpline)
-					# Append data to end of file
-					if (new_splits_fn == TRUE)
+					# Write data to file, if outputfiles==TRUE
+					if (outputfiles == TRUE)
 						{
-						write(outstr, file=splits_table_fn, append=FALSE, sep="\n")
-						new_splits_fn = FALSE
-						} else {
-						write(outstr, file=splits_table_fn, append=TRUE, sep="\n")
+						if (new_splits_fn == TRUE)
+							{
+							write(outstr, file=splits_table_fn, append=FALSE, sep="\n")
+							new_splits_fn = FALSE
+							} else {
+							write(outstr, file=splits_table_fn, append=TRUE, sep="\n")
+							}
 						}
 					}
 				}
@@ -2381,12 +2418,16 @@ parse_lagrange_output <- function(outfn, results_dir=getwd(), new_splits_fn = TR
 					
 					#ancestral_states_array = rbind(ancestral_states_array, tmpline)
 					# Append data to end of file
-					if (new_states_fn == TRUE)
+					# Write data to file, if outputfiles==TRUE
+					if (outputfiles == TRUE)
 						{
-						write(outstr, file=states_table_fn, append=FALSE, sep="\n")
-						new_states_fn = FALSE
-						} else {
-						write(outstr, file=states_table_fn, append=TRUE, sep="\n")
+						if (new_states_fn == TRUE)
+							{
+							write(outstr, file=states_table_fn, append=FALSE, sep="\n")
+							new_states_fn = FALSE
+							} else {
+							write(outstr, file=states_table_fn, append=TRUE, sep="\n")
+							}
 						}
 					}
 				}
@@ -2395,15 +2436,26 @@ parse_lagrange_output <- function(outfn, results_dir=getwd(), new_splits_fn = TR
 		}
 	cat("\n")
 
-	cat("\nStates output to: ", splits_table_fn, "\n", sep="")
-	cat("\nSplits output to: ", splits_table_fn, "\nn", sep="")
-	
-	sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood, splits_table_fn, states_table_fn)
-	sumstats = adf2(sumstats)
-	
-	outfn = paste(results_dir, "sumstats.txt", sep="")
-	write.table(x=sumstats, file=outfn, append=FALSE, quote=FALSE, sep="	", row.names=FALSE, col.names=TRUE)
-	# write_table_good(sumstats, paste(results_dir, "sumstats.txt", sep=""))
+
+
+	# Write data to file, if outputfiles==TRUE
+	if (outputfiles == TRUE)
+		{
+		# Make an output table
+		sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood, splits_table_fn, states_table_fn)
+		sumstats = adf2(sumstats)
+
+		cat("\nStates output to: ", splits_table_fn, "\n", sep="")
+		cat("\nSplits output to: ", splits_table_fn, "\nn", sep="")
+		
+		outfn = np(paste(results_dir, "sumstats.txt", sep=""))
+		write.table(x=sumstats, file=outfn, append=FALSE, quote=FALSE, sep="	", row.names=FALSE, col.names=TRUE)
+		# write_table_good(sumstats, paste(results_dir, "sumstats.txt", sep=""))
+		} else {
+		# Output to table
+		sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood)
+		sumstats = adf2(sumstats)
+		}
 
 	return(sumstats)
 	}

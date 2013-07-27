@@ -8,10 +8,12 @@
   \item{obj}{An ape phylo object}
 }
 \value{
-  \code{TF_tips} The TRUE/FALSE list for each tip.
+  \code{TF_tips} The \code{TRUE}/\code{FALSE} list for each
+  tip.
 }
 \description{
-  A utility function
+  A utility function that returns \code{TRUE}/\code{FALSE}
+  for whether or not each node is a tip.
 }
 \note{
   Go BEARS!
@@ -28,6 +30,7 @@ test=1
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link{prt}}, \code{\link{chainsaw2}}
+  \code{\link{prt}}, \code{\link{chainsaw2}},
+  \code{\link{match_list1_in_list2}}
 }
 

@@ -29,7 +29,8 @@ require("cladoRcpp")
 #' test=1
 sourceall <- function(path=path, pattern="\\.R", ...)
 	{
-	Rfiles = list.files(path=path, pattern="\\.R", ...)
+	tmppath = np(addslash(path))
+	Rfiles = list.files(path=tmppath, pattern="\\.R", ...)
 	
 	# Files to remove
 	Rfiles_remove_TF1 = grepl("compile", Rfiles)
@@ -44,7 +45,7 @@ sourceall <- function(path=path, pattern="\\.R", ...)
 	for (Rfile in Rfiles)
 		{
 		cat("Sourcing Rfile: ", Rfile, "\n", sep="")
-		fullfn = slashslash(paste(path, Rfile, sep=""))
+		fullfn = np(slashslash(paste(addslash(path), Rfile, sep="")))
 		source(fullfn, chdir=TRUE, ...)
 		}
 
@@ -53,64 +54,150 @@ sourceall <- function(path=path, pattern="\\.R", ...)
 	}
 
 
+
+
 #######################################################
-# fix Psychotria tree so tips all come to 0
+# printall
 #######################################################
-#######################################################
-# make_all_tips_come_to_0
-#######################################################
-#' Take a tree, ensure all tips end at 0
+#' Print an entire table to screen
 #' 
-#' Makes tree precisely ultrametric (unlike e.g. the default <i>Psychotria</i> tree)
+#' Utility function.  This prints a table to screen in chunks of \code{chunksize_toprint} 
+#' (default=40).  This avoids the annoying situation of not being able to see the bottom 
+#' of a table. Note that if you print something huge, you will be waiting for awhile (try
+#' ESC or CTRL-C to cancel such an operation).
+#'
+#' Another option is to reset options to something like: \code{options(max.print=99999)}, but this
+#' is hard to remember.  Your current setting is \code{getOption("max.print")}.
 #' 
-#' @param trfn The Newick tree filename
-#' @param outfn The filename for the resulting file
-#' @return \code{phy} The corrected phylogeny
+#' @param dtf The \code{\link[base]{data.frame}} to \code{\link[base]{print}}.
+#' @param chunksize_toprint Number of lines to print. Default 50.
+#' @param printflag For optional printing. Passed to \code{\link{prflag}}.
+#' @return NULL
 #' @export
-#' @seealso \code{\link[ape]{read.tree}}
+#' @seealso \code{\link[base]{print}}, \code{\link{prflag}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
 #' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
 #'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
-make_all_tips_come_to_0 <- function(trfn, outfn)
+printall <- function(dtf, chunksize_toprint = 40, printflag=TRUE)
 	{
-	phy = read.tree(trfn)
-
-
-	print("Input tree:")
-	print("is.ultrametric(phy)")
-	print(is.ultrametric(phy))
-	
-	prt_table = prt(phy)
-	
-	
-	prt_table$time_bp
-	
-	for (i in 1:nrow(prt_table))
+	# Print everything in a data frame, in chunks of e.g. 50 rows
+	if (nrow(dtf) <= chunksize_toprint)
 		{
-		if ((prt_table$time_bp[i] > 0) && (prt_table$node.type[i] == "tip"))
-			{
-			edgeTF = phy$edge[,2] == i
-			phy$edge.length[edgeTF] = phy$edge.length[edgeTF] + prt_table$time_bp[i]
-			}
+		prflag(dtf, printflag=printflag)
+		return(dtf)
 		}
+	rows_toprint = seq(1, nrow(dtf), chunksize_toprint)
 	
-	print("Putput tree:")
-	print("is.ultrametric(phy)")
-	print(is.ultrametric(phy))
-	
-	prt(phy)
-	
-	#write.tree(phy, file="Psychotria_5.2_ultrametric.newick")
-	write.tree(phy, file=outfn)
-	return(phy)
+	if (printflag == TRUE)
+		{
+		for (i in 1 : (length(rows_toprint)-1) )
+			{
+			tmp_rows_toprint_start = rows_toprint[i]
+			tmp_rows_toprint_end = rows_toprint[i+1]
+			prflag(dtf[tmp_rows_toprint_start:tmp_rows_toprint_end, ])
+			}
+		
+		# Then print the end
+		tmp_rows_toprint_start = rows_toprint[length(rows_toprint)]
+		tmp_rows_toprint_end = nrow(dtf)
+		prflag(dtf[tmp_rows_toprint_start:tmp_rows_toprint_end, ])
+		}	
 	}
 
+
+
+
+
+#######################################################
+# prflag
+#######################################################
+#' Utility function to conditionally print intermediate results
+#'
+#' Just a handy shortcut function, allowing other functions to optionally 
+#' print, depending on the value of \code{printflag}.
+#' 
+#' @param x What to print.
+#' @param printflag If TRUE, do the printing
+#' @return nothing
+#' @export
+#' @seealso \code{\link{get_daughters}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+prflag <- function(x, printflag=TRUE)
+	{
+	# A standard function to print (or not) certain variables,
+	#   based on a master printflag
+	# This avoids having to comment in/out various code chunks
+	#   while debugging.
+	if (printflag == TRUE)
+		{
+		# CAT instead of PRINT if it's a string or numeric
+		if (is.character(x))
+			{
+			cat(x, "\n", sep="")
+			}
+		if (is.numeric(x))
+			{
+			cat(x, "\n", sep="")
+			} else {
+			print(x)
+			}
+		}
+	else
+		{
+		pass="BLAH"
+		}
+	}
+
+
+
+
+#######################################################
+# np
+#######################################################
+#' normalizePath shortcut
+#' 
+#' Utility function that runs \code{\link[base]{normalizePath}}. Useful for
+#' running on Mac vs. Windows.
+#' 
+#' @param path The path to run \code{\link[base]{normalizePath}} on.
+#' @param ... Additional arguments to \code{\link[base]{normalizePath}}.
+#' @return \code{path} The path that was normalized.
+#' @export
+#' @seealso \code{\link[base]{normalizePath}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' # Get a path
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' extdata_dir
+#'
+#' path = paste(extdata_dir, "//", "Psychotria_5.2.newick", sep="")
+#' path
+#'
+#' path = np(path)
+#' path
+#' 
+np <- function(path=path, ...)
+	{
+	path = normalizePath(path, ...)
+	return(path)
+	}
 
 
 
@@ -305,7 +392,7 @@ unlist_dtf_cols <- function(dtf, printflag=FALSE)
 #' @param list2 The second list list.
 #' @return \code{match_indices} The match indices.
 #' @export
-#' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}
+#' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}, \code{\link{get_indices_where_list1_occurs_in_list2_noNA}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -323,8 +410,74 @@ get_indices_where_list1_occurs_in_list2 <- function(list1, list2)
 	}
 
 
+# return indices in 2nd list matching the first list
+#######################################################
+# get_indices_where_list1_occurs_in_list2_noNA
+#######################################################
+#' Return (first!) indices in second list matching the first list, excluding NAs
+#' 
+#' This function will return one match (the first) for each item in the list; i.e. the second-list
+#' index for each item in the first list.  Only the first hit in the second list is returned.  Unlike 
+#' \code{\link{get_indices_where_list1_occurs_in_list2}}, non-hits (NAs) are excluded.
+#' 
+#' This is used by get_indices_of_branches_under_tips, which is used by \code{\link{extend_tips_to_ultrametricize}}, which can be used by section_the_tree.
+#'
+#' @param list1 The first list. 
+#' @param list2 The second list list.
+#' @return \code{match_indices} The match indices.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}, \code{\link{get_indices_where_list1_occurs_in_list2}}, 
+#' \code{\link{extend_tips_to_ultrametricize}}, \code{\link{section_the_tree}}, \code{\link{return_items_not_NA}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' list1 = c("N", "I", "C", "K")
+#' list2 = LETTERS
+#' get_indices_where_list1_occurs_in_list2_noNA(list1, list2)
+#' 
+get_indices_where_list1_occurs_in_list2_noNA <- function(list1, list2)
+	{
+	match_indices = match(list1, list2)
+	match_indices = return_items_not_NA(match_indices)
+	return(match_indices)
+	}
 
 
+#######################################################
+# return_items_not_NA
+#######################################################
+#' Remove NAs from a vector/list
+#' 
+#' Utility function. This function returns the non-NA values from a vector.
+#' 
+#' This is used by \code{\link{get_indices_where_list1_occurs_in_list2_noNA}}, which is used 
+#' by \code{\link{get_indices_of_branches_under_tips}}, which is used by 
+#' \code{\link{extend_tips_to_ultrametricize}}, which can be used by \code{\link{section_the_tree}}.
+#'
+#' @param x The vector of items to check for being not NA.
+#' @return \code{y} The surviving, non-NA cells of a vector.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}, \code{\link{get_indices_where_list1_occurs_in_list2_noNA}},  
+#' \code{\link{get_indices_where_list1_occurs_in_list2}}, \code{\link{extend_tips_to_ultrametricize}}, \code{\link{section_the_tree}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' list1 = c("N", "I", NA, "C", "K")
+#' return_items_not_NA(list1)
+#' 
+return_items_not_NA <- function(x)
+	{
+	y = x[!is.na(x)]
+	return(y)
+	}
 
 
 #######################################################
@@ -637,7 +790,7 @@ dfnums_to_numeric <- function(dtf, max_NAs=0.5, printout=FALSE, roundval=NULL)
 		{
 		if (cls_col_list[i] == "list")
 			{
-			next()
+			next()	# skip the lists
 			}
 		if (cls_col_list[i] != "numeric")
 			{
@@ -707,6 +860,7 @@ dfnums_to_numeric <- function(dtf, max_NAs=0.5, printout=FALSE, roundval=NULL)
 #' @examples
 #' x = matrix(c(1,2,3,4,5,6), nrow=3, ncol=2)
 #' adf(x)
+#' 
 adf <- function(x)
 	{
 	return(as.data.frame(x, row.names=NULL, stringsAsFactors=FALSE))
@@ -733,6 +887,7 @@ adf <- function(x)
 #' @examples
 #' x = matrix(c(1,2,3,4,5,6), nrow=3, ncol=2)
 #' adf2(x)
+#' 
 adf2 <- function(x)
 	{
 	# Deals with the problem of repeated row names
@@ -865,6 +1020,7 @@ unlist_df2 <- function(df)
 unlist_df3 <- function(df)
 	{
 	store_colnames = names(df)
+	store_rownames = rownames(df)
 	
 	outdf = NULL
 	
@@ -889,6 +1045,7 @@ unlist_df3 <- function(df)
 	outdf = adf2(outdf)
 	
 	names(outdf) = store_colnames
+	rownames(outdf) = store_rownames
 	return(outdf)
 	}
 
@@ -904,11 +1061,13 @@ unlist_df3 <- function(df)
 #' \code{\link{dfnums_to_numeric}} which should remove the problem of numbers columns being of
 #' class \code{\link[base]{character}}.
 #' 
+#' See especially  \code{\link[base]{data.matrix}} for a possibly simpler alternative.
+#' 
 #' @param df matrix or other object transformable to data.frame
 #' @param ... Additional options passed to \code{\link{dfnums_to_numeric}}.
 #' @return \code{outdf} data.frame
 #' @export
-#' @seealso \code{\link{unlist_df}}, \code{\link{dfnums_to_numeric}}, \code{\link{cls.df}}
+#' @seealso \code{\link{unlist_df}}, \code{\link{dfnums_to_numeric}}, \code{\link{cls.df}}, \code{\link[base]{data.matrix}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
 #' @examples
 #' x = matrix(c(1,2,3,4,5,6), nrow=3, ncol=2)
@@ -927,10 +1086,12 @@ unlist_df3 <- function(df)
 unlist_df4 <- function(df, ...)
 	{
 	store_colnames = names(df)
+	store_rownames = rownames(df)
 	
 	outdf = NULL
 	
 	numrows = dim(df)[1]
+	numcols = dim(df)[2]
 	
 	for (i in 1:ncol(df))
 		{
@@ -942,11 +1103,30 @@ unlist_df4 <- function(df, ...)
 		if (length(tmpcol) < numrows)
 			{
 			tmpcol2 = df[,i]
-			tmpcol = as.character(tmpcol2)
+			tmpcol = as.character(unlist(tmpcol2))
 			}
 		
 		outdf = cbind(outdf, tmpcol)
 		}
+
+	# Unlist each row
+# 	outdf2 = NULL
+# 	for (i in 1:nrow(df))
+# 		{
+# 		#print(names(df)[i])
+# 		tmprow = unlist(df[i, ])
+# 		#print(length(tmpcol))
+# 		
+# 		# Error check; e.g. blank cells might screw it up
+# 		if (length(tmprow) < numcols)
+# 			{
+# 			tmprow2 = df[i,]
+# 			tmprow = as.character(unlist(tmprow2))
+# 			}
+# 		
+# 		outdf2 = rbind(outdf2, tmprow)
+# 		}
+# 	outdf = outdf2
 	
 	outdf_tmp = adf2(outdf)
 	
@@ -954,6 +1134,7 @@ unlist_df4 <- function(df, ...)
 	outdf = dfnums_to_numeric(outdf_tmp, ...)
 	
 	names(outdf) = store_colnames
+	rownames(outdf) = store_rownames
 	return(outdf)
 	}
 
@@ -984,7 +1165,7 @@ unlist_df4 <- function(df, ...)
 #'
 slashslash <- function(tmpstr)
 	{
-	outstr = gsub(pattern="//", replacement="/", x=tmpstr)
+	outstr = np(gsub(pattern="//", replacement="/", x=tmpstr))
 	return(outstr)
 	}
 
@@ -1762,7 +1943,9 @@ AkaikeWeights_on_summary_table <- function(restable, colname_to_use="AIC", add_t
 
 
 
-
+#######################################################
+# AICstats_2models
+#######################################################
 #' Calculate all the AIC and LRT stats between two models
 #' 
 #' The Likelihood Ratio Test (LRT) is a standard method for testing whether or not the data likelihood
@@ -1791,6 +1974,7 @@ AkaikeWeights_on_summary_table <- function(restable, colname_to_use="AIC", add_t
 #'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
+#' 
 AICstats_2models <- function(LnL_1, LnL_2, numparams1, numparams2)
 	{
 	defaults='
@@ -2863,7 +3047,7 @@ get_relative_prob_model2old <- function(AICval_1, AICval_2)
 #' 
 pdfit <- function(table_vals, file_prefix="tmptable", size="\\tiny", gettex=FALSE, caption=NULL)
 	{
-	require(xtable)
+	#require(xtable)
 	
 	cat("\nNOTE: the pdfit() function will only work if you have 'latex' installed on your machine.\n", sep="")
 	
@@ -2940,7 +3124,7 @@ pdfit <- function(table_vals, file_prefix="tmptable", size="\\tiny", gettex=FALS
 #' 
 pdftable <- function(table_vals, pdffn="tmptable.pdf", size="\\tiny", tmpdir="~", openPDF=TRUE, caption=NULL)
 	{
-	require(xtable)
+	#require(xtable)
 	
 	# pdfif no like it if columns are lists
 	#table_vals = unlist_df3(table_vals)
@@ -2971,6 +3155,548 @@ pdftable <- function(table_vals, pdffn="tmptable.pdf", size="\\tiny", tmpdir="~"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+#######################################################
+# TREE FUNCTIONS
+#######################################################
+
+
+
+
+
+#######################################################
+# get_daughters
+#######################################################
+#' Get all the direct daughters nodes of a node
+#' 
+#' @param nodenum The node number to get the daughters of
+#' @param t An ape phylo object
+#' @return \code{daughter_nodenums} List of the daughter node numbers
+#' @export
+#' @seealso \code{\link{findall}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_daughters <- function(nodenum, t)
+	{
+	daughter_edgenums = findall(nodenum, t$edge[,1])
+	daughter_nodenums = t$edge[,2][daughter_edgenums]
+	return(daughter_nodenums)
+	}
+
+
+
+
+# Get indices of all matches to a list
+#######################################################
+# findall
+#######################################################
+#' Get indices of all matches to a list
+#'
+#' Just a handy shortcut function
+#' 
+#' @param what The item to find
+#' @param inlist The list to search in 
+#' @return \code{matching_indices} List of the matching indices
+#' @export
+#' @seealso \code{\link{get_daughters}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+findall <- function(what, inlist)
+	{
+	TFmatches = inlist == what
+	indices = 1:length(inlist)
+	matching_indices = indices[TFmatches]
+	return(matching_indices)
+	}
+
+
+
+
+
+#######################################################
+# get_parent
+#######################################################
+#' Get the direct parent node of a node
+#' 
+#' @param nodenum The node number to get the parent of
+#' @param t An ape phylo object
+#' @return \code{parent_nodenum}The parent node number
+#' @export
+#' @seealso \code{\link{findall}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_parent <- function(nodenum, t)
+	{
+	matching_edges = findall(nodenum, t$edge[,2])
+	parent_nodenum = t$edge[,1][matching_edges][1]
+	return(parent_nodenum)
+	}
+
+
+#######################################################
+# get_level
+#######################################################
+#' Get a node's level in the tree
+#'
+#' Finds how many nodes deep a node is.
+#' 
+#' @param nodenum The node number to get the parent of
+#' @param t An ape phylo object
+#' @param tmplevel A starting level (the function is recursive)
+#' @return \code{tmplevel} The level of the node.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_level <- function(nodenum, t, tmplevel=0)
+	{
+	parent_nodenum = get_parent(nodenum, t)
+	if (is.na(parent_nodenum))
+		{
+		#tmplevel = 0
+		return(tmplevel)
+		}
+	else
+		{
+		#print(paste("parent_nodenum: ", parent_nodenum, " level: ", tmplevel, sep=""))
+		tmplevel = tmplevel + 1
+		tmplevel = get_level(parent_nodenum, t, tmplevel)
+		return(tmplevel)
+		}
+	# If an error occurs
+	return(NA)
+	}
+
+
+#######################################################
+# get_TF_tips
+#######################################################
+#' Get TRUE/FALSE for nodes being tips
+#'
+#' A utility function that returns \code{TRUE}/\code{FALSE} for whether or not each node is a tip.
+#' 
+#' @param obj An ape phylo object
+#' @return \code{TF_tips} The \code{TRUE}/\code{FALSE} list for each tip.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link{match_list1_in_list2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_TF_tips <- function(obj)
+	{
+	# Get TF for nodes being tips
+	
+	# BIG CHANGE?
+	#TF_tips = match_list1_in_list2(1:length(dists_from_root), obj$tip.label)
+	TF_tips = match_list1_in_list2(1:length(obj$edge), 1:length(obj$tip.label))
+	#TF_tips = obj$tip.label[TF_tips_indices]
+	return(TF_tips)
+	}
+
+
+
+#######################################################
+# get_TF_tips
+#######################################################
+#' Get TRUE/FALSE for nodes being tips
+#'
+#' A utility function that returns indices (node numbers) of the tips. This mostly saves typing.
+#' 
+#' @param obj An ape phylo object
+#' @return \code{tip_indices} The node numbers of the tips.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link[ape]{phylo}}, \code{\link{get_indices_of_branches_under_tips}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_indices_of_tip_nodes <- function(obj)
+	{
+	tip_indices = 1:length(obj$tip.label)
+	return(tip_indices)
+	}
+
+#######################################################
+# get_indices_of_branches_under_tips
+#######################################################
+#' Get the indices of the branches (row number in edge matrix) below each tip
+#'
+#' A utility function. Gets the indices of the branches (row number in edge matrix) below each tip.
+#' 
+#' @param obj An \code{\link[ape]{ape}} \code{\link[ape]{phylo}} object
+#' @return \code{branchnums_under_tips} The indices of the branches (row number in edge matrix) below each tip.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link{get_indices_of_tip_nodes}}, \code{\link{get_indices_where_list1_occurs_in_list2_noNA}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_indices_of_branches_under_tips <- function(obj)
+	{
+	tip_indices = get_indices_of_tip_nodes(obj)
+	branchnums_under_tips = get_indices_where_list1_occurs_in_list2_noNA(tip_indices, obj$edge[, 2])
+	return(branchnums_under_tips)
+	}
+
+
+
+
+#######################################################
+# get_node_ages_of_tips
+#######################################################
+#' Get the ages of each tip above the root
+#'
+#' A utility function.
+#' 
+#' @param obj An ape phylo object
+#' @return \code{TF_tips} The age (from the root) of each tip.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_node_ages_of_tips <- function(obj)
+	{
+	TF_tips = get_TF_tips(obj)
+	root_node_num = get_nodenum_structural_root(obj)
+	dists_from_root = dist.nodes(obj)[root_node_num, ]
+	node_ages_of_tips = dists_from_root[TF_tips]
+	return(node_ages_of_tips)
+	}
+
+
+#######################################################
+# get_all_node_ages
+#######################################################
+#' Get the ages of all the nodes in the tree (above the root)
+#'
+#' A utility function. Use of \code{\link[ape]{dist.nodes}} may be slow.
+#' 
+#' @param obj An ape phylo object
+#' @return \code{TF_tips} The age (from the root) of each node.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_all_node_ages <- function(obj)
+	{
+	node_ages = dist.nodes(obj)[get_nodenum_structural_root(obj), ]
+	return(node_ages)
+	}
+
+
+#######################################################
+# get_max_height_tree
+#######################################################
+#' Get the maximum age of all the nodes (above the root)
+#'
+#' I.e., the distance of the highest node above the root.  A utility function. 
+#' Use of \code{\link[ape]{dist.nodes}} may be slow.
+#' 
+#' @param obj An ape phylo object
+#' @return \code{max_height} The age (from the root) of the highest node.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_max_height_tree <- function(obj)
+	{
+	max_height = max(get_node_ages_of_tips(obj))
+	return(max_height)
+	}
+
+
+
+#######################################################
+# get_edge_times_before_present
+#######################################################
+#' Get the times of the top and bottom of each edge
+#'
+#' A utility function. 
+#' 
+#' @param t An ape phylo object
+#' @return \code{edge_times_bp} A 2-column matrix with the age (from the present) of the top and bottom of each edge.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+get_edge_times_before_present <- function(t)
+	{
+	#height above root
+	hts_at_end_of_branches_aka_at_nodes = t$edge.length
+	hts_at_end_of_branches_aka_at_nodes = get_all_node_ages(t)
+	h = hts_at_end_of_branches_aka_at_nodes
+
+	# times before present, below (ultrametric!) tips
+	# numbers are positive, i.e. in millions of years before present
+	#                       i.e. mybp, Ma
+	times_before_present = get_max_height_tree(t) - h
+
+	
+	# fill in the ages of each node for the edges
+	edge_ages = t$edge
+	edge_ages[,1] = h[t$edge[,1]]	# bottom of branch
+	edge_ages[,2] = h[t$edge[,2]]	# top of branch
+
+	# fill in the times before present of each node for the edges
+	edge_times_bp = t$edge
+	edge_times_bp[,1] = times_before_present[t$edge[,1]]	# bottom of branch
+	edge_times_bp[,2] = times_before_present[t$edge[,2]]	# top of branch
+	
+	return(edge_times_bp)
+	}
+
+
+
+
+
+
+
+
+#######################################################
+# extend_tips_to_ultrametricize
+#######################################################
+#' Take a tree, extend all tips (including fossils) up to 0.0 my before present
+#' 
+#' Makes tree precisely ultrametric by extending the terminal branches up to the highest tip (which is treated as 0 my before present).
+#'
+#' This function ADDS the time_before_present to everything, including fossils.  You have been warned.
+#' 
+#' @param obj An \code{\link[ape]{ape}} \code{\link[ape]{phylo}} object.
+#' @param age_of_root The length of the branch below the root. Default 0.
+#' @param tips_end_at_this_date The tips can be set to something other than 0, if desired.  (This could produce negative branclengths, however.)
+#' @return \code{obj} The corrected phylogeny
+#' @export
+#' @seealso \code{\link[ape]{read.tree}}, \code{\link{prt}}, \code{\link{average_tr_tips}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_date=NA)
+	{
+	#print("node ages of tips:")
+	tip_ages = age_of_root + get_node_ages_of_tips(obj)
+	#print(tip_ages)
+	
+	
+	if (is.na(tips_end_at_this_date))
+		{
+		tips_end_at_this_date = max(tip_ages)
+		}
+	
+	nums_to_add_to_tip_to_ultrametricize = tips_end_at_this_date - tip_ages
+	
+	indices_of_branches_under_tips = get_indices_of_branches_under_tips(obj)
+
+	obj$edge.length[indices_of_branches_under_tips] = obj$edge.length[indices_of_branches_under_tips] + nums_to_add_to_tip_to_ultrametricize
+	
+	return(obj)
+	}
+
+
+
+
+#######################################################
+# average_tr_tips
+#######################################################
+#' Average the heights of (non-fossil) tips to make ultrametric-ish.
+#'
+#' When you have a digitized tree, or other slightly uneven source tree, average the tips 
+#' to get them all to line up at 0 my before present.  This makes an ultrametric tree
+#' if and only if there are no fossil tips in the tree.
+#'
+#' If the user includes fossils accidentally, this function can easily lead to pathological
+#' results (negative branch lengths etc.), so use with care!!
+#' 
+#' @param tr An ape phylo object
+#' @param fossils_older_than Tips that are older than \code{fossils_older_than} will be excluded from the tips that 
+#' are going to be averaged. This is not currently set to 0, because Newick files can have slight precision issues etc.
+#' that mean not all tips quite come to zero (which is why you need \code{\link{average_tr_tips}} in the first place!).  
+#' Obviously you should be cautious about the value of , depending on the absolute timescale of your tree. Make sure you do
+#' not inappropriately average in fossils!!
+#' @return \code{edge_times_bp} A 2-column matrix with the age (from the present) of the top and bottom of each edge.
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link{extend_tips_to_ultrametricize}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+average_tr_tips <- function(tr, fossils_older_than=0.6)
+	{
+	#require(BioGeoBEARS)	# for prt()
+
+	# Check for negative branchlengths
+	blren_equal_below_0_TF = tr$edge.length <= 0
+	if (sum(blren_equal_below_0_TF) > 0)
+		{
+		tmptxt = paste(tr$edge.length[blren_equal_below_0_TF], collapse=", ", sep="")
+		stoptxt = paste("\nFATAL ERROR in average_tr_tips(): the INPUT tree has branchlengths <= 0:\n", tmptxt, 
+		"\nThis can sometimes happen if you (A) are accidentally including fossil tips (change 'fossils_older_than'), or\n",
+		"if your input tree was e.g. an MCC (majority clade consensus) trees output by BEAST's TreeAnnotator.\n", 
+		"In that case, you must fix the input Newick file. See ?check_BioGeoBEARS_run for comments.\n", sep="")
+		cat(stoptxt)
+		stop(stoptxt)
+		}
+
+
+
+	tr_table = prt(tr, printflag=FALSE)
+
+	tipnums_tmp = 1:length(tr$tip.label)
+	
+	# Cut out fossils!!
+	tips_are_fossils_TF = tr_table$time_bp[tipnums_tmp] > fossils_older_than
+	tipnums_tmp = tipnums_tmp[tips_are_fossils_TF == FALSE]
+	
+	edges_w_tips_TF = tr$edge[,2] %in% tipnums_tmp
+	edges_rownums = (1:nrow(tr$edge))
+	edges_w_tips_rownums = edges_rownums[edges_w_tips_TF]
+	
+	tipnums = tr$edge[edges_w_tips_rownums, 2]
+	
+
+	#tipnums = tr$edge[edges_w_tips_rownums, 2]
+	#tipnums
+	meanval = mean(tr_table$node_ht[tipnums])
+	meanval
+	diffs_from_mean = tr_table$node_ht[tipnums] - meanval
+	diffs_from_mean
+
+	tr5 = tr
+	tr5$edge.length[edges_w_tips_rownums] = tr5$edge.length[edges_w_tips_rownums] - diffs_from_mean
+	
+	min(tr5$edge.length)
+	min(tr$edge.length)
+
+
+	# Check the output; if IT has negative branchlengths, return NA!!
+	# Check for negative branchlengths
+	blren_equal_below_0_TF = tr5$edge.length <= 0
+	if (sum(blren_equal_below_0_TF) > 0)
+		{
+		tmptxt = paste(tr$edge.length[blren_equal_below_0_TF], collapse=", ", sep="")
+		stoptxt = paste("\nFATAL ERROR in average_tr_tips(): the OUTPUT tree has branchlengths <= 0:\n", tmptxt, 
+		"\nThis can sometimes happen if you (A) are accidentally including fossil tips (change 'fossils_older_than'), or\n",
+		"(B) if average_tr_tips() introduced more negative branches (especially can happen with shallow branches).\n", 
+		"Returning nada\n", sep="")
+		cat(stoptxt)
+		stop(stoptxt)
+		return(NA)
+		}
+	
+	#tr5_table = prt(tr5)
+	#tr5_table
+		
+	return(tr5)
+	}
+
+
+
+
+
+
+#######################################################
+# is.not.na
+#######################################################
+#' Check for not NA
+#'
+#' A utility function. 
+#' 
+#' @param x Thing to check for NA
+#' @return \code{TRUE} or \code{FALSE}
+#' @export
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+is.not.na <- function(x)
+	{
+	return(is.na(x) == FALSE)
+	}
 
 
 

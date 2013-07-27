@@ -1,0 +1,16 @@
+# Run with:
+# cd /Dropbox/_njm/__packages/BioGeoBEARS_setup/lagrange_run
+# ./lagrange_cpp /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Lonicera_M0/LGcpp/Lonicera_M0.lg | tee /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Lonicera_M0/LGcpp/Lonicera_M0_lgcpp_out.txt
+
+treefile = Lonicera.newick
+datafile = Lonicera.data
+
+# if calctype = m, marginal is set to TRUE? otherwise FALSE (??)
+calctype = m
+#periods = 20 200
+areanames = A B C D
+logfile = logfile
+#ancstate = _all_
+states
+#sparse
+#estimate_dispersal_mask

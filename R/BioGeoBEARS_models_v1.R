@@ -55,15 +55,15 @@ require("cladoRcpp")
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: 
 #' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -275,7 +275,7 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -308,14 +308,14 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -463,14 +463,14 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -682,7 +682,7 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -715,14 +715,14 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, fixnode=fixnode, fixlikes=fixlikes, itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, fixnode=fixnode, fixlikes=fixlikes, itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -883,15 +883,15 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: 
 #' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -1103,7 +1103,7 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -1136,14 +1136,14 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -1278,15 +1278,15 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: 
 #' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -1495,7 +1495,7 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -1528,14 +1528,14 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -1697,15 +1697,15 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: 
 #' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -1907,7 +1907,7 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -1940,14 +1940,14 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -2101,15 +2101,15 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: 
 #' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -2311,7 +2311,7 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -2344,14 +2344,14 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -2504,14 +2504,14 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -2713,7 +2713,7 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -2746,14 +2746,14 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, fixnode=fixnode, fixlikes=fixlikes, itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, fixnode=fixnode, fixlikes=fixlikes, itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -2898,14 +2898,14 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -3107,7 +3107,7 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -3140,14 +3140,14 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -3299,14 +3299,14 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -3508,7 +3508,7 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -3541,14 +3541,14 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -3704,14 +3704,14 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -3915,7 +3915,7 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -3948,14 +3948,14 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -4120,14 +4120,14 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -4331,7 +4331,7 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -4365,14 +4365,14 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -4517,14 +4517,14 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -4733,7 +4733,7 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -4767,14 +4767,14 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -4932,14 +4932,14 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -5143,7 +5143,7 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -5176,14 +5176,14 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -5346,14 +5346,14 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -5557,7 +5557,7 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -5590,14 +5590,14 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -5764,14 +5764,14 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -5975,7 +5975,7 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -6008,14 +6008,14 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 	#optim_result2 = nlminb(start=params, objective=function_to_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		} else {
 		# Compare methods with optimx
-		require(optimx)
+		#require(optimx)
 		
 		
 		
-		optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		# Run with all methods, for testing:
-		# optim_result2 = optimx::optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+		# optim_result2 = optimx(par=params, fn=function_to_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 
 		#######################################################
 		# Compare optimization routines
@@ -6183,14 +6183,14 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)

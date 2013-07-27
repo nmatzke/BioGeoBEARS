@@ -54,6 +54,8 @@ tipnames_in_order=paste("tip", seq(1,7), sep=""))
 }
 \seealso{
   \code{\link{letter_string_to_binary}},
+  \code{\link{binary_range_to_letter_code_list}},
+  \code{\link{binary_ranges_to_letter_codes}},
   \code{\link{getranges_from_LagrangePHYLIP}}
 }
 

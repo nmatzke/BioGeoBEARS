@@ -13,7 +13,9 @@
   nothing
 }
 \description{
-  Just a handy shortcut function
+  Just a handy shortcut function, allowing other functions
+  to optionally print, depending on the value of
+  \code{printflag}.
 }
 \note{
   Go BEARS!

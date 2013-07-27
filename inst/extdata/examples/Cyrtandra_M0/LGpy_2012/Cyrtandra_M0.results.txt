@@ -1,0 +1,534 @@
+Lagrange: likelihood analysis of geographic range evolution
+Version: 20120508
+Authors: Richard Ree <rree@fieldmuseum.org>
+         Stephen Smith <sasmith@nescent.org>
+http://lagrange.googlecode.com
+
+Newick tree with interior nodes labeled:
+((((((((C_sp_C0018:8.285191793,((C_sp_C0016:7.566993756,(C_anthropophagorum_C0114:7.359678858,(C_sp_C0019:4.190722569,C_sp_C0020:4.190722569)N5:3.168956289)N6:0.2073148974)N7:0.4590544157,(C_milnei_C0113:0.7181980375,C_leucantha_C0116:0.7181980375)N10:7.307850134)N11:0.2591436218)N12:3.931578947,(((C_richii_C0072:6.700713649,C_aurantiicarpa_C0076:6.700713649)N15:0.710793934,(C_sp_C0112:6.648884924,(C_cf_richii_C0068:6.441570027,C_pogonantha_C0071:6.441570027)N19:0.2073148974)N20:0.7626226583)N21:0.3628010705,(((C_ootensis_var_ootensis_C0061:4.146297948,(C_feaniana_C0059:3.938983051,C_ootensis_var_mollissima_C0060:3.938983051)N25:0.2073148974)N26:0.6589652096,(C_ootensis_var_mollissima_C0063:4.0426405,C_ootensis_var_mollissima_C0132:4.0426405)N29:0.7626226583)N30:1.125423729,(C_jonesii_C0064:2.354504906,(C_thibaultii_C0062:0.5108831401,C_nukukivensis_C0065:0.5108831401)N34:1.843621766)N35:3.57618198)N36:1.843621766)N37:4.442462087)N38:1.791793042,(((C_samoensis_C0030:7.515165031,C_samoensis_C0031:7.515165031)N41:0.5627118644,(C_kusaimontana_C0033:4.753434434,C_urvillei_C0034:4.753434434)N44:3.324442462)N45:2.398929527,(C_pulchella_C0029:3.072702944,C_ompressa_C0074:3.072702944)N48:7.404103479)N49:3.53175736)N50:4.242551293,(C_cf_occulta_C0119:4.398037467,(C_sp_C0017:2.199018733,C_occulta_C0017:2.199018733)N54:2.199018733)N55:13.85307761)N56:0.4590544157,((C_sandwicensis_C0045:5.168064228,(C_wagneri_C0013:5.06440678,((C_munroi_C0104:3.783496878,(C_propinqua_C0039:3.583586084,C_cordifolia_C0048:3.583586084)N62:0.1999107939)N63:0.05182872435,(C_laxiflora_C0037:3.679839429,C_sp_C0050:3.679839429)N66:0.1554861731)N67:1.229081178)N68:0.1036574487)N69:0.1480820696,((C_longifolia_C0023:2.917216771,(C_grandiflora_C0046:0.8736842105,(C_hawaiensis_C0038:0.6663693131,C_kaulantha_C0041:0.6663693131)N74:0.2073148974)N75:2.04353256)N76:0.6663693131,((C_tintinabula_C0012:0.4664585192,C_spathulata_C0102:0.4664585192)N79:0.1480820696,(C_grayana_C0103:0.05182872435,C_grayi_C0105:0.05182872435)N82:0.5627118644)N83:2.969045495)N84:1.732560214)N85:13.39402319)N86:16.45191793,(C_coccinea_C0089:5.471632471,(C_calpidicarpa_C0040:5.012578055,(C_wawrae_C0022:3.887154326,((C_wainihaensis_C0021:1.947279215,C_kauaiensis_C0026:1.947279215)N92:0.1999107939,(C_kealiae_spp_kealiae_C0035:1.947279215,C_kealiae_spp_urceolata_C0054:1.947279215)N95:0.1999107939)N96:1.739964318)N97:1.125423729)N98:0.4590544157)N99:29.69045495)N100:2.302676182,(C_sulcata_C0100:18.71016949,(C_sp_C0095:17.28117752,(C_sp_C0092:4.190722569,(C_sp_C0094:0.4664585192,C_pendula_C0098:0.4664585192)N106:3.72426405)N107:13.09045495)N108:1.428991971)N109:18.75459411)N110:4.035236396,(C_sp_C0093:24.48537021,(C_sp_C0096:12.47591436,C_picta_C0097:12.47591436)N114:12.00945584)N115:17.01462979)N116:0.0;
+
+
+Cladogram (branch lengths not to scale):
+                         ---------------+ [C] C_sp_C0018                      
+                         :                                                    
+                         :     ---------+ [C] C_sp_C0016                      
+                      N12+  -N7+                                              
+                      :  :  :  :  ------+ [C] C_anthropophagorum_C0114        
+                      :  :  :  -N6+                                           
+                      :  :  :     :  ---+ [C] C_sp_C0019                      
+                      :  N11+     -N5+                                        
+                      :     :        ---+ [C] C_sp_C0020                      
+                      :     :                                                 
+                      :     :     ------+ [C] C_milnei_C0113                  
+                      :     ---N10+                                           
+                      :           ------+ [C] C_leucantha_C0116               
+                   N38+                                                       
+                   :  :           ------+ [B] C_richii_C0072                  
+                   :  :     ---N15+                                           
+                   :  :     :     ------+ [B] C_aurantiicarpa_C0076           
+                   :  :  N21+                                                 
+                   :  :  :  :   --------+ [C] C_sp_C0112                      
+                   :  :  :  -N20+                                             
+                   :  :  :      :   ----+ [B] C_cf_richii_C0068               
+                   :  :  :      -N19+                                         
+                   :  :  :          ----+ [B] C_pogonantha_C0071              
+                   :  :  :                                                    
+                   :  N37+        ------+ [A] C_ootensis_var_ootensis_C0061   
+                   :     :     N26+                                           
+                   :     :     :  :  ---+ [A] C_feaniana_C0059                
+                   :     :     :  N25+                                        
+                   :     :  N30+     ---+ [A] C_ootensis_var_mollissima_C0060 
+                N50+     :  :  :                                              
+                :  :     :  :  :   -----+ [A] C_ootensis_var_mollissima_C0063 
+                :  :     N36+  -N29+                                          
+                :  :        :      -----+ [A] C_ootensis_var_mollissima_C0132 
+                :  :        :                                                 
+                :  :        :   --------+ [A] C_jonesii_C0064                 
+                :  :        -N35+                                             
+                :  :            :   ----+ [A] C_thibaultii_C0062              
+                :  :            -N34+                                         
+                :  :                ----+ [A] C_nukukivensis_C0065            
+                :  :                                                          
+                :  :              ------+ [B] C_samoensis_C0030               
+             N56+  :         --N41+                                           
+             :  :  :         :    ------+ [D] C_samoensis_C0031               
+             :  :  :    --N45+                                                
+             :  :  :    :    :    ------+ [E] C_kusaimontana_C0033            
+             :  :  :    :    --N44+                                           
+             :  :  --N49+         ------+ [E] C_urvillei_C0034                
+             :  :       :                                                     
+             :  :       :       --------+ [B] C_pulchella_C0029               
+             :  :       -----N48+                                             
+             :  :               --------+ [B] C_ompressa_C0074                
+             :  :                                                             
+             :  :       ----------------+ [C] C_cf_occulta_C0119              
+             :  -----N55+                                                     
+             :          :       --------+ [C] C_sp_C0017                      
+          N86+          -----N54+                                             
+          :  :                  --------+ [C] C_occulta_C0017                 
+          :  :                                                                
+          :  :      --------------------+ [F] C_sandwicensis_C0045            
+          :  :      :                                                         
+          :  :  -N69+   ----------------+ [F] C_wagneri_C0013                 
+          :  :  :   :   :                                                     
+          :  :  :   :   :       --------+ [F] C_munroi_C0104                  
+          :  :  :   -N68+   -N63+                                             
+          :  :  :       :   :   :   ----+ [F] C_propinqua_C0039               
+          :  :  :       :   :   -N62+                                         
+          :  :  :       -N67+       ----+ [F] C_cordifolia_C0048              
+          :  :  :           :                                                 
+          :  :  :           :     ------+ [F] C_laxiflora_C0037               
+          :  N85+           ---N66+                                           
+          :     :                 ------+ [F] C_sp_C0050                      
+          :     :                                                             
+      N100+     :        ---------------+ [F] C_longifolia_C0023              
+       :  :     :   --N76+                                                    
+       :  :     :   :    :    ----------+ [F] C_grandiflora_C0046             
+       :  :     :   :    --N75+                                               
+       :  :     :   :         :    -----+ [F] C_hawaiensis_C0038              
+       :  :     :   :         --N74+                                          
+       :  :     -N84+              -----+ [F] C_kaulantha_C0041               
+       :  :         :                                                         
+       :  :         :            -------+ [F] C_tintinabula_C0012             
+       :  :         :     ----N79+                                            
+       :  :         :     :      -------+ [F] C_spathulata_C0102              
+       :  :         ---N83+                                                   
+       :  :               :      -------+ [F] C_grayana_C0103                 
+       :  :               ----N82+                                            
+       :  :                      -------+ [F] C_grayi_C0105                   
+   N110+  :                                                                   
+    :  :  :    -------------------------+ [G] C_coccinea_C0089                
+    :  :  :    :                                                              
+    :  :  --N99+    --------------------+ [F] C_calpidicarpa_C0040            
+    :  :       :    :                                                         
+    :  :       --N98+    ---------------+ [F] C_wawrae_C0022                  
+    :  :            :    :                                                    
+    :  :            --N97+         -----+ [F] C_wainihaensis_C0021            
+    :  :                 :    --N92+                                          
+    :  :                 :    :    -----+ [F] C_kauaiensis_C0026              
+    :  :                 --N96+                                               
+    :  :                      :    -----+ [F] C_kealiae_spp_kealiae_C0035     
+    :  :                      --N95+                                          
+N116+  :                           -----+ [F] C_kealiae_spp_urceolata_C0054   
+    :  :                                                                      
+    :  :     ---------------------------+ [G] C_sulcata_C0100                 
+    :  --N109+                                                                
+    :        :     ---------------------+ [G] C_sp_C0095                      
+    :        --N108+                                                          
+    :              :      --------------+ [G] C_sp_C0092                      
+    :              ---N107+                                                   
+    :                     :      -------+ [G] C_sp_C0094                      
+    :                     ---N106+                                            
+    :                            -------+ [G] C_pendula_C0098                 
+    :                                                                         
+    :           ------------------------+ [G] C_sp_C0093                      
+    --------N115+                                                             
+                :           ------------+ [G] C_sp_C0096                      
+                --------N114+                                                 
+                            ------------+ [G] C_picta_C0097                   
+
+
+
+Global ML at root node:
+  -lnL = 46.43
+  dispersal = 0.001251
+  extinction = 4.285e-09
+
+Ancestral range subdivision/inheritance scenarios ('splits') at
+internal nodes.
+
+* Split format: [left|right], where 'left' and 'right' are the ranges
+  inherited by each descendant branch (on the printed tree, 'left' is
+  the upper branch, and 'right' the lower branch).
+
+* Only splits within 2 log-likelihood units of the maximum for each
+  node are shown.  'Rel.Prob' is the relative probability (fraction of
+  the global likelihood) of a split.
+
+At node N116:
+   split        lnL     Rel.Prob
+   [ABCFG|G]    -47.99  0.21    
+   [BCDEFG|G]   -48.49  0.1263  
+   [BCFG|G]     -48.58  0.1158  
+   [FG|G]       -49.27  0.0583  
+   [ACFG|G]     -49.48  0.04697 
+   [BCEFG|G]    -49.53  0.04477 
+   [BCDFG|G]    -49.57  0.0429  
+   [CFG|G]      -49.62  0.0411  
+   [ABFG|G]     -49.78  0.03476 
+   [CDEFG|G]    -49.84  0.03282 
+   [BDEFG|G]    -50.16  0.02382 
+   [BFG|G]      -50.29  0.0209  
+   [ABCG|G]     -50.37  0.01928 
+   [ABCEFG|G]   -50.65  0.01456 
+   [BCDEG|G]    -50.72  0.01358 
+   [ABCDFG|G]   -50.77  0.01293 
+   [CEFG|G]     -50.94  0.0109  
+   [CDFG|G]     -50.99  0.01041 
+   [BCG|G]      -51.18  0.008646
+   [AFG|G]      -51.22  0.008241
+   [BEFG|G]     -51.34  0.007351
+   [G|G]        -51.37  0.007128
+   [BDFG|G]     -51.38  0.007042
+   [DEFG|G]     -51.65  0.00538 
+   [ACEFG|G]    -51.77  0.00475 
+   [ABCF|G]     -51.89  0.004222
+   [ACDFG|G]    -51.9   0.004207
+   [BCEG|G]     -51.92  0.004113
+   [BCDG|G]     -51.96  0.003941
+   [ABCDEFG|G]  -52.01  0.00376 
+   [CG|G]       -52.07  0.003537
+
+At node N110:
+   split       lnL     Rel.Prob
+   [ABCF|G]    -48.43  0.1344  
+   [ABCFG|G]   -48.72  0.101   
+   [BCDEF|G]   -48.9   0.08448 
+   [BCF|G]     -49.12  0.06774 
+   [BCDEFG|G]  -49.16  0.06518 
+   [BCFG|G]    -49.44  0.04913 
+   [FG|G]      -49.47  0.04742 
+   [BCEF|G]    -50.08  0.02588 
+   [ACF|G]     -50.08  0.02577 
+   [BCDF|G]    -50.13  0.02471 
+   [CF|G]      -50.22  0.02246 
+   [BCEFG|G]   -50.35  0.01975 
+   [ACFG|G]    -50.39  0.01894 
+   [BCDFG|G]   -50.4   0.01887 
+   [CDEF|G]    -50.42  0.01848 
+   [ABF|G]     -50.43  0.01816 
+   [CFG|G]     -50.5   0.01703 
+   [CDEFG|G]   -50.68  0.01416 
+   [ABFG|G]    -50.73  0.01349 
+   [ABCG|G]    -50.75  0.01321 
+   [BDEF|G]    -50.79  0.0127  
+   [F|G]       -50.89  0.0115  
+   [BF|G]      -50.98  0.01052 
+   [BDEFG|G]   -51.05  0.009818
+   [ABCEF|G]   -51.07  0.009655
+   [BCDEG|G]   -51.07  0.009604
+   [ABCDF|G]   -51.19  0.008562
+   [BFG|G]     -51.24  0.008117
+   [ABCEFG|G]  -51.32  0.007456
+   [ABCDFG|G]  -51.44  0.006613
+   [CEF|G]     -51.62  0.005518
+   [BCG|G]     -51.63  0.00551 
+   [CDF|G]     -51.68  0.005246
+   [G|G]       -51.68  0.005202
+   [CEFG|G]    -51.92  0.004119
+   [AF|G]      -51.96  0.003945
+   [CDFG|G]    -51.97  0.003919
+   [BEF|G]     -52.09  0.003474
+   [BDF|G]     -52.13  0.003316
+   [AFG|G]     -52.21  0.003073
+   [ACEF|G]    -52.33  0.002735
+   [ABCDEF|G]  -52.36  0.002658
+   [BEFG|G]    -52.37  0.002631
+   [BCEG|G]    -52.39  0.002575
+   [BDFG|G]    -52.41  0.002514
+
+At node N100:
+   split       lnL     Rel.Prob
+   [ABCF|F]    -48.45  0.1317  
+   [ABCF|G]    -48.64  0.109   
+   [BCDEF|F]   -48.91  0.08336 
+   [BCDEF|G]   -49.05  0.0726  
+   [BCF|F]     -49.17  0.06427 
+   [F|FG]      -49.43  0.04973 
+   [BCF|G]     -49.43  0.04935 
+   [BCEF|F]    -50.15  0.024   
+   [ACF|F]     -50.17  0.02357 
+   [BCDF|F]    -50.2   0.02287 
+   [CF|F]      -50.27  0.02138 
+   [BCEF|G]    -50.34  0.01986 
+   [BCDF|G]    -50.39  0.01892 
+   [ACF|G]     -50.44  0.0181  
+   [CDEF|F]    -50.51  0.01687 
+   [ABF|F]     -50.55  0.01613 
+   [CDEF|G]    -50.7   0.01396 
+   [ABF|G]     -50.82  0.01239 
+   [ABC|G]     -50.84  0.01209 
+   [BDEF|F]    -50.92  0.01119 
+   [CF|G]      -50.94  0.01095 
+   [F|F]       -50.94  0.01094 
+   [BF|F]      -51.07  0.009596
+   [ABCEF|F]   -51.08  0.009486
+   [BDEF|G]    -51.11  0.009262
+   [BCDE|G]    -51.13  0.00903 
+   [ABCDF|F]   -51.2   0.008407
+   [ABCEF|G]   -51.22  0.008262
+   [ABC|F]     -51.24  0.008136
+   [ABCDF|G]   -51.34  0.007322
+   [BCDE|F]    -51.43  0.006726
+   [C|FG]      -51.57  0.005841
+   [BF|G]      -51.74  0.004916
+   [CEF|F]     -51.75  0.00485 
+   [BC|G]      -51.77  0.004785
+   [CDF|F]     -51.81  0.004601
+   [CEF|G]     -52.02  0.003724
+   [CDF|G]     -52.07  0.003533
+   [AF|F]      -52.08  0.003507
+   [BEF|F]     -52.26  0.00293 
+   [BDF|F]     -52.31  0.002792
+   [BC|F]      -52.34  0.002696
+   [ABCDEF|F]  -52.36  0.002652
+   [B|FG]      -52.37  0.00261 
+   [ACEF|F]    -52.4   0.002533
+   [ABCDEF|G]  -52.46  0.0024  
+   [BEF|G]     -52.52  0.00225 
+   [ACDF|F]    -52.53  0.00224 
+   [BCE|G]     -52.55  0.002194
+
+At node N86:
+   split     lnL     Rel.Prob
+   [ABC|F]   -47.44  0.363   
+   [BCDE|F]  -47.72  0.2735  
+   [BC|F]    -48.49  0.1272  
+   [C|F]     -49.41  0.05035 
+   [BCE|F]   -49.83  0.03334 
+   [BCD|F]   -49.91  0.03056 
+   [ABCE|F]  -49.93  0.03003 
+   [ABCD|F]  -50.06  0.02647 
+   [AC|F]    -50.26  0.02156 
+
+At node N56:
+   split     lnL     Rel.Prob
+   [ABC|C]   -47.45  0.359   
+   [BCDE|C]  -47.81  0.2503  
+   [BC|C]    -48.5   0.1254  
+   [C|C]     -49.44  0.04928 
+   [BCE|C]   -49.95  0.02959 
+   [ABCE|C]  -49.97  0.02887 
+   [BCD|C]   -50.03  0.0271  
+   [BDE|C]   -50.07  0.02625 
+   [ABCD|C]  -50.1   0.02542 
+   [AC|C]    -50.31  0.02053 
+   [CDE|C]   -50.6   0.01532 
+
+At node N50:
+   split    lnL     Rel.Prob
+   [ABC|B]  -47.35  0.3979  
+   [C|BDE]  -47.69  0.2827  
+   [BC|B]   -48.41  0.1379  
+   [ABC|E]  -49.85  0.0326  
+   [ABC|D]  -49.98  0.0287  
+   [B|BDE]  -50.18  0.02337 
+   [C|BE]   -50.33  0.02009 
+   [C|BD]   -50.46  0.01769 
+   [A|BDE]  -50.86  0.01189 
+
+At node N38:
+   split    lnL     Rel.Prob
+   [C|ABC]  -47.14  0.4887  
+   [C|C]    -47.65  0.2933  
+   [C|BC]   -48.26  0.1596  
+   [C|AC]   -49.54  0.04432 
+
+At node N12:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N11:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N7:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N6:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N5:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N10:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N37:
+   split   lnL     Rel.Prob
+   [BC|A]  -46.46  0.9669  
+
+At node N21:
+   split   lnL     Rel.Prob
+   [B|BC]  -46.43  0.9922  
+
+At node N15:
+   split  lnL     Rel.Prob
+   [B|B]  -46.43  1       
+
+At node N20:
+   split  lnL     Rel.Prob
+   [C|B]  -46.43  1       
+
+At node N19:
+   split  lnL     Rel.Prob
+   [B|B]  -46.43  1       
+
+At node N36:
+   split  lnL     Rel.Prob
+   [A|A]  -46.43  1       
+
+At node N30:
+   split  lnL     Rel.Prob
+   [A|A]  -46.43  1       
+
+At node N26:
+   split  lnL     Rel.Prob
+   [A|A]  -46.43  1       
+
+At node N25:
+   split  lnL     Rel.Prob
+   [A|A]  -46.43  1       
+
+At node N29:
+   split  lnL     Rel.Prob
+   [A|A]  -46.43  1       
+
+At node N35:
+   split  lnL     Rel.Prob
+   [A|A]  -46.43  1       
+
+At node N34:
+   split  lnL     Rel.Prob
+   [A|A]  -46.43  1       
+
+At node N49:
+   split    lnL     Rel.Prob
+   [BDE|B]  -47.29  0.4198  
+   [B|B]    -47.47  0.3516  
+   [BE|B]   -48.51  0.1241  
+   [BD|B]   -48.72  0.1005  
+
+At node N45:
+   split   lnL     Rel.Prob
+   [BD|E]  -46.52  0.9084  
+   [B|E]   -48.82  0.09084 
+
+At node N41:
+   split  lnL     Rel.Prob
+   [B|D]  -46.43  1       
+
+At node N44:
+   split  lnL     Rel.Prob
+   [E|E]  -46.43  1       
+
+At node N48:
+   split  lnL     Rel.Prob
+   [B|B]  -46.43  1       
+
+At node N55:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N54:
+   split  lnL     Rel.Prob
+   [C|C]  -46.43  1       
+
+At node N85:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N69:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N68:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N67:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N63:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N62:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N66:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N84:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N76:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N75:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N74:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N83:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N79:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N82:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N99:
+   split  lnL     Rel.Prob
+   [G|F]  -46.43  1       
+
+At node N98:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N97:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N96:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N92:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N95:
+   split  lnL     Rel.Prob
+   [F|F]  -46.43  1       
+
+At node N109:
+   split  lnL     Rel.Prob
+   [G|G]  -46.43  1       
+
+At node N108:
+   split  lnL     Rel.Prob
+   [G|G]  -46.43  1       
+
+At node N107:
+   split  lnL     Rel.Prob
+   [G|G]  -46.43  1       
+
+At node N106:
+   split  lnL     Rel.Prob
+   [G|G]  -46.43  1       
+
+At node N115:
+   split  lnL     Rel.Prob
+   [G|G]  -46.43  1       
+
+At node N114:
+   split  lnL     Rel.Prob
+   [G|G]  -46.43  1       
+

@@ -4,20 +4,23 @@
 \alias{BioGeoBEARS-package}
 \title{BioGeography with Bayesian (and likelihood) Evolutionary Analysis of RangeS}
 \description{
-  BioGeoBEARS: BioGeography with Bayesian (and likelihood)
+  BioGeoBEARS: BioGeography with Bayesian (and Likelihood)
   Evolutionary Analysis in R Scripts
 }
 \details{
   \tabular{ll}{ Package: \tab BioGeoBEARS\cr Type: \tab
-  Package\cr Version: \tab 0.1\cr Date: \tab 2012-05-30\cr
-  License: \tab GPL (>= 3)\cr LazyLoad: \tab yes\cr }
+  Package\cr Version: \tab 0.2.1\cr Date: \tab
+  2012-07-27\cr License: \tab GPL (>= 3)\cr LazyLoad: \tab
+  yes\cr }
 
   Summary: This package performs model-based statistical
   inference for historical biogeography. This includes
   inference of model parameters, ancestral states, and
-  model comparison. Currently, the package performs ML
-  (maximum-likelihood) based inference, but will soon be
-  expanded to Bayesian analysis.
+  model comparison. This package performs ML
+  (maximum-likelihood) based inference, but the same
+  functions can easily be integrated into a Bayesian
+  analysis via use of MCMC sampling functions from other
+  packages.
 
   Details: BioGeoBEARS allows probabilistic inference of
   both historical biogeography (ancestral geographic ranges
@@ -49,13 +52,34 @@
   BioGeoBEARS also enables the natural incorporation of (1)
   imperfect detection of geographic ranges in the tips, and
   (2) inclusion of fossil geographic range data, when the
-  fossils are tips on the phylogeny.
+  fossils are tips on the phylogeny.  Bayesian analysis has
+  been implemented through use of the "LaplacesDemon"
+  package, however this package is now maintained off of
+  CRAN, so its usage is not formally included in
+  BioGeoBEARS at the current time.
+
+  CITATION INFO: This package is the result of my Ph.D.
+  research, please cite the package if you use it! Type:
+  citation(package="BioGeoBEARS") to get the citation
+  information.
+
+  See also the citation information for the sister
+  packages, \code{citation(package="rexpokit")} and
+  \code{citation(package="cladoRcpp")}.
 }
 \note{
   Go BEARS!
 }
 \examples{
 test=1
+
+# To get citation information for BioGeoBEARS, type:
+citation(package="BioGeoBEARS")
+
+# Please also cite the accessory packages I created to make BioGeoBEARS work:
+citation(package="cladoRcpp")
+citation(package="rexpokit")		# Roger Sidje is a coauthor of rexpokit
+                                 # and author of the FORTRAN EXPOKIT
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}
@@ -69,7 +93,8 @@ test=1
   ReeSmith2008
 }
 \seealso{
-  \code{\link{rexpokit}} \code{\link{cladoRcpp}}
+  \code{\link[rexpokit]{rexpokit}}
+  \code{\link[cladoRcpp]{cladoRcpp}}
 }
 \keyword{cladoRcpp}
 \keyword{package}

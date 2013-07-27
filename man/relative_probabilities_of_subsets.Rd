@@ -136,7 +136,8 @@
 testval=1
 # Examples
 
-# Probabilities of different descendant rangesizes, for the smaller descendant, under sympatric/subset speciation
+# Probabilities of different descendant rangesizes, for the smaller
+# descendant, under sympatric/subset speciation
 # (plus sympatric/range-copying, which is folded in):
 relative_probabilities_of_subsets(max_numareas=6, maxent_constraint_01=0.0001,
 NA_val=NA)

@@ -21,14 +21,15 @@
 test=1
 
 # Get the example files directory
-extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-# tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+# tmp hard code:
+# extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 
 # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 tr = read.tree(file=trfn)
 
-geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 
 # Look at the tree and ranges, for kicks
 getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -60,6 +61,7 @@ bears_output
   Landis_Matzke_etal_2013_BayArea
 }
 \seealso{
+  \code{\link{readfiles_BioGeoBEARS_run}},
   \code{\link{bears_2param_standard_fast}},
   \code{\link[cladoRcpp]{numstates_from_numareas}},
   \code{\link{getranges_from_LagrangePHYLIP}},

@@ -10,7 +10,8 @@
     input_is_COO = FALSE, spPmat_inputs = NULL,
     cppSpMethod = 3, cluster_already_open = NULL,
     calc_ancprobs = FALSE, null_range_allowed = TRUE,
-    fixnode = NULL, fixlikes = NULL)
+    fixnode = NULL, fixlikes = NULL, stratified = FALSE,
+    states_allowed_TF = NULL)
 }
 \arguments{
   \item{tip_condlikes_of_data_on_each_state}{A numeric
@@ -153,6 +154,14 @@
   \item{fixlikes}{The state likelihoods to be used at the
   fixed node.  I.e. 1 for the fixed state, and 0 for the
   others.}
+
+  \item{stratified}{Default FALSE. If TRUE, you are running
+  a stratified analysis, in which case uppass probs should
+  be calculated elsewhere.}
+
+  \item{states_allowed_TF}{Default NULL. If user gives a
+  vector of TRUE and FALSE values, these states will be set
+  to 0 likelihood throughout the calculations.}
 }
 \value{
   Return whatever is specified by \code{return_what}.

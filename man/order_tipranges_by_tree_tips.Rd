@@ -27,15 +27,15 @@
 testval=1
 
 # Get the example files directory
-extdata_dir = system.file("extdata/", package="BioGeoBEARS")
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 # tmp hard code:
 # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 # Set the filename (Hawaiian Psychotria from Ree & Smith 2008)
 
-trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 tr = read.tree(trfn)
 
-fn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+fn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 tipranges1 = getranges_from_LagrangePHYLIP(lgdata_fn=fn)
 tipranges1
 

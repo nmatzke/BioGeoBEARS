@@ -1,0 +1,245 @@
+Lagrange: likelihood analysis of geographic range evolution
+Version: 20120508
+Authors: Richard Ree <rree@fieldmuseum.org>
+         Stephen Smith <sasmith@nescent.org>
+http://lagrange.googlecode.com
+
+Newick tree with interior nodes labeled:
+((((((((P_hawaiiensis_WaikamoiL1:0.965685049885,P_mauiensis_Eke:0.965685049885)N2:0.708625793489,(P_fauriei2:1.23021851098,P_hathewayi_1:1.23021851098)N5:0.444092332393)N6:0.176711555197,(P_kaduana_PuuKukuiAS:1.85102239897,P_mauiensis_PepeAS:1.85102239897)N9:0.000889786280186)N10:0.334737598595,P_kaduana_HawaiiLoa:2.18575999697)N12:0.302349377995,(P_greenwelliae07:1.13136325498,P_greenwelliae907:1.13136325498)N15:1.35674611998)N16:1.68917027397,((((P_mariniana_MauiNui:1.99401105397,P_hawaiiensis_Makaopuhi:1.99401105397)N19:0.732827980389,P_mariniana_Oahu:2.72683903396)N21:0.257415170896,P_mariniana_Kokee2:2.98425420495)N23:0.460108485493,P_wawraeDL7428:3.44436269095)N25:0.732916958989)N26:0.734518574289,(P_grandiflora_Kal2:2.47930049096,P_hobdyi_Kuia:2.47930049096)N29:2.43249773296)N30:0.287311989896,((P_hexandra_K1:2.36398418896,P_hexandra_M:2.36398418896)N33:0.463044780193,P_hexandra_Oahu:2.82693999096)N35:2.37208124396)N36:0.0;
+
+
+Cladogram (branch lengths not to scale):
+                                      -----+ [M] P_hawaiiensis_WaikamoiL1 
+                                 ---N2+                                   
+                                 :    -----+ [M] P_mauiensis_Eke          
+                            ---N6+                                        
+                            :    :    -----+ [O] P_fauriei2               
+                            :    ---N5+                                   
+                       --N10+         -----+ [O] P_hathewayi_1            
+                       :    :                                             
+                       :    :      --------+ [M] P_kaduana_PuuKukuiAS     
+                  --N12+    -----N9+                                      
+                  :    :           --------+ [M] P_mauiensis_PepeAS       
+                  :    :                                                  
+             --N16+    --------------------+ [O] P_kaduana_HawaiiLoa      
+             :    :                                                       
+             :    :           -------------+ [K] P_greenwelliae07         
+             :    ---------N15+                                           
+             :                -------------+ [K] P_greenwelliae907        
+             :                                                            
+        --N26+                       ------+ [M] P_mariniana_MauiNui      
+        :    :                 ---N19+                                    
+        :    :           ---N21+     ------+ [H] P_hawaiiensis_Makaopuhi  
+        :    :           :     :                                          
+        :    :     ---N23+     ------------+ [O] P_mariniana_Oahu         
+   --N30+    :     :     :                                                
+   :    :    ---N25+     ------------------+ [K] P_mariniana_Kokee2       
+   :    :          :                                                      
+   :    :          ------------------------+ [K] P_wawraeDL7428           
+   :    :                                                                 
+N36+    :                ------------------+ [K] P_grandiflora_Kal2       
+   :    --------------N29+                                                
+   :                     ------------------+ [K] P_hobdyi_Kuia            
+   :                                                                      
+   :                         --------------+ [K] P_hexandra_K1            
+   :            ----------N33+                                            
+   ----------N35+            --------------+ [K] P_hexandra_M             
+                :                                                         
+                ---------------------------+ [O] P_hexandra_Oahu          
+
+
+
+Global ML at root node:
+  -lnL = 35.36
+  dispersal = 0.03818
+  extinction = 0.04079
+
+Ancestral range subdivision/inheritance scenarios ('splits') at
+internal nodes.
+
+* Split format: [left|right], where 'left' and 'right' are the ranges
+  inherited by each descendant branch (on the printed tree, 'left' is
+  the upper branch, and 'right' the lower branch).
+
+* Only splits within 2 log-likelihood units of the maximum for each
+  node are shown.  'Rel.Prob' is the relative probability (fraction of
+  the global likelihood) of a split.
+
+At node N36:
+   split     lnL     Rel.Prob
+   [K|KO]    -36.11  0.4752  
+   [K|K]     -36.75  0.2495  
+   [K|KOH]   -38.86  0.0302  
+   [K|KOM]   -38.86  0.0302  
+   [KO|K]    -38.89  0.02929 
+   [K|O]     -38.95  0.02759 
+   [KM|K]    -39.07  0.0245  
+   [KOM|K]   -39.18  0.0219  
+   [KO|O]    -39.3   0.01944 
+   [KOM|O]   -39.59  0.01453 
+   [K|KH]    -40.02  0.009489
+   [K|KM]    -40.02  0.009489
+   [KM|O]    -40.17  0.00813 
+   [KOMH|K]  -40.34  0.006918
+
+At node N30:
+   split    lnL     Rel.Prob
+   [K|K]    -35.54  0.8363  
+   [KO|K]   -38.32  0.05186 
+   [KOM|K]  -38.68  0.03617 
+   [KM|K]   -38.73  0.03442 
+
+At node N26:
+   split     lnL     Rel.Prob
+   [K|K]     -35.75  0.6778  
+   [KO|K]    -37.85  0.08318 
+   [KM|K]    -38.07  0.06642 
+   [KOM|K]   -38.41  0.04772 
+   [K|KO]    -39.5   0.0159  
+   [O|KO]    -39.64  0.01381 
+   [K|KH]    -39.96  0.01009 
+   [K|KM]    -39.96  0.01009 
+   [M|KM]    -40.26  0.007484
+   [K|KOMH]  -40.65  0.005039
+   [OM|K]    -40.75  0.004569
+   [O|KOMH]  -40.79  0.004379
+   [O|K]     -40.83  0.004236
+
+At node N16:
+   split    lnL     Rel.Prob
+   [OM|K]   -35.91  0.5776  
+   [O|K]    -36.86  0.2231  
+   [M|K]    -37.43  0.1261  
+   [KOM|K]  -39.47  0.01642 
+   [K|K]    -39.64  0.01393 
+
+At node N12:
+   split    lnL     Rel.Prob
+   [OM|O]   -35.6   0.7867  
+   [O|O]    -37.53  0.1144  
+   [M|O]    -38.47  0.04458 
+   [KOM|O]  -39.54  0.01539 
+
+At node N10:
+   split   lnL     Rel.Prob
+   [OM|M]  -35.46  0.9033  
+   [M|M]   -38.06  0.06726 
+
+At node N6:
+   split   lnL     Rel.Prob
+   [M|O]   -35.47  0.8953  
+   [OM|O]  -38.68  0.03612 
+   [M|OM]  -38.87  0.03009 
+
+At node N2:
+   split  lnL     Rel.Prob
+   [M|M]  -35.38  0.9833  
+
+At node N5:
+   split  lnL     Rel.Prob
+   [O|O]  -35.39  0.9698  
+
+At node N9:
+   split  lnL     Rel.Prob
+   [M|M]  -35.36  0.9992  
+
+At node N15:
+   split  lnL     Rel.Prob
+   [K|K]  -35.37  0.9914  
+
+At node N25:
+   split     lnL     Rel.Prob
+   [K|K]     -35.55  0.828   
+   [KO|K]    -38.29  0.0536  
+   [KM|K]    -38.76  0.03346 
+   [KH|K]    -39.01  0.02608 
+   [KOMH|K]  -39.56  0.01505 
+
+At node N23:
+   split    lnL     Rel.Prob
+   [K|K]    -36.43  0.3438  
+   [O|K]    -37.32  0.1414  
+   [M|K]    -37.8   0.08771 
+   [H|K]    -37.83  0.0845  
+   [OM|K]   -38.11  0.06436 
+   [OH|K]   -38.16  0.06111 
+   [OMH|K]  -38.53  0.04217 
+   [KO|K]   -38.65  0.03734 
+   [KM|K]   -39.03  0.02557 
+   [KH|K]   -39.07  0.02464 
+   [MH|K]   -39.31  0.01928 
+   [O|KO]   -39.53  0.01543 
+   [M|KM]   -40.01  0.009577
+
+At node N21:
+   split    lnL     Rel.Prob
+   [K|K]    -37.3   0.1434  
+   [O|O]    -37.61  0.1059  
+   [M|O]    -37.86  0.08199 
+   [H|O]    -37.9   0.07904 
+   [MH|O]   -37.91  0.07812 
+   [M|M]    -38.09  0.06548 
+   [H|H]    -38.13  0.06294 
+   [K|O]    -38.21  0.05818 
+   [M|K]    -38.68  0.03632 
+   [H|K]    -38.69  0.03597 
+   [KM|O]   -39.23  0.02093 
+   [KH|O]   -39.25  0.02059 
+   [KO|O]   -39.36  0.01841 
+   [OM|O]   -39.47  0.01643 
+   [OH|O]   -39.51  0.01584 
+   [MH|K]   -39.76  0.01229 
+   [KMH|O]  -39.87  0.01106 
+   [M|KO]   -39.92  0.01051 
+   [H|KO]   -39.93  0.01034 
+   [MH|H]   -40.03  0.009381
+   [MH|M]   -40.03  0.009381
+   [M|OM]   -40.16  0.00825 
+   [H|OH]   -40.2   0.007954
+   [OMH|O]  -40.21  0.007858
+   [M|KM]   -40.26  0.007495
+   [H|KH]   -40.27  0.007423
+   [KM|M]   -40.29  0.007277
+   [KM|K]   -40.29  0.007277
+
+At node N19:
+   split    lnL     Rel.Prob
+   [M|H]    -36.39  0.3596  
+   [M|M]    -37.84  0.08415 
+   [H|H]    -37.87  0.08181 
+   [M|K]    -38.36  0.05003 
+   [K|H]    -38.36  0.04988 
+   [M|KH]   -38.39  0.04825 
+   [KM|H]   -38.39  0.04825 
+   [MH|H]   -38.97  0.02713 
+   [M|MH]   -38.97  0.02713 
+   [M|O]    -38.98  0.02673 
+   [O|H]    -38.99  0.02655 
+   [OM|H]   -39.02  0.02569 
+   [M|OH]   -39.02  0.02569 
+   [K|K]    -39.03  0.02554 
+   [O|O]    -39.64  0.01386 
+   [M|KM]   -40.23  0.007702
+   [KH|H]   -40.23  0.007679
+   [M|OM]   -40.86  0.004115
+   [OH|H]   -40.86  0.004088
+   [KMH|H]  -40.93  0.003813
+   [M|KMH]  -40.93  0.003813
+
+At node N29:
+   split  lnL     Rel.Prob
+   [K|K]  -35.37  0.9913  
+
+At node N35:
+   split   lnL     Rel.Prob
+   [K|O]   -35.74  0.684   
+   [K|K]   -37.38  0.1327  
+   [K|KO]  -38.01  0.07112 
+   [KO|O]  -38.77  0.03314 
+   [K|OM]  -39.36  0.01844 
+   [K|OH]  -39.36  0.01838 
+
+At node N33:
+   split  lnL    Rel.Prob
+   [K|K]  -35.4  0.96    
+

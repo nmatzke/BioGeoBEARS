@@ -42,6 +42,8 @@ list_of_areas_in_the_state
 }
 \seealso{
   \code{\link{binary_ranges_to_letter_codes}},
+  \code{\link{letter_string_to_binary}},
+  \code{\link{letter_strings_to_tipranges_df}},
   \code{\link{binary_range_to_letter_code_txt}},
   \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 }

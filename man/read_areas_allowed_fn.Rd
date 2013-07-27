@@ -14,8 +14,9 @@
   \code{list_of_areas_allowed_mats} A list object
 }
 \description{
-  areas_allowed file is just a list of distance matrices,
-  separated by blank lines, from youngest to oldest.
+  areas_allowed file is just a list of 1/0 matrices,
+  separated by blank lines, from youngest to oldest. 1s
+  represent allowed combinations of areas
 }
 \note{
   Go BEARS!

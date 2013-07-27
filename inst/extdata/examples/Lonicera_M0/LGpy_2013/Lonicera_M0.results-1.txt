@@ -1,0 +1,678 @@
+Lagrange: likelihood analysis of geographic range evolution
+Version: 20130526
+Author: Richard Ree <rree@fieldmuseum.org>
+https://github.com/rhr/lagrange-python
+
+Newick tree with interior nodes labeled:
+(Heptacodium_miconioides:68.8490955697,((Triosteum_sinuatum:43.4831715114,(((Triosteum_pinnatifidum:31.3612476766,Triosteum_sp:31.3612476766)N4:7.59737861402,Triosteum_himalayanum:38.9586262906)N6:0.736488924805,((Triosteum_angustifolium:2.7613094522,Triosteum_aurantiacum:2.7613094522)N9:1.95594027201,Triosteum_perfoliatum:4.71724972421)N11:34.9778654912)N12:3.78805629595)N13:10.9832986604,((((Lonicera_albiflora:8.69499973376,(Lonicera_sempervirens:4.45552188172,(((Lonicera_dioica:1.08849725317,Lonicera_arizonica:1.08849725317)N18:1.09421088576,Lonicera_flava:2.18270813894)N20:1.5361730782,(Lonicera_hirsuta:1.20560301186,Lonicera_interrupta:1.20560301186)N23:2.51327820527)N24:0.736640664587)N25:4.23947785204)N26:0.502323202773,(((Lonicera_pilosa:5.93629662124,Lonicera_hispidula:5.93629662124)N29:2.03278647237,(Lonicera_ciliosa:7.78324311756,((Lonicera_etrusca:4.16362573218,Lonicera_caprifolium:4.16362573218)N33:0.665600813571,Lonicera_implexa:4.82922654575)N35:2.95401657182)N36:0.185839976044)N37:0.895738172974,((Lonicera_periclymenum:6.12698663245,(Lonicera_tragophylla:4.76682099874,Lonicera_carnosifolia:4.76682099874)N41:1.36016563371)N42:0.753027821063,Lonicera_subspicata:6.88001445351)N44:1.98480681307)N45:0.332501669956)N46:18.9210226369,(((Lonicera_vesicaria:18.5904160402,(Lonicera_iberica:5.57236902984,Lonicera_ferdinandi:5.57236902984)N50:13.0180470103)N51:5.95768881713,(((((((Lonicera_quinquelocularis:0.529034344875,Lonicera_cyanocarpa:0.529034344875)N54:12.794121301,((Lonicera_lanceolata:2.14634831909,Lonicera_trichosantha:2.14634831909)N57:9.25617654396,((Lonicera_demissa:9.29578407389,((Lonicera_chrysantha:5.43127653156,(((Lonicera_koehneana:0.584227042191,Lonicera_heteroloba:0.584227042191)N62:0.033207772417,Lonicera_xylosteum:0.617434814608)N64:2.88078277916,Lonicera_floribunda:3.49821759377)N66:1.93305893779)N67:1.7384094425,(Lonicera_deflexicalyx:4.12437827489,Lonicera_steveniana:4.12437827489)N70:3.04530769917)N71:2.12609809983)N72:0.805515238499,(Lonicera_maackii:4.79802122411,Lonicera_subsessilis:4.79802122411)N75:5.30327808828)N76:1.30122555067)N77:1.92063078281)N78:1.23933339634,(((Lonicera_morrowii:4.64632310004,(Lonicera_tatarica:4.22912011622,Lonicera_sovetkinae:4.22912011622)N82:0.417202983816)N83:3.89954643326,Lonicera_korolkovii:8.5458695333)N85:2.11607385748,Lonicera_ruprechtiana:10.6619433908)N87:3.90054565142)N88:3.26677021198,(Lonicera_oblongifolia:14.0393764173,((Lonicera_maximowiczii:5.68136786461,Lonicera_modesta:5.68136786461)N92:4.97050247659,((Lonicera_orientalis:7.79846050428,Lonicera_nigra:7.79846050428)N95:1.21375588205,(Lonicera_graebneri:3.79403573787,Lonicera_nervosa:3.79403573787)N98:5.21818064847)N99:1.63965395486)N100:3.38750607609)N101:3.78988283689)N102:3.70809681474,(Lonicera_gynochlamydea:14.3206562722,((Lonicera_spinosa:8.53777634564,(Lonicera_syringantha:3.20333932461,Lonicera_rupicola:3.20333932461)N107:5.33443702103)N108:1.0281020397,((Lonicera_tomemtella:1.70601591255,(Lonicera_myrtilloides:1.12796998642,Lonicera_myrtillus:1.12796998642)N112:0.57804592612)N113:4.63976199596,Lonicera_serreana:6.3457779085)N115:3.22010047684)N116:4.75477788685)N117:7.21669979673)N118:0.241839065433,((Lonicera_acuminata:10.58593559,(Lonicera_giraldii:5.85466580727,(Lonicera_henryi:3.21490103413,Lonicera_japonica:3.21490103413)N123:2.63976477314)N124:4.7312697827)N125:5.0347593412,Lonicera_confusa:15.6206949312)N127:6.15850020319)N128:1.89140209777,(Lonicera_pyrenaica:20.936923046,((Lonicera_pileata:1.43719829289,Lonicera_nitida:1.43719829289)N132:15.1280268118,((Lonicera_involucrata:4.8097517631,Lonicera_ledebourii:4.8097517631)N135:7.98443854667,(Lonicera_hemsleyana:10.394941849,Lonicera_alpigena:10.394941849)N138:2.39924846074)N139:3.7710347949)N140:4.37169794134)N141:2.73367418613)N142:0.877507625163)N143:2.69195989164,((((Lonicera_tangutica:6.26682157515,(Lonicera_oresbia:4.47246871404,Lonicera_inconspicua:4.47246871404)N147:1.79435286111)N148:6.28504881449,(Lonicera_obovata:11.9380306219,Lonicera_microphylla:11.9380306219)N151:0.613839767752)N152:9.63388775532,(Lonicera_gracilipes:12.7253370209,Lonicera_caerulea:12.7253370209)N155:9.46042112403)N156:1.14188222793,((Lonicera_calcarata:12.9159519683,Lonicera_altmannii:12.9159519683)N159:7.18072184691,((Lonicera_hispida:10.7593823683,Lonicera_setifera:10.7593823683)N162:3.84933084494,(Lonicera_standishii:0.801371143953,Lonicera_fragrantissima:0.801371143953)N165:13.8073420693)N166:5.48796060192)N167:3.2309665577)N168:3.91242437605)N169:0.878280824477)N170:19.5881595403,(((Symphoricarpos_orbiculatus:7.76280748845,Symphoricarpos_hesperius:7.76280748845)N173:2.43940308846,(Symphoricarpos_occidentalis:5.30056297631,Symphoricarpos_albus:5.30056297631)N176:4.9016476006)N177:24.3089008956,(Leycesteria_crocothyrsos:18.3437740288,Leycesteria_formosa:18.3437740288)N180:16.1673374437)N181:13.1953936412)N182:6.759965058)N183:14.3826253979)N184:0.0;
+
+
+Cladogram (branch lengths not to scale):
+    ------------------------------------------------------------+ [D] Heptacodium_miconioides      
+    :                                                                                              
+    :             ----------------------------------------------+ [D] Triosteum_sinuatum           
+    :             :                                                                                
+    :             :                                 ------------+ [D] Triosteum_pinnatifidum       
+    :  --------N13+                     ----------N4+                                              
+    :  :          :          ---------N6+           ------------+ [D] Triosteum_sp                 
+    :  :          :          :          :                                                          
+    :  :          :          :          ------------------------+ [D] Triosteum_himalayanum        
+    :  :          --------N12+                                                                     
+    :  :                     :                      ------------+ [B] Triosteum_angustifolium      
+    :  :                     :          ----------N9+                                              
+    :  :                     --------N11+           ------------+ [B] Triosteum_aurantiacum        
+    :  :                                :                                                          
+    :  :                                ------------------------+ [B] Triosteum_perfoliatum        
+    :  :                                                                                           
+    :  :                   -------------------------------------+ [A] Lonicera_albiflora           
+    :  :                   :                                                                       
+    :  :            ----N26+      ------------------------------+ [B] Lonicera_sempervirens        
+    :  :            :      :      :                                                                
+    :  :            :      :      :                     --------+ [B] Lonicera_dioica              
+    :  :            :      ----N25+             -----N18+                                          
+    :  :            :             :      ----N20+       --------+ [A] Lonicera_arizonica           
+    :  :            :             :      :      :                                                  
+    :  :            :             ----N24+      ----------------+ [B] Lonicera_flava               
+    :  :            :                    :                                                         
+    :  :            :                    :          ------------+ [B] Lonicera_hirsuta             
+    :  :            :                    --------N23+                                              
+    :  :     ----N46+                               ------------+ [A] Lonicera_interrupta          
+    :  :     :      :                                                                              
+    :  :     :      :                            ---------------+ [A] Lonicera_pilosa              
+    :  :     :      :             ------------N29+                                                 
+    :  :     :      :             :              ---------------+ [A] Lonicera_hispidula           
+N184+  :     :      :      ----N37+                                                                
+    :  :     :      :      :      :      -----------------------+ [A] Lonicera_ciliosa             
+    :  :     :      :      :      :      :                                                         
+    :  :     :      :      :      ----N36+              --------+ [C] Lonicera_etrusca             
+    :  :     :      :      :             :      -----N33+                                          
+    :  :     :      :      :             ----N35+       --------+ [C] Lonicera_caprifolium         
+    :  :     :      ----N45+                    :                                                  
+    :  :     :             :                    ----------------+ [C] Lonicera_implexa             
+    :  :     :             :                                                                       
+    :  :     :             :                 -------------------+ [C] Lonicera_periclymenum        
+    :  :     :             :        ------N42+                                                     
+    :  :     :             :        :        :        ----------+ [D] Lonicera_tragophylla         
+    :  :     :             ------N44+        ------N41+                                            
+    :  :     :                      :                 ----------+ [D] Lonicera_carnosifolia        
+    :  :     :                      :                                                              
+    :  :     :                      ----------------------------+ [A] Lonicera_subspicata          
+    :  :     :                                                                                     
+    :  :     :                    ------------------------------+ [D] Lonicera_vesicaria           
+    :  :     :     ------------N51+                                                                
+    :  :     :     :              :              ---------------+ [D] Lonicera_iberica             
+    :  :     :     :              ------------N50+                                                 
+    :  :     :     :                             ---------------+ [D] Lonicera_ferdinandi          
+    :  :     :     :                                                                               
+    :  :     :     :                              --------------+ [D] Lonicera_quinquelocularis    
+    :  :     :     :                 ----------N54+                                                
+    :  :     :     :                 :            --------------+ [D] Lonicera_cyanocarpa          
+    :  :     :     :                 :                                                             
+    :  :     :     :                 :              ------------+ [D] Lonicera_lanceolata          
+    :  :     :     :                 :  ---------N57+                                              
+    :  :     :     :              N78+  :           ------------+ [D] Lonicera_trichosantha        
+    :  :     :     :              :  :  :                                                          
+    :  :     :     :              :  :  :     ------------------+ [D] Lonicera_demissa             
+    :  :     :     :              :  :  :     :                                                    
+   N183+     :     :              :  :  :     :     ------------+ [D] Lonicera_chrysantha          
+       :     :     :              :  N77+     :     :                                              
+       :     :     :              :     :  N72+     :        ---+ [D] Lonicera_koehneana           
+       :     :     :              :     :  :  :  N67+     N62+                                     
+       :     :     :              :     :  :  :  :  :  N64+  ---+ [D] Lonicera_heteroloba          
+       :     :     :              :     :  :  :  :  :  :  :                                        
+       :     :     :              :     :  :  :  :  N66+  ------+ [CD] Lonicera_xylosteum          
+       :     :     :              :     :  :  N71+     :                                           
+       :     :     :              :     N76+     :     ---------+ [D] Lonicera_floribunda          
+       :     :     :           N88+        :     :                                                 
+       : N170+     :           :  :        :     :      --------+ [D] Lonicera_deflexicalyx        
+       :  :  :     :           :  :        :     ----N70+                                          
+       :  :  :     :           :  :        :            --------+ [C] Lonicera_steveniana          
+       :  :  :     :           :  :        :                                                       
+       :  :  :     :           :  :        :         -----------+ [D] Lonicera_maackii             
+       :  :  :     :           :  :        -------N75+                                             
+       :  :  :     :           :  :                  -----------+ [D] Lonicera_subsessilis         
+       :  :  :     :           :  :                                                                
+       :  :  :     :           :  :                 ------------+ [D] Lonicera_morrowii            
+       :  :  :     :           :  :           ---N83+                                              
+       :  :  :     :       N102+  :           :     :     ------+ [CD] Lonicera_tatarica           
+       :  :  :     :        :  :  :     ---N85+     ---N82+                                        
+       :  :  : N143+        :  :  :     :     :           ------+ [CD] Lonicera_sovetkinae         
+       :  :  :  :  :        :  :  ---N87+     :                                                    
+       :  :  :  :  :        :  :        :     ------------------+ [D] Lonicera_korolkovii          
+       :  :  :  :  :        :  :        :                                                          
+       :  :  :  :  :        :  :        ------------------------+ [D] Lonicera_ruprechtiana        
+       :  :  :  :  :        :  :                                                                   
+       :  :  :  :  :        :  :     ---------------------------+ [B] Lonicera_oblongifolia        
+       :  :  :  :  :        :  :     :                                                             
+       :  :  :  :  :        :  :     :               -----------+ [D] Lonicera_maximowiczii        
+       :  :  :  :  :        :  --N101+     -------N92+                                             
+       :  :  :  :  :    N118+        :     :         -----------+ [D] Lonicera_modesta             
+       :  :  :  :  :     :  :        :     :                                                       
+       :  :  :  :  :     :  :        --N100+             -------+ [D] Lonicera_orientalis          
+       :  :  :  :  :     :  :              :      ----N95+                                         
+       :  :  :  :  :     :  :              :      :      -------+ [C] Lonicera_nigra               
+       :  :  :  :  :     :  :              ----N99+                                                
+       :  :  :  :  :     :  :                     :      -------+ [D] Lonicera_graebneri           
+       :  :  :  :  :     :  :                     ----N98+                                         
+       :  :  :  :  :     :  :                            -------+ [D] Lonicera_nervosa             
+       :  :  :  :  :     :  :                                                                      
+       :  :  :  :  :     :  :     ------------------------------+ [D] Lonicera_gynochlamydea       
+       :  :  :  :  :     :  :     :                                                                
+       :  :  :  :  :     :  :     :             ----------------+ [D] Lonicera_spinosa             
+       :  :  :  :  :     :  --N117+     ----N108+                                                  
+       :  :  :  :  :     :        :     :       :       --------+ [D] Lonicera_syringantha         
+       :  :  :  :  : N128+        :     :       ----N107+                                          
+       :  :  :  :  :  :  :        :     :               --------+ [D] Lonicera_rupicola            
+       :  :  :  :  :  :  :        --N116+                                                          
+       :  :  :  :  :  :  :              :           ------------+ [D] Lonicera_tomemtella          
+       :  :  :  :  :  :  :              :     --N113+                                              
+       :  :  :  :  :  :  :              :     :     :     ------+ [D] Lonicera_myrtilloides        
+       :  :  :  :  :  :  :              --N115+     --N112+                                        
+       :  :  :  :  :  :  :                    :           ------+ [D] Lonicera_myrtillus           
+       :  :  :  :  :  :  :                    :                                                    
+       :  :  :  :  :  :  :                    ------------------+ [D] Lonicera_serreana            
+       :  :  :  :  :  :  :                                                                         
+       :  : N169+  :  :  :              ------------------------+ [D] Lonicera_acuminata           
+       :  :     : N142+  :      ----N125+                                                          
+       :  :     :     :  :      :       :       ----------------+ [D] Lonicera_giraldii            
+       :  :     :     :  :      :       ----N124+                                                  
+      N182+     :     :  ---N127+               :       --------+ [D] Lonicera_henryi              
+          :     :     :         :               ----N123+                                          
+          :     :     :         :                       --------+ [D] Lonicera_japonica            
+          :     :     :         :                                                                  
+          :     :     :         --------------------------------+ [D] Lonicera_confusa             
+          :     :     :                                                                            
+          :     :     :       ----------------------------------+ [C] Lonicera_pyrenaica           
+          :     :     :       :                                                                    
+          :     :     :       :                    -------------+ [D] Lonicera_pileata             
+          :     :     ----N141+       ---------N132+                                               
+          :     :             :       :            -------------+ [D] Lonicera_nitida              
+          :     :             :       :                                                            
+          :     :             ----N140+                ---------+ [A] Lonicera_involucrata         
+          :     :                     :       -----N135+                                           
+          :     :                     :       :        ---------+ [A] Lonicera_ledebourii          
+          :     :                     ----N139+                                                    
+          :     :                             :        ---------+ [D] Lonicera_hemsleyana          
+          :     :                             -----N138+                                           
+          :     :                                      ---------+ [C] Lonicera_alpigena            
+          :     :                                                                                  
+          :     :                               ----------------+ [D] Lonicera_tangutica           
+          :     :                       ----N148+                                                  
+          :     :                       :       :       --------+ [D] Lonicera_oresbia             
+          :     :                       :       ----N147+                                          
+          :     :               ----N152+               --------+ [D] Lonicera_inconspicua         
+          :     :               :       :                                                          
+          :     :               :       :           ------------+ [D] Lonicera_obovata             
+          :     :       ----N156+       --------N151+                                              
+          :     :       :       :                   ------------+ [D] Lonicera_microphylla         
+          :     :       :       :                                                                  
+          :     :       :       :               ----------------+ [D] Lonicera_gracilipes          
+          :     :       :       ------------N155+                                                  
+          :     ----N168+                       ----------------+ [ABCD] Lonicera_caerulea         
+          :             :                                                                          
+          :             :                        ---------------+ [D] Lonicera_calcarata           
+          :             :         -----------N159+                                                 
+          :             :         :              ---------------+ [D] Lonicera_altmannii           
+          :             :         :                                                                
+          :             ------N167+                   ----------+ [D] Lonicera_hispida             
+          :                       :         ------N162+                                            
+          :                       :         :         ----------+ [D] Lonicera_setifera            
+          :                       ------N166+                                                      
+          :                                 :         ----------+ [D] Lonicera_standishii          
+          :                                 ------N165+                                            
+          :                                           ----------+ [D] Lonicera_fragrantissima      
+          :                                                                                        
+          :                                       --------------+ [B] Symphoricarpos_orbiculatus   
+          :                         ----------N173+                                                
+          :                         :             --------------+ [A] Symphoricarpos_hesperius     
+          :            ---------N177+                                                              
+          :            :            :             --------------+ [AB] Symphoricarpos_occidentalis 
+          :            :            ----------N176+                                                
+          ---------N181+                          --------------+ [AB] Symphoricarpos_albus        
+                       :                                                                           
+                       :                   ---------------------+ [D] Leycesteria_crocothyrsos     
+                       ----------------N180+                                                       
+                                           ---------------------+ [D] Leycesteria_formosa          
+
+
+
+Global ML at root node:
+  -lnL = 125
+  dispersal = 0.005812
+  extinction = 0.001049
+
+Ancestral range subdivision/inheritance scenarios ('splits') at
+internal nodes.
+
+* Split format: [left|right], where 'left' and 'right' are the ranges
+  inherited by each descendant branch (on the printed tree, 'left' is
+  the upper branch, and 'right' the lower branch).
+
+* Only splits within 2 log-likelihood units of the maximum for each
+  node are shown.  'Rel.Prob' is the relative probability (fraction of
+  the global likelihood) of a split.
+
+At node N184:
+   split    lnL     Rel.Prob
+   [D|D]    -125.2  0.7736  
+   [D|BD]   -127.4  0.09057 
+   [D|AD]   -128.1  0.04282 
+   [D|ABD]  -129.1  0.01583 
+   [D|CD]   -129.5  0.01045 
+   [D|B]    -129.7  0.009278
+   [AD|D]   -129.9  0.007562
+
+At node N183:
+   split    lnL     Rel.Prob
+   [D|D]    -125.3  0.7362  
+   [BD|D]   -127.4  0.08829 
+   [D|AD]   -127.9  0.05268 
+   [D|BD]   -128.4  0.03408 
+   [D|ABD]  -129.2  0.01515 
+   [D|CD]   -129.7  0.009237
+   [B|BD]   -130    0.006658
+   [B|D]    -130.1  0.005907
+   [D|ACD]  -130.2  0.005601
+
+At node N13:
+   split   lnL     Rel.Prob
+   [D|D]   -125.3  0.7012  
+   [D|BD]  -126.2  0.2824  
+
+At node N12:
+   split  lnL     Rel.Prob
+   [D|B]  -125.5  0.6172  
+   [D|D]  -126    0.3461  
+
+At node N6:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9927  
+
+At node N4:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9973  
+
+At node N11:
+   split  lnL   Rel.Prob
+   [B|B]  -125  0.9756  
+
+At node N9:
+   split  lnL   Rel.Prob
+   [B|B]  -125  0.997   
+
+At node N182:
+   split    lnL     Rel.Prob
+   [D|D]    -125.3  0.7354  
+   [D|BD]   -127.7  0.06668 
+   [D|AD]   -127.8  0.06031 
+   [D|ABD]  -128.9  0.01896 
+   [AD|D]   -129    0.01793 
+   [CD|D]   -129.3  0.0137  
+   [A|AD]   -129.3  0.0135  
+   [AD|A]   -129.6  0.009701
+   [A|A]    -129.9  0.007137
+   [D|B]    -130.1  0.005762
+   [D|A]    -130.2  0.005212
+
+At node N170:
+   split    lnL     Rel.Prob
+   [D|D]    -125.5  0.6022  
+   [AD|D]   -127.1  0.1224  
+   [CD|D]   -127.5  0.07647 
+   [ACD|D]  -127.8  0.05903 
+   [A|D]    -127.9  0.05286 
+   [AC|D]   -128.5  0.029   
+   [C|D]    -128.9  0.02067 
+
+At node N46:
+   split    lnL     Rel.Prob
+   [A|ACD]  -125.4  0.6582  
+   [A|AD]   -126.5  0.2258  
+   [A|AC]   -128    0.04979 
+   [A|A]    -128.6  0.02672 
+
+At node N26:
+   split   lnL     Rel.Prob
+   [A|A]   -125    0.9495  
+   [A|AB]  -128.3  0.03637 
+
+At node N25:
+   split   lnL   Rel.Prob
+   [B|AB]  -125  0.9725  
+
+At node N24:
+   split   lnL     Rel.Prob
+   [B|AB]  -125.6  0.5353  
+   [AB|B]  -126.8  0.1661  
+   [AB|A]  -126.8  0.1661  
+   [A|AB]  -127.3  0.101   
+
+At node N20:
+   split   lnL     Rel.Prob
+   [AB|B]  -125.6  0.5453  
+   [B|B]   -125.8  0.4511  
+
+At node N18:
+   split  lnL   Rel.Prob
+   [B|A]  -125  0.9961  
+
+At node N23:
+   split  lnL   Rel.Prob
+   [B|A]  -125  0.9967  
+
+At node N45:
+   split    lnL     Rel.Prob
+   [A|ACD]  -125.7  0.4724  
+   [A|AD]   -126.5  0.2085  
+   [C|ACD]  -126.7  0.184   
+   [A|A]    -128.3  0.03655 
+   [AC|A]   -129    0.01748 
+   [A|AC]   -129.2  0.01499 
+   [AC|D]   -129.2  0.01414 
+   [AC|C]   -129.3  0.01345 
+
+At node N37:
+   split   lnL     Rel.Prob
+   [A|AC]  -125.6  0.5421  
+   [A|A]   -125.8  0.4564  
+
+At node N29:
+   split  lnL   Rel.Prob
+   [A|A]  -125  0.9999  
+
+At node N36:
+   split  lnL     Rel.Prob
+   [A|C]  -125.1  0.8948  
+   [A|A]  -127.3  0.09334 
+
+At node N35:
+   split  lnL   Rel.Prob
+   [C|C]  -125  0.9581  
+
+At node N33:
+   split  lnL   Rel.Prob
+   [C|C]  -125  0.9915  
+
+At node N44:
+   split   lnL     Rel.Prob
+   [CD|A]  -125.1  0.8847  
+   [D|A]   -127.5  0.0817  
+
+At node N42:
+   split  lnL   Rel.Prob
+   [C|D]  -125  0.9702  
+
+At node N41:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9967  
+
+At node N169:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9777  
+
+At node N143:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9512  
+
+At node N51:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9993  
+
+At node N50:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9995  
+
+At node N142:
+   split   lnL     Rel.Prob
+   [D|D]   -125.1  0.895   
+   [D|CD]  -127.5  0.07804 
+
+At node N128:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9975  
+
+At node N118:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9961  
+
+At node N102:
+   split   lnL     Rel.Prob
+   [D|D]   -125.1  0.863   
+   [D|BD]  -127.1  0.1223  
+
+At node N88:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9994  
+
+At node N78:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N54:
+   split  lnL   Rel.Prob
+   [D|D]  -125  1       
+
+At node N77:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9994  
+
+At node N57:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9999  
+
+At node N76:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9977  
+
+At node N72:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.991   
+
+At node N71:
+   split   lnL     Rel.Prob
+   [D|D]   -125.1  0.8864  
+   [D|CD]  -127.2  0.1081  
+
+At node N67:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9896  
+
+At node N66:
+   split   lnL     Rel.Prob
+   [D|D]   -125    0.9437  
+   [CD|D]  -127.9  0.05535 
+
+At node N64:
+   split   lnL     Rel.Prob
+   [D|D]   -125.6  0.5328  
+   [D|CD]  -125.7  0.4655  
+
+At node N62:
+   split  lnL   Rel.Prob
+   [D|D]  -125  1       
+
+At node N70:
+   split  lnL   Rel.Prob
+   [D|C]  -125  0.976   
+
+At node N75:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N87:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9969  
+
+At node N85:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.989   
+
+At node N83:
+   split   lnL     Rel.Prob
+   [D|D]   -125.1  0.9006  
+   [D|CD]  -127.3  0.09549 
+
+At node N82:
+   split   lnL     Rel.Prob
+   [D|D]   -125.1  0.8453  
+   [CD|D]  -128.3  0.03732 
+   [D|CD]  -128.3  0.03732 
+   [CD|C]  -128.3  0.03732 
+
+At node N101:
+   split   lnL     Rel.Prob
+   [B|D]   -125.2  0.8087  
+   [D|D]   -127.2  0.1114  
+   [B|CD]  -127.8  0.058   
+
+At node N100:
+   split   lnL     Rel.Prob
+   [D|D]   -125.1  0.8865  
+   [D|CD]  -127.2  0.1096  
+
+At node N92:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9995  
+
+At node N99:
+   split   lnL     Rel.Prob
+   [D|D]   -125.3  0.7428  
+   [CD|D]  -126.3  0.2534  
+
+At node N95:
+   split  lnL     Rel.Prob
+   [D|C]  -125.1  0.8852  
+   [D|D]  -127.3  0.09861 
+
+At node N98:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N117:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9996  
+
+At node N116:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N108:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9999  
+
+At node N107:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9999  
+
+At node N115:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9999  
+
+At node N113:
+   split  lnL   Rel.Prob
+   [D|D]  -125  1       
+
+At node N112:
+   split  lnL   Rel.Prob
+   [D|D]  -125  1       
+
+At node N127:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9995  
+
+At node N125:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9997  
+
+At node N124:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N123:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9999  
+
+At node N141:
+   split    lnL     Rel.Prob
+   [C|CD]   -125.4  0.6766  
+   [C|D]    -127    0.135   
+   [C|ACD]  -127.4  0.09208 
+   [D|D]    -127.8  0.05997 
+
+At node N140:
+   split    lnL     Rel.Prob
+   [D|CD]   -125.8  0.428   
+   [D|ACD]  -126.1  0.3384  
+   [D|D]    -126.9  0.1459  
+   [D|AD]   -128.2  0.0411  
+
+At node N132:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N139:
+   split   lnL     Rel.Prob
+   [A|CD]  -125.1  0.8726  
+   [A|D]   -127.6  0.07446 
+   [A|C]   -129    0.0177  
+
+At node N135:
+   split  lnL   Rel.Prob
+   [A|A]  -125  0.9947  
+
+At node N138:
+   split  lnL   Rel.Prob
+   [D|C]  -125  0.9535  
+
+At node N168:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9901  
+
+At node N156:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9793  
+
+At node N152:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9996  
+
+At node N148:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N147:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9999  
+
+At node N151:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9998  
+
+At node N155:
+   split     lnL     Rel.Prob
+   [D|D]     -125.5  0.6158  
+   [D|AD]    -127.5  0.07735 
+   [D|CD]    -127.5  0.07716 
+   [D|BD]    -127.5  0.07707 
+   [D|ACD]   -128.4  0.0319  
+   [D|ABD]   -128.4  0.03185 
+   [D|BCD]   -128.4  0.03175 
+   [D|ABCD]  -128.8  0.0217  
+
+At node N167:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9997  
+
+At node N159:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9994  
+
+At node N166:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9996  
+
+At node N162:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9997  
+
+At node N165:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9999  
+
+At node N181:
+   split   lnL     Rel.Prob
+   [A|D]   -126.1  0.3294  
+   [B|D]   -126.1  0.3182  
+   [AB|D]  -126.7  0.1805  
+   [D|D]   -127.2  0.1095  
+   [AD|D]  -129.2  0.01424 
+
+At node N177:
+   split    lnL     Rel.Prob
+   [AB|A]   -126.1  0.322   
+   [AB|B]   -126.1  0.322   
+   [A|A]    -127.4  0.0871  
+   [B|B]    -127.5  0.08425 
+   [B|AB]   -127.7  0.06449 
+   [A|AB]   -127.7  0.06449 
+   [ABD|A]  -129.3  0.01326 
+
+At node N173:
+   split   lnL     Rel.Prob
+   [B|A]   -125    0.9325  
+   [B|AD]  -129.4  0.01208 
+   [BD|A]  -129.4  0.01208 
+
+At node N176:
+   split   lnL     Rel.Prob
+   [A|A]   -126.3  0.2703  
+   [B|B]   -126.3  0.2685  
+   [AB|B]  -127.2  0.1127  
+   [B|AB]  -127.2  0.1127  
+   [AB|A]  -127.2  0.1127  
+   [A|AB]  -127.2  0.1127  
+
+At node N180:
+   split  lnL   Rel.Prob
+   [D|D]  -125  0.9921  
+

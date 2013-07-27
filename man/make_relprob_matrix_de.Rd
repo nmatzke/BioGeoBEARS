@@ -2,11 +2,11 @@
 \alias{make_relprob_matrix_de}
 \title{Make a relative dispersal probability matrix (in text form)}
 \usage{
-  make_relprob_matrix_de(states_list = list("_", c("A"), c("B"), c("C"), c("A", "B"), c("B", "C"), c("A", "C"), c("A", "B", "C")),
+  make_relprob_matrix_de(states_list = default_states_list(),
     split_ABC = FALSE, split = "",
     remove_simultaneous_events = TRUE,
     add_multiple_Ds = TRUE,
-    dispersal_multiplier_matrix = make_dispersal_multiplier_matrix(states_list = states_list))
+    dispersal_multiplier_matrix = make_dispersal_multiplier_matrix(states_list))
 }
 \arguments{
   \item{states_list}{A list of states, where each state

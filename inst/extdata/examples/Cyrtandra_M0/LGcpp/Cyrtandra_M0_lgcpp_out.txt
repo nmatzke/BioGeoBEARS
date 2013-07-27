@@ -1,0 +1,493 @@
+reading tree...
+Tree 1 has 59 leaves.
+reading data...
+Reading species: C_feaniana_C0059 1000000
+Reading species: C_ootensis_var_mollissima_C0060 1000000
+Reading species: C_ootensis_var_ootensis_C0061 1000000
+Reading species: C_ootensis_var_mollissima_C0063 1000000
+Reading species: C_ootensis_var_mollissima_C0132 1000000
+Reading species: C_thibaultii_C0062 1000000
+Reading species: C_nukukivensis_C0065 1000000
+Reading species: C_jonesii_C0064 1000000
+Reading species: C_cf_richii_C0068 0100000
+Reading species: C_pogonantha_C0071 0100000
+Reading species: C_sp_C0112 0010000
+Reading species: C_richii_C0072 0100000
+Reading species: C_aurantiicarpa_C0076 0100000
+Reading species: C_sp_C0019 0010000
+Reading species: C_sp_C0020 0010000
+Reading species: C_anthropophagorum_C0114 0010000
+Reading species: C_sp_C0016 0010000
+Reading species: C_milnei_C0113 0010000
+Reading species: C_leucantha_C0116 0010000
+Reading species: C_sp_C0018 0010000
+Reading species: C_samoensis_C0030 0100000
+Reading species: C_samoensis_C0031 0001000
+Reading species: C_kusaimontana_C0033 0000100
+Reading species: C_urvillei_C0034 0000100
+Reading species: C_pulchella_C0029 0100000
+Reading species: C_ompressa_C0074 0100000
+Reading species: C_sp_C0017 0010000
+Reading species: C_occulta_C0017 0010000
+Reading species: C_cf_occulta_C0119 0010000
+Reading species: C_grayana_C0103 0000010
+Reading species: C_grayi_C0105 0000010
+Reading species: C_tintinabula_C0012 0000010
+Reading species: C_spathulata_C0102 0000010
+Reading species: C_hawaiensis_C0038 0000010
+Reading species: C_kaulantha_C0041 0000010
+Reading species: C_grandiflora_C0046 0000010
+Reading species: C_longifolia_C0023 0000010
+Reading species: C_laxiflora_C0037 0000010
+Reading species: C_sp_C0050 0000010
+Reading species: C_propinqua_C0039 0000010
+Reading species: C_cordifolia_C0048 0000010
+Reading species: C_munroi_C0104 0000010
+Reading species: C_wagneri_C0013 0000010
+Reading species: C_sandwicensis_C0045 0000010
+Reading species: C_wainihaensis_C0021 0000010
+Reading species: C_kauaiensis_C0026 0000010
+Reading species: C_kealiae_spp_kealiae_C0035 0000010
+Reading species: C_kealiae_spp_urceolata_C0054 0000010
+Reading species: C_wawrae_C0022 0000010
+Reading species: C_calpidicarpa_C0040 0000010
+Reading species: C_coccinea_C0089 0000001
+Reading species: C_sulcata_C0100 0000001
+Reading species: C_sp_C0094 0000001
+Reading species: C_pendula_C0098 0000001
+Reading species: C_sp_C0092 0000001
+Reading species: C_sp_C0095 0000001
+Reading species: C_sp_C0096 0000001
+Reading species: C_picta_C0097 0000001
+Reading species: C_sp_C0093 0000001
+checking data...
+initializing nodes...
+initializing branch segments...
+setting default model...
+setting up tips...
+starting likelihood calculations
+initial -ln likelihood: 64.9457
+Optimizing (simplex) -ln likelihood.
+dis: 0.00110037 ext: 2.90212e-05
+final -ln likelihood: 46.4624
+Ancestral splits for:	1
+	C|C	0.999999	(46.4624)
+
+Ancestral states for:	1
+	C	0.999999	(46.4624)
+
+Ancestral splits for:	2
+	C|C	1	(46.4624)
+
+Ancestral states for:	2
+	C	1	(46.4624)
+
+Ancestral splits for:	3
+	C|C	1	(46.4624)
+
+Ancestral states for:	3
+	C	1	(46.4624)
+
+Ancestral splits for:	4
+	C|C	1	(46.4624)
+
+Ancestral states for:	4
+	C	1	(46.4624)
+
+Ancestral splits for:	5
+	C|C	1	(46.4624)
+
+Ancestral states for:	5
+	C	1	(46.4624)
+
+Ancestral splits for:	6
+	C|C	0.999998	(46.4624)
+
+Ancestral states for:	6
+	C	0.999998	(46.4624)
+
+Ancestral splits for:	7
+	B|B	0.999999	(46.4624)
+
+Ancestral states for:	7
+	B	0.999999	(46.4624)
+
+Ancestral splits for:	8
+	B|B	0.999913	(46.4624)
+
+Ancestral states for:	8
+	B	0.999913	(46.4624)
+
+Ancestral splits for:	9
+	C|B	0.999603	(46.4627)
+
+Ancestral states for:	9
+	B_C	0.999861	(46.4625)
+
+Ancestral splits for:	10
+	B|B_C	0.99291	(46.4695)
+
+Ancestral states for:	10
+	B_C	0.993745	(46.4686)
+
+Ancestral splits for:	11
+	A|A	1	(46.4624)
+
+Ancestral states for:	11
+	A	1	(46.4624)
+
+Ancestral splits for:	12
+	A|A	0.999999	(46.4624)
+
+Ancestral states for:	12
+	A	0.999999	(46.4624)
+
+Ancestral splits for:	13
+	A|A	0.999999	(46.4624)
+
+Ancestral states for:	13
+	A	0.999999	(46.4624)
+
+Ancestral splits for:	14
+	A|A	0.999998	(46.4624)
+
+Ancestral states for:	14
+	A	0.999998	(46.4624)
+
+Ancestral splits for:	15
+	A|A	1	(46.4624)
+
+Ancestral states for:	15
+	A	1	(46.4624)
+
+Ancestral splits for:	16
+	A|A	0.999998	(46.4624)
+
+Ancestral states for:	16
+	A	0.999998	(46.4624)
+
+Ancestral splits for:	17
+	A|A	0.999986	(46.4624)
+
+Ancestral states for:	17
+	A	0.999986	(46.4624)
+
+Ancestral splits for:	18
+	B_C|A	0.967726	(46.4952)
+
+Ancestral states for:	18
+	A_B_C	0.96781	(46.4951)
+
+Ancestral splits for:	19
+	C|A_B_C	0.503134	(47.1493)
+	C|C	0.292473	(47.6917)
+	C|B_C	0.148947	(48.3665)
+
+Ancestral states for:	19
+	A_B_C	0.513641	(47.1286)
+	C	0.292473	(47.6917)
+	B_C	0.150509	(48.3561)
+
+Ancestral splits for:	20
+	B|D	0.998273	(46.4641)
+
+Ancestral states for:	20
+	B_D	0.998701	(46.4637)
+
+Ancestral splits for:	21
+	E|E	0.99992	(46.4624)
+
+Ancestral states for:	21
+	E	0.99992	(46.4624)
+
+Ancestral splits for:	22
+	B_D|E	0.90748	(46.5594)
+
+Ancestral states for:	22
+	B_D_E	0.90769	(46.5592)
+
+Ancestral splits for:	23
+	B|B	0.999998	(46.4624)
+
+Ancestral states for:	23
+	B	0.999998	(46.4624)
+
+Ancestral splits for:	24
+	B_D_E|B	0.422195	(47.3246)
+	B|B	0.351812	(47.507)
+	B_E|B	0.122954	(48.5583)
+	B_D|B	0.0993463	(48.7715)
+
+Ancestral states for:	24
+	B_D_E	0.424963	(47.3181)
+	B	0.351812	(47.507)
+	B_E	0.123344	(48.5551)
+	B_D	0.0996727	(48.7682)
+
+Ancestral splits for:	25
+	A_B_C|B	0.413197	(47.3462)
+	C|B_D_E	0.286737	(47.7115)
+	B_C|B	0.125264	(48.5397)
+
+Ancestral states for:	25
+	A_B_C	0.423559	(47.3214)
+	B_C_D_E	0.286825	(47.7112)
+	B_C	0.129063	(48.5098)
+
+Ancestral splits for:	26
+	C|C	0.999999	(46.4624)
+
+Ancestral states for:	26
+	C	0.999999	(46.4624)
+
+Ancestral splits for:	27
+	C|C	0.999994	(46.4624)
+
+Ancestral states for:	27
+	C	0.999994	(46.4624)
+
+Ancestral splits for:	28
+	A_B_C|C	0.377457	(47.4367)
+	B_C_D_E|C	0.257079	(47.8207)
+	B_C|C	0.116194	(48.6148)
+
+Ancestral states for:	28
+	A_B_C	0.383992	(47.4195)
+	B_C_D_E	0.283485	(47.723)
+	B_C	0.11805	(48.599)
+
+Ancestral splits for:	29
+	F|F	1	(46.4624)
+
+Ancestral states for:	29
+	F	1	(46.4624)
+
+Ancestral splits for:	30
+	F|F	1	(46.4624)
+
+Ancestral states for:	30
+	F	1	(46.4624)
+
+Ancestral splits for:	31
+	F|F	1	(46.4624)
+
+Ancestral states for:	31
+	F	1	(46.4624)
+
+Ancestral splits for:	32
+	F|F	1	(46.4624)
+
+Ancestral states for:	32
+	F	1	(46.4624)
+
+Ancestral splits for:	33
+	F|F	1	(46.4624)
+
+Ancestral states for:	33
+	F	1	(46.4624)
+
+Ancestral splits for:	34
+	F|F	0.999999	(46.4624)
+
+Ancestral states for:	34
+	F	0.999999	(46.4624)
+
+Ancestral splits for:	35
+	F|F	1	(46.4624)
+
+Ancestral states for:	35
+	F	1	(46.4624)
+
+Ancestral splits for:	36
+	F|F	1	(46.4624)
+
+Ancestral states for:	36
+	F	1	(46.4624)
+
+Ancestral splits for:	37
+	F|F	1	(46.4624)
+
+Ancestral states for:	37
+	F	1	(46.4624)
+
+Ancestral splits for:	38
+	F|F	1	(46.4624)
+
+Ancestral states for:	38
+	F	1	(46.4624)
+
+Ancestral splits for:	39
+	F|F	1	(46.4624)
+
+Ancestral states for:	39
+	F	1	(46.4624)
+
+Ancestral splits for:	40
+	F|F	1	(46.4624)
+
+Ancestral states for:	40
+	F	1	(46.4624)
+
+Ancestral splits for:	41
+	F|F	0.999999	(46.4624)
+
+Ancestral states for:	41
+	F	0.999999	(46.4624)
+
+Ancestral splits for:	42
+	F|F	0.999995	(46.4624)
+
+Ancestral states for:	42
+	F	0.999995	(46.4624)
+
+Ancestral splits for:	43
+	A_B_C|F	0.381043	(47.4272)
+	B_C_D_E|F	0.280589	(47.7332)
+	B_C|F	0.11774	(48.6016)
+
+Ancestral states for:	43
+	A_B_C_F	0.381128	(47.427)
+	B_C_D_E_F	0.280674	(47.7329)
+	B_C_F	0.117759	(48.6015)
+
+Ancestral splits for:	44
+	F|F	1	(46.4624)
+
+Ancestral states for:	44
+	F	1	(46.4624)
+
+Ancestral splits for:	45
+	F|F	1	(46.4624)
+
+Ancestral states for:	45
+	F	1	(46.4624)
+
+Ancestral splits for:	46
+	F|F	1	(46.4624)
+
+Ancestral states for:	46
+	F	1	(46.4624)
+
+Ancestral splits for:	47
+	F|F	0.999994	(46.4624)
+
+Ancestral states for:	47
+	F	0.999994	(46.4624)
+
+Ancestral splits for:	48
+	F|F	0.999956	(46.4624)
+
+Ancestral states for:	48
+	F	0.999956	(46.4624)
+
+Ancestral splits for:	49
+	G|F	0.999691	(46.4627)
+
+Ancestral states for:	49
+	F_G	0.999896	(46.4625)
+
+Ancestral splits for:	50
+	A_B_C_F|F	0.144968	(48.3936)
+	A_B_C_F|G	0.119449	(48.5872)
+	B_C_D_E_F|F	0.0907401	(48.8621)
+	B_C_D_E_F|G	0.0786093	(49.0056)
+	B_C_F|F	0.062245	(49.239)
+	B_C_F|G	0.0476512	(49.5062)
+	F|F_G	0.0422365	(49.6268)
+	B_C_E_F|F	0.0233745	(50.2185)
+	A_C_F|F	0.0229936	(50.2349)
+	B_C_D_F|F	0.0222619	(50.2672)
+
+Ancestral states for:	50
+	A_B_C_F	0.15286	(48.3406)
+	A_B_C_F_G	0.119615	(48.5858)
+	B_C_D_E_F	0.0972098	(48.7932)
+	B_C_D_E_F_G	0.0787347	(49.004)
+	B_C_F	0.0645415	(49.2028)
+	B_C_F_G	0.047719	(49.5048)
+	F_G	0.0437162	(49.5924)
+	B_C_E_F	0.0246442	(50.1656)
+	A_C_F	0.0238402	(50.1987)
+	B_C_D_F	0.0234711	(50.2143)
+
+Ancestral splits for:	51
+	G|G	1	(46.4624)
+
+Ancestral states for:	51
+	G	1	(46.4624)
+
+Ancestral splits for:	52
+	G|G	0.999996	(46.4624)
+
+Ancestral states for:	52
+	G	0.999996	(46.4624)
+
+Ancestral splits for:	53
+	G|G	0.999992	(46.4624)
+
+Ancestral states for:	53
+	G	0.999992	(46.4624)
+
+Ancestral splits for:	54
+	G|G	0.99997	(46.4624)
+
+Ancestral states for:	54
+	G	0.99997	(46.4624)
+
+Ancestral splits for:	55
+	A_B_C_F|G	0.147517	(48.3762)
+	A_B_C_F_G|G	0.111832	(48.6531)
+	B_C_D_E_F|G	0.0917986	(48.8505)
+	B_C_D_E_F_G|G	0.0715432	(49.0998)
+	B_C_F|G	0.0653998	(49.1896)
+	B_C_F_G|G	0.0477503	(49.5041)
+	F_G|G	0.0404758	(49.6694)
+	B_C_E_F|G	0.0251378	(50.1457)
+	A_C_F|G	0.0250662	(50.1486)
+	B_C_D_F|G	0.0239915	(50.1924)
+
+Ancestral states for:	55
+	A_B_C_F_G	0.259353	(47.8119)
+	B_C_D_E_F_G	0.163345	(48.2742)
+	B_C_F_G	0.113151	(48.6414)
+	F_G	0.0490818	(49.4766)
+	B_C_E_F_G	0.0444917	(49.5748)
+	A_C_F_G	0.0436248	(49.5945)
+	B_C_D_F_G	0.0424731	(49.6212)
+
+Ancestral splits for:	56
+	G|G	0.999987	(46.4624)
+
+Ancestral states for:	56
+	G	0.999987	(46.4624)
+
+Ancestral splits for:	57
+	G|G	0.99996	(46.4624)
+
+Ancestral states for:	57
+	G	0.99996	(46.4624)
+
+Ancestral splits for:	58
+	A_B_C_F_G|G	0.234483	(47.9127)
+	B_C_D_E_F_G|G	0.140647	(48.4239)
+	B_C_F_G|G	0.112909	(48.6435)
+	F_G|G	0.0486293	(49.4859)
+	A_C_F_G|G	0.0461952	(49.5372)
+	B_C_E_F_G|G	0.0442342	(49.5806)
+	B_C_D_F_G|G	0.0423672	(49.6237)
+	C_F_G|G	0.0352813	(49.8068)
+	A_B_F_G|G	0.0342178	(49.8374)
+	C_D_E_F_G|G	0.0323713	(49.8928)
+
+Ancestral states for:	58
+	A_B_C_F_G	0.238644	(47.8951)
+	B_C_D_E_F_G	0.143753	(48.402)
+	B_C_F_G	0.114418	(48.6302)
+	F_G	0.0488487	(49.4814)
+	A_C_F_G	0.0468129	(49.5239)
+	B_C_E_F_G	0.04502	(49.563)
+	B_C_D_F_G	0.0431199	(49.6061)
+	C_F_G	0.0355974	(49.7978)
+	A_B_F_G	0.0346752	(49.8241)
+	C_D_E_F_G	0.0329456	(49.8753)
+

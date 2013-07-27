@@ -2,7 +2,7 @@
 \alias{size_species_matrix}
 \title{Calculate the dimensions of the cladogenesis/speciation matrix}
 \usage{
-  size_species_matrix(states_list = list("_", c("A"), c("B"), c("C"), c("A", "B"), c("B", "C"), c("A", "C"), c("A", "B", "C")),
+  size_species_matrix(states_list = default_states_list(),
     printwarn = 1)
 }
 \arguments{

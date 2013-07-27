@@ -2,12 +2,15 @@
 \alias{getname}
 \title{Collapse range abbreviations to strings}
 \usage{
-  getname(TFrow, tiparea_names, sep = "")
+  getname(TFrow, tiparea_names, concat = TRUE, sep = "")
 }
 \arguments{
   \item{TFrow}{A list of TRUE and FALSE}
 
   \item{tiparea_names}{The names of each area}
+
+  \item{concat}{If TRUE (default), merge the areas in a
+  state into a single string.}
 
   \item{sep}{The sep argument for
   \code{\link[base]{paste}}.}
@@ -39,6 +42,7 @@ tiparea_names=c("K", "O", "M", "H"), sep="_")
   Matzke_2012_IBS
 }
 \seealso{
+  \code{\link{states_list_indexes_to_areastxt}},
   \code{\link{order_tipranges_by_tree_tips}},
   \code{\link{define_tipranges_object}},
   \code{\link{save_tipranges_to_LagrangePHYLIP}}

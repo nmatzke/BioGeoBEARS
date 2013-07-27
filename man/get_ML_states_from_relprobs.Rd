@@ -3,7 +3,7 @@
 \title{Extract the ML states at each node, from a table of relative probabilities -- old version}
 \usage{
   get_ML_states_from_relprobs(relprobs, statenames,
-    returnwhat = "states")
+    returnwhat = "states", if_ties = "takefirst")
 }
 \arguments{
   \item{relprobs}{A numeric matrix of relative
@@ -15,6 +15,10 @@
   \item{returnwhat}{If "indices", return the 0-based
   indices of the states. If "states", return the name of
   the state, based on statenames.}
+
+  \item{if_ties}{What to do with ties. Currently, the only
+  option is to take the first (this will be shown in e.g. a
+  pie chart, of course).}
 }
 \value{
   \code{ML_states} or \code{ML_states_indices}, depending

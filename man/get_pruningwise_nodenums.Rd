@@ -22,9 +22,10 @@
   Go BEARS!
 }
 \examples{
-extdata_dir = system.file("extdata", package="BioGeoBEARS")
-trfn = slashslash(paste(extdata_dir,
-"/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep=""))
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+tmpdir = paste(extdata_dir,
+"/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep="")
+trfn = np(slashslash(tmpdir))
 tr = read.tree(trfn)
 node_numbers_matrix = get_pruningwise_nodenums(tr)
 node_numbers_matrix

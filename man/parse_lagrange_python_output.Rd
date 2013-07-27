@@ -3,12 +3,16 @@
 \title{Parse the output file from python \code{LAGRANGE}}
 \usage{
   parse_lagrange_python_output(outfn = "output.results.txt",
-    results_dir = getwd(), new_splits_fn = TRUE,
-    new_states_fn = FALSE, filecount = 0)
+    outputfiles = FALSE, results_dir = getwd(),
+    new_splits_fn = TRUE, new_states_fn = FALSE,
+    filecount = 0, append = FALSE)
 }
 \arguments{
   \item{outfn}{The python \code{LAGRANGE} output text
   file.}
+
+  \item{outputfiles}{Should parsed output be written to
+  files? Default FALSE.}
 
   \item{results_dir}{The directory \code{outfn} is in.}
 
@@ -17,13 +21,16 @@
   Default \code{TRUE}.}
 
   \item{new_states_fn}{Should a text file containing a
-  table of the splits and their probabilities be output?
+  table of the states and their probabilities be output?
   Default \code{FALSE}, as I don't believe python
   \code{LAGRANGE} will output the states at the nodes (C++
   \code{LAGRANGE} will, however).}
 
   \item{filecount}{The starting number for the filecount
   (relevant if one is processing many files).}
+
+  \item{append}{Should results be appended to preexisting
+  file? (default \code{FALSE})}
 }
 \value{
   sumstats A \code{\link[base]{data.frame}} containing the

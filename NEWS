@@ -1,0 +1,69 @@
+CHANGES in BioGeoBEARS VERSION 0.21
+
+NEW FEATURES
+
+    o added detection probability models
+    o added calculations of prior probabilities of ranges, conditional likelihoods of 
+      detection/taphonomic control counts conditional on ranges, and posterior probabilities
+      of ranges, given their priors and data likelihoods
+    o added more plotting options, e.g. pie charts on corners
+    o added rounding to plot of cladogenesis model
+    o added CITATION file and information
+
+BUG FIXES
+
+    o Fixed minor bugs in the plot_BioGeoBEARS_model function.
+
+OTHER CHANGES
+
+    o none
+    
+
+
+CHANGES in BioGeoBEARS VERSION 0.2
+
+NEW FEATURES
+
+    o Added new functions for displaying ancestral range estimates, a legend for same, 
+      and a graphical depiction of the initial or inferred model parameters & speciation
+      model.
+    o Added new function features for incorporating fossil tips in the likelihood 
+      calculations in the correct way, stratifying the tree correctly so that the same
+      likelihoods are produced in stratified and un-stratified analyses under the same 
+      model.  Several utility functions to aid with steps of this.
+    o Added an error check function to catch many of the common sources of problems, e.g.
+      mismatches between the tip names in the input Newick and geography data files.
+    o Added importFrom() commands to the NAMESPACE for the several packages where only 
+      one or a few functions were needed.
+
+BUG FIXES
+
+    o fixed minor bug in tree sectioning/chainsaw2 function, which was due to not all
+      concatenated labels being strsplit on commas, then sorted, then concatenated again,
+      before being compared.
+
+OTHER CHANGES
+
+    o removed LaplacesDemon dependency, as that package is now maintained off CRAN. 
+      Bayesian functions using LP have been moved to an example script.
+    
+
+
+
+
+
+CHANGES in BioGeoBEARS VERSION 0.1.2
+
+NEW FEATURES
+
+    o more examples
+
+BUG FIXES
+
+    o using normalizePath() to make examples work in Windows (fixing compile error
+      noted by Uwe of CRAN)
+
+OTHER CHANGES
+
+    o none
+    

@@ -2,7 +2,8 @@
 \alias{get_ML_state_indices}
 \title{Extract the indices for the ML states at each node, given a row of relative probabilities}
 \usage{
-  get_ML_state_indices(relprobs_row, nums, maxprob)
+  get_ML_state_indices(relprobs_row, nums, maxprob,
+    if_ties = "takefirst")
 }
 \arguments{
   \item{relprobs_row}{A row from a \code{relprobs}, a
@@ -13,6 +14,10 @@
 
   \item{maxprob}{The value of the maximum probability for
   the row.}
+
+  \item{if_ties}{What to do with ties. Currently, the only
+  option is to take the first (this will be shown in e.g. a
+  pie chart, of course).}
 }
 \value{
   \code{index_of_ML_state_s}

@@ -19,7 +19,7 @@ require("cladoRcpp")
 #' This function is an input to optim or optimx, the ML estimation routines.
 #' 
 #' @param params A vector of parameters for optimization.
-#' @param BioGeoBEARS_model_object Object containing the model.
+#' @param BioGeoBEARS_run_object Object containing the run parameters and the model.
 #' @param phy An ape tree object
 #' @param tip_condlikes_of_data_on_each_state A numeric matrix with rows representing tips, and columns representing states/geographic ranges.  The cells
 #' give the likelihood of the observation data under the assumption that the tip has that state; typically this means that the known geographic range gets a 
@@ -32,9 +32,14 @@ require("cladoRcpp")
 #' a cluster, specify the cluster here.  E.g. \code{cluster_already_open = makeCluster(rep("localhost",num_cores_to_use), type = "SOCK")}.  Note: this will work on 
 #' most platforms, including Macs running R from command line, but will NOT work on Macs running the R GUI \code{R.app}, because parallel processing functions like
 #' \code{MakeCluster} from e.g. \code{library(parallel)} for some reason crash R.app.  The program runs a check for R.app and will just run on 1 node if found. 
+#' @param return_what What should be returned to the user? Options are "loglike" (the log-likelihood of the data under the tree, model, and model parameters), 
+#' "nodelikes" (the scaled conditional likelihoods at the nodes), "rootprobs" (the relative probability of the geographic ranges/states at the root), or "all"
+#' (all of the above in a list).  Typically the user will only want to return "loglike" while doing ML optimization, but then return "all" once the ML parameter
+#' values have been found.
+#' @param calc_ancprobs Just use this function once, return the anc probs of states.
 #' @return \code{ttl_loglike} The log-likelihood of the data under the input model and parameters.
 #' @export
-#' @seealso \code{\link[stats]{convolve}}
+#' @seealso \code{\link{prune_states_list}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -43,10 +48,11 @@ require("cladoRcpp")
 #'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
-calc_loglike_for_optim <- function(params, BioGeoBEARS_model_object, phy, tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)
+calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
 	{
 	# Put the parameters into the BioGeoBEARS_model_object, so that they can be universally read out
 	# into any function
+	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
 	BioGeoBEARS_model_object = params_into_BioGeoBEARS_model_object(BioGeoBEARS_model_object=BioGeoBEARS_model_object, params=params)
 	
 	# Update linked parameters
@@ -55,24 +61,100 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_model_object, phy, tip_co
 	# Set the dispersal and extinction rate
 	d = BioGeoBEARS_model_object@params_table["d","est"]
 	e = BioGeoBEARS_model_object@params_table["e","est"]
+	a = BioGeoBEARS_model_object@params_table["a","est"]
 
+
+	#######################################################
+	#######################################################
+	# Do branch-length exponentiation if desired
+	#######################################################
+	#######################################################
+	b = BioGeoBEARS_model_object@params_table["b","est"]
+	# Modify the edge.lengths
+	phy$edge.length = phy$edge.length ^ b
+
+
+	#######################################################
+	#######################################################
+	# Do distance-dependence and dispersal multipliers matrix
+	#######################################################
+	#######################################################
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	areas = areas_list
-	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
+	
+	# If there is a distance matrix, use the first one 
+	# (non-stratified analysis, here)
+	if ( (is.null(BioGeoBEARS_run_object$list_of_distances_mats) == FALSE))
+		{
+		distances_mat = BioGeoBEARS_run_object$list_of_distances_mats[[1]]
+		} else {
+		# Default is all areas effectively equidistant
+		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
+		}
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
-	elist = rep(e, length(areas))
+	# Get the exponent on distance, apply to distances matrix
+	x = BioGeoBEARS_model_object@params_table["x","est"]
+	dispersal_multipliers_matrix = distances_mat ^ x
+
+	# Apply manual dispersal multipliers, if any
+	# If there is a manual dispersal multipliers matrix, use the first one 
+	# (non-stratified analysis, here)
+	if ( (is.null(BioGeoBEARS_run_object$list_of_dispersal_multipliers_mats) == FALSE))
+		{
+		manual_dispersal_multipliers_matrix = BioGeoBEARS_run_object$list_of_dispersal_multipliers_mats[[1]]
+		} else {
+		# Default is all areas effectively equidistant
+		manual_dispersal_multipliers_matrix = matrix(1, nrow=length(areas), ncol=length(areas))
+		}
+	
+	# Apply element-wise
+	dispersal_multipliers_matrix = dispersal_multipliers_matrix * manual_dispersal_multipliers_matrix
+
+	#######################################################
+	# multiply parameter d by dispersal_multipliers_matrix
+	#######################################################
+	dmat = dispersal_multipliers_matrix * matrix(d, nrow=length(areas), ncol=length(areas))
+	amat = dispersal_multipliers_matrix * matrix(a, nrow=length(areas), ncol=length(areas))
+
+
+
+
+	#######################################################
+	#######################################################
+	# Do area-dependence and extinction multipliers list
+	#######################################################
+	#######################################################
+	if ( (is.null(BioGeoBEARS_run_object$list_of_area_of_areas) == FALSE))
+		{
+		area_of_areas = BioGeoBEARS_run_object$list_of_area_of_areas[[1]]
+		} else {
+		# Default is all areas effectively equidistant
+		area_of_areas = rep(1, length(areas))
+		}
+		
+	# Get the exponent on extinction, apply to extinction modifiers	
+	u = BioGeoBEARS_model_object@params_table["u","est"]
+	extinction_modifier_list = area_of_areas ^ (1 * u)
+	
+	# Apply to extinction rate
+	elist = extinction_modifier_list * rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	# someday we'll have to put "a" (anagenic range-switching) in here...
+	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, amat, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
+	#######################################################
 	# Cladogenic model
+	#######################################################
 	j = BioGeoBEARS_model_object@params_table["j","est"]
-	ysv = BioGeoBEARS_model_object@params_table["ys","est"]
-	v = BioGeoBEARS_model_object@params_table["v","est"]
+	ysv = BioGeoBEARS_model_object@params_table["ysv","est"]
 	ys = BioGeoBEARS_model_object@params_table["ys","est"]
-	sum_SPweights = ys + j + v
+	v = BioGeoBEARS_model_object@params_table["v","est"]
+	y = BioGeoBEARS_model_object@params_table["y","est"]
+	s = BioGeoBEARS_model_object@params_table["s","est"]
+	sum_SPweights = y + s + j + v
+
 
 	maxent_constraint_01 = BioGeoBEARS_model_object@params_table["mx01","est"]
 	
@@ -90,14 +172,18 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_model_object, phy, tip_co
 
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
+
+	# Note that this gets the dispersal multipliers matrix, which is applied to 
+	# e.g. the j events, NOT the dmat above which is d*dispersal_multipliers_matrix
+	spPmat_inputs$dmat = dispersal_multipliers_matrix
+
 	states_indices = states_list
 	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
 	spPmat_inputs$l = states_indices
-	spPmat_inputs$s = ys
+	spPmat_inputs$s = s
 	spPmat_inputs$v = v
 	spPmat_inputs$j = j
-	spPmat_inputs$y = ys
-	spPmat_inputs$dmat = distances_mat
+	spPmat_inputs$y = y
 	spPmat_inputs$maxent01s_param = maxent01s_param
 	spPmat_inputs$maxent01v_param = maxent01v_param
 	spPmat_inputs$maxent01j_param = maxent01j_param
@@ -117,24 +203,36 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_model_object, phy, tip_co
 		#cat("d=", d, "; e=", e, "; j=", j, "; ys=", ys, "; v=", v, "; maxent01=", maxent_constraint_01, "; maxent01v=", maxent_constraint_01v, "; sum=", sum_SPweights, "; LnL=", sep="")
 		}
 
-	# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-	ttl_loglike = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="loglike", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, cluster_already_open=cluster_already_open)
-	ttl_loglike
 
-	if (print_optim == TRUE)
+	if (calc_ancprobs == FALSE)
 		{
-		LnL = ttl_loglike
-		# If the log likelihood is successful, print it
-		outvars = adf(t(c(BioGeoBEARS_model_object@params_table$est, LnL)))
-		#outvars = cbind(outvars, LnL)
+		fixnode = BioGeoBEARS_run_object$fixnode
+		fixlikes = BioGeoBEARS_run_object$fixlikes
 		
-		names(outvars) = c(rownames(BioGeoBEARS_model_object@params_table), "LnL")
-		print(round(outvars,3))
+		# Calculate the log-likelihood of the data, given the model parameters during this iteration	
+		ttl_loglike = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="loglike", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, cluster_already_open=cluster_already_open, calc_ancprobs=FALSE, fixnode=fixnode, fixlikes=fixlikes)
+		ttl_loglike
 
-		#cat(ttl_loglike, "\n", sep="")
-		}
+		if (print_optim == TRUE)
+			{
+			LnL = ttl_loglike
+			# If the log likelihood is successful, print it
+			outvars = adf(t(c(BioGeoBEARS_model_object@params_table$est, LnL)))
+			#outvars = cbind(outvars, LnL)
+			
+			#print("HERE #1!!!")
+			names(outvars) = c(rownames(BioGeoBEARS_model_object@params_table), "LnL")
+			print(round(outvars,3))
 	
-	return(ttl_loglike)
+			#cat(ttl_loglike, "\n", sep="")
+			}
+	
+		return(ttl_loglike)
+		} else {
+		# Calculate EVERYTHING!
+		model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, cluster_already_open=cluster_already_open, calc_ancprobs=TRUE)
+		return(model_results)
+		}
 	}
 
 
@@ -145,7 +243,7 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_model_object, phy, tip_co
 
 
 
-# 6-parameter model, adding j, v (vicariance proportion), maxent_constraint_01 (for non-vicariant subsets), maxent_constraint_01v (weighting for size of smaller offspring)
+# Any parameter model, adding j, v (vicariance proportion), maxent_constraint_01 (for non-vicariant subsets), maxent_constraint_01v (weighting for size of smaller offspring)
 #######################################################
 # bears_optim_run
 #######################################################
@@ -156,7 +254,7 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_model_object, phy, tip_co
 #' @param BioGeoBEARS_run_object Contains all inputs
 #' @return \code{bears_output} A list of outputs.  bears_output$optim_result
 #' @export
-#' @seealso \code{\link{bears_2param_standard_fast}}, \code{\link[cladoRcpp]{numstates_from_numareas}}, \code{\link{getranges_from_LagrangePHYLIP}}, \code{\link[ape]{read.tree}}, \code{\link{calc_loglike_sp}}
+#' @seealso \code{\link{readfiles_BioGeoBEARS_run}}, \code{\link{bears_2param_standard_fast}}, \code{\link[cladoRcpp]{numstates_from_numareas}}, \code{\link{getranges_from_LagrangePHYLIP}}, \code{\link[ape]{read.tree}}, \code{\link{calc_loglike_sp}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -173,14 +271,15 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_model_object, phy, tip_co
 #' test=1
 #' 
 #' # Get the example files directory
-#' extdata_dir = system.file("extdata/", package="BioGeoBEARS")
-#' # tmp hard code: extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' # tmp hard code: 
+#' # extdata_dir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/"
 #'
 #' # Set the filenames (Hawaiian Psychotria from Ree & Smith 2008)
-#' trfn = paste(extdata_dir, "Psychotria_5.2.newick", sep="")
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' tr = read.tree(file=trfn)
 #' 
-#' geogfn = paste(extdata_dir, "Psychotria_geog.data", sep="")
+#' geogfn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' 
 #' # Look at the tree and ranges, for kicks
 #' getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -202,15 +301,22 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 	require(cladoRcpp)
 	require(rexpokit)
 	
-	inputs = BioGeoBEARS_run_object
 
-	
+
+
+	#######################################################
 	# Load the model object
+	#######################################################
+	inputs = BioGeoBEARS_run_object
 	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
 
 	# Get geographic ranges at tips
-	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=BioGeoBEARS_run_object$geogfn)
-
+	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=np(BioGeoBEARS_run_object$geogfn))
+	
+	
+	# Should we do optimx speedup?
+	speedup = inputs$speedup
+	
 
 	# Get the list of geographic areas
 	areas = getareas_from_tipranges_object(tipranges)
@@ -226,7 +332,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 	#######################################################
 	if (is.na(BioGeoBEARS_run_object$max_range_size))
 		{
-		if (is.na(BioGeoBEARS_run_object$states_list))
+		if (is.null(BioGeoBEARS_run_object$states_list))
 			{
 			# Maximum range size is all areas
 			max_range_size = length(areas)
@@ -241,6 +347,24 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 		}
 	max_numareas = max_range_size
 	
+	#######################################################
+	# Check that no tips have larger ranges than you allowed
+	#######################################################
+	TF = (rowSums(dfnums_to_numeric(tipranges@df))) > max_range_size
+	if (sum(TF, na.rm=TRUE) > 0)
+		{
+		cat("\n\nERROR: Tips with ranges too big:\n", sep="")
+		print(dfnums_to_numeric(tipranges@df)[TF, ])
+		cat("\n\nCheck your input geography file!\n", sep="")
+		txt = paste("ERROR: Some tips (listed above) have range sizes larger than ", max_range_size, sep="")
+		stop(txt)
+		}
+
+	
+	
+	
+	
+	
 	# Old/slow way of getting the list of states and speciation matrix (slow)
 	# old_states_list = areas_list_to_states_list(areas, include_null_range=TRUE)
 	# old_states_list
@@ -253,12 +377,16 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 
 	# Take the list of areas, and get list of possible states
 	# (the user can manually input states if they like)
-	if (is.na(BioGeoBEARS_run_object$states_list))
+	if (is.null(BioGeoBEARS_run_object$states_list))
 		{
 		states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
 		states_list
+		#BioGeoBEARS_run_object$states_list = states_list
+		#inputs$states_list = states_list
 		} else {
 		states_list = BioGeoBEARS_run_object$states_list
+		#BioGeoBEARS_run_object$states_list = states_list
+		#inputs$states_list = states_list
 		}
 
 	if (is.na(BioGeoBEARS_run_object$force_sparse))
@@ -284,14 +412,41 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 	#######################################################
 	# Load the phylogenetic tree
 	#######################################################
-	trfn = BioGeoBEARS_run_object$trfn
+	trfn = np(BioGeoBEARS_run_object$trfn)
 	phy = read.tree(file=trfn)
 
 	# The likelihood of each state at the tips
 	# Change this, if you have observations instead of presence/absence at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	
+	if (BioGeoBEARS_run_object$use_detection_model == FALSE)
+		{
+		tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+		} else {
+		# Calculate the initial tip likelihoods, using the detection model
+		# Assumes correct order, double-check this
+		numareas = length(areas)
+		detects_df = inputs$detects_df
+		controls_df = inputs$controls_df
+		mean_frequency = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mf", "init"]
+		dp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["dp", "init"]
+		fdp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["fdp", "init"]
+		tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, numareas, detects_df, controls_df, mean_frequency, dp, fdp, null_range_gets_0_like=TRUE)
+		}
 	tip_condlikes_of_data_on_each_state
 
+
+
+
+	#######################################################
+	# Read the stratification/distances input files, if any
+	#######################################################
+	inputs = readfiles_BioGeoBEARS_run(inputs=inputs)
+
+	#######################################################
+	# Check for problems in the input files; will throw stop() if there are problems
+	#######################################################
+	#check_result = check_BioGeoBEARS_run(inputs=inputs)
+	#check_result
 	
 
 	#######################################################
@@ -334,7 +489,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
-		require("parallel") #<- do this higher up
+		#require("parallel") #<- do this higher up
 
 		num_cores_computer_has = detectCores()
 		
@@ -370,17 +525,48 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 		use_optimx = BioGeoBEARS_run_object$use_optimx
 		if (use_optimx == FALSE)
 			{
-			optim_result2 = optim(par=params, fn=calc_loglike_for_optim_stratified, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
+			optim_result2 = optim(par=params, fn=calc_loglike_for_optim_stratified, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_condlikes_table=FALSE, method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		
 		#optim_result2 = nlminb(start=params, objective=calc_loglike_for_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 			} else {
 			# Compare methods with optimx
-			require(optimx)
+			#require(optimx)
 			
-			optim_result2 = optimx::optimx(par=params, fn=calc_loglike_for_optim_stratified, lower=lower, upper=upper, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
-	
+			print_optim = inputs$print_optim
+			
+			# For optimx
+			# Speedup if desired, using looser tolerances / lower # of generations on optimx
+			#speedup = TRUE
+			if (speedup)
+				{
+				# use itnmax, not maxit
+				# default reltol: sqrt(.Machine$double.eps) = 1.490116e-08 ; this should be the amount of LnL at which it stops
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE, reltol=0.001)#, maxit=100)
+				# This causes pathology: reltol=0.001
+				# Actually, this was fine, it was force_sparse = TRUE that was the problem
+				# (leads to different results!!  probably rounding errors)
+				
+				num_free_params = sum(inputs$BioGeoBEARS_model_object@params_table$"type" == "free")
+				num_free_params
+				itnmax = 50 * num_free_params
+				} else {
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE)
+				itnmax = 250
+				}
+			
+			# For error check, on stratified analysis, just calculate the log-likelihood for hard-coded parameters
+			#params = c(0.037, 0.0000000000001)
+			#params = c(0.03645000, 4.49500e-08)
+			#loglike = calc_loglike_for_optim_stratified(params=params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)
+			
+			optim_result2 = optimx(par=params, fn=calc_loglike_for_optim_stratified, lower=lower, upper=upper, itnmax=itnmax, method=c("bobyqa"), control=control_list, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+			
+			
+			
+			# print(condlikes_table)
+			
 			# Run with all methods, for testing:
-			# optim_result2 = optimx::optimx(par=params, fn=calc_loglike_for_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+			# optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 	
 			#######################################################
 			# Compare optimization routines
@@ -399,22 +585,65 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 			#return (optim_result2)
 			}
 		} else {
+		#######################################################
+		# NON-stratified analysis
+		#######################################################
+
+		#######################################################
+		# If needed, modify the states_list by areas_allowed_mat
+		#######################################################
+		if ( (is.null(BioGeoBEARS_run_object$list_of_areas_allowed_mats) == FALSE))
+			{
+			# Take the first areas_allowed matrix (non-stratified)
+			areas_allowed_mat = BioGeoBEARS_run_object$list_of_areas_allowed_mats[[1]]
+			
+			# Cut down the states accordingly (hopefully not slow!)
+			states_list = prune_states_list(states_list_0based_index=states_list, areas_allowed_mat=areas_allowed_mat)
+			} else {
+			# Make no change
+			pass = 1
+			# states_list = states_list
+			}
 		
 		# Run optimization on a SINGLE tree
 		use_optimx = BioGeoBEARS_run_object$use_optimx
 		if (use_optimx == FALSE)
 			{
-			optim_result2 = optim(par=params, fn=calc_loglike_for_optim, BioGeoBEARS_model_object=BioGeoBEARS_model_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
+			optim_result2 = optim(par=params, fn=calc_loglike_for_optim, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE, method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 		
 		#optim_result2 = nlminb(start=params, objective=calc_loglike_for_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 			} else {
 			# Compare methods with optimx
-			require(optimx)
+			#require(optimx)
+
+			# For optimx
+			# Speedup if desired, using looser tolerances / lower # of generations on optimx
+			#speedup = TRUE
+			if (speedup)
+				{
+				# use itnmax, not maxit
+				# default reltol: sqrt(.Machine$double.eps) = 1.490116e-08 ; this should be the amount of LnL at which it stops
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE, reltol=0.001)#, reltol=0.001)#, maxit=100)
+				# This causes pathology: reltol=0.001
+				# Actually, this was fine, it was force_sparse = TRUE that was the problem
+				# (leads to different results!!  probably rounding errors)
+				
+				num_free_params = sum(inputs$BioGeoBEARS_model_object@params_table$"type" == "free")
+				num_free_params
+				itnmax = 50 * num_free_params
+				} else {
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE)
+				itnmax = 250
+				}
+
+			calc_loglike_for_optim(params, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
 			
-			optim_result2 = optimx::optimx(par=params, fn=calc_loglike_for_optim, BioGeoBEARS_model_object=BioGeoBEARS_model_object, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+			optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, gr=NULL, hess=NULL, lower=lower, upper=upper, method=c("bobyqa"), itnmax=itnmax, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+	
+
 	
 			# Run with all methods, for testing:
-			# optim_result2 = optimx::optimx(par=params, fn=calc_loglike_for_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
+			# optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 	
 			#######################################################
 			# Compare optimization routines
@@ -471,23 +700,36 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 	# Set the dispersal and extinction rate
 	d = BioGeoBEARS_model_object@params_table["d","est"]
 	e = BioGeoBEARS_model_object@params_table["e","est"]
+	a = BioGeoBEARS_model_object@params_table["a","est"]
+	
+	# Set the branch length exponent
+	b = BioGeoBEARS_model_object@params_table["b","est"]
+	phy$edge.length = phy$edge.length ^ b
+
 
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	dispersal_multipliers_matrix = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas)) * dispersal_multipliers_matrix
+	# Multiply d by dispersal_multipliers_matrix (for relative distance)
+	dmat = dispersal_multipliers_matrix * matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
+	amat = dispersal_multipliers_matrix * matrix(a, nrow=length(areas), ncol=length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, amat, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
+
+	#######################################################
 	# Cladogenic model
+	#######################################################
 	j = BioGeoBEARS_model_object@params_table["j","est"]
-	ysv = BioGeoBEARS_model_object@params_table["ys","est"]
+	ysv = BioGeoBEARS_model_object@params_table["ysv","est"]
 	v = BioGeoBEARS_model_object@params_table["v","est"]
 	ys = BioGeoBEARS_model_object@params_table["ys","est"]
-	sum_SPweights = ys + j + v
+	y = BioGeoBEARS_model_object@params_table["y","est"]
+	s = BioGeoBEARS_model_object@params_table["s","est"]
+	sum_SPweights = y + s + j + v
 
 	maxent_constraint_01 = BioGeoBEARS_model_object@params_table["mx01","est"]
 	
@@ -505,29 +747,47 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
-	spPmat_inputs$dmat = dmat
+	
+	# This dmat is for dispersal multipliers, i.e. to apply to j events, 
+	# NOT the dmat derived from the d parameter;
+	# make sure there aren't others elsewhere!
+	spPmat_inputs$dmat = dispersal_multipliers_matrix
 
 	states_indices = states_list
 	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
 	spPmat_inputs$l = states_indices
-	spPmat_inputs$s = ys
+	spPmat_inputs$s = s
 	spPmat_inputs$v = v
 	spPmat_inputs$j = j
-	spPmat_inputs$y = ys
-	spPmat_inputs$dmat = dmat
+	spPmat_inputs$y = y
 	spPmat_inputs$maxent01s_param = maxent01s_param
 	spPmat_inputs$maxent01v_param = maxent01v_param
 	spPmat_inputs$maxent01j_param = maxent01j_param
 	spPmat_inputs$maxent01y_param = maxent01y_param
 
-	inputs$BioGeoBEARS_model_object = BioGeoBEARS_model_object
+	outputs = BioGeoBEARS_model_object
 
 	if ((is.numeric(inputs$timeperiods))) #&& (length(inputs$timeperiods) > 1))
 		{
-		model_results = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=force_sparse, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=cluster_already_open, calc_ancprobs=TRUE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list)
+		# We need to put the params back into the inputs to get the reconstructed ancestors etc.
+		return_condlikes_table = inputs$return_condlikes_table
+		calc_ancprobs = inputs$calc_ancprobs
+		
+		fixnode = inputs$fixnode
+		fixlikes = inputs$fixlikes
+		
+		# Need to store the model parameters in an inputs object to pass to calc_loglike_sp_stratified
+		inputs2 = inputs
+		inputs2$BioGeoBEARS_model_object = BioGeoBEARS_model_object
+		
+		model_results = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=1e-21, return_what="all", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=force_sparse, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=cluster_already_open, calc_ancprobs=calc_ancprobs, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs2, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=return_condlikes_table)
 		} else {
+		params = BioGeoBEARS_model_object_to_est_params(BioGeoBEARS_model_object)
+		
 		# Calculate the log-likelihood of the data, given the model parameters during this iteration	
-		model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+		#model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=0, calc_ancprobs=TRUE)
+		
+		model_results = calc_loglike_for_optim(params=params, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="all", calc_ancprobs=TRUE)
 		}
 
 
@@ -547,7 +807,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 	bears_output = model_results
 	bears_output$inputs = inputs
 	bears_output$spPmat_inputs = spPmat_inputs
-	bears_output$outputs = BioGeoBEARS_run_object
+	bears_output$outputs = outputs
 	bears_output$optim_result = optim_result2
 	
 	return(bears_output)

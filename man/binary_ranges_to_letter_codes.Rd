@@ -46,6 +46,8 @@ letter_code_ranges
 }
 \seealso{
   \code{\link{binary_range_to_letter_code_list}},
+  \code{\link{letter_string_to_binary}},
+  \code{\link{letter_strings_to_tipranges_df}},
   \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 }
 

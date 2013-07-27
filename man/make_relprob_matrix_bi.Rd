@@ -2,7 +2,7 @@
 \alias{make_relprob_matrix_bi}
 \title{Make a relative probability matrix for a single speciation (bifurcation) event}
 \usage{
-  make_relprob_matrix_bi(states_list = list("_", c("A"), c("B"), c("C"), c("A", "B"), c("B", "C"), c("A", "C"), c("A", "B", "C")),
+  make_relprob_matrix_bi(states_list = default_states_list(),
     split_ABC = FALSE, splitval = "",
     code_for_overlapping_subsets = NA, printwarn = 1)
 }

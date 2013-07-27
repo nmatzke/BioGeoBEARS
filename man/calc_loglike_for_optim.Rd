@@ -2,17 +2,18 @@
 \alias{calc_loglike_for_optim}
 \title{Take model parameters and the data and calculate the log-likelihood}
 \usage{
-  calc_loglike_for_optim(params, BioGeoBEARS_model_object,
+  calc_loglike_for_optim(params, BioGeoBEARS_run_object,
     phy, tip_condlikes_of_data_on_each_state,
     print_optim = TRUE, areas_list = areas_list,
     states_list = states_list, force_sparse = force_sparse,
-    cluster_already_open = cluster_already_open)
+    cluster_already_open = cluster_already_open,
+    return_what = "loglike", calc_ancprobs = FALSE)
 }
 \arguments{
   \item{params}{A vector of parameters for optimization.}
 
-  \item{BioGeoBEARS_model_object}{Object containing the
-  model.}
+  \item{BioGeoBEARS_run_object}{Object containing the run
+  parameters and the model.}
 
   \item{phy}{An ape tree object}
 
@@ -49,6 +50,19 @@
   from e.g. \code{library(parallel)} for some reason crash
   R.app.  The program runs a check for R.app and will just
   run on 1 node if found.}
+
+  \item{return_what}{What should be returned to the user?
+  Options are "loglike" (the log-likelihood of the data
+  under the tree, model, and model parameters), "nodelikes"
+  (the scaled conditional likelihoods at the nodes),
+  "rootprobs" (the relative probability of the geographic
+  ranges/states at the root), or "all" (all of the above in
+  a list).  Typically the user will only want to return
+  "loglike" while doing ML optimization, but then return
+  "all" once the ML parameter values have been found.}
+
+  \item{calc_ancprobs}{Just use this function once, return
+  the anc probs of states.}
 }
 \value{
   \code{ttl_loglike} The log-likelihood of the data under
@@ -73,6 +87,6 @@ test=1
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link[stats]{convolve}}
+  \code{\link{prune_states_list}}
 }
 

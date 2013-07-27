@@ -24,6 +24,10 @@
   problem of numbers columns being of class
   \code{\link[base]{character}}.
 }
+\details{
+  See especially \code{\link[base]{data.matrix}} for a
+  possibly simpler alternative.
+}
 \examples{
 x = matrix(c(1,2,3,4,5,6), nrow=3, ncol=2)
 cls.df(x)
@@ -43,6 +47,6 @@ unlist_df4(x)
 }
 \seealso{
   \code{\link{unlist_df}}, \code{\link{dfnums_to_numeric}},
-  \code{\link{cls.df}}
+  \code{\link{cls.df}}, \code{\link[base]{data.matrix}}
 }
 

@@ -1,0 +1,153 @@
+reading tree...
+Tree 1 has 19 leaves.
+reading data...
+Reading species: P_mariniana_Kokee2 1000
+Reading species: P_mariniana_Oahu 0100
+Reading species: P_mariniana_MauiNui 0010
+Reading species: P_hawaiiensis_Makaopuhi 0001
+Reading species: P_wawraeDL7428 1000
+Reading species: P_kaduana_PuuKukuiAS 0010
+Reading species: P_mauiensis_PepeAS 0010
+Reading species: P_hawaiiensis_WaikamoiL1 0010
+Reading species: P_mauiensis_Eke 0010
+Reading species: P_fauriei2 0100
+Reading species: P_hathewayi_1 0100
+Reading species: P_kaduana_HawaiiLoa 0100
+Reading species: P_greenwelliae07 1000
+Reading species: P_greenwelliae907 1000
+Reading species: P_grandiflora_Kal2 1000
+Reading species: P_hobdyi_Kuia 1000
+Reading species: P_hexandra_K1 1000
+Reading species: P_hexandra_M 1000
+Reading species: P_hexandra_Oahu 0100
+checking data...
+Reading rate matrix file
+ .   .  0 0 
+0  .   .  0 
+0 0  .   .  
+0 0 0  .  
+
+initializing nodes...
+initializing branch segments...
+setting default model...
+setting up tips...
+starting likelihood calculations
+initial -ln likelihood: 40.3319
+Optimizing (simplex) -ln likelihood.
+dis: 0.122973 ext: 4.7416e-07
+final -ln likelihood: 31.92
+Ancestral splits for:	1
+	M|M	1	(31.92)
+
+Ancestral states for:	1
+	M	1	(31.92)
+
+Ancestral splits for:	2
+	O|O	1	(31.92)
+
+Ancestral states for:	2
+	O	1	(31.92)
+
+Ancestral splits for:	3
+	M|O	0.999999	(31.92)
+
+Ancestral states for:	3
+	O_M	1	(31.92)
+
+Ancestral splits for:	4
+	M|M	1	(31.92)
+
+Ancestral states for:	4
+	M	1	(31.92)
+
+Ancestral splits for:	5
+	O_M|M	0.978853	(31.9414)
+
+Ancestral states for:	5
+	O_M	1	(31.92)
+
+Ancestral splits for:	6
+	O|O	0.864638	(32.0655)
+	O_M|O	0.135361	(33.9198)
+
+Ancestral states for:	6
+	O	0.864638	(32.0655)
+	O_M	0.135361	(33.9198)
+
+Ancestral splits for:	7
+	K|K	1	(31.92)
+
+Ancestral states for:	7
+	K	1	(31.92)
+
+Ancestral splits for:	8
+	O|K	0.999998	(31.92)
+
+Ancestral states for:	8
+	K_O	1	(31.92)
+
+Ancestral splits for:	9
+	M|H	0.999991	(31.92)
+
+Ancestral states for:	9
+	M_H	0.999993	(31.92)
+
+Ancestral splits for:	10
+	M|O	0.999997	(31.92)
+
+Ancestral states for:	10
+	O_M	0.999999	(31.92)
+
+Ancestral splits for:	11
+	O|K	0.999998	(31.92)
+
+Ancestral states for:	11
+	K_O	1	(31.92)
+
+Ancestral splits for:	12
+	K|K	0.742898	(32.2172)
+	K_O|K	0.257102	(33.2783)
+
+Ancestral states for:	12
+	K	0.742898	(32.2172)
+	K_O	0.257102	(33.2783)
+
+Ancestral splits for:	13
+	K|K	0.863333	(32.067)
+
+Ancestral states for:	13
+	K	0.863333	(32.067)
+	K_O	0.136667	(33.9102)
+
+Ancestral splits for:	14
+	K|K	1	(31.92)
+
+Ancestral states for:	14
+	K	1	(31.92)
+
+Ancestral splits for:	15
+	K|K	0.970919	(31.9495)
+
+Ancestral states for:	15
+	K	0.970919	(31.9495)
+
+Ancestral splits for:	16
+	K|K	1	(31.92)
+
+Ancestral states for:	16
+	K	1	(31.92)
+
+Ancestral splits for:	17
+	K|O	0.999995	(31.92)
+
+Ancestral states for:	17
+	K_O	0.999997	(31.92)
+
+Ancestral splits for:	18
+	K|K	0.589914	(32.4478)
+	K|K_O	0.388472	(32.8656)
+
+Ancestral states for:	18
+	K	0.589914	(32.4478)
+	K_O	0.410086	(32.8114)
+

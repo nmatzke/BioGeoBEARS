@@ -5,19 +5,10 @@
   calc_loglike_for_optim_stratified(params,
     BioGeoBEARS_run_object, phy,
     tip_condlikes_of_data_on_each_state,
-    print_optim = TRUE, areas_list = areas_list,
-    states_list = states_list, force_sparse = force_sparse,
-    cluster_already_open = cluster_already_open)
+    print_optim = TRUE, areas_list, states_list,
+    force_sparse = FALSE, cluster_already_open = FALSE)
 }
 \arguments{
-  \item{tip_condlikes_of_data_on_each_state}{A numeric
-  matrix with rows representing tips, and columns
-  representing states/geographic ranges.  The cells give
-  the likelihood of the observation data under the
-  assumption that the tip has that state; typically this
-  means that the known geographic range gets a '1' and all
-  other states get a 0.}
-
   \item{params}{A vector of parameters for optimization.}
 
   \item{BioGeoBEARS_run_object}{Object containing the run
@@ -25,8 +16,14 @@
 
   \item{phy}{An ape tree object}
 
-  \item{force_sparse}{Should sparse matrix exponentiation
-  be used?}
+  \item{tip_condlikes_of_data_on_each_state}{Conditional
+  likelihoods at tips. A numeric matrix with rows
+  representing tips, and columns representing
+  states/geographic ranges.  The cells give the likelihood
+  of the observation data under the assumption that the tip
+  has that state; typically this means that the known
+  geographic range gets a '1' and all other states get a
+  0.}
 
   \item{print_optim}{If TRUE (default), print the
   optimization steps as ML estimation progresses.}
@@ -36,6 +33,9 @@
 
   \item{states_list}{A list of the possible
   states/geographic ranges, in 0-based index form.}
+
+  \item{force_sparse}{Should sparse matrix exponentiation
+  be used? Default \code{FALSE}.}
 
   \item{cluster_already_open}{The cluster object, if it has
   already been started.}

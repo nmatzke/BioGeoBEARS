@@ -24,7 +24,8 @@
   nothing
 }
 \description{
-  What it says.
+  This function makes labels for plotting ranges on
+  corners.
 }
 \note{
   Go BEARS!
@@ -44,6 +45,7 @@ test=1
   ReeSmith2008
 }
 \seealso{
+  \code{\link{cornerpies}}, \code{\link{corner_coords}},
   \code{\link{get_lagrange_nodenums}},
   \code{\link{LGpy_splits_fn_to_table}},
   \code{\link{LGcpp_splits_fn_to_table}}

@@ -3,7 +3,7 @@
 \title{Make a default matrix of relative dispersal probabilities between areas}
 \usage{
   make_dispersal_multiplier_matrix(areas = NULL,
-    states_list = list("_", c("A"), c("B"), c("C"), c("A", "B"), c("B", "C"), c("A", "C"), c("A", "B", "C")),
+    states_list = default_states_list(),
     dispersal_multipliers_matrix = NULL,
     distances_mat = NULL, x_exponent = 0)
 }

@@ -1,0 +1,31 @@
+# Run with:
+# cd /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M2strat/LGcpp/
+# ./lagrange_cpp /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M2strat/LGcpp/Psychotria_M2strat.lg | tee /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M2strat/LGcpp/Psychotria_M2strat_lgcpp_out.txt
+
+treefile = Psychotria_5.2.newick
+datafile = Psychotria_geog.data
+logfile = Psychotria_M2_stratified_log.txt
+
+
+
+# if calctype = m, marginal is set to TRUE? otherwise FALSE (??)
+# NOTE: calctype = 0 results in LOWER LnL, not sure what its for
+calctype = m
+
+ratematrix = Psychotria_M2_stratified.txt
+periods = 0.5 1.9 3.7 5.1 10
+
+
+# only distributions with 2 or fewer areas
+includedists = 4
+
+#periods = 20 200
+areanames = K O M H
+# equal: K O M H
+
+logfile = logfile
+ancstate = _all_
+states
+splits
+#sparse
+#estimate_dispersal_mask

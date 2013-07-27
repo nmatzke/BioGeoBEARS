@@ -3,7 +3,7 @@
 \title{States (ranges) lists to txt string of the areas}
 \usage{
   states_list_indexes_to_areastxt(states_list, areanames,
-    counting_base = 0, sep = "")
+    counting_base = 0, concat = TRUE, sep = "")
 }
 \arguments{
   \item{states_list}{A list of states, where each state
@@ -13,6 +13,9 @@
 
   \item{counting_base}{Does states_list start indexing
   areas from 0 (default) or 1?}
+
+  \item{concat}{If TRUE (default), merge the areas in a
+  state into a single string.}
 
   \item{sep}{Character to merge on, as in
   \code{\link[base]{paste}}. Default "".}
@@ -38,6 +41,7 @@ test=1
   Matzke_2012_IBS
 }
 \seealso{
+  \code{\link{getname}},
   \code{\link{order_tipranges_by_tree_tips}},
   \code{\link{define_tipranges_object}},
   \code{\link{save_tipranges_to_LagrangePHYLIP}}

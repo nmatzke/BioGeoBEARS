@@ -1,0 +1,22 @@
+# Run with:
+# lagrange_cpp lg_controls.lg | tee lg_output.txt
+
+treefile = tree.newick
+datafile = geog.data
+logfile = lg_output_log.txt
+
+# if calctype = m, marginal is set to TRUE? otherwise FALSE (??)
+# NOTE: calctype = 0 results in LOWER LnL, not sure what its for
+calctype = m
+#periods = 20 200
+
+# This has to be customized
+areanames = K O M H
+# equal: K O M H
+
+logfile = logfile
+ancstate = _all_
+states
+splits
+#sparse
+#estimate_dispersal_mask

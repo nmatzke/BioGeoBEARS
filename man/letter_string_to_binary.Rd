@@ -47,6 +47,8 @@ letter_codes_in_desired_order=strsplit("ABCDEF", split="")[[1]])
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link{binary_ranges_to_letter_codes}}
+  \code{\link{binary_ranges_to_letter_codes}},
+  \code{\link{binary_range_to_letter_code_list}},
+  \code{\link{letter_strings_to_tipranges_df}}
 }
 

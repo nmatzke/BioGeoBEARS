@@ -4,7 +4,7 @@
 \usage{
   prt(t, printflag = TRUE, relabel_nodes = FALSE,
     time_bp_digits = 7, add_root_edge = TRUE,
-    get_tipnames = FALSE)
+    get_tipnames = FALSE, fossils_older_than = 0.6)
 }
 \arguments{
   \item{t}{A \code{\link[ape]{phylo}} tree object.}
@@ -25,6 +25,15 @@
   descending from each node be printed as a string in
   another column? This is slow-ish, but useful for matching
   up nodes between differing trees. Default \code{FALSE}.}
+
+  \item{fossils_older_than}{Tips that are older than
+  \code{fossils_older_than} will be marked as \code{TRUE}
+  in a column called \code{fossil}. This is not currently
+  set to 0, because Newick files can have slight precision
+  issues etc. that mean not all tips quite come to zero.
+  You can attempt to fix this with
+  \code{\link{average_tr_tips}} (but make sure you do not
+  inappropriately average in fossils!!).}
 }
 \value{
   \code{dtf} A \code{\link[base]{data.frame}} holding the
@@ -57,6 +66,6 @@ test=1
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link[ape]{phylo}}
+  \code{\link[ape]{phylo}}, \code{\link{average_tr_tips}}
 }
 

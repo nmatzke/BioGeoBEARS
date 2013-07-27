@@ -4,7 +4,7 @@
 require("ape")
 require("rexpokit")
 require("cladoRcpp")
-require("parallel")
+#require("parallel")
 
 #######################################################
 # Helper functions to try to speed things up
@@ -513,6 +513,8 @@ check_if_state_is_allowed <- function(state_0based_indexes, areas_allowed_mat)
 #' Default is \code{NULL} which means running on a single processor.
 #' @param fixnode If the state at a particular node is going to be fixed (e.g. for ML marginal ancestral states), give the node number.
 #' @param fixlikes The state likelihoods to be used at the fixed node.  I.e. 1 for the fixed state, and 0 for the others.
+#' @param stratified Default FALSE. If TRUE, you are running a stratified analysis, in which case uppass probs should be calculated elsewhere.
+#' @param states_allowed_TF Default NULL. If user gives a vector of TRUE and FALSE values, these states will be set to 0 likelihood throughout the calculations.
 #' @return Return whatever is specified by \code{return_what}.
 #' @export
 #' @seealso \code{\link{calc_loglike_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOprobs}}, 
@@ -528,7 +530,7 @@ check_if_state_is_allowed <- function(state_0based_indexes, areas_allowed_mat)
 #' @examples
 #' testval=1
 #'
-calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL)
+calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, stratified=FALSE, states_allowed_TF=NULL)
 	{
 	defaults='
 	# Phylogeny
@@ -576,7 +578,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		# Also, cppSpMethod must be 3 (I'm not going to program the other ones!!)
 		if (cppSpMethod != 3)
 			{
-			stop("ERROR: You must have cppSpMethod=3 if calc_ancprobs=TRUE or save_downpass_splitprobs=TRUE")
+			stop("ERROR: You must have cppSpMethod=3 if calc_ancprobs=TRUE")
 			}
 		}
 
@@ -653,20 +655,6 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	
 	
 	
-	edgelengths = phy$edge.length
-	num_branches_below_min = sum(edgelengths < min_branchlength)
-
-	if ( (printlevel >= 2) || (num_branches_below_min > 0) )
-		{
-		cat("\n")
-		cat("Running calc_loglike_sp():\n")
-		cat("This run of calc_loglike_sp() has a min_branchlength of: ", min_branchlength, "\n", sep="")
-		cat("Branches shorter than this will be assumed to be connected to the tree with\n")
-		cat("sympatric events (i.e., members of fossil lineages on ~0 length branches.)\n")
-		cat("This tree has ", num_branches_below_min, " branches < ", min_branchlength, ".\n", sep="")
-		cat("\n")
-		}	
-	
 	# Fix "l" (which is states_indices, i.e. a list of lists of state_indices)
 	# so that there is no "null geographic range", i.e. no "_", no "-", no "NA"
 	if ( is.null(spPmat_inputs)==FALSE )
@@ -682,6 +670,35 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	# Calculate likelihoods down tree
 	#numstates = nrow(Qmat)
 	numstates = ncol(tip_condlikes_of_data_on_each_state)
+
+	
+	#######################################################
+	# Check if the phylogeny is actually just a number (i.e., a branch length)
+	#######################################################
+	# Hmm, this seems harder...
+
+
+	#######################################################
+	# The rest assumes that you've got a phylo3 object, in default order
+	#######################################################
+	
+	
+	
+	
+	edgelengths = phy$edge.length
+	num_branches_below_min = sum(edgelengths < min_branchlength)
+
+	if ( (printlevel >= 2) || (num_branches_below_min > 0) )
+		{
+		cat("\n")
+		cat("Running calc_loglike_sp():\n")
+		cat("This run of calc_loglike_sp() has a min_branchlength of: ", min_branchlength, "\n", sep="")
+		cat("Branches shorter than this will be assumed to be connected to the tree with\n")
+		cat("sympatric events (i.e., members of fossil lineages on ~0 length branches.)\n")
+		cat("This tree has ", num_branches_below_min, " branches < ", min_branchlength, ".\n", sep="")
+		cat("\n")
+		}	
+
 	
 	num_internal_nodes = phy$Nnode
 	numtips = length(phy$tip.label)
@@ -713,7 +730,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	# This is all you need for a standard likelihood calculation
 	# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = rel probs AT A NODE
 	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS <- matrix(data=0, nrow=numnodes, ncol=numstates)
-	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] = tip_condlikes_of_data_on_each_state
+	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] = tip_condlikes_of_data_on_each_state / rowSums(tip_condlikes_of_data_on_each_state)
 	condlikes_of_each_state = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
 	#relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] <- 1
 	
@@ -853,7 +870,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			dmat = spPmat_inputs$dmat
 			
 			# Take the max of the indices of the possible areas, and add 1
-			numareas = max(unlist(spPmat_inputs$l), na.rm=TRUE) + 1
+			# numareas = max(unlist(spPmat_inputs$l), na.rm=TRUE) + 1 # old, bogus
+			numareas = max(sapply(X=spPmat_inputs$l, FUN=length), na.rm=TRUE) + 0
 			
 			maxent01s_param = spPmat_inputs$maxent01s_param
 			maxent01v_param = spPmat_inputs$maxent01v_param
@@ -1007,9 +1025,10 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				#cat("\n\n")
 				
 				condlikes_Left = independent_likelihoods_on_each_branch[[i]] %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
-							
+				
 				# Conditional likelihoods of states at the bottom of right branch
 				condlikes_Right = independent_likelihoods_on_each_branch[[j]] %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
+
 				}
 
 			
@@ -1122,7 +1141,13 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			#print(c(condlikes_Right))
 			}		
 		
-		
+		# Zero out impossible states
+		if (!is.null(states_allowed_TF))
+			{
+			condlikes_Left[states_allowed_TF==FALSE] = 0
+			condlikes_Right[states_allowed_TF==FALSE] = 0
+			}
+	
 		
 		
 		# Save the conditional likelihoods of the data at the bottoms of each branch 
@@ -1223,6 +1248,17 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				node_likelihood_with_speciation = rowSums(outmat2)
 				
 				
+				# THIS ZERO IS ALREADY OVER-WRITING THE NULL STATE LIKELIHOOD!!
+				
+				# Add the 0 back in, representing 0 probability of "_"
+				# range just below speciation event
+				if (null_range_allowed == TRUE)
+					{
+					node_likelihood = c(0, node_likelihood_with_speciation)
+					} else {
+					node_likelihood = node_likelihood_with_speciation
+					}
+
 				#######################################################
 				# If the states/likelihood have been fixed at a particular node
 				#######################################################
@@ -1234,21 +1270,10 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						# instead use the fixed likelihoods (i.e., the "known" state) for
 						# this node.
 						# fix the likelihoods of the (NON-NULL) states
-						node_likelihood_with_speciation = node_likelihood_with_speciation * fixlikes
+						node_likelihood = node_likelihood * fixlikes
 						}
 					}
 
-				
-				# THIS ZERO IS ALREADY OVER-WRITING THE NULL STATE LIKELIHOOD!!
-				
-				# Add the 0 back in, representing 0 probability of "_"
-				# range just below speciation event
-				if (null_range_allowed == TRUE)
-					{
-					node_likelihood = c(0, node_likelihood_with_speciation)
-					} else {
-					node_likelihood = node_likelihood_with_speciation
-					}
 				}
 			} else {
 			# use_cpp == TRUE
@@ -1315,8 +1340,17 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						
 						node_likelihood_with_speciation = rowSums(outmat2)
 						
+						# THIS ZERO IS ALREADY OVER-WRITING THE NULL STATE LIKELIHOOD!!
 						
-						
+						# Add the 0 back in, representing 0 probability of "_"
+						# range just below speciation event
+						if (null_range_allowed == TRUE)
+							{
+							node_likelihood = c(0, node_likelihood_with_speciation)
+							} else {
+							node_likelihood = node_likelihood_with_speciation
+							}
+
 						#######################################################
 						# If the states/likelihood have been fixed at a particular node
 						#######################################################
@@ -1328,21 +1362,11 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 								# instead use the fixed likelihoods (i.e., the "known" state) for
 								# this node.
 								# fix the likelihoods of the (NON-NULL) states
-								node_likelihood_with_speciation = node_likelihood_with_speciation * fixlikes
+								node_likelihood = node_likelihood * fixlikes
 								}
 							}
 
-						
-						# THIS ZERO IS ALREADY OVER-WRITING THE NULL STATE LIKELIHOOD!!
-						
-						# Add the 0 back in, representing 0 probability of "_"
-						# range just below speciation event
-						if (null_range_allowed == TRUE)
-							{
-							node_likelihood = c(0, node_likelihood_with_speciation)
-							} else {
-							node_likelihood = node_likelihood_with_speciation
-							}
+
 						}
 					} else {
 					if (printlevel >= 1)
@@ -1427,21 +1451,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						node_likelihood_with_speciation = node_likelihood_with_speciation3
 						}
 
+
 					
-					#######################################################
-					# If the states/likelihood have been fixed at a particular node
-					#######################################################
-					if (!is.null(fixnode))
-						{
-						if (anc == fixnode)
-							{
-							# If the node is fixed, ignore the calculation for this node, and
-							# instead use the fixed likelihoods (i.e., the "known" state) for
-							# this node.
-							# fix the likelihoods of the (NON-NULL) states
-							node_likelihood_with_speciation = node_likelihood_with_speciation * fixlikes
-							}
-						}
 
 					
 					if (printlevel >= 2) {
@@ -1455,6 +1466,31 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						} else {
 						node_likelihood = node_likelihood_with_speciation
 						}
+
+
+
+					#######################################################
+					# If the states/likelihood have been fixed at a particular node
+					#######################################################
+					if (!is.null(fixnode))
+						{
+						if (anc == fixnode)
+							{
+							# If the node is fixed, ignore the calculation for this node, and
+							# instead use the fixed likelihoods (i.e., the "known" state) for
+							# this node.
+							# fix the likelihoods of the (NON-NULL) states
+							node_likelihood = node_likelihood * fixlikes
+							}
+						}
+
+
+					# Zero out impossible states
+					if (!is.null(states_allowed_TF))
+						{
+						node_likelihood[states_allowed_TF==FALSE] = 0
+						}
+
 					}
 				}
 			}
@@ -1490,6 +1526,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		#print(node_likelihood)
 		
 		total_likelihood_for_node = sum(node_likelihood)
+		
+		#print(total_likelihood_for_node)
 		
 		computed_likelihoods_at_each_node[anc] = total_likelihood_for_node
 		
@@ -1539,6 +1577,13 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		relative_probs_of_each_state_at_bottom_of_root_branch = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ]
 		}
 	
+	# Zero out impossible states
+	if (!is.null(states_allowed_TF))
+		{
+		relative_probs_of_each_state_at_bottom_of_root_branch[states_allowed_TF==FALSE] = 0
+		relative_probs_of_each_state_at_bottom_of_root_branch = relative_probs_of_each_state_at_bottom_of_root_branch / sum(relative_probs_of_each_state_at_bottom_of_root_branch)
+		}
+
 	
 	# why times 2?? -- probably this is some AIC thing from the original APE function
 	#output_loglike = -2 * sum(log(comp[-TIPS]))
@@ -1560,7 +1605,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	#######################################################
 	if (calc_ancprobs == TRUE)
 		{
-		if (printlevel >= 0)
+		if ((printlevel >= 0) && (stratified == FALSE))
 			{
 			cat("\nUppass starting for marginal ancestral states estimation!\n", sep="")
 			}
@@ -1607,6 +1652,13 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			#######################################################
 			# Otherwise, just start with the bottom fork
 			starting_probs = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[anc, ]
+			}
+		
+		# Zero out impossible states
+		if (!is.null(states_allowed_TF))
+			{
+			starting_probs[states_allowed_TF==FALSE] = 0
+			starting_probs = starting_probs / sum(starting_probs)
 			}
 		
 		
@@ -1710,10 +1762,15 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						{
 						# You have to add another 1, since the speciational models EXCLUDE
 						# the first "range", the null range
+						# You have to add another 1, since the speciational models EXCLUDE
+						# NJM 7/2013 -- no, + 0 works for constrained analysis with UPPASS
+						# the first "range", the null range
+						# NJM 2013-07-15 -- YES, do +1 or you end up with state #16 (KOMH) getting prob
+						# 0 on the UPPASS
 						Lstate_1based_indexes = COO_weights_columnar[[2]][ancstate_matches_TF] + 1 + 1
 						Rstate_1based_indexes = COO_weights_columnar[[3]][ancstate_matches_TF] + 1 + 1
 						} else {
-						Lstate_1based_indexes = COO_weights_columnar[[2]][ancstate_matches_TF] + 1						
+						Lstate_1based_indexes = COO_weights_columnar[[2]][ancstate_matches_TF] + 1				
 						Rstate_1based_indexes = COO_weights_columnar[[3]][ancstate_matches_TF] + 1
 						}
 				
@@ -1726,6 +1783,15 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 					relprobs_just_after_speciation_UPPASS_Right[Rstate_1based_indexes] = relprobs_just_after_speciation_UPPASS_Right[Rstate_1based_indexes] + split_probs_for_this_ancestor
 					
 					} # That should be it for calculating the relative probs. Still have to normalize!
+
+
+				# Zero out impossible states
+				if (!is.null(states_allowed_TF))
+					{
+					relprobs_just_after_speciation_UPPASS_Left[states_allowed_TF==FALSE] = 0
+					relprobs_just_after_speciation_UPPASS_Right[states_allowed_TF==FALSE] = 0
+					}
+
 				
 				# Normalize the probs by their sum.
 				relprobs_just_after_speciation_UPPASS_Left = relprobs_just_after_speciation_UPPASS_Left / sum(relprobs_just_after_speciation_UPPASS_Left)				
@@ -1786,6 +1852,15 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				condprobs_Right_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 				}		
 			
+			
+			
+			# Zero out impossible states
+			if (!is.null(states_allowed_TF))
+				{
+				condprobs_Left_branch_top[states_allowed_TF==FALSE] = 0
+				condprobs_Right_branch_top[states_allowed_TF==FALSE] = 0
+				}		
+			
 			# Normalize and save these probabilities
 			relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[left_desc_nodenum,] = condprobs_Left_branch_top / sum(condprobs_Left_branch_top)
 			relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[right_desc_nodenum,] = condprobs_Right_branch_top / sum(condprobs_Right_branch_top)
@@ -1796,7 +1871,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		#######################################################
 		# End of loop for this pair of branches.  Move to next pair
 		#######################################################
-		if (printlevel >= 0)
+		if ((printlevel >= 0) && (stratified == FALSE))
 			{
 			cat("\nUppass completed for marginal ancestral states estimation!\n", sep="")
 			}
@@ -1855,7 +1930,12 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			#######################################################
 			# For branch tops
 			#######################################################
-			ML_marginal_prob_each_state_at_branch_top_AT_node = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS * relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+			if (stratified == FALSE)
+				{
+				ML_marginal_prob_each_state_at_branch_top_AT_node = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS * relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+				} else {
+				ML_marginal_prob_each_state_at_branch_top_AT_node = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS * 1
+				}
 			
 			# print
 			ML_marginal_prob_each_state_at_branch_top_AT_node
@@ -1984,6 +2064,8 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 #' @param null_range_allowed Does the state space include the null range?#' @return Return whatever is specified by \code{return_what}.
 #' @param fixnode If the state at a particular node is going to be fixed (e.g. for ML marginal ancestral states), give the node number.
 #' @param fixlikes The state likelihoods to be used at the fixed node.  I.e. 1 for the fixed state, and 0 for the others.
+#' @param stratified Default FALSE. If TRUE, you are running a stratified analysis, in which case uppass probs should be calculated elsewhere.
+#' @param states_allowed_TF Default NULL. If user gives a vector of TRUE and FALSE values, these states will be set to 0 likelihood throughout the calculations.
 #' @export
 #' @seealso \code{\link{calc_loglike_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp}}, \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOprobs}}, 
 #' \code{\link[cladoRcpp]{rcpp_calc_anclikes_sp_COOweights_faster}}, \code{\link[rexpokit]{mat2coo}}, 

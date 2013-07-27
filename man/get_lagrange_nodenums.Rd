@@ -34,8 +34,10 @@
   Go BEARS!
 }
 \examples{
-extdata_dir = system.file("extdata", package="BioGeoBEARS")
-trfn = slashslash(paste(extdata_dir, "/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep=""))
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+tmppath = paste(extdata_dir,
+"/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick", sep="")
+trfn = np(slashslash(tmppath))
 tr = read.tree(trfn)
 downpass_node_matrix = get_lagrange_nodenums(tr)
 downpass_node_matrix

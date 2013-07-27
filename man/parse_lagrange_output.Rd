@@ -2,21 +2,24 @@
 \alias{parse_lagrange_output}
 \title{Parse the output file from python \code{LAGRANGE}}
 \usage{
-  parse_lagrange_output(outfn, results_dir = getwd(),
-    new_splits_fn = TRUE, new_states_fn = TRUE,
-    filecount = 0)
+  parse_lagrange_output(outfn, outputfiles = FALSE,
+    results_dir = getwd(), new_splits_fn = FALSE,
+    new_states_fn = TRUE, filecount = 0)
 }
 \arguments{
   \item{outfn}{The C++ \code{LAGRANGE} output text file.}
+
+  \item{outputfiles}{Should parsed output be written to
+  files? Default FALSE.}
 
   \item{results_dir}{The directory \code{outfn} is in.}
 
   \item{new_splits_fn}{Should a text file containing a
   table of the splits and their probabilities be output?
-  Default \code{TRUE}.}
+  Default \code{FALSE}.}
 
   \item{new_states_fn}{Should a text file containing a
-  table of the splits and their probabilities be output?
+  table of the states and their probabilities be output?
   Default \code{TRUE}, unlike python \code{LAGRANGE}, C++
   \code{LAGRANGE} \emph{will} output the states at the
   nodes.}

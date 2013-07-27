@@ -1,6 +1,6 @@
 \name{readfiles_BioGeoBEARS_run}
 \alias{readfiles_BioGeoBEARS_run}
-\title{Read in the stratification input files, if any}
+\title{Read in the extra input files, if any}
 \usage{
   readfiles_BioGeoBEARS_run(inputs)
 }
@@ -11,8 +11,11 @@
   \code{inputs} The modified inputs list
 }
 \description{
-  areas_allowed file is just a list of distance matrices,
-  separated by blank lines, from youngest to oldest.
+  This function reads input files for stratification,
+  constraints, and detection, i.e., everything except the
+  tree and geography files. E.g., \code{areas_allowed_fn}
+  file is just a list of distance matrices, separated by
+  blank lines, from youngest to oldest.
 }
 \note{
   Go BEARS!
@@ -29,6 +32,13 @@ test=1
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link[stats]{convolve}}
+  \code{\link{define_BioGeoBEARS_run}},
+  \code{\link{read_times_fn}},
+  \code{\link{read_distances_fn}},
+  \code{\link{read_dispersal_multipliers_fn}},
+  \code{\link{read_area_of_areas_fn}},
+  \code{\link{read_areas_allowed_fn}},
+  \code{\link{read_detections}},
+  \code{\link{read_controls}}
 }
 

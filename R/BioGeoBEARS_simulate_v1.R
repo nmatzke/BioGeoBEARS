@@ -52,7 +52,7 @@ simulate_biogeog_history <- function(phy, Qmat, COO_probs_columnar, index_Qmat_0
 	simulated_states_by_node = simulate_biogeog_history(phy, Qmat, COO_probs_columnar, index_Qmat_0based_of_starting_state=15)
 	
 	# Save to a PHYLIP-formatted LAGRANGE-type file
-	out_geogfn = simulated_indexes_to_tipranges_file(simulated_states_by_node, areas_list, states_list, trfn, out_geogfn="lagrange_area_data_file.data")
+	out_geogfn = np(simulated_indexes_to_tipranges_file(simulated_states_by_node, areas_list, states_list, trfn, out_geogfn="lagrange_area_data_file.data"))
 	moref(out_geogfn)
 	'
 	
@@ -631,11 +631,11 @@ get_ML_probs <- function(relprobs_matrix, unlist_TF=TRUE)
 		
 		if (nummatches > 1)
 			{
-			cat("multiple states tied\n")
+			cat("\nNOTE: multiple states tied\n")
 			# unlist_TF
 			if (unlist_TF == TRUE)
 				{
-				cat("\nNote: picking the first state in the tie; use unlist_TF=FALSE to see all states.\n")
+				cat("\nNote: in get_ML_probs(), picking the first state in the tie; use unlist_TF=FALSE to see all states.\n")
 				inf_probsvec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF][1])
 				} else {
 				inf_probsvec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
@@ -1372,6 +1372,8 @@ get_simparams <- function(simhist_row)
 #' @param relprobs A numeric matrix of relative probabilities
 #' @param statenames The names of the states/geographic ranges (e.g., A, AB, CDE, ABD, etc...)
 #' @param returnwhat If "indices", return the 0-based indices of the states. If "states", return the name of the state, based on statenames.
+#' @param if_ties What to do with ties. Currently, the only option is to take the first (this will be
+#' shown in e.g. a pie chart, of course).
 #' @return \code{ML_states} or \code{ML_states_indices}, depending on \code{returnwhat}.
 #' @export
 #' @seealso \code{\link{get_ML_state_indices}}
@@ -1387,7 +1389,7 @@ get_simparams <- function(simhist_row)
 #' @examples
 #' testval=1
 #' 
-get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states")
+get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states", if_ties="takefirst")
 	{
 	# Get the maximum probability values for each row of the relative probs
 	maxprobs = apply(relprobs, 1, max)
@@ -1404,14 +1406,21 @@ get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states
 		{
 		relprobs_row = relprobs[i,]
 		maxprob = maxprobs[i]
-		ML_states_indices[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob)
-		ML_states[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob)
+		ML_states_indices[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="takefirst")
+		ML_states[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="takefirst")
 		}
 
 	# return values
 	if (returnwhat == "states")
 		{
-		return(ML_states)
+		foo = function(MLstate, statenames)
+			{
+			statenames[MLstate]
+			}
+		ML_states2 = unlist(sapply(X=ML_states, FUN=foo, statenames))
+		ML_states2
+		
+		return(ML_states2)
 		}
 	if (returnwhat == "indices")
 		{
@@ -1434,6 +1443,8 @@ get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states
 #' @param relprobs_row A row from a \code{relprobs}, a numeric matrix of relative probabilities
 #' @param nums Numbers indexing the states from 1 to numstates
 #' @param maxprob The value of the maximum probability for the row.
+#' @param if_ties What to do with ties. Currently, the only option is to take the first (this will be
+#' shown in e.g. a pie chart, of course).
 #' @return \code{index_of_ML_state_s} 
 #' @export
 #' @seealso \code{\link{get_ML_states}}
@@ -1447,12 +1458,17 @@ get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states
 #' @examples
 #' testval=1
 #' 
-get_ML_state_indices <- function(relprobs_row, nums, maxprob)
+get_ML_state_indices <- function(relprobs_row, nums, maxprob, if_ties="takefirst")
 	{
 	# get index (col #) of the ML state(s)
 	# This could be more than one state, obviously, if several states have
 	# equal probability
 	index_of_ML_state_s = nums[relprobs_row == maxprob]
+	
+	if (length(index_of_ML_state_s) > 1)
+		{
+		index_of_ML_state_s = index_of_ML_state_s[1]
+		}
 	
 	return(index_of_ML_state_s)
 	}

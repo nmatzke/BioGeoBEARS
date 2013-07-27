@@ -1,0 +1,17 @@
+# Run with:
+# cd /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Cyrtandra_M0/LGcpp/
+# ./lagrange_cpp /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Cyrtandra_M0/LGcpp/Cyrtandra_M0.lg | tee /Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Cyrtandra_M0/LGcpp/Cyrtandra_M0_lgcpp_out.txt 
+
+treefile = Cyrtandra.newick
+datafile = Cyrtandra_geog.data
+
+# if calctype = m, marginal is set to TRUE? otherwise FALSE (??)
+#calctype = m
+#periods = 20 200
+areanames = A B C D E F G
+logfile = logfile
+ancstate = _all_
+states
+splits
+#sparse
+#estimate_dispersal_mask

@@ -3,7 +3,8 @@
 \title{Plot a colors legend for geographic ranges}
 \usage{
   colors_legend(possible_ranges_list_txt,
-    colors_list_for_states, ncol = 2, cex = 2.5)
+    colors_list_for_states, legend_ncol = NULL,
+    legend_cex = 1)
 }
 \arguments{
   \item{possible_ranges_list_txt}{A list of the allowed
@@ -11,9 +12,20 @@
 
   \item{colors_list_for_states}{The corresponding colors}
 
-  \item{ncol}{Number of columns in the legend, default 2}
+  \item{legend_ncol}{The number of columns in the legend.
+  If \code{NULL} (default), the function calculates
+  \code{floor(sqrt(length(possible_ranges_list_txt) / 2))}.
+  Note that when you have hundreds of states, there is
+  probably no good way to have a coherent legend, and it is
+  easier to just rely upon printing the character codes for
+  the ML states in the plots, with the colors, and users
+  can then see and trace the common colors/states by eye.}
 
-  \item{cex}{Text size multiplier, default 2.5}
+  \item{legend_cex}{The cex (character expansion size) for
+  the legend.  Defaults to 1, which means the
+  \code{\link[graphics]{legend}} function determines the
+  size.  The value 2.5 works well for 15 or 16
+  states/ranges.}
 }
 \value{
   Nothing
@@ -36,6 +48,8 @@ testval=1
   Matzke_2012_IBS
 }
 \seealso{
-  \code{\link[stats]{optim}}
+  \code{\link[graphics]{legend}},
+  \code{\link[base]{floor}}, \code{\link[base]{ceiling}},
+  \code{\link[base]{floor}}
 }
 

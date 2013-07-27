@@ -1,0 +1,23 @@
+bibentry("Manual",
+         title = "BioGeoBEARS: BioGeography with Bayesian (and Likelihood) Evolutionary Analysis in R Scripts",
+         author = c(person("Nicholas J.", "Matzke", email = "matzke@berkeley.edu", role =
+        c("aut", "cre", "cph"))),
+         organization = "University of California, Berkeley",
+         address      = "Berkeley, CA",
+         year         = 2013,
+         note         = "The rexpokit/cladoRcpp/BioGeoBEARS packages were first published in: Matzke, Nicholas J. (2012). Founder-event speciation in BioGeoBEARS package dramatically improves likelihoods and alters parameter inference in Dispersal-Extinction-Cladogenesis (DEC) analyses. Frontiers of Biogeography, 4(suppl. 1): 210, December 2012.  Link to abstract and PDF of poster: 
+http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster . (Poster abstract 
+published in the Conference Program and Abstracts of the International Biogeography Society 6th Biannual 
+Meeting, Miami, Florida. Poster Session P10: Historical and Paleo-Biogeography. Poster 129B. January 11, 
+2013.)",
+         url          = "http://CRAN.R-project.org/package=BioGeoBEARS",
+                
+         mheader = "To cite package 'BioGeoBEARS' in publications use:",
+	 
+	 mfooter = 
+         paste("A lot of time and effort in creating BioGeoBEARS, as well as the sister packages 'rexpokit' and 'cladoRcpp',",
+          "please cite it and the other packages when using it for publication.",
+	  "See also", sQuote("citation(\"pkgname\")"),
+	  "for citing R packages.", sep = " ")
+	)
+
