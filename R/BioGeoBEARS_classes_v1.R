@@ -1644,6 +1644,10 @@ readfiles_BioGeoBEARS_run <- function(inputs)
 #' test=1
 check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE)
 	{
+	runjunk='
+	inputs = BioGeoBEARS_run_object
+	'
+	
 	# Load the tree
 	tmptr = read.tree(inputs$trfn)
 	
@@ -1766,11 +1770,10 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE)
 			tipranges_too_big = tipranges@df[tips_too_big_TF, ]
 			
 			stoptxt = paste("\nFATAL ERROR in inputs: max_tipsize=", max_tipsize, " > inputs$max_range_size=", inputs$max_range_size, ". Examples:\n", sep="")
-			for (i in 1:sum(tips_too_big_TF))
-				{
-				cat(tipranges_too_big[i,])
-				cat("\n")
-				}
+			cat(stoptxt)
+			print(tipranges_too_big)
+			cat("\n")
+			
 			stop(stoptxt)
 			}
 		}
@@ -1875,7 +1878,18 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE)
 				stop(stoptxt)
 				}
 			}
-		}		
+		
+		# Check for section_the_tree()
+		if ("tree_sections_list" %in% names(inputs) == FALSE)
+			{
+			stoptxt = paste("\nFATAL ERROR: You have time slices, but you do not have 'inputs$tree_sections_list'.\n",
+			"Run 'section_the_tree()' to add tree sections to your input BioGeoBEARS_run_object.\n\n", sep="")
+			cat(stoptxt)
+			stop(stoptxt)
+			}
+		
+		
+		} # End time check	
 
 	return(TRUE)
 	}

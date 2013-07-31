@@ -729,9 +729,24 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	
 	# This is all you need for a standard likelihood calculation
 	# relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = rel probs AT A NODE
+	# BE SURE TO DISTINGUISH STATE PROBABILITIES (VS LIKELIHOODS 9WHICH ARE NOT NORMALIZED)
+	condlikes_of_each_state <- matrix(data=0, nrow=numnodes, ncol=numstates)
 	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS <- matrix(data=0, nrow=numnodes, ncol=numstates)
-	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] = tip_condlikes_of_data_on_each_state / rowSums(tip_condlikes_of_data_on_each_state)
-	condlikes_of_each_state = relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
+	
+	# In THEORY, this should be OK to divide, but BECAUSE I pass relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS to 
+	# the matrix exponentiation calculations, these need to be likelihoods at the tips;
+	# SO DON'T DIVIDE, if you do it normalizes the probabilities at the tips, and this screws up things at are being passed 
+	# likelihoods that are not 1/0000, e.g. stratification analyses, and causes M0 and M0 strat to disagree on Psychotria (e.g.)
+	#
+	# At some point we should more rigorously separate relprobs and condlikes, but don't screw with it now!
+	# 
+	# For e.g. uppass calculations of tip probs, just do a hack later.
+	# 
+	relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] = tip_condlikes_of_data_on_each_state #/ rowSums(tip_condlikes_of_data_on_each_state)
+	
+	# BUT, DO NOT DIVIDE THIS BY rowSums(tip_condlikes_of_data_on_each_state), it forces normalization which prevents e.g.
+	# passing down likelihoods during stratification
+	condlikes_of_each_state[tipnums, ] = tip_condlikes_of_data_on_each_state
 	#relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[tipnums, ] <- 1
 	
 	

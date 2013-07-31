@@ -1,8 +1,8 @@
 Package: BioGeoBEARS
 Type: Package
 Title: BioGeography with Bayesian (and Likelihood) Evolutionary Analysis in R Scripts
-Version: 0.2.1
-Date: 2013-07-27
+Version: 0.2.2-2
+Date: 2013-07-31
 Authors@R: c(person("Nicholas J.", "Matzke", email = "matzke@berkeley.edu", role =
         c("aut", "cre", "cph")))
 Maintainer: Nicholas J. Matzke <matzke@berkeley.edu>

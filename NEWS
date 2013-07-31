@@ -1,3 +1,25 @@
+CHANGES in BioGeoBEARS VERSION 0.22-2
+
+NEW FEATURES
+
+    o minor changes to graphing functions
+    
+    o better summary plot to screen for section_the_tree (and better double-checking / 
+      error check of this)
+
+BUG FIXES
+
+    o Fixed minor bugs in stratification, due to not excluding is_fossil==FALSE, and to 
+      calc_loglike_sp wrongly renormalizing tip input likelihoods passed from the 
+      stratification functions
+    o edited CITATION information
+
+OTHER CHANGES
+
+    o none
+    
+
+
 CHANGES in BioGeoBEARS VERSION 0.21
 
 NEW FEATURES

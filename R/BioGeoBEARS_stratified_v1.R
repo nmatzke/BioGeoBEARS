@@ -179,7 +179,7 @@ section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, 
 			stratum = i
 			
 			
-			cat("\n", i, ": ", timeperiods[i], "\n", "\n", sep="")
+			cat("\n", i, "- top: ", orig_timeperiods[i]-timeperiods[i], ", bot: ", orig_timeperiods[i], ", rel_bot: ", timeperiods[i], "\n", sep="")
 			# Chainsaw the top off the tree
 			if (i == 1)
 				{
@@ -233,7 +233,7 @@ section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, 
 				
 				
 				# Get the tree structure as the tree is chopped down
-				print(i)
+				#print(i)
 				phy_chopped_down_table = prt(phy_as_it_is_chopped_down, printflag=FALSE, get_tipnames=TRUE)
 				
 				# re-sort the tipnames
@@ -1066,7 +1066,8 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 					is_fossil = tmp_master_table_row$fossils
 					
 					# If this is TRUE, there's a match and the fossil tip appears in this time period
-					if ( (master_tip_time_bp >= time_top) && (master_tip_time_bp < time_bot) && (is_fossil == TRUE))
+					# (THIS IS CRUCIAL TO GETTING STRATIFICATION TO WORK -- YOU NEED THE is_fossil==TRUE ADDED!!)
+					if ( (master_tip_time_bp >= time_top) && (master_tip_time_bp < time_bot) && (is.na(is_fossil) == FALSE) && (is_fossil == TRUE))
 						{
 						# Shorten the branchlength by master_tip_time_bp-time_top
 						amount_to_shorten_by = master_tip_time_bp-time_top
@@ -1076,7 +1077,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 
 					# If this is TRUE, this fossil hasn't occurred yet, and you are looking at the "phantom limb".
 					# In this case, DON'T do matrix exponentiation, just copy the likelihoods down!!
-					if ( master_tip_time_bp < time_top )
+					if (( master_tip_time_bp < time_top) && (is.na(is_fossil) == FALSE) && (is_fossil == TRUE))
 						{
 						do_exponentiation = FALSE
 						}
@@ -1122,6 +1123,10 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 				# Also, store the conditional likelihoods for all nodes in this subtree
 				chainsaw_result$conditional_likelihoods_for_nodes_plus_bottom_in_this_section[[jj]] = conditional_likelihoods_at_branch_section_bottom
 	
+	
+				# (THIS IS CRUCIAL TO GETTING STRATIFICATION TO WORK -- YOU NEED THE is_fossil==TRUE ADDED!!)
+				# (these don't seem essential, whether divided or not, in stratified analysis; what matters is what 
+				#  goes into condlikes_table)
 				# Relative probabilities -- jjust the new tip
 				chainsaw_result$relative_probs_of_each_state_at_bottom_of_root_branch[[jj]] = conditional_likelihoods_at_branch_section_bottom / sum(conditional_likelihoods_at_branch_section_bottom)
 	
@@ -1212,6 +1217,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 				# Use the tipnames to get the conditional likelihoods at these tips
 				tips_for_subtree_TF = phy_as_it_is_chopped_down$tip.label %in% tipnames
 				subtree_tip_relative_probs_of_each_state = current_tip_relative_probs_of_each_state[tips_for_subtree_TF,states_to_use_TF]
+				
 				
 				# Check if this subtree contains a fixed internal node on the master tree
 				tmp_fixnode = NULL		# Default
@@ -1321,6 +1327,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 				
 				chainsaw_result$conditional_likelihoods_for_nodes_plus_bottom_in_this_section[[jj]] = matrix(data=calc_loglike_sp_results$condlikes_of_each_state[-tmp_tipnums, ], ncol=ncol(calc_loglike_sp_results$condlikes_of_each_state))
 				
+		
 				# Matrix of tip likelihoods to delete so you don't repeat using them in the total
 				# loglike
 				#tiplikes_to_delete[[jj]] = calc_loglike_sp_results$condlikes_of_each_state[tmp_tipnums, ]
@@ -1386,7 +1393,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 		# Update for the next loop
 		# Tip likelihoods
 		current_tip_relative_probs_of_each_state = new_tip_likelihoods
-	
+			
 		# Store previous round
 		#old_phy_as_it_is_chopped_down = phy_as_it_is_chopped_down
 		#old_chainsaw_result = chainsaw_result
@@ -1444,6 +1451,8 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 	
 	if (calc_TTL_loglike_from_condlikes_table == TRUE)
 		{
+		#print ("HEY!")
+		
 		# Standard LAGRANGE result (exactly)
 		TF2 = inputs$master_table$SUBnode.type == "internal"
 		TF3 = inputs$master_table$SUBnode.type == "orig_tip"	# These are the original tips likelihoods; doesn't matter for unambiguous tips, but
@@ -1451,6 +1460,10 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 		TF4 = inputs$master_table$SUBnode.type == "root"
 		TF234 = (TF2 + TF3 + TF4) == 1
 		sum(TF234)
+		
+		#TF5 = inputs$master_table$piececlass == "subbranch"
+		#TF234 = (TF2 + TF3 + TF4 + TF5) == 1
+
 		
 		TF = TF234 == 1
 		nodes_in_original_tree = inputs$master_table[TF,]
@@ -1897,12 +1910,6 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 					
 					previous_treepiece_num = master_table_row_corresponding_to_anctip$piecenum
 
-
-					#print("HEY 2")
-					#print(previous_stratum)
-					#print(anc_node_original_tree)
-					#print(master_table_row_corresponding_to_anctip)
-					#print(previous_treepiece_num)
 
 					# The previous treepiece
 					previous_treepiece = inputs$tree_sections_list[[previous_stratum]]$return_pieces_list[[previous_treepiece_num]]

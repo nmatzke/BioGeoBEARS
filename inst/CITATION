@@ -5,11 +5,11 @@ bibentry("Manual",
          organization = "University of California, Berkeley",
          address      = "Berkeley, CA",
          year         = 2013,
-         note         = "The rexpokit/cladoRcpp/BioGeoBEARS packages were first published in: Matzke, Nicholas J. (2012). Founder-event speciation in BioGeoBEARS package dramatically improves likelihoods and alters parameter inference in Dispersal-Extinction-Cladogenesis (DEC) analyses. Frontiers of Biogeography, 4(suppl. 1): 210, December 2012.  Link to abstract and PDF of poster: 
-http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster . (Poster abstract 
+         note         = "The rexpokit/cladoRcpp/BioGeoBEARS packages were first published in:\n\nMatzke, Nicholas J. (2012). Founder-event speciation in BioGeoBEARS package dramatically improves likelihoods and alters parameter inference in Dispersal-Extinction-Cladogenesis (DEC) analyses. Frontiers of Biogeography, 4(suppl. 1): 210, December 2012.\nLink to abstract and PDF of poster:\n
+http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster .\n\n(Poster abstract 
 published in the Conference Program and Abstracts of the International Biogeography Society 6th Biannual 
 Meeting, Miami, Florida. Poster Session P10: Historical and Paleo-Biogeography. Poster 129B. January 11, 
-2013.)",
+2013.)\n",
          url          = "http://CRAN.R-project.org/package=BioGeoBEARS",
                 
          mheader = "To cite package 'BioGeoBEARS' in publications use:",
