@@ -4,7 +4,7 @@
 \usage{
   calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state,
     phy, Qmat = NULL, spPmat = NULL,
-    min_branchlength = 1e-21, return_what = "loglike",
+    min_branchlength = 1e-06, return_what = "loglike",
     probs_of_states_at_root = NULL, rootedge = TRUE,
     sparse = FALSE, printlevel = 0, use_cpp = TRUE,
     input_is_COO = FALSE, spPmat_inputs = NULL,

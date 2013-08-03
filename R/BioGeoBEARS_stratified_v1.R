@@ -677,10 +677,10 @@ chainsaw2 <- function(tr, timepoint=10, return_pieces=TRUE)
 #' @examples
 #' testval=1
 #'
-calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE)
+calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=0.000001, return_what="loglike", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE)
 	{
 	defaults='
-	Qmat=NULL; spPmat=NULL; min_branchlength=1e-21; return_what="loglike"; probs_of_states_at_root=NULL; rootedge=FALSE; sparse=FALSE; printlevel=1; use_cpp=TRUE; input_is_COO=FALSE; spPmat_inputs=NULL; cppSpMethod=3; cluster_already_open=NULL; calc_ancprobs=FALSE; null_range_allowed=TRUE; fixnode=NULL; fixlikes=NULL; inputs=inputs; allareas=allareas; all_states_list=all_states_list; return_condlikes_table=FALSE
+	Qmat=NULL; spPmat=NULL; min_branchlength=0.000001; return_what="loglike"; probs_of_states_at_root=NULL; rootedge=FALSE; sparse=FALSE; printlevel=1; use_cpp=TRUE; input_is_COO=FALSE; spPmat_inputs=NULL; cppSpMethod=3; cluster_already_open=NULL; calc_ancprobs=FALSE; null_range_allowed=TRUE; fixnode=NULL; fixlikes=NULL; inputs=inputs; allareas=allareas; all_states_list=all_states_list; return_condlikes_table=FALSE
 	'
 	
 	defaults='
@@ -692,10 +692,10 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 	allareas = getareas_from_tipranges_object(tipranges)
 	all_states_list = rcpp_areas_list_to_states_list(areas=allareas, include_null_range=TRUE, maxareas=maxareas)
 	
-	tmpres = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=1e-21, return_what="all", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=FALSE)
+	tmpres = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=0.000001, return_what="all", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=FALSE)
 	tmpres
 	
-	min_branchlength=1e-21
+	min_branchlength=0.000001
 	null_range_allowed=TRUE
 	printlevel=0
 	cppSpMethod=3
@@ -704,14 +704,14 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 	calc_ancprobs=TRUE
 '
 	defaults='
-	tmpres = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=1e-21, return_what="all", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=TRUE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=TRUE, calc_TTL_loglike_from_condlikes_table=TRUE)
+	tmpres = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=0.000001, return_what="all", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=TRUE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=TRUE, calc_TTL_loglike_from_condlikes_table=TRUE)
 '
 
 
 
 # 	defaults='
 # 	# STANDARD DEBUGGING HERE
-# 	tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state; phy=phy; Qmat=NULL; spPmat=NULL; min_branchlength=1e-21; return_what="loglike"; probs_of_states_at_root=NULL; rootedge=TRUE; sparse=FALSE; printlevel=0; use_cpp=TRUE; input_is_COO=FALSE; spPmat_inputs=NULL; cppSpMethod=3; cluster_already_open=NULL; calc_ancprobs=FALSE; null_range_allowed=TRUE; fixnode=fixnode; fixlikes=fixlikes; inputs=BioGeoBEARS_run_object; allareas=areas; all_states_list=states_list; return_condlikes_table=TRUE; calc_TTL_loglike_from_condlikes_table=TRUE;
+# 	tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state; phy=phy; Qmat=NULL; spPmat=NULL; min_branchlength=0.000001; return_what="loglike"; probs_of_states_at_root=NULL; rootedge=TRUE; sparse=FALSE; printlevel=0; use_cpp=TRUE; input_is_COO=FALSE; spPmat_inputs=NULL; cppSpMethod=3; cluster_already_open=NULL; calc_ancprobs=FALSE; null_range_allowed=TRUE; fixnode=fixnode; fixlikes=fixlikes; inputs=BioGeoBEARS_run_object; allareas=areas; all_states_list=states_list; return_condlikes_table=TRUE; calc_TTL_loglike_from_condlikes_table=TRUE;
 # 	' # end junk
 
 
@@ -2781,7 +2781,7 @@ calc_loglike_for_optim_stratified <- function(params, BioGeoBEARS_run_object, ph
 	return_condlikes_table = BioGeoBEARS_run_object$return_condlikes_table
 	calc_TTL_loglike_from_condlikes_table = BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table
 
-	ttl_loglike = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=NULL, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=fixnode, fixlikes=fixlikes, inputs=BioGeoBEARS_run_object, allareas=areas, all_states_list=states_list, return_condlikes_table=return_condlikes_table, calc_TTL_loglike_from_condlikes_table=calc_TTL_loglike_from_condlikes_table)
+	ttl_loglike = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=NULL, spPmat=NULL, min_branchlength=0.000001, return_what="loglike", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=fixnode, fixlikes=fixlikes, inputs=BioGeoBEARS_run_object, allareas=areas, all_states_list=states_list, return_condlikes_table=return_condlikes_table, calc_TTL_loglike_from_condlikes_table=calc_TTL_loglike_from_condlikes_table)
 
 	if (print_optim == TRUE)
 		{

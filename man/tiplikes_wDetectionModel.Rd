@@ -5,7 +5,7 @@
   tiplikes_wDetectionModel(states_list_0based_index,
     numareas = NULL, detects_df, controls_df,
     mean_frequency = 0.1, dp = 1, fdp = 0,
-    null_range_gets_0_like = TRUE)
+    null_range_gets_0_like = TRUE, return_LnLs = TRUE)
 }
 \arguments{
   \item{states_list_0based_index}{A states_list, 0-based,
@@ -70,6 +70,11 @@
   study area, at the timepoint being considered.  Null
   ranges are identified by length=1, containing NULL, NA,
   "", "_", etc.}
+
+  \item{return_LnLs}{If \code{FALSE} (default), return
+  exp(sum(LnLs of data in each area)), i.e. the likelihood
+  of the data, non-logged. If \code{TRUE}, return the LnLs
+  of the data in each area.}
 }
 \value{
   \code{tip_condlikes_of_data_on_each_state} The

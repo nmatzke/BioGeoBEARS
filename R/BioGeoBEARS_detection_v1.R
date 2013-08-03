@@ -52,6 +52,7 @@ read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0
 		{
 		dtf = read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
 		dtf
+		OTUnames = row.names(dtf)
 		} else {
 		# Assumes no OTU names
 		dtf = read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=OTUnames)
@@ -75,6 +76,7 @@ read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0
 	# Standardize and return
 	dtf = adf2(dtf)
 	dtf = dfnums_to_numeric(dtf)
+	row.names(dtf) = OTUnames
 	
 	return(dtf)
 	}
@@ -134,6 +136,7 @@ read_controls <- function(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0,
 		{
 		dtf = read.table(file=controls_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
 		dtf
+		OTUnames = row.names(dtf)
 		} else {
 		# Assumes no OTU names
 		dtf = read.table(file=controls_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=OTUnames)
@@ -157,6 +160,7 @@ read_controls <- function(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0,
 	# Standardize and return
 	dtf = adf2(dtf)
 	dtf = dfnums_to_numeric(dtf)
+	row.names(dtf) = OTUnames
 	
 	return(dtf)
 	}
@@ -1408,7 +1412,7 @@ obs_all_species=controls_df, MoreArgs=list(mean_frequency=mean_frequency, dp=dp,
 #' # The likelihood: the probability of the data in each area:
 #' exp(LnLs_of_data_in_each_area)
 #' 
-Pdata_given_rangerow <- function(range_as_areas_TF, detects_df_row, controls_df_row, mean_frequency=0.1, dp=1, fdp=0, return_LnLs=FALSE)
+Pdata_given_rangerow <- function(range_as_areas_TF, detects_df_row, controls_df_row, mean_frequency=0.1, dp=1, fdp=0, return_LnLs=TRUE)
 	{
 	runjunk='
 	controls_fn = "/Library/Frameworks/R.framework/Versions/2.15/Resources/library/BioGeoBEARS/extdata/Psychotria_controls_v1.txt"
@@ -1428,7 +1432,7 @@ Pdata_given_rangerow <- function(range_as_areas_TF, detects_df_row, controls_df_
 
 	# OK, calculate likelihood OF THE DATA ON THAT RANGE
 	LnLs_of_data_in_each_area = mapply(FUN=calc_obs_like, truly_present=range_as_areas_TF, obs_target_species=detects_df_row,
-obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp=0.99, fdp=0.001), USE.NAMES=TRUE)
+obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp=dp, fdp=fdp), USE.NAMES=TRUE)
 	
 	if (return_LnLs == FALSE)
 		{
@@ -1436,7 +1440,7 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 		likelihood_of_data_given_range = exp(LnL_range)
 		return(likelihood_of_data_given_range)
 		} else {
-		return(LnLs_of_data_in_each_area)
+		return(sum(LnLs_of_data_in_each_area))
 		}
 	}
 
@@ -1495,6 +1499,8 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 #' range is a null range (i.e., no areas occupied).  This is equivalent to saying that you are sure/are willing to assume that 
 #' the OTU exists somewhere in your study area, at the timepoint being considered.  Null ranges are identified by length=1, 
 #' containing NULL, NA, "", "_", etc.
+#' @param return_LnLs If \code{FALSE} (default), return exp(sum(LnLs of data in each area)), i.e. the likelihood of the data, 
+#' non-logged. If \code{TRUE}, return the LnLs of the data in each area.
 #' @return \code{tip_condlikes_of_data_on_each_state} The (non-logged!) likelihood of the data for each tip, given each possible range, and the 
 #' detection model parameters.
 #' @export
@@ -1532,7 +1538,7 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 #' 
 #' tip_condlikes_of_data_on_each_state
 #' 
-tiplikes_wDetectionModel <- function(states_list_0based_index, numareas=NULL, detects_df, controls_df, mean_frequency=0.1, dp=1, fdp=0, null_range_gets_0_like=TRUE)
+tiplikes_wDetectionModel <- function(states_list_0based_index, numareas=NULL, detects_df, controls_df, mean_frequency=0.1, dp=1, fdp=0, null_range_gets_0_like=TRUE, return_LnLs=TRUE)
 	{
 	runjunk='
 	controls_fn = "/Library/Frameworks/R.framework/Versions/2.15/Resources/library/BioGeoBEARS/extdata/Psychotria_controls_v1.txt"
@@ -1558,6 +1564,12 @@ tiplikes_wDetectionModel <- function(states_list_0based_index, numareas=NULL, de
 	#states_list_0based_index = tmpstates
 	numstates = length(states_list_0based_index)
 	numtips = nrow(detects_df)
+	
+# 	print("numtips")
+# 	print(numtips)
+# 	print("numstates")
+# 	print(numstates)
+	
 	tip_condlikes_of_data_on_each_state = matrix(data=0, nrow=numtips, ncol=numstates)
 	for (statenum in 1:numstates)
 		{
@@ -1570,7 +1582,13 @@ tiplikes_wDetectionModel <- function(states_list_0based_index, numareas=NULL, de
 			if ( (truerange_areas=="_") || (is.null(truerange_areas)==TRUE) || (is.na(truerange_areas)==TRUE) || (truerange_areas=="") )
 				{
 				# Then you have a null range, and you have decided to give the data 0 likelihood on all states
-				likes_vector = rep(0, times=numtips)
+				if (return_LnLs == FALSE)
+					{
+					likes_vector = rep(0, times=numtips)
+					} else {
+					# In log space, it has to be -Inf
+					likes_vector = rep(-Inf, times=numtips)					
+					}
 				tip_condlikes_of_data_on_each_state[, statenum] = likes_vector
 				
 				# skip to next loop
@@ -1589,7 +1607,7 @@ tiplikes_wDetectionModel <- function(states_list_0based_index, numareas=NULL, de
 		for (i in 1:nrow(range_as_areas_TF))
 			{
 			likes_vector[i] = Pdata_given_rangerow(range_as_areas_TF=range_as_areas_TF[i,], detects_df_row=detects_df[i,], 
-		controls_df_row=controls_df[i,], mean_frequency=mean_frequency, dp=dp, fdp=fdp, return_LnLs=FALSE)
+		controls_df_row=controls_df[i,], mean_frequency=mean_frequency, dp=dp, fdp=fdp, return_LnLs=return_LnLs)
 			}
 	
 		tip_condlikes_of_data_on_each_state[, statenum] = likes_vector

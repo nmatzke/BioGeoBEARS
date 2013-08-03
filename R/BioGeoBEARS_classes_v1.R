@@ -327,8 +327,8 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-15, minval_cladogene
 	param_data = param_data_starter
 	param_data$type = "fixed"
 	param_data$init = 0.1
-	param_data$min = 0 + minval_anagenesis
-	param_data$max = 1 - minval_anagenesis
+	param_data$min = 0.005
+	param_data$max = 1-param_data$min
 	param_data$est = param_data$init
 	param_data$note = "yes"
 	param_data$desc = "mean frequency of truly sampling OTU of interest"
@@ -343,8 +343,8 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-15, minval_cladogene
 	param_data = param_data_starter
 	param_data$type = "fixed"
 	param_data$init = 1
-	param_data$min = 0 + minval_anagenesis
-	param_data$max = 1 - minval_anagenesis
+	param_data$min = 0.005
+	param_data$max = 1-param_data$min
 	param_data$est = param_data$init
 	param_data$note = "yes"
 	param_data$desc = "detection probability per true sample of OTU of interest"
@@ -358,8 +358,8 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-15, minval_cladogene
 	param_data = param_data_starter
 	param_data$type = "fixed"
 	param_data$init = 0
-	param_data$min = 0 + minval_anagenesis
-	param_data$max = 1 - minval_anagenesis
+	param_data$min = 0.005
+	param_data$max = 1-param_data$min
 	param_data$est = param_data$init
 	param_data$note = "yes"
 	param_data$desc = "false detection of OTU probability per true taphonomic control sample"
@@ -1664,7 +1664,7 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE)
 	if (sum(blren_equal_below_0_TF) > 0)
 		{
 		tmptxt = paste(tmptr$edge.length[blren_equal_below_0_TF], collapse=", ", sep="")
-		stoptxt = paste("\nFATAL ERROR in average_tr_tips(): the output tree has branchlengths <= 0:\n", tmptxt, 
+		stoptxt = paste("\nFATAL ERROR in check_BioGeoBEARS_run(): the output tree has branchlengths <= 0:\n", tmptxt, 
 		"\nThis can sometimes happen in e.g. MCC (majority clade consensus) trees output by BEAST's TreeAnnotator.\nYou must fix the Newick file. See ?check_BioGeoBEARS_run for comments.\n", sep="")
 		cat(stoptxt)
 		stop(stoptxt)
@@ -1788,6 +1788,30 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE)
 		stoptxt = paste("\nFATAL ERROR in inputs: your tipranges file has NAs and/or tips with rangesize 0!\n See tipranges printed below:\n\n", sep="")
 		cat(stoptxt)
 		print(tipranges@df)
+		
+		stoptxt2 = paste("\nAnd your problematic tipranges rows are:\n", sep="")
+		cat(stoptxt2)
+		
+		if (sum(rangesize_is_ZERO_TF) > 0)
+			{
+			TF = rangesize_is_ZERO_TF
+			print(tipranges@df[TF, ])
+			}
+		
+		if (sum(ranges_have_NAs_TF) > 0)
+			{
+			TF = rep(FALSE, nrow(tipranges@df))
+			for (i in 1:nrow(tipranges@df))
+				{
+				tmprow = tipranges@df[i,]
+				if (sum(is.na(tmprow)) > 0)
+					{
+					TF[i] = TRUE
+					}
+				}
+			print(tipranges@df[TF,])
+			}
+		
 		stop(stoptxt)
 
 		}
@@ -1818,6 +1842,24 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE)
 			stop(stoptxt)
 			}
 		}
+	
+	# If "x" is being used, there must be a distances file
+	TF1 = inputs$BioGeoBEARS_model_object@params_table["x","type"] == "free"
+	TF2 = inputs$BioGeoBEARS_model_object@params_table["x","init"] != 0
+	TF3 = inputs$BioGeoBEARS_model_object@params_table["x","est"] != 0
+
+	if (TF1 || TF2 || TF3)
+		{
+		if (is.character(inputs$distsfn) == FALSE)
+			{
+			stoptxt = paste("\nFATAL ERROR: Your 'x' parameter is free or nonzero, but you have input\n",
+		                "no distances file.\n\n", sep="")
+		    cat(stoptxt)
+		    stop(stoptxt)
+		    }
+		}
+		                
+	
 	
 	
 	# If there is a times file, it should have already been read in 

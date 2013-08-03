@@ -3,7 +3,7 @@
 \title{Calculate log-likelihood with a transition matrix and speciation events -- byte-compiled}
 \usage{
   calc_loglike_sp(tip_condlikes_of_data_on_each_state, phy,
-    Qmat, spPmat = NULL, min_branchlength = 1e-21,
+    Qmat, spPmat = NULL, min_branchlength = 1e-06,
     return_what = "loglike",
     probs_of_states_at_root = NULL, rootedge = FALSE,
     sparse = FALSE, printlevel = 1, use_cpp = TRUE,

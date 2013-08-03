@@ -530,7 +530,7 @@ check_if_state_is_allowed <- function(state_0based_indexes, areas_allowed_mat)
 #' @examples
 #' testval=1
 #'
-calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=1e-21, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, stratified=FALSE, states_allowed_TF=NULL)
+calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=0.000001, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, null_range_allowed=TRUE, fixnode=NULL, fixlikes=NULL, stratified=FALSE, states_allowed_TF=NULL)
 	{
 	defaults='
 	# Phylogeny
@@ -554,7 +554,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	spPmat=NULL
 	
 	
-	min_branchlength=1e-21
+	min_branchlength=0.000001
 	return_what = "all"
 	probs_of_states_at_root=NULL
 	rootedge=FALSE
@@ -1539,6 +1539,29 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 		#txt = paste("left node: ", left_desc_nodenum, ", right node:", right_desc_nodenum, sep="")
 		#print(txt)
 		#print(node_likelihood)
+		
+		nanTF = is.nan(node_likelihood)
+		if (sum(nanTF) > 0)
+			{
+			print(nanTF)
+			print(node_likelihood)
+			print(i)
+			print(j)
+			left_desc_nodenum
+			right_desc_nodenum
+		
+			# And for the ancestor edge (i or j shouldn't matter, should produce the same result!!!)
+			anc <- phy2$edge[i, 1]
+			plot(phy2)
+			nodelabels()
+			
+			printall(prt(phy2))
+			
+			print(tip_condlikes_of_data_on_each_state[left_desc_nodenum,])
+			print(tip_condlikes_of_data_on_each_state[right_desc_nodenum,])
+			
+			stop()
+			}
 		
 		total_likelihood_for_node = sum(node_likelihood)
 		

@@ -4,7 +4,7 @@
 \usage{
   Pdata_given_rangerow(range_as_areas_TF, detects_df_row,
     controls_df_row, mean_frequency = 0.1, dp = 1, fdp = 0,
-    return_LnLs = FALSE)
+    return_LnLs = TRUE)
 }
 \arguments{
   \item{range_as_areas_TF}{The list of areas (as

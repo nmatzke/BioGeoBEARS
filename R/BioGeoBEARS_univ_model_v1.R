@@ -190,6 +190,47 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 	spPmat_inputs$maxent01y_param = maxent01y_param
 
 
+	# Get the detection model
+	if (BioGeoBEARS_run_object$use_detection_model == TRUE)
+		{
+		mf = BioGeoBEARS_model_object@params_table["mf","est"]
+		dp = BioGeoBEARS_model_object@params_table["dp","est"]
+		fdp = BioGeoBEARS_model_object@params_table["fdp","est"]
+
+		# Calculate the initial tip likelihoods, using the detection model
+		# Assumes correct order, double-check this
+		numareas = length(areas)
+		detects_df = BioGeoBEARS_run_object$detects_df
+		controls_df = BioGeoBEARS_run_object$controls_df
+		
+		# return_LnLs=TRUE ensures no under-flow
+		tip_condlikes_of_data_on_each_state_LnL = tiplikes_wDetectionModel(states_list_0based_index=states_list, numareas, detects_df, controls_df, mean_frequency=mf, dp=dp, fdp=fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE)
+		tip_condlikes_of_data_on_each_state_LnL
+
+		maxlike_each_row = apply(X=tip_condlikes_of_data_on_each_state_LnL, MARGIN=1, max)
+		tip_condlikes_of_data_on_each_state_LnL = tip_condlikes_of_data_on_each_state_LnL - maxlike_each_row
+				
+		tip_condlikes_of_data_on_each_state = exp(tip_condlikes_of_data_on_each_state_LnL)
+		
+		# Error check
+		sums = rowSums(tip_condlikes_of_data_on_each_state)
+		tiplike_sums_to_0_TF = sums <= 0
+		
+		if (sum(tiplike_sums_to_0_TF) > 0)
+			{
+			stoptxt = "\nFATAL ERROR: Some tiplikes sum to 0!!!\n"
+			cat(stoptxt)
+			print((1:length(tiplike_sums_to_0_TF))[tiplike_sums_to_0_TF])
+			print(tip_condlikes_of_data_on_each_state[tiplike_sums_to_0_TF, ])
+			stop(stoptxt)
+			}
+		}
+	tip_condlikes_of_data_on_each_state
+
+
+
+
+
 	if (print_optim == TRUE)
 		{
 		#outvars = as.data.frame(t(BioGeoBEARS_model_object@params_table$est))
@@ -425,16 +466,43 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 		# Calculate the initial tip likelihoods, using the detection model
 		# Assumes correct order, double-check this
 		numareas = length(areas)
-		detects_df = inputs$detects_df
-		controls_df = inputs$controls_df
+		detects_df = read_detections(BioGeoBEARS_run_object$detects_fn)
+		controls_df = read_controls(BioGeoBEARS_run_object$controls_fn)
+		BioGeoBEARS_run_object$detects_df = detects_df
+		BioGeoBEARS_run_object$controls_df = controls_df
 		mean_frequency = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mf", "init"]
 		dp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["dp", "init"]
 		fdp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["fdp", "init"]
-		tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, numareas, detects_df, controls_df, mean_frequency, dp, fdp, null_range_gets_0_like=TRUE)
+		
+		# return_LnLs=TRUE ensures no under-flow
+		tip_condlikes_of_data_on_each_state_LnL = tiplikes_wDetectionModel(states_list_0based_index=states_list, numareas, detects_df, controls_df, mean_frequency, dp, fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE)
+		tip_condlikes_of_data_on_each_state_LnL
+
+		maxlike_each_row = apply(X=tip_condlikes_of_data_on_each_state_LnL, MARGIN=1, max)
+		tip_condlikes_of_data_on_each_state_LnL = tip_condlikes_of_data_on_each_state_LnL - maxlike_each_row
+		
+		tip_condlikes_of_data_on_each_state = exp(tip_condlikes_of_data_on_each_state_LnL)
+		
+		# For Assassin spiders, this produces:
+		# rowSums(tip_condlikes_of_data_on_each_state)
+		# 1  1  1  1  1  1  1  1  1  1  1  1  1 64 64 64 64 64  1  1  1  1  1
+		
+		# Error check
+		sums = rowSums(tip_condlikes_of_data_on_each_state)
+		tiplike_sums_to_0_TF = sums <= 0
+		
+		if (sum(tiplike_sums_to_0_TF) > 0)
+			{
+			stoptxt = "\nFATAL ERROR: Some tiplikes sum to 0!!!\n"
+			cat(stoptxt)
+			print((1:length(tiplike_sums_to_0_TF))[tiplike_sums_to_0_TF])
+			print(tip_condlikes_of_data_on_each_state[tiplike_sums_to_0_TF, ])
+			stop(stoptxt)
+			}
 		}
 	tip_condlikes_of_data_on_each_state
 
-
+	#print(tip_condlikes_of_data_on_each_state)
 
 
 	#######################################################
@@ -636,6 +704,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 				itnmax = 250
 				}
 
+			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!
 			#calc_loglike_for_optim(params, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
 			
 			optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, gr=NULL, hess=NULL, lower=lower, upper=upper, method=c("bobyqa"), itnmax=itnmax, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
