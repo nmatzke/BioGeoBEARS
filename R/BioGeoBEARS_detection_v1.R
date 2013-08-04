@@ -39,6 +39,48 @@ require("cladoRcpp")
 #' @examples
 #' testval=1
 #' 
+#' # soft-coded input files
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
+#' controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+#' 
+#' OTUnames=NULL
+#' areanames=NULL
+#' tmpskip=0
+#' phy=NULL
+#' 
+#' dtf = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
+#' dtf
+#' 
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+#' phy = read.tree(trfn)
+#' 
+#' dtf = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+#' dtf
+#' 
+#' 
+#' 
+#' 	
+#' # soft-coded input files
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
+#' controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+#' 
+#' OTUnames=NULL
+#' areanames=NULL
+#' tmpskip=0
+#' phy=NULL
+#' 
+#' dtf = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
+#' dtf
+#' 
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+#' phy = read.tree(trfn)
+#' 
+#' dtf = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+#' dtf
+#' 
+#' 
 read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
 	{
 	runjunk='
@@ -47,10 +89,14 @@ read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0
 	OTUnames=NULL
 	areanames=NULL
 	tmpskip=0
+	phy=NULL
+	
+	trfn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/Psychotria_5.2.newick"
+	phy = read.tree(trfn)
 	'
 	if (is.null(OTUnames) == TRUE)
 		{
-		dtf = read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
+		dtf = read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="\t", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
 		dtf
 		OTUnames = row.names(dtf)
 		} else {
@@ -71,6 +117,7 @@ read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0
 		{
 		tipranges_df_order = match(phy$tip.label, rownames(dtf))
 		dtf = dtf[tipranges_df_order, ]
+		OTUnames = OTUnames[tipranges_df_order]
 		}
 		
 	# Standardize and return
@@ -123,6 +170,48 @@ read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0
 #' @examples
 #' testval=1
 #' 
+#' # soft-coded input files
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
+#' controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+#' 
+#' OTUnames=NULL
+#' areanames=NULL
+#' tmpskip=0
+#' phy=NULL
+#' 
+#' dtf = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
+#' dtf
+#' 
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+#' phy = read.tree(trfn)
+#' 
+#' dtf = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+#' dtf
+#' 
+#' 
+#' 
+#' 	
+#' # soft-coded input files
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
+#' controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+#' 
+#' OTUnames=NULL
+#' areanames=NULL
+#' tmpskip=0
+#' phy=NULL
+#' 
+#' dtf = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
+#' dtf
+#' 
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+#' phy = read.tree(trfn)
+#' 
+#' dtf = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+#' dtf
+#' 
+#' 
 read_controls <- function(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
 	{
 	runjunk='
@@ -155,6 +244,7 @@ read_controls <- function(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0,
 		{
 		tipranges_df_order = match(phy$tip.label, rownames(dtf))
 		dtf = dtf[tipranges_df_order, ]
+		OTUnames = OTUnames[tipranges_df_order]
 		}
 	
 	# Standardize and return
@@ -1476,6 +1566,8 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 #' particular area.
 #' 
 #' @param states_list_0based_index A states_list, 0-based, e.g. from \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}}.
+#' @phy A phylogeny object is required by default.  This ensures that the tip likelihoods that are produced are in the same order as the tips.  The 
+#' user can skip this by setting \code{phy="none"}.
 #' @param numareas The number of areas being considered in the analysis. If \code{NULL} (default), this is calculated to be the maximum range length, or 
 #' one plus the maximum 0-based index in any of the ranges.
 #' @param detects_df A matrix/data.frame of detection counts, as produced from the output from \code{\link{read_detections}}.
@@ -1499,10 +1591,20 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 #' range is a null range (i.e., no areas occupied).  This is equivalent to saying that you are sure/are willing to assume that 
 #' the OTU exists somewhere in your study area, at the timepoint being considered.  Null ranges are identified by length=1, 
 #' containing NULL, NA, "", "_", etc.
-#' @param return_LnLs If \code{FALSE} (default), return exp(sum(LnLs of data in each area)), i.e. the likelihood of the data, 
-#' non-logged. If \code{TRUE}, return the LnLs of the data in each area.
-#' @return \code{tip_condlikes_of_data_on_each_state} The (non-logged!) likelihood of the data for each tip, given each possible range, and the 
+#' @param return_LnLs Passed to \code{\link{Pdata_given_rangerow}}. If \code{FALSE}, \code{\link{Pdata_given_rangerow}} returns 
+#' \code{exp(sum(LnLs of data in each area))}, i.e. the likelihood of the data, 
+#' non-logged. If \code{TRUE} (default), \code{\link{Pdata_given_rangerow}} returns the LnLs of the data in each area.  \code{FALSE} is 
+#' handy for examples, \code{TRUE} is safer for large computations/functions where underflow is a possibility.
+#' @relative_LnLs Default \code{TRUE}. If \code{return_LnLs==TRUE}, then \code{relative_LnLs} says whether or not to subtract the maximum LnL from
+#' each row of the (logged) tip conditional likelihoods. This effectively sets the state that confers the highest likelihood on the data to 
+#' LnL=0, which translates to likelihood 1 of the data under that state in normal space (note that this is different than the probability of states; 
+#' see Felsenstein 2004).  This relative scaling should not effect results, but may help avoid underflow.
+#' @param exp_LnLs Default \code{TRUE}. If \code{return_LnLs==TRUE}, then, if \code{exp_LnLs==TRUE}, the final tip log-likelihoods are exponentiated to
+#' convert back to normal probability space before returning to the user.
+#' @return \code{tip_condlikes_of_data_on_each_state} The (logged, or non-logged!) likelihood of the data for each tip, given each possible range, and the 
 #' detection model parameters.
+#' @param error_check If \code{TRUE} (default), then the tip data conditional likelihoods are summed for each row, and if any row/tip has a total likelihood of
+#' 0, an error is thrown.  Relevant only if the function is returning regular likelihoods, not log-likelihoods.
 #' @export
 #' @seealso \code{\link{Pdata_given_rangerow}}, \code{\link{calc_obs_like}}, \code{\link[base]{mapply}}, \code{\link{read_detections}}, \code{\link{read_controls}}
 #' @note Go BEARS!
@@ -1519,26 +1621,53 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 #' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 #' detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
 #' controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 #' 
 #' detects_df = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0)
 #' controls_df = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0)
+#' phy = read.tree(trfn)
 #' 
 #' # Calculate the likelihood of the data at each tip, for each possible geographic range
 #' numareas = 4
-#' tmpranges = list(c(0), c(1), c(0,1))
+#' states_list_0based_index = rcpp_areas_list_to_states_list(areas=LETTERS[1:numareas], maxareas=numareas, include_null_range=TRUE)
 #' 
 #' mean_frequency=0.1
 #' dp=1
 #' fdp=0
 #' 
+#' # This is returning the raw, un-scaled, un-logged likelihoods; it is safer to use the log likelihoods
+#' # (from which the max is substracted, and exp(LnL) is performed) in actual code, due to 
+#' # underflow issues.
+#' null_range_gets_0_like=TRUE; return_LnLs=FALSE; relative_LnLs=FALSE; exp_LnLs=FALSE; error_check=TRUE
+#' 
+#' 
 #' tip_condlikes_of_data_on_each_state = 
-#' tiplikes_wDetectionModel(states_list_0based_index=tmpranges, numareas=numareas, 
-#' detects_df, controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, 
-#' null_range_gets_0_like=TRUE)
+#' tiplikes_wDetectionModel(states_list_0based_index=states_list_0based_index, phy=phy, numareas=numareas, 
+#' detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, 
+#' null_range_gets_0_like=TRUE, return_LnLs=FALSE, relative_LnLs=FALSE, exp_LnLs=FALSE, error_check=TRUE)
 #' 
 #' tip_condlikes_of_data_on_each_state
 #' 
-tiplikes_wDetectionModel <- function(states_list_0based_index, numareas=NULL, detects_df, controls_df, mean_frequency=0.1, dp=1, fdp=0, null_range_gets_0_like=TRUE, return_LnLs=TRUE)
+#' 
+#' 
+#' # Do it in log space, with scale so that max LnL = 0, max likelihood = 1
+#' 
+#' null_range_gets_0_like=TRUE; return_LnLs=TRUE; relative_LnLs=TRUE; exp_LnLs=TRUE; error_check=TRUE
+#' 
+#' tip_condlikes_of_data_on_each_state_scaled = 
+#' tiplikes_wDetectionModel(states_list_0based_index=states_list_0based_index, phy=phy, numareas=numareas, 
+#' detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, 
+#' null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)
+#' 
+#' tip_condlikes_of_data_on_each_state_scaled
+#' 
+#' 
+#' tip_condlikes_of_data_on_each_state_scaled
+#' tip_condlikes_of_data_on_each_state
+#' tip_condlikes_of_data_on_each_state_scaled - tip_condlikes_of_data_on_each_state
+#' 
+#' 
+tiplikes_wDetectionModel <- function(states_list_0based_index, phy, numareas=NULL, detects_df, controls_df, mean_frequency=0.1, dp=1, fdp=0, null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)
 	{
 	runjunk='
 	controls_fn = "/Library/Frameworks/R.framework/Versions/2.15/Resources/library/BioGeoBEARS/extdata/Psychotria_controls_v1.txt"
@@ -1616,6 +1745,52 @@ tiplikes_wDetectionModel <- function(states_list_0based_index, numareas=NULL, de
 	tip_condlikes_of_data_on_each_state
 
 
+
+	# Post-calculation edits
+	# Make log-likelihoods relative to the maximum? (I.e., set the maximum to 0?)
+	if ((return_LnLs==TRUE) && (relative_LnLs==TRUE))
+		{
+		tip_condlikes_of_data_on_each_state_LnL = tip_condlikes_of_data_on_each_state
+		maxlike_each_row = apply(X=tip_condlikes_of_data_on_each_state_LnL, MARGIN=1, max)
+		tip_condlikes_of_data_on_each_state_LnL = tip_condlikes_of_data_on_each_state_LnL - maxlike_each_row
+		tip_condlikes_of_data_on_each_state = tip_condlikes_of_data_on_each_state_LnL
+		}
+	if ((return_LnLs==TRUE) && (exp_LnLs==TRUE))
+		{
+		tip_condlikes_of_data_on_each_state = exp(tip_condlikes_of_data_on_each_state)
+		# > rowSums(tip_condlikes_of_data_on_each_state)
+		# [1]  1  1  1  1  1  1  1  1  1  1  1  1  1 64 64 64 64 64  1  1  1  1  1
+		}
+
+	# May be kinda slow, so make optional
+	if (error_check == TRUE)
+		{
+		# Only do, if likelihoods in regular space
+		if ( ((return_LnLs==TRUE) && (exp_LnLs==TRUE)) || (return_LnLs==FALSE) )
+			{
+			# Error check
+			sums = rowSums(tip_condlikes_of_data_on_each_state)
+			tiplike_sums_to_0_TF = sums <= 0
+		
+			if (sum(tiplike_sums_to_0_TF) > 0)
+				{
+				stoptxt = "\nFATAL ERROR in tiplikes_wDetectionModel(): Some tiplikes sum to 0!!!\n"
+				cat(stoptxt)
+				print((1:length(tiplike_sums_to_0_TF))[tiplike_sums_to_0_TF])
+				print(tip_condlikes_of_data_on_each_state[tiplike_sums_to_0_TF, ])
+				stop(stoptxt)
+				}
+			}
+		}
+
+
+	#######################################################
+	# MAKE SURE THE TIP LIKELIHOODS ARE IN TREE TIP ORDER!!!!
+	#######################################################
+	# Make sure the letter code ranges are in the same order as the 
+	# phylogeny tips
+	tipranges_df_order = match(phy$tip.label, rownames(detects_df))
+	tip_condlikes_of_data_on_each_state = tip_condlikes_of_data_on_each_state[tipranges_df_order, ]
 
 	return(tip_condlikes_of_data_on_each_state)
 	}

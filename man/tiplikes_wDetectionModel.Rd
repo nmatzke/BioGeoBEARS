@@ -2,10 +2,12 @@
 \alias{tiplikes_wDetectionModel}
 \title{Calculate probability of detection data for each OTU at each range in a list of states/geographic ranges}
 \usage{
-  tiplikes_wDetectionModel(states_list_0based_index,
+  tiplikes_wDetectionModel(states_list_0based_index, phy,
     numareas = NULL, detects_df, controls_df,
     mean_frequency = 0.1, dp = 1, fdp = 0,
-    null_range_gets_0_like = TRUE, return_LnLs = TRUE)
+    null_range_gets_0_like = TRUE, return_LnLs = TRUE,
+    relative_LnLs = TRUE, exp_LnLs = TRUE,
+    error_check = TRUE)
 }
 \arguments{
   \item{states_list_0based_index}{A states_list, 0-based,
@@ -71,15 +73,33 @@
   ranges are identified by length=1, containing NULL, NA,
   "", "_", etc.}
 
-  \item{return_LnLs}{If \code{FALSE} (default), return
-  exp(sum(LnLs of data in each area)), i.e. the likelihood
-  of the data, non-logged. If \code{TRUE}, return the LnLs
-  of the data in each area.}
+  \item{return_LnLs}{Passed to
+  \code{\link{Pdata_given_rangerow}}. If \code{FALSE},
+  \code{\link{Pdata_given_rangerow}} returns
+  \code{exp(sum(LnLs of data in each area))}, i.e. the
+  likelihood of the data, non-logged. If \code{TRUE}
+  (default), \code{\link{Pdata_given_rangerow}} returns the
+  LnLs of the data in each area.  \code{FALSE} is handy for
+  examples, \code{TRUE} is safer for large
+  computations/functions where underflow is a possibility.}
+
+  \item{exp_LnLs}{Default \code{TRUE}. If
+  \code{return_LnLs==TRUE}, then, if \code{exp_LnLs==TRUE},
+  the final tip log-likelihoods are exponentiated to
+  convert back to normal probability space before returning
+  to the user.}
+
+  \item{error_check}{If \code{TRUE} (default), then the tip
+  data conditional likelihoods are summed for each row, and
+  if any row/tip has a total likelihood of 0, an error is
+  thrown.  Relevant only if the function is returning
+  regular likelihoods, not log-likelihoods.}
 }
 \value{
-  \code{tip_condlikes_of_data_on_each_state} The
-  (non-logged!) likelihood of the data for each tip, given
-  each possible range, and the detection model parameters.
+  \code{tip_condlikes_of_data_on_each_state} The (logged,
+  or non-logged!) likelihood of the data for each tip,
+  given each possible range, and the detection model
+  parameters.
 }
 \description{
   This function calculates P(data|range,dp), i.e. the
@@ -123,24 +143,50 @@ testval=1
 extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
 controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
 
 detects_df = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0)
 controls_df = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0)
+phy = read.tree(trfn)
 
 # Calculate the likelihood of the data at each tip, for each possible geographic range
 numareas = 4
-tmpranges = list(c(0), c(1), c(0,1))
+states_list_0based_index = rcpp_areas_list_to_states_list(areas=LETTERS[1:numareas], maxareas=numareas, include_null_range=TRUE)
 
 mean_frequency=0.1
 dp=1
 fdp=0
 
+# This is returning the raw, un-scaled, un-logged likelihoods; it is safer to use the log likelihoods
+# (from which the max is substracted, and exp(LnL) is performed) in actual code, due to
+# underflow issues.
+null_range_gets_0_like=TRUE; return_LnLs=FALSE; relative_LnLs=FALSE; exp_LnLs=FALSE; error_check=TRUE
+
+
 tip_condlikes_of_data_on_each_state =
-tiplikes_wDetectionModel(states_list_0based_index=tmpranges, numareas=numareas,
-detects_df, controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp,
-null_range_gets_0_like=TRUE)
+tiplikes_wDetectionModel(states_list_0based_index=states_list_0based_index, phy=phy, numareas=numareas,
+detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp,
+null_range_gets_0_like=TRUE, return_LnLs=FALSE, relative_LnLs=FALSE, exp_LnLs=FALSE, error_check=TRUE)
 
 tip_condlikes_of_data_on_each_state
+
+
+
+# Do it in log space, with scale so that max LnL = 0, max likelihood = 1
+
+null_range_gets_0_like=TRUE; return_LnLs=TRUE; relative_LnLs=TRUE; exp_LnLs=TRUE; error_check=TRUE
+
+tip_condlikes_of_data_on_each_state_scaled =
+tiplikes_wDetectionModel(states_list_0based_index=states_list_0based_index, phy=phy, numareas=numareas,
+detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp,
+null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)
+
+tip_condlikes_of_data_on_each_state_scaled
+
+
+tip_condlikes_of_data_on_each_state_scaled
+tip_condlikes_of_data_on_each_state
+tip_condlikes_of_data_on_each_state_scaled - tip_condlikes_of_data_on_each_state
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

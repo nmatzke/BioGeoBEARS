@@ -193,39 +193,19 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 	# Get the detection model
 	if (BioGeoBEARS_run_object$use_detection_model == TRUE)
 		{
-		mf = BioGeoBEARS_model_object@params_table["mf","est"]
-		dp = BioGeoBEARS_model_object@params_table["dp","est"]
-		fdp = BioGeoBEARS_model_object@params_table["fdp","est"]
-
 		# Calculate the initial tip likelihoods, using the detection model
 		# Assumes correct order, double-check this
 		numareas = length(areas)
 		detects_df = BioGeoBEARS_run_object$detects_df
 		controls_df = BioGeoBEARS_run_object$controls_df
+		mean_frequency = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mf", "init"]
+		dp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["dp", "init"]
+		fdp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["fdp", "init"]
 		
 		# return_LnLs=TRUE ensures no under-flow
-		tip_condlikes_of_data_on_each_state_LnL = tiplikes_wDetectionModel(states_list_0based_index=states_list, numareas, detects_df, controls_df, mean_frequency=mf, dp=dp, fdp=fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE)
-		tip_condlikes_of_data_on_each_state_LnL
-
-		maxlike_each_row = apply(X=tip_condlikes_of_data_on_each_state_LnL, MARGIN=1, max)
-		tip_condlikes_of_data_on_each_state_LnL = tip_condlikes_of_data_on_each_state_LnL - maxlike_each_row
-				
-		tip_condlikes_of_data_on_each_state = exp(tip_condlikes_of_data_on_each_state_LnL)
-		
-		# Error check
-		sums = rowSums(tip_condlikes_of_data_on_each_state)
-		tiplike_sums_to_0_TF = sums <= 0
-		
-		if (sum(tiplike_sums_to_0_TF) > 0)
-			{
-			stoptxt = "\nFATAL ERROR: Some tiplikes sum to 0!!!\n"
-			cat(stoptxt)
-			print((1:length(tiplike_sums_to_0_TF))[tiplike_sums_to_0_TF])
-			print(tip_condlikes_of_data_on_each_state[tiplike_sums_to_0_TF, ])
-			stop(stoptxt)
-			}
+		tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, phy=phy, numareas=numareas, detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)
 		}
-	tip_condlikes_of_data_on_each_state
+	#print(tip_condlikes_of_data_on_each_state)
 
 
 
@@ -466,42 +446,15 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run())
 		# Calculate the initial tip likelihoods, using the detection model
 		# Assumes correct order, double-check this
 		numareas = length(areas)
-		detects_df = read_detections(BioGeoBEARS_run_object$detects_fn)
-		controls_df = read_controls(BioGeoBEARS_run_object$controls_fn)
-		BioGeoBEARS_run_object$detects_df = detects_df
-		BioGeoBEARS_run_object$controls_df = controls_df
+		detects_df = BioGeoBEARS_run_object$detects_df
+		controls_df = BioGeoBEARS_run_object$controls_df
 		mean_frequency = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mf", "init"]
 		dp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["dp", "init"]
 		fdp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["fdp", "init"]
 		
 		# return_LnLs=TRUE ensures no under-flow
-		tip_condlikes_of_data_on_each_state_LnL = tiplikes_wDetectionModel(states_list_0based_index=states_list, numareas, detects_df, controls_df, mean_frequency, dp, fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE)
-		tip_condlikes_of_data_on_each_state_LnL
-
-		maxlike_each_row = apply(X=tip_condlikes_of_data_on_each_state_LnL, MARGIN=1, max)
-		tip_condlikes_of_data_on_each_state_LnL = tip_condlikes_of_data_on_each_state_LnL - maxlike_each_row
-		
-		tip_condlikes_of_data_on_each_state = exp(tip_condlikes_of_data_on_each_state_LnL)
-		
-		# For Assassin spiders, this produces:
-		# rowSums(tip_condlikes_of_data_on_each_state)
-		# 1  1  1  1  1  1  1  1  1  1  1  1  1 64 64 64 64 64  1  1  1  1  1
-		
-		# Error check
-		sums = rowSums(tip_condlikes_of_data_on_each_state)
-		tiplike_sums_to_0_TF = sums <= 0
-		
-		if (sum(tiplike_sums_to_0_TF) > 0)
-			{
-			stoptxt = "\nFATAL ERROR: Some tiplikes sum to 0!!!\n"
-			cat(stoptxt)
-			print((1:length(tiplike_sums_to_0_TF))[tiplike_sums_to_0_TF])
-			print(tip_condlikes_of_data_on_each_state[tiplike_sums_to_0_TF, ])
-			stop(stoptxt)
-			}
+		tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, phy=phy, numareas=numareas, detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)
 		}
-	tip_condlikes_of_data_on_each_state
-
 	#print(tip_condlikes_of_data_on_each_state)
 
 

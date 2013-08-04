@@ -58,6 +58,47 @@
 }
 \examples{
 testval=1
+
+# soft-coded input files
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
+controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+
+OTUnames=NULL
+areanames=NULL
+tmpskip=0
+phy=NULL
+
+dtf = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
+dtf
+
+trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+phy = read.tree(trfn)
+
+dtf = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+dtf
+
+
+
+
+# soft-coded input files
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+detects_fn = np(paste(extdata_dir, "/Psychotria_detections_v1.txt", sep=""))
+controls_fn = np(paste(extdata_dir, "/Psychotria_controls_v1.txt", sep=""))
+
+OTUnames=NULL
+areanames=NULL
+tmpskip=0
+phy=NULL
+
+dtf = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
+dtf
+
+trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+phy = read.tree(trfn)
+
+dtf = read_controls(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
+dtf
 }
 \author{
   Nicholas J. Matzke \email{matzke@berkeley.edu}

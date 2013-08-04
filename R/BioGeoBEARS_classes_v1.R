@@ -1933,6 +1933,120 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE)
 		
 		} # End time check	
 
+
+
+	#######################################################
+	# Check detections file
+	#######################################################
+	if (inputs$use_detection_model == TRUE)
+		{
+		# Check that the files exist and have been loaded
+		if (is.character(inputs$detects_fn) == FALSE)
+			{
+			stoptxt = paste("\n\nFATAL ERROR: You have $use_detection_model set to TRUE, but you have no \n",
+			"detections text file given in '$detects_fn'!\n\n", sep="")
+			cat(stoptxt)
+			stop(stoptxt)
+			} else {
+			# You have a file, so check if it is loaded
+			if (class(inputs$detects_df) != "data.frame")
+				{
+				stoptxt = paste("\n\nFATAL ERROR: You have referenced a detections text file given in '$detects_fn' at:\n\n",
+				inputs$detects_fn, "\n",
+				"\n...but 'inputs$detects_df' is not a data.frame, perhaps empty!\n\n",
+				"You should use 'readfiles_BioGeoBEARS_run()' to load these files.\n\n", 
+				"Printing inputs$detects_df below:\n\n",
+				"inputs$detects_df = \n\n", sep="")
+				
+				cat(stoptxt)
+				print(inputs$detects_df)
+				stop(stoptxt)				
+				}
+			
+			# Check the order of the table rownames
+			tr = read.tree(inputs$trfn)
+			tipnames = tr$tip.label
+			
+			table_rownames = row.names(inputs$detects_df)
+			
+			TF = table_rownames == tipnames
+			if (sum(TF) != length(TF))
+				{
+				stoptxt = paste("\n\nFATAL ERROR: the rownames in inputs$detects_df do not match the tip.labels in tr$tip.labels!!\n\n",
+				"Printing both below:\n\n", sep="")
+				
+				cat(stoptxt)
+				print("tipnames:")
+				print(tipnames)
+
+				print("table_rownames:")
+				print(table_rownames)
+				
+				print("match TF:")
+				print(TF)
+				
+				stop(stoptxt)
+				}
+			}
+		}
+
+	#######################################################
+	# Check controls file
+	#######################################################
+	if (inputs$use_detection_model == TRUE)
+		{
+		# Check that the files exist and have been loaded
+		if (is.character(inputs$controls_fn) == FALSE)
+			{
+			stoptxt = paste("\n\nFATAL ERROR: You have $use_detection_model set to TRUE, but you have no \n",
+			"taphonomic controls text file given in '$controls_fn'!\n\n", sep="")
+			cat(stoptxt)
+			stop(stoptxt)
+			} else {
+			# You have a file, so check if it is loaded
+			if (class(inputs$controls_df) != "data.frame")
+				{
+				stoptxt = paste("\n\nFATAL ERROR: You have referenced a taphonomic controls text file given in '$controls_fn' at:\n\n",
+				inputs$controls_fn, "\n",
+				"\n...but 'inputs$controls_df' is not a data.frame, perhaps empty!\n\n",
+				"You should use 'readfiles_BioGeoBEARS_run()' to load these files.\n\n", 
+				"Printing inputs$controls_df below:\n\n",
+				"inputs$controls_df = \n\n", sep="")
+				
+				cat(stoptxt)
+				print(inputs$controls_df)
+				stop(stoptxt)				
+				}
+			
+			# Check the order of the table rownames
+			tr = read.tree(inputs$trfn)
+			tipnames = tr$tip.label
+			
+			table_rownames = row.names(inputs$controls_df)
+			
+			TF = table_rownames == tipnames
+			if (sum(TF) != length(TF))
+				{
+				stoptxt = paste("\n\nFATAL ERROR: the rownames in inputs$controls_df do not match the tip.labels in tr$tip.labels!!\n\n",
+				"Printing both below:\n\n", sep="")
+				
+				cat(stoptxt)
+				print("tipnames:")
+				print(tipnames)
+
+				print("table_rownames:")
+				print(table_rownames)
+				
+				print("match TF:")
+				print(TF)
+				
+				stop(stoptxt)
+				}
+			}
+		}
+
+
+
 	return(TRUE)
 	}
 

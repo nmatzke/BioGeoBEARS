@@ -2757,6 +2757,33 @@ calc_loglike_for_optim_stratified <- function(params, BioGeoBEARS_run_object, ph
 # 	spPmat_inputs$maxent01y_param = maxent01y_param
 # 
 
+
+
+
+
+	#######################################################
+	# Get the detection model
+	#######################################################
+	if (BioGeoBEARS_run_object$use_detection_model == TRUE)
+		{
+		mean_frequency = BioGeoBEARS_model_object@params_table["mf","est"]
+		dp = BioGeoBEARS_model_object@params_table["dp","est"]
+		fdp = BioGeoBEARS_model_object@params_table["fdp","est"]
+
+		# Calculate the initial tip likelihoods, using the detection model
+		# Assumes correct order, double-check this
+		numareas = length(areas)
+		detects_df = BioGeoBEARS_run_object$detects_df
+		controls_df = BioGeoBEARS_run_object$controls_df
+		
+		# return_LnLs=TRUE ensures no under-flow
+		tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, phy=phy, numareas=numareas, detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)
+		}
+
+
+
+
+
 	if (print_optim == TRUE)
 		{
 		#outvars = as.data.frame(t(BioGeoBEARS_model_object@params_table$est))

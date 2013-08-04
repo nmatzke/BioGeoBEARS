@@ -6,6 +6,16 @@ NEW FEATURES
     
     o better summary plot to screen for section_the_tree (and better double-checking / 
       error check of this)
+      
+    o tiplikes_wDetectionModel returns scaled raw likelihoods if desired
+
+    o tiplikes_wDetectionModel returns likelihoods normalized by the maximum (i.e., some 
+      state gives likelihood=1 to the data, or LnL=0). This may help prevent underflow 
+      issues for large datasets
+
+    o tiplikes_wDetectionModel error check now internalized
+    
+    o tiplikes_wDetectionModel Now an option in both unstratified and stratified analyses
 
 BUG FIXES
 
@@ -16,7 +26,7 @@ BUG FIXES
 
 OTHER CHANGES
 
-    o none
+    o  
     
 
 
