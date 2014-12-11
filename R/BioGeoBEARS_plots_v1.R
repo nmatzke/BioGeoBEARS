@@ -419,10 +419,6 @@ get_colors_for_numareas = function(numareas, use_rainbow=FALSE)
 		{
 		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")
 		}
-	if (numareas == 7)
-		{
-		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")
-		}
 	if (numareas > 7)
 		{
 		area_colors = col2rgb(rainbow(numareas))
