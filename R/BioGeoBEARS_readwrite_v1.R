@@ -159,16 +159,26 @@ get_APE_nodenums <- function(tr)
 #' nodelabels(node=20:37, downpass_node_matrix[,2])
 #' tiplabels(1:19)
 #' 
+#' # Ape node numbers
 #' downpass_node_matrix = get_lagrange_nodenums(tr)
 #' downpass_node_matrix = downpass_node_matrix[order(downpass_node_matrix[,1]), ]
 #' plot(tr)
 #' nodelabels(node=20:37, downpass_node_matrix[,1])
 #' tiplabels(1:19)
+#' title("Ape node numbers")
 #' 
-#' # THIS WORKS
+#' # THIS WORKS to produce C++ LAGRANGE node numbers
+#' # C++ LAGRANGE node numbers
 #' plot(tr)
 #' nodelabels(node=20:37, downpass_node_matrix[,2])
-#' tiplabels(1:19)
+#' title("C++ LAGRANGE node numbers")
+#' 
+#' # Python LAGRANGE node numbers
+#' plot(tr)
+#' ntips = length(tr$tip.label)
+#' python_lg_nodenums = ntips + downpass_node_matrix[,2]
+#' nodelabels(node=20:37, python_lg_nodenums)
+#' title("Python LAGRANGE node numbers")
 #' 
 get_lagrange_nodenums <- function(tr)
 	{
@@ -191,7 +201,7 @@ get_lagrange_nodenums <- function(tr)
 	#tr$edge[,2] = rev(tr$edge[,2])
 	
 	
-	# Perhaps, the pairs of nodes are numbered in order
+	# I think the pairs of nodes are numbered in order
 	i = 1
 	edges_to_visit = seq(from=1, by=2, length.out=tr$Nnode)
 
@@ -241,6 +251,21 @@ get_lagrange_nodenums <- function(tr)
 #' 
 LGpy_splits_fn_to_table <- function(splits_fn)
 	{
+	# NOTE: This function crashes if options(stringsAsFactors = TRUE)
+	#
+	# I have this line in my .Rprofile file, hosted in my home
+	# directory on my Mac:
+	#
+	# 
+	# Turn off all BS stringsAsFactors silliness
+	# options(stringsAsFactors = FALSE)
+	#
+	# But I am also using it here just to fix the problem for
+	# everybody:
+	options(stringsAsFactors = FALSE)
+	
+	
+	
 	splits = read.table(splits_fn)
 	names(splits) = c("nodenum_LGpy", "splits", "LnL", "relprob")
 	
@@ -249,7 +274,15 @@ LGpy_splits_fn_to_table <- function(splits_fn)
 	leftright = t(sapply(X=splits$splits, FUN=strsplit2, split="\\|"))
 	row.names(leftright)=NULL
 	#leftright = as.data.frame(leftright)
-	leftright = as.data.frame(leftright[,c(2,1)])
+	
+	if (nrow(leftright) > 1)
+		{
+		leftright = as.data.frame(leftright[,c(2,1)])
+		} else {
+		leftright = leftright[,c(2,1)]
+		leftright = matrix(leftright, nrow=1)
+		leftright = as.data.frame(leftright)
+		}
 
 	# "BB" means "branch bottom"
 	names(leftright) = c("leftBB", "rightBB")
@@ -359,6 +392,9 @@ LGcpp_splits_fn_to_table2 <- function(splits_fn)
 #' See \code{\link{get_lagrange_nodenums}} for connecting these node numbers to APE node numbers.
 #' 
 #' @param splits A data.frame containing the node numbers, splits, and split probabilities.
+#' @param merge_states_with Default NULL, which means if a tie occurs in a node 
+#' reconstruction, the first in the list is taken. If merge_states_with=",", they
+#' will be merged with a comma, etc.
 #' @return \code{MLsplits} A data.frame containing the node numbers, ML splits, and split probabilities.
 #' @export
 #' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
@@ -373,7 +409,7 @@ LGcpp_splits_fn_to_table2 <- function(splits_fn)
 #' @examples
 #' test=1
 #' 
-LGpy_MLsplit_per_node <- function(splits)
+LGpy_MLsplit_per_node <- function(splits, merge_states_with=NULL)
 	{
 	unique_nodenums = unique(splits$nodenum_ORD1)
 	
@@ -388,10 +424,21 @@ LGpy_MLsplit_per_node <- function(splits)
 		
 		# Find the (first) maxrow
 		max_LnL = max(tmptable$LnL)
+		
 		nums = 1:nrow(tmptable)
 		maxTF = tmptable$LnL == max_LnL
 		num = nums[maxTF][1]
 		tmprow = tmptable[num, ]
+
+		# If you want to merge maxprob ties with a character
+		if (is.null(merge_states_with) == FALSE)
+			{
+			if (sum(maxTF) > 1)
+				{
+				newsplit_txt = paste(tmptable$splits[maxTF], sep="", collapse=merge_states_with)
+				}
+			tmprow$splits[1] = newsplit_txt
+			}
 		
 		MLsplits[i, ] = unlist(tmprow)
 		}
@@ -568,10 +615,17 @@ get_sister_node <- function(tr, nodepair)
 #' 
 get_all_daughter_tips_of_a_node <- function(nodenum, t)
 	{
-	subtree = extract.clade(t, nodenum)
-	temp_tips = subtree$tip.label
+	# If it's a tip node, just return that tip label
+	if (nodenum <= length(t$tip.label))
+		{
+		temp_tips = t$tip.label[nodenum]
+		} else {
+		subtree = extract.clade(t, nodenum)
+		temp_tips = subtree$tip.label
+		} # END if (nodenum <= length(t$tip.label))
 	return(temp_tips)
-	}
+	} # END get_all_daughter_tips_of_a_node()
+
 
 
 
@@ -711,13 +765,17 @@ get_MLsplitprobs_from_results <- function(results_object)
 	# (These are marginal, rather than joint probs; but not local optima)
 	#######################################################
 	
-	ML_marginal_prob_each_split_at_branch_bottom_BELOW_node = results_object$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS * results_object$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS
-
-	results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node = ML_marginal_prob_each_split_at_branch_bottom_BELOW_node / rowSums(ML_marginal_prob_each_split_at_branch_bottom_BELOW_node)
+	ML_marginal_prob_each_split_at_branch_bottom_BELOW_node = results_object$ML_marginal_prob_each_state_at_branch_bottom_below_node
 	
-	results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node
-	rowSums(results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node)
-		
+	# Probably unnecessary
+	#results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node = ML_marginal_prob_each_split_at_branch_bottom_BELOW_node / rowSums(ML_marginal_prob_each_split_at_branch_bottom_BELOW_node)
+	
+	#results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node
+	#rowSums(results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node)
+	
+	# This is all you need (just re-labeling; CUT NJM)
+	results_object$ML_marginal_prob_each_split_at_branch_bottom_BELOW_node = results_object$ML_marginal_prob_each_state_at_branch_bottom_below_node
+	
 	return(results_object)
 	}
 
@@ -732,9 +790,7 @@ get_MLsplitprobs_from_results <- function(results_object)
 #' This table shows the Right, then Left, descendant nodenums for each node. This
 #' gets used later to plot splits at corners.
 #' 
-#' @param tr An ape phylo object
-#' @param results_object The results from a BioGeoBEARS ML search.
-#' @param nodes A list of internal node numbers for tree \code{tr}.
+#' @param tr An APE phylo object
 #' @return leftright_nodes_matrix A table with the Right, the Left, nodes
 #' @export
 #' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{LGcpp_splits_fn_to_table}}
@@ -749,12 +805,37 @@ get_MLsplitprobs_from_results <- function(results_object)
 #' @examples
 #' test=1
 #' 
-get_leftright_nodes_matrix_from_results <- function(tr, results_object, nodes)
+get_leftright_nodes_matrix_from_results <- function(tr)
 	{
 	#######################################################
 	# Get the marginal probs of the splits (global ML probs, not local)
 	# (These are marginal, rather than joint probs; but not local optima)
 	#######################################################
+
+
+	# NOTE: FOR TREE ITERATIONS, YOU HAVE TO SWITCH
+	# LEFT AND RIGHT, WHICH IS DIFFERENT THAN
+	# FOR GRAPHING:
+
+	# # Add the right and left descendant node numbers
+	# leftright_nodes_matrix = get_leftright_nodes_matrix_from_results(phy2)
+	# 
+	# left_desc_nodes = rep(NA, nrow(trtable))
+	# right_desc_nodes = rep(NA, nrow(trtable))
+	# 
+	# # dcorner = descendant corner (i.e. right after speciation)
+	# samp_LEFT_dcorner = rep(NA, nrow(trtable))
+	# samp_RIGHT_dcorner = rep(NA, nrow(trtable))
+	# 
+	# trtable = cbind(trtable, left_desc_nodes, right_desc_nodes, samp_LEFT_dcorner, samp_RIGHT_dcorner)
+	# trtable$left_desc_nodes[nodenums] = leftright_nodes_matrix$right
+	# trtable$right_desc_nodes[nodenums] = leftright_nodes_matrix$left
+	# trtable[nodenums,]
+
+
+	# Basic tree info
+	tips = 1:length(tr$tip.label)
+	nodes = (length(tr$tip.label)+1):(length(tr$tip.label)+tr$Nnode)
 		
 	# Make a splits table
 	tr_table = prt(tr, printflag=FALSE)
@@ -764,7 +845,8 @@ get_leftright_nodes_matrix_from_results <- function(tr, results_object, nodes)
 	leftright_nodes_matrix = matrix(data=unlist(daughter_nds), ncol=2, byrow=TRUE)
 	leftright_nodes_matrix = as.data.frame(leftright_nodes_matrix)
 	names(leftright_nodes_matrix) = c("right", "left")
-			
+	rownames(leftright_nodes_matrix) = nodes
+	
 	return(leftright_nodes_matrix)
 	}
 
@@ -1062,7 +1144,13 @@ postorder_nodes_phylo4_return_table <- function(tr4)
 	
 	
 	# Get postorder numbering, DIVA-style
-	ntips = summary(tr4)$nb.tips
+	# Old: causes error: 
+	# "Error: $ operator is invalid for atomic vectors"
+	# ntips = summary(tr4)$nb.tips
+	
+	# New:
+	summary_tr4 = summary(tr4)
+	ntips = summary_tr4$nb.tips
 	
 	DIVA_postorder = ntips+postorder
 	
@@ -1171,308 +1259,6 @@ nodenums_bottom_up <- function(tr)
 	
 	return(old2new_nodes_table)
 	}
-
-
-
-#######################################################
-# get_nodenums
-#######################################################
-#' Get the unique node numbers in a tree
-#' 
-#' This is a utility function for \code{\link{get_nodenum_structural_root}}.
-#'
-#' @param t A tree object in \code{\link[ape]{phylo}} format.
-#' @return \code{ordered_nodenames} The node numbers, in order.
-#' @export
-#' @seealso \code{\link[ape]{phylo}}, \code{\link{get_nodenum_structural_root}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' blah = 1
-# this returns the NUMBERS identifying each node
-get_nodenums <- function(t)
-	{
-	# get just the unique node numbers from the edge list (left column: start node; right column: end node):
-	nodenames = unique(c(t$edge))
-	ordered_nodenames = nodenames[order(nodenames)]
-	return(ordered_nodenames)
-	}
-
-#######################################################
-# get_nodenum_structural_root
-#######################################################
-#' Gets the root node 
-#' 
-#' This function gets the root node by finding the node not in the descendants list (edge[,2]). This
-#' may be more reliable than e.g. assuming length(tr$tip.label)+1.
-#'
-#' @param t A tree object in \code{\link[ape]{phylo}} format.
-#' @param print_nodenum Print the node numbers as you go through the list? Default FALSE.
-#' @return \code{root_nodenums_list} 
-#' @export
-#' @seealso \code{\link[ape]{phylo}}, \code{\link{get_nodenums}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' blah=1
-#' 
-get_nodenum_structural_root <- function(t, print_nodenum=FALSE)
-	{
-	#numnodes = length(t$tip.label) + length(t$node.label)
-	#ordered_nodes = 1:length(numnodes)
-	
-	ordered_nodes = get_nodenums(t)
-
-	root_nodenums_list = c()
-	for (n in 1:length(ordered_nodes))
-		{
-		tmpnode = ordered_nodes[n]
-		if (tmpnode %in% t$edge[,2])
-			{
-			blah = TRUE
-			}
-		else
-			{
-			if (print_nodenum == TRUE)
-				{
-				cat("get_nodenum_structural_root(): Root nodenum = ", tmpnode, sep="")
-				}
-			root_nodenums_list = c(root_nodenums_list, tmpnode)
-			}
-		}
-	return(root_nodenums_list)
-	}
-
-
-
-
-
-# print tree in hierarchical format
-#######################################################
-# prt
-#######################################################
-#' Print tree in table format
-#' 
-#' Learning and using APE's tree structure can be difficult and confusing because much of the information is
-#' implicit.  This function prints the entire
-#' tree to a table, and makes much of the implicit information explicit.  It is not particularly fast, but
-#' it is useful.
-#'
-#' See \url{http://ape.mpl.ird.fr/ape_development.html} for the official documentation of R tree objects.
-#' 
-#' @param t A \code{\link[ape]{phylo}} tree object.
-#' @param printflag Should the table be printed to screen?  Default TRUE.
-#' @param relabel_nodes Manually renumber the internal nodes, if desired. Default FALSE.
-#' @param time_bp_digits The number of digits to print in the time_bp (time before present) column. Default=7.
-#' @param add_root_edge Should a root edge be added?  Default \code{TRUE}.
-#' @param get_tipnames Should the list of tipnames descending from each node be printed as a string in another column?  
-#' This is slow-ish, but useful for matching up nodes between differing trees. Default \code{FALSE}.
-#' @param fossils_older_than Tips that are older than \code{fossils_older_than} will be marked as \code{TRUE} in a column called \code{fossil}.
-#' This is not currently set to 0, because Newick files can have slight precision issues etc. that mean not all tips quite come to zero.  You 
-#' can attempt to fix this with \code{\link{average_tr_tips}} (but make sure you do not inappropriately average in fossils!!).
-#' @return \code{dtf} A \code{\link[base]{data.frame}} holding the table. (Similar to the printout of a \code{\link[phylobase]{phylo4}} object.)
-#' @export
-#' @seealso \code{\link[ape]{phylo}}, \code{\link{average_tr_tips}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://ape.mpl.ird.fr/ape_development.html}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' test=1
-#' 
-prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=FALSE, fossils_older_than=0.6)
-	{
-	# assemble beginning table
-	
-	# check if internal node labels exist
-	if ("node.label" %in% attributes(t)$names == FALSE)
-		{
-		rootnum = get_nodenum_structural_root(t)
-		
-		new_node_labels = paste("inNode", rootnum:(rootnum+t$Nnode-1), sep="")
-		t$node.label = new_node_labels
-		}
-	
-	# or manually relabel the internal nodes, if desired
-	if (relabel_nodes == TRUE)
-		{
-		rootnum = get_nodenum_structural_root(t)
-		
-		new_node_labels = paste("inNode", rootnum:(rootnum+t$Nnode-1), sep="")
-		t$node.label = new_node_labels
-		}
-	
-	labels = c(t$tip.label, t$node.label)
-	ordered_nodenames = get_nodenums(t)
-	#nodenums = 1:length(labels)
-	node.types1 = rep("tip", length(t$tip.label))
-	node.types2 = rep("internal", length(t$node.label))
-	node.types2[1] = "root"
-	node.types = c(node.types1, node.types2)
-	
-	# These are the index numbers of the edges below each node
-	parent_branches = get_indices_where_list1_occurs_in_list2(ordered_nodenames, t$edge[,2])
-	#parent_edges = parent_branches
-	brlen_to_parent = t$edge.length[parent_branches]
-	
-	parent_nodes = t$edge[,1][parent_branches]
-	daughter_nodes = lapply(ordered_nodenames, get_daughters, t)
-	
-	# print out the structural root, if desired
-	root_nodenum = get_nodenum_structural_root(t)
-	tmpstr = paste("prt(t): root=", root_nodenum, "\n", sep="")
-	prflag(tmpstr, printflag=printflag)
-	
-	levels_for_nodes = unlist(lapply(ordered_nodenames, get_level, t))
-	#tmplevel = get_level(23, t)
-	#print(tmplevel)
-	
-	
-	#height above root
-	hts_at_end_of_branches_aka_at_nodes = t$edge.length
-	hts_at_end_of_branches_aka_at_nodes = get_all_node_ages(t)
-	h = hts_at_end_of_branches_aka_at_nodes
-
-	# times before present, below (ultrametric!) tips
-	# numbers are positive, i.e. in millions of years before present
-	#                       i.e. mybp, Ma
-	times_before_present = get_max_height_tree(t) - h
-
-	
-	# fill in the ages of each node for the edges
-	edge_ages = t$edge
-	edge_ages[,1] = h[t$edge[,1]]	# bottom of branch
-	edge_ages[,2] = h[t$edge[,2]]	# top of branch
-
-
-	# fill in the times before present of each node for the edges
-	edge_times_bp = t$edge
-	edge_times_bp[,1] = times_before_present[t$edge[,1]]	# bottom of branch
-	edge_times_bp[,2] = times_before_present[t$edge[,2]]	# top of branch
-	
-	
-	# If desired, get the list of all tipnames descended from a node, in alphabetical order
-	if (get_tipnames == TRUE)
-		{
-		# Make the empty list
-		list_of_clade_members_lists = rep(list(NA), length(ordered_nodenames))
-		
-		# Tips have only one descendant
-		list_of_clade_members_lists[1:length(t$tip.label)] = t$tip.label
-		list_of_clade_members_lists
-		
-		
-		nontip_nodenums = (length(t$tip.label)+1) : length(ordered_nodenames)
-		if (length(nontip_nodenums) > 1)
-			{
-			# More than 1 node
-			nontip_nodenames = ordered_nodenames[nontip_nodenums]
-			nontip_cladelists = sapply(X=nontip_nodenames, FUN=get_all_daughter_tips_of_a_node, t=t)
-			nontip_cladelists
-			
-			nontip_cladelists_alphabetical = sapply(X=nontip_cladelists, FUN=sort)
-			nontip_cladelists_alphabetical
-			
-			nontip_cladelists_alphabetical_str = sapply(X=nontip_cladelists_alphabetical, FUN=paste, collapse=",")
-			nontip_cladelists_alphabetical_str
-			
-			# Store the results
-			list_of_clade_members_lists[nontip_nodenums] = nontip_cladelists_alphabetical_str
-			list_of_clade_members_lists
-			} else {
-			# Just one node
-			nontip_nodenames = ordered_nodenames[nontip_nodenums]
-			nontip_cladelists = sapply(X=nontip_nodenames, FUN=get_all_daughter_tips_of_a_node, t=t)
-			nontip_cladewords = unlist(sapply(X=nontip_cladelists, FUN=strsplit, split=","))
-			
-			nontip_cladelists_alphabetical = sort(nontip_cladewords)
-			nontip_cladelists_alphabetical
-			
-			nontip_cladelists_alphabetical_str = paste(nontip_cladelists_alphabetical, collapse=",", sep="")
-			nontip_cladelists_alphabetical_str
-			
-			# Store the results
-			list_of_clade_members_lists[nontip_nodenums] = nontip_cladelists_alphabetical_str
-			list_of_clade_members_lists			
-			}
-			
-		}
-
-	
-	# Add fossils TRUE/FALSE column.  You can turn this off with fossils_older_than=NULL.
-	fossils = times_before_present > fossils_older_than
-
-	# Obviously, internal nodes are irrelevant and should be NA
-	tmpnodenums = (length(t$tip.label)+1) : ( length(t$tip.label) + t$Nnode )
-	fossils[tmpnodenums] = NA
-	
-	if (get_tipnames == FALSE)
-		{
-		# Don't put in the list of clade names
-		tmpdtf = cbind(1:length(ordered_nodenames), ordered_nodenames, levels_for_nodes, node.types, parent_branches, brlen_to_parent, parent_nodes, daughter_nodes, h, round(times_before_present, digits=time_bp_digits), fossils, labels)
-		
-		dtf = as.data.frame(tmpdtf, row.names=NULL)
-		# nd = node
-		
-		# edge.length is the same as brlen_2_parent
-		names(dtf) = c("node", "ord_ndname", "node_lvl", "node.type", "parent_br", "edge.length", "ancestor", "daughter_nds", "node_ht", "time_bp", "fossils", "label")
-		
-		# convert the cols from class "list" to some natural class
-		dtf = unlist_dtf_cols(dtf, printflag=FALSE)
-		} else {
-		# Put in the list of clade names
-		tmpdtf = cbind(1:length(ordered_nodenames), ordered_nodenames, levels_for_nodes, node.types, parent_branches, brlen_to_parent, parent_nodes, daughter_nodes, h, round(times_before_present, digits=time_bp_digits), fossils, labels, list_of_clade_members_lists)
-		
-		dtf = as.data.frame(tmpdtf, row.names=NULL)
-		# nd = node
-		
-		# edge.length is the same as brlen_2_parent
-		names(dtf) = c("node", "ord_ndname", "node_lvl", "node.type", "parent_br", "edge.length", "ancestor", "daughter_nds", "node_ht", "time_bp", "fossils", "label", "tipnames")
-		
-		# convert the cols from class "list" to some natural class
-		dtf = unlist_dtf_cols(dtf, printflag=FALSE)		
-		}
-	
-
-	
-	
-	
-	
-	# Add the root edge, if desired
-	# (AND, only if t$root.edge exists)
-	if ( (add_root_edge == TRUE) && (!is.null(t$root.edge)) )
-		{
-		root_row_TF = dtf$node.type == "root"
-		root_edge_length = t$root.edge
-		
-		# Stick in this edge length
-		dtf$edge.length[root_row_TF] = root_edge_length
-		
-		# Add the root edge length to all node heights
-		dtf$node_ht = dtf$node_ht + root_edge_length
-		}
-	
-	# print if desired
-	prflag(dtf, printflag=printflag)
-	
-	#tree_strings = c()
-	#root_str = get_node_info(root_nodenum, t)
-	return(dtf)
-	}
-
-
-
-
 
 
 
@@ -1959,11 +1745,12 @@ parse_lagrange_python_output_old <- function(outfn="output.results.txt", results
 #' @param new_states_fn Should a text file containing a table of the states and their probabilities be output? Default \code{FALSE}, 
 #' as I don't believe python \code{LAGRANGE} will output the states at the nodes (C++ \code{LAGRANGE} will, however).
 #' @param filecount The starting number for the filecount (relevant if one is processing many files).
-#' @param append Should results be appended to preexisting file? (default \code{FALSE})
+#' @param append Should each line of results be appended to preexisting file? (default \code{TRUE}; if FALSE, you only get
+#' the last line of results)
 #' @return sumstats A \code{\link[base]{data.frame}} containing the summary statistics (LnL, d and e rates, etc.)  The splits
 #' filename is output to screen.
 #' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}
+#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{parse_lagrange_output}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -1976,7 +1763,7 @@ parse_lagrange_python_output_old <- function(outfn="output.results.txt", results
 #' @examples
 #' test=1
 #' 
-parse_lagrange_python_output <- function(outfn="output.results.txt", outputfiles=FALSE, results_dir=getwd(), new_splits_fn = TRUE, new_states_fn = FALSE, filecount=0, append=FALSE)
+parse_lagrange_python_output <- function(outfn="output.results.txt", outputfiles=FALSE, results_dir=getwd(), new_splits_fn = TRUE, new_states_fn = FALSE, filecount=0, append=TRUE)
 	{
 	setup='
 	wd = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LAGRANGE_python/"
@@ -2258,7 +2045,7 @@ parse_lagrange_python_output <- function(outfn="output.results.txt", outputfiles
 #' @return sumstats A \code{\link[base]{data.frame}} containing the summary statistics (LnL, d and e rates, etc.)  The splits
 #' filename is output to screen.
 #' @export
-#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}
+#' @seealso \code{\link{get_lagrange_nodenums}}, \code{\link{LGpy_splits_fn_to_table}}, \code{\link{parse_lagrange_python_output}}
 #' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
@@ -2445,7 +2232,7 @@ parse_lagrange_output <- function(outfn, outputfiles=FALSE, results_dir=getwd(),
 		sumstats = cbind(initial_log_likelihood, dispersal_rates, extinction_rates, final_log_likelihood, splits_table_fn, states_table_fn)
 		sumstats = adf2(sumstats)
 
-		cat("\nStates output to: ", splits_table_fn, "\n", sep="")
+		cat("\nStates output to: ", states_table_fn, "\n", sep="")
 		cat("\nSplits output to: ", splits_table_fn, "\nn", sep="")
 		
 		outfn = np(paste(results_dir, "sumstats.txt", sep=""))
@@ -2459,6 +2246,441 @@ parse_lagrange_output <- function(outfn, outputfiles=FALSE, results_dir=getwd(),
 
 	return(sumstats)
 	}
+
+
+
+
+
+
+
+
+#######################################################
+# DIVA input and output functions
+#######################################################
+
+
+
+#######################################################
+# Convert a geographic areas file from
+# Lagrange/PHYLIP format to 
+# DIVAmatrix format
+#######################################################
+#Lagrange_PHYLIP_areas_to_DIVAmatrix_format
+
+#######################################################
+# Convert a tipranges object (it's data.frame slot)
+# to a DIVA-matrix format for inclusion in a NEXUS
+# file.
+#
+# Default is a 3 tips, 3 regions default matrix as
+# an example
+#######################################################
+tipranges_to_DIVA_DATAblock_format <- function(tipranges=NULL)
+	{
+	if (is.null(tipranges))
+		{
+		cat("WARNING: a tipranges object, i.e. an instance of class 'tipranges',\nwas not supplied. A default example (3 tips, 3 areas) has been generated.\n", sep="")
+		tipranges = define_tipranges_object()
+		}
+
+	# Get the size of the data matrix
+	ntips = nrow(tipranges@df)
+	nareas = ncol(tipranges@df)
+	tipnames = row.names(tipranges@df)
+	areanames = names(tipranges@df)
+	
+	# Set up the DATA block text	
+	lnum = 0
+	DATAblock_lines = NULL
+	DATAblock_lines[[(lnum=lnum+1)]] = "[ DATA block written by Nick Matzke's            ]"
+	DATAblock_lines[[(lnum=lnum+1)]] = "[ tipranges_to_DIVA_DATAblock_format() function.  ]"
+	DATAblock_lines[[(lnum=lnum+1)]] = "BEGIN DATA;"
+	DATAblock_lines[[(lnum=lnum+1)]] = paste("DIMENSIONS  NTAX=", ntips, " NCHAR=", nareas, ";", sep="")
+	DATAblock_lines[[(lnum=lnum+1)]] = "FORMAT MISSING=? GAP=- ;"
+	DATAblock_lines[[(lnum=lnum+1)]] = "	"
+	
+	# Make the CHARLABELS
+	DATAblock_lines[[(lnum=lnum+1)]] = "CHARLABELS"
+	
+	for (i in 1:nareas)
+		{
+		DATAblock_lines[[(lnum=lnum+1)]] = paste("\t[", i, "] ", areanames[i], sep="")
+		}
+	DATAblock_lines[[(lnum=lnum+1)]] = "\t;"
+	DATAblock_lines[[(lnum=lnum+1)]] = "	"
+
+	# Set up the MATRIX block
+	DATAblock_lines[[(lnum=lnum+1)]] = "MATRIX"
+	DATAblock_lines[[(lnum=lnum+1)]] = "[                    ]"
+	DATAblock_lines[[(lnum=lnum+1)]] = "[                    ]"
+	DATAblock_lines[[(lnum=lnum+1)]] = "	"
+	
+	# Get the length of the longest tipname
+	tipname_lengths = mapply(nchar, tipnames)
+	maxlength = max(tipname_lengths, na.rm=TRUE)
+	
+	for (i in 1:ntips)
+		{
+		# Calculate the number of spaces you need to make it look nice
+		numspaces = maxlength - tipname_lengths[i] + 5
+		spaces = paste(rep(" ", numspaces), sep="", collapse="")
+		
+		# Collapse the ranges to make the 10001111000 string
+		ranges_string = paste(tipranges@df[i, ], sep="", collapse="")
+		DATAblock_lines[[(lnum=lnum+1)]] = paste(tipnames[i], spaces, ranges_string, sep="")
+		}
+
+	# End the DATAblock
+	DATAblock_lines[[(lnum=lnum+1)]] = ";"	
+	DATAblock_lines[[(lnum=lnum+1)]] = "ENDBLOCK;"
+	DATAblock_lines[[(lnum=lnum+1)]] = "	"	
+	
+	
+	# This is in Ronquist's original.txt test file for reading NEXUS format;
+	# but it is almost certainly uncessary except for reading into MacClade or
+	# maybe PAUP/Mesquite
+	add_unnecessary = TRUE
+	if (add_unnecessary)
+		{
+		DATAblock_lines[[(lnum=lnum+1)]] = "	"
+		DATAblock_lines[[(lnum=lnum+1)]] = "BEGIN ASSUMPTIONS;"
+		DATAblock_lines[[(lnum=lnum+1)]] = "\tOPTIONS  DEFTYPE=unord PolyTcount=MINSTEPS ;"
+		DATAblock_lines[[(lnum=lnum+1)]] = "ENDBLOCK;"
+		DATAblock_lines[[(lnum=lnum+1)]] = "	"
+		}
+	
+	return(DATAblock_lines)
+	}
+
+
+
+DIVA_NEXUS_header <- function(headertxt="Written by Nick Matzke's DIVA_NEXUS_header() function.")
+	{
+	DIVA_NEXUS_headerlines = NULL
+	lnum = 0
+	
+	DIVA_NEXUS_headerlines[[(lnum=lnum+1)]] = "#NEXUS"
+	DIVA_NEXUS_headerlines[[(lnum=lnum+1)]] = "[From Ronquist's original.txt:                                                      ]"
+	DIVA_NEXUS_headerlines[[(lnum=lnum+1)]] = "[MacClade 3.04 registered to Fredrik Ronquist, Swedish Museum of Natural History]"
+	DIVA_NEXUS_headerlines[[(lnum=lnum+1)]] = "[Mock data to test compatibility with NEXUS files                                   ]"
+	DIVA_NEXUS_headerlines[[(lnum=lnum+1)]] = "[Added by user:                                                                     ]"
+	DIVA_NEXUS_headerlines[[(lnum=lnum+1)]] = paste("[", headertxt,  "]", sep="")
+	DIVA_NEXUS_headerlines[[(lnum=lnum+1)]] = "	"
+	
+	return(DIVA_NEXUS_headerlines)
+	}
+
+
+
+DIVA_NEXUS_MacClade_block <- function()
+	{
+	DIVA_NEXUS_MacClade_blocklines = NULL
+	lnum = 0
+
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "	"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "[This block is from Ronquist's original.txt file from the DIVA install; almost certainly unnecessary...]"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "BEGIN MACCLADE;"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "v 3.0"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "-1365338995"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "1100&/0"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "0"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "0"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "ENDBLOCK;"
+	DIVA_NEXUS_MacClade_blocklines[[(lnum=lnum+1)]] = "	"
+	
+	return(DIVA_NEXUS_MacClade_blocklines)
+	}
+
+
+
+# Convert an R phylo3 object to NEXUS format,
+# with tips TRANSLATE block, and subset to just the
+# lines the DIVA input wants.
+setup='
+tr = master_tree
+'
+tree_to_DIVA_TREE_block <- function(tr)
+	{
+	# Temporary file name
+	tmpfn = "tmptr.nexus"
+	
+	# We have to remove the branch lengths from the tree
+	tr$edge.length = NULL
+	
+	# Write the TAXA block and TREE block to a temporary NEXUS file
+	write.nexus(tr, file=tmpfn, translate=TRUE)
+	
+	# Get the lines from the temporary file
+	tmplines = scan(tmpfn, what="character", sep="\n")
+	startline_str = "BEGIN TREES;"
+	endline_str = "END;"
+
+	# If you want the extracted lines written to screen, use this.
+	DIVA_TREEblock_lines = extract_lines_startstr_to_endstr(tmplines, string_to_start_at=startline_str, string_to_end_at=endline_str, printflag=TRUE, include_endstring=TRUE)
+
+	# If you DON'T want the extracted lines written to screen, use this.	
+	DIVA_TREEblock_lines = extract_lines_startstr_to_endstr(tmplines, string_to_start_at=startline_str, string_to_end_at=endline_str, printflag=FALSE, include_endstring=TRUE)
+	
+	
+	return(DIVA_TREEblock_lines)
+	}
+
+
+
+setup='
+datafn="tmpDIVAdata_v1.nexus"
+cmdsfn="tmpDIVA_cmds.txt"
+options_txt=c("")
+'
+write_DIVA_cmds <- function(datafn="tmpDIVAdata_v1.nexus", cmdsfn="tmpDIVA_cmds.txt", outfn="", optimize_txt=NULL)
+	{
+	cmdslines = NULL
+	k = 0
+	cmdslines[[(k=k+1)]] = "[DIVA commands file written by Nick Matzke's write_DIVA_cmds() function. ]"
+	cmdslines[[(k=k+1)]] = paste("output ", outfn, ";", sep="")
+	cmdslines[[(k=k+1)]] = "echo status;"
+	cmdslines[[(k=k+1)]] = paste("proc ", datafn, ";", sep="")
+	
+	# Put in optional commands for optimize
+	
+	# Default
+	if (is.null(optimize_txt))
+		{
+		cmdslines[[(k=k+1)]] = "optimize;"
+		} else {
+		cmdslines[[(k=k+1)]] = paste("optimize ", optimize_txt, ";", sep="")
+		}
+	
+	#cmdslines[[(k=k+1)]] = "return;"
+	cmdslines[[(k=k+1)]] = "quit;"
+	
+	
+	write_lines_good(dtf=cmdslines, outfn=cmdsfn)
+	
+	return(cmdsfn)
+	}
+
+
+
+process_DIVA_output <- function(outfn, one_geog_range_per_row=TRUE)
+	{
+	setup='
+	outfn = "/Users/nickm/Desktop/__projects/_2011-07-15_Hannah_spider_fossils/_data/lagrange_for_nick2/sampled_newicks/combined_75000_trees.trees_subset_00001_divaoutput_v1.txt"
+	one_geog_range_per_row=TRUE
+	'
+
+
+	require(gdata)	# for "trim" function
+	
+	# Read a text file into a list of strings
+	tmplines = scan(outfn, what="character", sep="\n")
+	
+	str_to_find = "optimization successful"
+	lines_found_TF = find_str_inlist(findthis=str_to_find, tmplist=tmplines)	
+	startline = (1:length(tmplines))[lines_found_TF]
+	
+	optimization_success = tmplines[startline]
+	settings = tmplines[startline+1]
+	number_of_dispersals_txt = tmplines[startline+2]
+	
+	# Get the distributions at each node
+	str_to_find = "optimal distributions at each node"
+	lines_found_TF = find_str_inlist(findthis=str_to_find, tmplist=tmplines)
+	startline = (1:length(tmplines))[lines_found_TF]
+	
+	# Go through the geographic ranges at each node
+	nlines = length(tmplines) - startline
+	geog_ranges_data = matrix(NA, nrow=(nlines), ncol=4)
+	
+	
+	
+	# If you want all the ranges for a node listed on one line:
+	if (one_geog_range_per_row == FALSE)
+		{
+		for (i in 1:nlines)
+		#for (i in 1:2)
+			{
+			words = strsplit(tmplines[startline+i], split=" ")[[1]]
+			
+			# Store nodenum
+			geog_ranges_data[i, 1] = as.numeric(words[2])
+			
+			# Store the tip specifiers
+			tip_specifiers_txt = words[6]
+			geog_ranges_data[i, 3] = sub(pattern="\\):", replacement="", tip_specifiers_txt)
+			
+			# Store the optimal geographic ranges
+			words = strsplit(tmplines[startline+i], split=": ")[[1]]
+			geog_ranges_txt = words[2]
+			geog_ranges_data[i, 4] = geog_ranges_txt
+
+			# The "relative probability" is 1/number of equally parsimonious states
+			geog_ranges_words = strsplit(geog_ranges_txt, split=" ")[[1]]
+			numstates = length(geog_ranges_words)
+			relprob = 1/numstates
+			
+			geog_ranges_data[i, 2] = relprob
+			}
+		}	
+	
+	# If you want each geog_range listed on its own line:
+	if (one_geog_range_per_row == TRUE)
+		{
+		geog_ranges_data = NULL
+		
+		for (i in 1:nlines)
+		#for (i in 1:2)
+			{
+			words = strsplit(tmplines[startline+i], split=" ")[[1]]
+
+			# Store nodenum
+			DIVA_nodenum = as.numeric(words[2])
+
+			# Store the tip specifiers
+			tip_specifiers_txt = words[6]
+			tip_specifiers = sub(pattern="\\):", replacement="", tip_specifiers_txt)
+			
+			# Store the optimal geographic ranges
+			words2 = strsplit(tmplines[startline+i], split=": ")[[1]]
+			geog_ranges_txt = words2[2]
+			
+			geog_ranges_words = strsplit(geog_ranges_txt, split=" ")[[1]]
+			
+			# The "relative probability" is 1/number of equally parsimonious states
+			numstates = length(geog_ranges_words)
+			relprob = 1/numstates
+			
+			c1 = rep(DIVA_nodenum, numstates)
+			c2 = rep(tip_specifiers, numstates)
+			c3 = rep(relprob, numstates)
+			c4 = geog_ranges_words
+			
+			nodematrix = cbind(c1, c2, c3, c4)
+			
+			geog_ranges_data = rbind(geog_ranges_data, nodematrix)
+			}
+		}
+	
+	bigDIVA_matrix_nlines = nrow(geog_ranges_data)
+	
+	# Put the other data into the table
+	c1 = rep(outfn, bigDIVA_matrix_nlines)
+	c2 = rep(optimization_success, bigDIVA_matrix_nlines)
+	c3 = rep(trim2(settings), bigDIVA_matrix_nlines)
+	c4 = rep(trim2(number_of_dispersals_txt), bigDIVA_matrix_nlines)
+	
+	geog_ranges_data2 = cbind(geog_ranges_data, c1, c2, c3, c4)
+	
+	
+	# Remove NA Rows
+	geog_ranges_data2 = geog_ranges_data2[is.na(geog_ranges_data2[,1])==FALSE,]
+	
+	geog_ranges_df = adf(geog_ranges_data2)
+	names(geog_ranges_df) = c("DIVA_programs_nodenum", "relprob", "tip_specifiers", "geog_range", "DIVAout_fn", "optimization_success", "DIVA_settings", "numevents")
+	geog_ranges_df$DIVA_programs_nodenum = as.numeric(geog_ranges_df$DIVA_programs_nodenum)
+	geog_ranges_df$relprob = as.numeric(geog_ranges_df$relprob)
+	
+	return(geog_ranges_df)
+	}
+
+
+find_str_inlist <- function(findthis, tmplist)
+	{
+	# make empty list
+	outlist = rep(NA, length(tmplist))
+	for (i in 1:length(tmplist))
+		{
+		string = tmplist[i]
+		outlist[i] = find_instring(findthis, string)
+		
+		}
+	return(outlist)
+	}
+
+# Find a string inside another string...
+find_instring <- function(findthis, string)
+	{
+	result = grep(findthis, string)
+	if (length(result) > 0)
+		{
+		#print("match")
+		match = TRUE
+		}
+	else
+		{
+		match = FALSE
+		}
+	return(match)
+	}
+
+
+# Trim surrounding spaces, AND remove any tabs
+trim2 <- function(tmpstr)
+	{
+	require(gdata) # for trim
+	
+	# Convert any tabs to space; leading/trailing tabs will be removed by trim
+	tmpstr = gsub(pattern="\t", replacement=" ", tmpstr)
+	tmpstr = trim(tmpstr)
+	return(tmpstr)
+	}
+
+
+
+
+
+
+
+
+
+#######################################################
+# Node numbers for DIVA, Python LAGRANGE, and C++ LAGRANGE
+#######################################################
+
+nodenums_DIVA <- function(tr, plotnums=FALSE)
+	{
+	junk='
+	
+	# Psychotria tree from Ree & Smith 2008:
+	trstr = "((((((((P_hawaiiensis_WaikamoiL1:0.9656850499,P_mauiensis_Eke:0.9656850499):0.7086257935,(P_fauriei2:1.230218511,P_hathewayi_1:1.230218511):0.4440923324):0.1767115552,(P_kaduana_PuuKukuiAS:1.851022399,P_mauiensis_PepeAS:1.851022399):0.0008897862802):0.3347375986,P_kaduana_HawaiiLoa:2.185759997):0.302349378,(P_greenwelliae07:1.131363255,P_greenwelliae907:1.131363255):1.35674612):1.689170274,((((P_mariniana_MauiNui:1.994011054,P_hawaiiensis_Makaopuhi:1.994011054):0.7328279804,P_mariniana_Oahu:2.726839034):0.2574151709,P_mariniana_Kokee2:2.984254205):0.4601084855,P_wawraeDL7428:3.444362691):0.732916959):0.7345185743,(P_grandiflora_Kal2:2.479300491,P_hobdyi_Kuia:2.479300491):2.432497733):0.2873119899,((P_hexandra_K1:2.363984189,P_hexandra_M:2.363984189):0.4630447802,P_hexandra_Oahu:2.826939991):2.372081244);"
+	tr = read.tree(file="", text=trstr)
+	tr
+	
+	'#endjunk
+	
+	DIVA_nodes_table = postorder_nodes_phylo4_return_table(tr)
+	
+	nnDIVA_dtf = DIVA_nodes_table[,c(1,4)]
+	nnDIVA_dtf
+	
+	names(nnDIVA_dtf) = c("nnAPE", "nnDIVA")
+	
+	if (plotnums == TRUE)
+		{
+		# Get node numbers
+		ntips = length(tr$tip.label)
+		Rnodenums = (ntips+1):(ntips+tr$Nnode)
+		
+		# Plot standard APE numbers
+		plot(tr, show.tip.label=TRUE, label.offset=0.2)
+		axisPhylo()
+		nodelabels(node=Rnodenums, text=Rnodenums)
+		tiplabels(tip=1:ntips, text=1:ntips)
+		title("Tree with APE node numbers")
+		
+		plot(tr, show.tip.label=TRUE, label.offset=0.2)
+		axisPhylo()
+		nodelabels(node=nnDIVA_dtf$nnAPE, text=nnDIVA_dtf$nnDIVA)
+		#tiplabels()
+		title("Tree with DIVA node numbers")
+		
+		}
+	
+	return(nnDIVA_dtf)
+	}
+	
+
+
 
 
 

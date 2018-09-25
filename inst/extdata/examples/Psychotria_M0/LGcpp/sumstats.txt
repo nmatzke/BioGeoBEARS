@@ -1,2 +1,0 @@
-initial_log_likelihood	dispersal_rates	extinction_rates	final_log_likelihood	splits_table_fn	states_table_fn
--36.8714	0.0350117	0.0282904	-34.542	/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LGcpp/LGcpp_results_splits00001.txt	/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/examples/Psychotria_M0/LGcpp/LGcpp_results_states00001.txt

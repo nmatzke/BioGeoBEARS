@@ -1,0 +1,5 @@
+num	ab1	ab2	desc	notes
+1	K	Ka	Kauai
+2	O	Oa	Oahu
+3	M	Ma	Maui	Maui-Nui
+4	H	Ha	Hawaii	Big Island

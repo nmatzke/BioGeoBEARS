@@ -1,6 +1,36 @@
+CHANGES in BioGeoBEARS VERSION 1.1
+
+NEW FEATURES
+
+    o added all code and features from PhyloWiki page
+    o put the PhyloWiki test scripts in as unit tests, with the testthat package
+
+OTHER CHANGES
+
+    o none
+
+
 CHANGES in BioGeoBEARS VERSION 0.23
 
 NEW FEATURES
+    o TODO: Cairo package for graphics; constraining multiple nodes; stochastic mapping
+
+	o added error check to read_PHYLIP_data() -- (checking for rows with less than the 
+	  specified number of characters/areas
+	
+	o edited example script so that 3-parameter "+J" models start with the ML results of the 
+	  2-parameter model. This should avoid situations where the LnL found during ML search of 
+	  the 3-parameter model is lower than the ML returned by the 2-parameter model.
+	
+    o added extract_params_from_BioGeoBEARS_results_object(), a function to extract free
+      parameter values, rather than using the plot_BioGeoBEARS_results() function to do
+      this.
+
+    o changed function name to be more accurate: get_perEvent_probs --> get_clado_perEvent_weights
+    
+    o fixed: optimx, optim usage and graphing
+
+    o fixed: re-sizing titles
 
     o minor changes to graphing functions
     
@@ -26,7 +56,8 @@ BUG FIXES
 
 OTHER CHANGES
 
-    o  
+    o  issues: print_optim, warning for very small trees, check maxent01v parameterization (divide by mean)
+    o  check dispersal file, areas allowed file for correct number of areas
     
 
 

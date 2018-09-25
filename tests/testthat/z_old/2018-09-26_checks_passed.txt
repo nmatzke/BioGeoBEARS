@@ -1,0 +1,108 @@
+
+================================================
+
+Checking the maximum lnL inferences for 7 models in example BAYAREALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'd' for 5 models in example BAYAREALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'e' for 5 models in example BAYAREALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'j' for 5 models in example BAYAREALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't12' for 5 models in example BAYAREALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't21' for 5 models in example BAYAREALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'm2' for 3 models in example BAYAREALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (archive values)......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (test values)......PASSED
+Checking that BAYAREALIKE+J lnL >= BAYAREALIKE lnL (which it must be, as BAYAREALIKE is nested inside BAYAREALIKE+J) (archive values)......PASSED
+Checking that BAYAREALIKE+J lnL >= BAYAREALIKE lnL (which it must be, as BAYAREALIKE is nested inside BAYAREALIKE+J) (test values)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 lnL (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (archive values)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 lnL (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (test values)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 lnL (on rep. 1) >= BAYAREALIKE+t12+t21+m2 lnL (which it must be, as BAYAREALIKE+t12+t21+m2 is nested inside BAYAREALIKE+J+t12+t21+m2) (archive values)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 lnL (on rep. 1) >= BAYAREALIKE+t12+t21+m2 lnL (which it must be, as BAYAREALIKE+t12+t21+m2 is nested inside BAYAREALIKE+J+t12+t21+m2) (test values)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 d (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 d (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 e (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 e (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 j (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 j (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 t12 (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 t12 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 t21 (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 t21 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that BAYAREALIKE+J+t12+t21+m2 m2 (on rep. 2) == BAYAREALIKE+J+t12+t21+m2 m2 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+
+Checking the maximum lnL inferences for 7 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'd' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'e' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'j' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't12' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't21' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'm2' for 3 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (archive values)......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (test values)......PASSED
+Checking that DEC+J lnL >= DEC lnL (which it must be, as DEC is nested inside DEC+J) (archive values)......PASSED
+Checking that DEC+J lnL >= DEC lnL (which it must be, as DEC is nested inside DEC+J) (test values)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 2) == DEC+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (archive values)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 2) == DEC+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (test values)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 1) >= DEC+t12+t21+m2 lnL (which it must be, as DEC+t12+t21+m2 is nested inside DEC+J+t12+t21+m2) (archive values)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 1) >= DEC+t12+t21+m2 lnL (which it must be, as DEC+t12+t21+m2 is nested inside DEC+J+t12+t21+m2) (test values)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 2) >= DEC+t12+t21+m2 lnL (which it must be, as DEC+t12+t21+m2 is nested inside DEC+J+t12+t21+m2) (archive values)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 2) >= DEC+t12+t21+m2 lnL (which it must be, as DEC+t12+t21+m2 is nested inside DEC+J+t12+t21+m2) (test values)......PASSED
+Checking that DEC+J+t12+t21+m2 d (on rep. 2) == DEC+J+t12+t21+m2 d (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 e (on rep. 2) == DEC+J+t12+t21+m2 e (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 j (on rep. 2) == DEC+J+t12+t21+m2 j (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 t12 (on rep. 2) == DEC+J+t12+t21+m2 t12 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 t21 (on rep. 2) == DEC+J+t12+t21+m2 t21 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 m2 (on rep. 2) == DEC+J+t12+t21+m2 m2 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+
+Checking the maximum lnL inferences for 7 models in example DIVALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'd' for 5 models in example DIVALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'e' for 5 models in example DIVALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'j' for 5 models in example DIVALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't12' for 5 models in example DIVALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't21' for 5 models in example DIVALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'm2' for 3 models in example DIVALIKE_wTraits trait-dependent dispersal script......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (archive values)......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (test values)......PASSED
+Checking that DIVALIKE+J lnL >= DIVALIKE lnL (which it must be, as DIVALIKE is nested inside DIVALIKE+J) (archive values)......PASSED
+Checking that DIVALIKE+J lnL >= DIVALIKE lnL (which it must be, as DIVALIKE is nested inside DIVALIKE+J) (test values)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 lnL (on rep. 2) == DIVALIKE+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (archive values)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 lnL (on rep. 2) == DIVALIKE+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (test values)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 lnL (on rep. 1) >= DIVALIKE+t12+t21+m2 lnL (which it must be, as DIVALIKE+t12+t21+m2 is nested inside DIVALIKE+J+t12+t21+m2) (archive values)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 lnL (on rep. 1) >= DIVALIKE+t12+t21+m2 lnL (which it must be, as DIVALIKE+t12+t21+m2 is nested inside DIVALIKE+J+t12+t21+m2) (test values)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 d (on rep. 2) == DIVALIKE+J+t12+t21+m2 d (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 e (on rep. 2) == DIVALIKE+J+t12+t21+m2 e (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 j (on rep. 2) == DIVALIKE+J+t12+t21+m2 j (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 t12 (on rep. 2) == DIVALIKE+J+t12+t21+m2 t12 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 t21 (on rep. 2) == DIVALIKE+J+t12+t21+m2 t21 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DIVALIKE+J+t12+t21+m2 m2 (on rep. 2) == DIVALIKE+J+t12+t21+m2 m2 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+
+Checking the maximum lnL inferences for 7 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'd' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'e' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'j' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't12' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 't21' for 5 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking the ML inferences of 'm2' for 3 models in example DEC_wTraits trait-dependent dispersal script......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (archive values)......PASSED
+Checking that the 2rates traits lnL >= 1rates traits lnL (which it must be, because the 1rates model is nested inside 2rates) (test values)......PASSED
+Checking that DEC+J lnL >= DEC lnL (which it must be, as DEC is nested inside DEC+J) (archive values)......PASSED
+Checking that DEC+J lnL >= DEC lnL (which it must be, as DEC is nested inside DEC+J) (test values)......PASSED
+Checking that DEC+J+t12+t21+m2 d (on rep. 2) == DEC+J+t12+t21+m2 d (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 e (on rep. 2) == DEC+J+t12+t21+m2 e (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 j (on rep. 2) == DEC+J+t12+t21+m2 j (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 t12 (on rep. 2) == DEC+J+t12+t21+m2 t12 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 t21 (on rep. 2) == DEC+J+t12+t21+m2 t21 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 m2 (on rep. 2) == DEC+J+t12+t21+m2 m2 (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 2) == DEC+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (archive values)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 2) == DEC+J+t12+t21+m2 lnL (on rep. 1) (which it must be, because these are the same model, with optimization started from two different starting points) (test values)......PASSED
+Checking that DEC+t12+t21+m2 lnL (on rep. 1) == (DEC lnL PLUS trait 2rates lnL) (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 1) == (DEC+J lnL PLUS trait 2rates lnL) (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 lnL (on rep. 2) == (DEC+J lnL PLUS trait 2rates lnL) (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 d (on rep. 1) == (DEC+J lnL PLUS trait 2rates lnL) (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 d (on rep. 2) == (DEC+J lnL PLUS trait 2rates lnL) (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 e (on rep. 1) == DEC+J e (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 e (on rep. 2) == DEC+J e (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 j (on rep. 1) == DEC+J j (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 j (on rep. 2) == DEC+J j (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 t12 (on rep. 1) == trait 2rates t12 (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 t12 (on rep. 2) == trait 2rates t12 (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 t21 (on rep. 1) == trait 2rates t21 (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+Checking that DEC+J+t12+t21+m2 t21 (on rep. 2) == trait 2rates t21 (which it must be, because these are the same model when m2 is fixed to 1)......PASSED
+
+══ testthat results  ═══════════════════════════════════════════════════════════════════════════════════════════════
+OK: 165 SKIPPED: 0 FAILED: 0
+
+================================================

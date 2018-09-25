@@ -8,11 +8,146 @@ require("ape")
 require("rexpokit")
 require("cladoRcpp")
 
+# Get geographic ranges at tips, from the detections file rather than a geog file
+tipranges_from_detects_fn <- function(detects_fn)
+	{
+	if (is.character(detects_fn))
+		{
+		detects_df = read_detections(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=NULL)
+		tmp_blah = as.matrix(detects_df)
+		tmp_blah[isblank_TF(tmp_blah)] = 0
+		tmp_blah[tmp_blah > 0] = 1
+		tmp_input = adf2(tmp_blah)
+		tipranges_object = define_tipranges_object(tmpdf=tmp_input)
+		tipranges_object@df = adf2(tipranges_object@df)
+		rownames(tipranges_object@df) = rownames(tmp_blah)
+		tipranges = tipranges_object
+		} else {
+		txt = paste0("STOP ERROR in tipranges_from_detects_fn(): you are trying to get tipranges from a detections file, so an input file is required for input detects_fn. This is required to set up the tipranges internally.")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}# END if (is.character(BioGeoBEARS_run_object$detects_fn))
+	return(tipranges)
+	} # END tipranges_from_detects_fn <- function(detects_fn)
+
+
+tipranges_from_BGB_run_object <- function(BioGeoBEARS_run_object)
+	{
+	# Get geographic ranges at tips
+	if (BioGeoBEARS_run_object$use_detection_model == FALSE)
+		{
+		tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=np(BioGeoBEARS_run_object$geogfn))
+		}
+	if (BioGeoBEARS_run_object$use_detection_model == TRUE)
+		{
+		tipranges = tipranges_from_detects_fn(detects_fn=BioGeoBEARS_run_object$detects_fn)
+		} # END if (BioGeoBEARS_run_object$use_detection_model == TRUE)
+	return(tipranges)
+	} # END tipranges_from_BGB_run_object <- function(BioGeoBEARS_run_object)
+
+
+geog_ancstates_from_both <- function(res, num_trait_states=2)
+	{
+	newres = res
+	numcols = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[2]
+	
+	# Check if even
+	even_TF = ((numcols %% num_trait_states) == 0)
+	if (even_TF == FALSE)
+		{
+		txt = paste0("STOP ERROR in geog_ancstates_from_both(): Your num_trait_states does not divide evenly into the number of columns in res$ML_marginal_prob_each_state_at_branch_top_AT_node")
+		stop(txt)
+		}
+	
+	num_geog_states = numcols / num_trait_states
+	states1 = res$ML_marginal_prob_each_state_at_branch_top_AT_node[,1:num_geog_states]
+	states2 = res$ML_marginal_prob_each_state_at_branch_top_AT_node[,(num_geog_states+1):numcols]
+	new_state_probs = states1 + states2
+	newres$ML_marginal_prob_each_state_at_branch_top_AT_node = new_state_probs
+
+	states1 = res$ML_marginal_prob_each_state_at_branch_bottom_below_node[,1:num_geog_states]
+	states2 = res$ML_marginal_prob_each_state_at_branch_bottom_below_node[,(num_geog_states+1):numcols]
+	new_state_probs = states1 + states2
+	newres$ML_marginal_prob_each_state_at_branch_bottom_below_node = new_state_probs
+	
+	return(newres)
+	} # END geog_ancstates_from_both <- function(res, num_trait_states=2)
+
+
+
+trait_ancstates_from_both <- function(res, num_trait_states=2)
+	{
+	newres = res
+	numcols = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[2]
+	
+	# Check if even
+	even_TF = ((numcols %% num_trait_states) == 0)
+	if (even_TF == FALSE)
+		{
+		txt = paste0("STOP ERROR in trait_ancstates_from_both(): Your num_trait_states does not divide evenly into the number of columns in res$ML_marginal_prob_each_state_at_branch_top_AT_node")
+		stop(txt)
+		}
+	
+	num_geog_states = numcols / num_trait_states
+	
+	trait_states_branchtops = matrix(data=NA, ncol=num_trait_states, nrow=nrow(res$ML_marginal_prob_each_state_at_branch_top_AT_node))
+	trait_states_branchbots = matrix(data=NA, ncol=num_trait_states, nrow=nrow(res$ML_marginal_prob_each_state_at_branch_top_AT_node))
+	startcol = 0
+	for (i in 1:num_trait_states)
+		{
+		cols_to_sum = (startcol+1):(startcol+num_geog_states)
+		tmp_traits = matrix(res$ML_marginal_prob_each_state_at_branch_top_AT_node[,cols_to_sum], ncol=num_geog_states)
+		trait_col = rowSums(tmp_traits)
+		trait_states_branchtops[,i] = trait_col
+
+		tmp_traits = matrix(res$ML_marginal_prob_each_state_at_branch_bottom_below_node[,cols_to_sum], ncol=num_geog_states)
+		trait_col = rowSums(tmp_traits)
+		trait_states_branchbots[,i] = trait_col
+		startcol = startcol + num_geog_states
+		}
+
+	newres$ML_marginal_prob_each_state_at_branch_top_AT_node = trait_states_branchtops
+	newres$ML_marginal_prob_each_state_at_branch_bottom_below_node = trait_states_branchbots
+	
+	return(newres)
+	} # END trait_ancstates_from_both <- function(res, num_trait_states=2)
+
+
+
+# Get tipranges from a detection counts matrix
+get_tipranges_from_detects_df <- function(BioGeoBEARS_run_object=NULL, detects_df=NULL)
+	{
+	# Inputs check
+	if (is.null(BioGeoBEARS_run_object$detects_df))
+		{
+		if (is.null(detects_df))
+			{
+			stoptxt = "STOP ERROR in get_tipranges_from_detects_df(): either BioGeoBEARS_run_object$detects_df or detects_df must be non-null!"
+			cat("\n\n")
+			cat(stoptxt)
+			cat("\n\n")
+			stop(stoptxt)
+			} # END if (is.null(detects_df))
+		} else {
+		detects_df = BioGeoBEARS_run_object$detects_df
+		} # END if (is.null(BioGeoBEARS_run_object$detects_df))
+
+	tmp_blah = as.matrix(detects_df)
+	tmp_blah[isblank_TF(tmp_blah)] = 0
+	tmp_blah[tmp_blah > 0] = 1
+	tmp_input = adf2(tmp_blah)
+	tipranges_object = define_tipranges_object(tmpdf=tmp_input)
+	tipranges_object@df = adf2(tipranges_object@df)
+	rownames(tipranges_object@df) = rownames(tmp_blah)
+	tipranges = tipranges_object
+	return(tipranges)
+	} # END get_tipranges_from_detects_df <- function(BioGeoBEARS_run_object=NULL, detects_df=NULL)
+
 
 # Qmat contains the d & e probs
 # COO_probs_columnar contains the simulation probs
-
-
 #######################################################
 # read_detections
 #######################################################
@@ -94,6 +229,17 @@ read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0
 	trfn = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/Psychotria_5.2.newick"
 	phy = read.tree(trfn)
 	'
+	
+	if (file.exists(detects_fn) == FALSE)
+		{
+		txt = paste0("STOP ERROR in read_detections(): file detects_fn='", detects_fn, "' was not found. Check your inputs and your working directory (wd). Use commands like:\n - 'getwd()' to get your current R working directory (wd)\n - '?setwd' to see how to set your R working directory\n - 'list.files()' to list the files in your current R working directory\n - and use 'system('open .')' to open your file browsing program from the R command line (this works on macs, at least). ")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		} # END if (file.exists(detects_fn) == FALSE)
+	
+	
 	if (is.null(OTUnames) == TRUE)
 		{
 		dtf = read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="\t", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
@@ -221,6 +367,17 @@ read_controls <- function(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0,
 	areanames=NULL
 	tmpskip=0
 	'
+
+	if (file.exists(controls_fn) == FALSE)
+		{
+		txt = paste0("STOP ERROR in read_controls(): file controls_fn='", controls_fn, "' was not found. Check your inputs and your working directory (wd). Use commands like:\n - 'getwd()' to get your current R working directory (wd)\n - '?setwd' to see how to set your R working directory\n - 'list.files()' to list the files in your current R working directory\n - and use 'system('open .')' to open your file browsing program from the R command line (this works on macs, at least). ")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		} # END if (file.exists(controls_fn) == FALSE)
+
+
 	if (is.null(OTUnames) == TRUE)
 		{
 		dtf = read.table(file=controls_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
@@ -1566,7 +1723,7 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 #' particular area.
 #' 
 #' @param states_list_0based_index A states_list, 0-based, e.g. from \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}}.
-#' @phy A phylogeny object is required by default.  This ensures that the tip likelihoods that are produced are in the same order as the tips.  The 
+#' @param phy A phylogeny object is required by default.  This ensures that the tip likelihoods that are produced are in the same order as the tips.  The 
 #' user can skip this by setting \code{phy="none"}.
 #' @param numareas The number of areas being considered in the analysis. If \code{NULL} (default), this is calculated to be the maximum range length, or 
 #' one plus the maximum 0-based index in any of the ranges.
@@ -1595,7 +1752,7 @@ obs_all_species=controls_df_row, MoreArgs=list(mean_frequency=mean_frequency, dp
 #' \code{exp(sum(LnLs of data in each area))}, i.e. the likelihood of the data, 
 #' non-logged. If \code{TRUE} (default), \code{\link{Pdata_given_rangerow}} returns the LnLs of the data in each area.  \code{FALSE} is 
 #' handy for examples, \code{TRUE} is safer for large computations/functions where underflow is a possibility.
-#' @relative_LnLs Default \code{TRUE}. If \code{return_LnLs==TRUE}, then \code{relative_LnLs} says whether or not to subtract the maximum LnL from
+#' @param relative_LnLs Default \code{TRUE}. If \code{return_LnLs==TRUE}, then \code{relative_LnLs} says whether or not to subtract the maximum LnL from
 #' each row of the (logged) tip conditional likelihoods. This effectively sets the state that confers the highest likelihood on the data to 
 #' LnL=0, which translates to likelihood 1 of the data under that state in normal space (note that this is different than the probability of states; 
 #' see Felsenstein 2004).  This relative scaling should not effect results, but may help avoid underflow.
@@ -2006,10 +2163,19 @@ prob_of_states_from_prior_prob_areas <- function(states_list_0based_index, numar
 #' dp=1
 #' fdp=0
 #' 
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+#' phy = read.tree(trfn)
+#' 
+#' # This is returning the raw, un-scaled, un-logged likelihoods; it is safer to use the log likelihoods
+#' # (from which the max is substracted, and exp(LnL) is performed) in actual code, due to 
+#' # underflow issues.
+#' null_range_gets_0_like=TRUE; return_LnLs=FALSE; relative_LnLs=FALSE; exp_LnLs=FALSE; error_check=TRUE
+#' 
+#' 
 #' tip_condlikes_of_data_on_each_state = 
-#' tiplikes_wDetectionModel(states_list_0based_index, numareas=numareas, 
-#' detects_df, controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, 
-#' null_range_gets_0_like=TRUE)
+#' tiplikes_wDetectionModel(states_list_0based_index=states_list_0based_index, phy=phy, numareas=numareas, 
+#' detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, 
+#' null_range_gets_0_like=TRUE, return_LnLs=FALSE, relative_LnLs=FALSE, exp_LnLs=FALSE, error_check=TRUE)
 #' 
 #' tip_condlikes_of_data_on_each_state
 #' 
@@ -2132,10 +2298,19 @@ post_prob_states <- function(prob_of_each_range, condlikes_of_data_on_each_range
 #' dp=1
 #' fdp=0
 #' 
+#' trfn = np(paste(extdata_dir, "/Psychotria_5.2.newick", sep=""))
+#' phy = read.tree(trfn)
+#' 
+#' # This is returning the raw, un-scaled, un-logged likelihoods; it is safer to use the log likelihoods
+#' # (from which the max is substracted, and exp(LnL) is performed) in actual code, due to 
+#' # underflow issues.
+#' null_range_gets_0_like=TRUE; return_LnLs=FALSE; relative_LnLs=FALSE; exp_LnLs=FALSE; error_check=TRUE
+#' 
+#' 
 #' tip_condlikes_of_data_on_each_state = 
-#' tiplikes_wDetectionModel(states_list_0based_index, numareas=numareas, 
-#' detects_df, controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, 
-#' null_range_gets_0_like=TRUE)
+#' tiplikes_wDetectionModel(states_list_0based_index=states_list_0based_index, phy=phy, numareas=numareas, 
+#' detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, 
+#' null_range_gets_0_like=TRUE, return_LnLs=FALSE, relative_LnLs=FALSE, exp_LnLs=FALSE, error_check=TRUE)
 #' 
 #' tip_condlikes_of_data_on_each_state
 #' 

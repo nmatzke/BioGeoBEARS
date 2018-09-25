@@ -247,7 +247,9 @@ given_a_starting_state_simulate_branch_end <- function(index_Qmat_0based_of_star
 #' @examples
 #' testval=1
 #' 
-given_a_starting_state_simulate_split <- function(index_Qmat_0based_of_starting_state=1, COO_probs_columnar, numstates)
+given_a_starting_state_simulate_split <- function(index_Qmat_0based_of_starting_state=1, 
+COO_probs_columnar, 
+numstates=1+max(sapply(X = COO_weights_columnar, FUN=max)[1:3]))
 	{
 	defaults='
 	# Note that the speciation matrix is always missing the original state 0 (null range);
@@ -370,7 +372,8 @@ given_a_starting_state_simulate_split <- function(index_Qmat_0based_of_starting_
 #' 
 simulated_indexes_to_tipranges_object <- function(simulated_states_by_node, areas_list, states_list, trfn)
 	{
-	phy = read.tree(trfn)
+	#phy = read.tree(trfn)
+	phy = check_trfn(trfn=trfn)
 	phy2 <- reorder(phy, "pruningwise")
 	
 	tiplabels = phy2$tip.label
@@ -477,8 +480,11 @@ simulated_indexes_to_tipranges_file <- function(simulated_states_by_node, areas_
 #' The user should specify WHICH matrix in the results_object -- i.e., scaled conditional likelihoods on downpass or uppass, or 
 #' actual marginal probabilities of ancestral states.  (The latter is the main thing of interest.)  This specification 
 #' is done via e.g. \code{relprobs_matrix = results_object$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS}.
-#' @param unlist_TF Unlist the output? Default TRUE.
-#' @return \code{inf_statesvec} The inferred vector of states.
+#' @param unlist_TF Unlist the output? Default \code{TRUE}.
+#' @param return_1based_indices By default (\code{FALSE}), 0-based indices to the 
+#' states are returned in \code{inf_statesvec}. Set to \code{TRUE} to get 1-based
+#' indices.
+#' @return \code{inf_statesvec} The inferred vector of states (0-based, by default).
 #' @export
 #' @seealso \code{\link{get_ML_probs}}, \code{\link{bears_2param_standard_fast}}, \code{\link{get_ML_state_indices}}
 #' @note Go BEARS!
@@ -492,8 +498,14 @@ simulated_indexes_to_tipranges_file <- function(simulated_states_by_node, areas_
 #' @examples
 #' testval=1
 #' 
-get_ML_states <- function(relprobs_matrix, unlist_TF=TRUE)
+get_ML_states <- function(relprobs_matrix, unlist_TF=TRUE, return_1based_indices=FALSE)
 	{
+	defaults='
+	unlist_TF=TRUE
+	return_1based_indices=FALSE
+	'
+	
+	
 	inf_statesvec = as.list(rep(-1, times=nrow(relprobs_matrix)))
 	
 	state_indexes_0based = seq(0, ncol(relprobs_matrix)-1, 1)
@@ -525,7 +537,7 @@ get_ML_states <- function(relprobs_matrix, unlist_TF=TRUE)
 		if (nummatches == 1)
 			{
 			#ML_probs_vec[[rownum]] = c(relprobs_matrix[rownum,][match_max_TF])
-			inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF])
+			inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF]) + return_1based_indices
 			} 
 		
 		if (nummatches > 1)
@@ -535,9 +547,9 @@ get_ML_states <- function(relprobs_matrix, unlist_TF=TRUE)
 			if (unlist_TF == TRUE)
 				{
 				cat("\nNote: picking the first state in the tie; use unlist_TF=FALSE to see all states.\n")
-				inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF][1])
+				inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF][1]) + return_1based_indices
 				} else {
-				inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF])
+				inf_statesvec[[rownum]] = c(state_indexes_0based[match_max_TF]) + return_1based_indices
 				}
 			} 
 		
@@ -751,6 +763,52 @@ infprobs_to_probs_of_each_area <- function(relprobs_matrix, states_list)
 	
 	return(area_probs)
 	}
+
+
+
+
+
+infprobs_to_probs_of_each_rangesize <- function(relprobs_matrix, states_list)
+	{
+	# Get the areas from the states list
+	areas = unique(unlist(states_list))
+	# Remove null range
+	areas = areas[!is.na(areas)]
+
+	rangesizes_by_state = sapply(FUN=length, X=states_list_0based)
+	rangesizes = sort(unique(rangesizes_by_state))
+	rangesizes
+	
+	# Area probabilities table for each node
+	area_probs = matrix(0, nrow=nrow(relprobs_matrix), ncol=length(rangesizes))
+
+	# Go through the states
+	for (i in 1:length(states_list))
+		{
+		if (is.na(states_list[[i]] && (length(states_list[[i]]==1)) ))
+			{
+			next()
+			} else {
+			# Convert 0-based states to 1-based states
+			areas_in_this_state = length(states_list[[i]])
+
+			# Go through the rows (the ancestral nodes)
+			for (rownum in 1:nrow(relprobs_matrix))
+				{
+				# Prob of a particular state
+				tmpprob = relprobs_matrix[rownum,i]
+				
+				# Every area in this state gets this probability
+				area_probs[rownum,areas_in_this_state] = area_probs[rownum,areas_in_this_state] + tmpprob
+				}
+			}
+		}
+	
+	return(area_probs)
+	}
+
+
+
 
 
 
@@ -1372,8 +1430,13 @@ get_simparams <- function(simhist_row)
 #' @param relprobs A numeric matrix of relative probabilities
 #' @param statenames The names of the states/geographic ranges (e.g., A, AB, CDE, ABD, etc...)
 #' @param returnwhat If "indices", return the 0-based indices of the states. If "states", return the name of the state, based on statenames.
-#' @param if_ties What to do with ties. Currently, the only option is to take the first (this will be
-#' shown in e.g. a pie chart, of course).
+#' @param if_ties What to do with ties in probability. Currently, 
+#' the options are:
+#' (1) "takefirst", which takes the first tied state in the 
+#' probabilities column (The full probabilities of all states will be
+#' shown in e.g. pie charts, of course); (2) "asterisk", which 
+#' returns returns the first tied state, but marks it with an 
+#' asterisk ("*").
 #' @return \code{ML_states} or \code{ML_states_indices}, depending on \code{returnwhat}.
 #' @export
 #' @seealso \code{\link{get_ML_state_indices}}
@@ -1391,8 +1454,17 @@ get_simparams <- function(simhist_row)
 #' 
 get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states", if_ties="takefirst")
 	{
+	defaults='
+	relprobs = relprobs_matrix
+	statenames=statenames
+	returnwhat="states"
+	if_ties="takefirst"
+	'
+	
+	
 	# Get the maximum probability values for each row of the relative probs
 	maxprobs = apply(relprobs, 1, max)
+	length(maxprobs)
 	
 	# Indices, 1 thru number of states
 	nums = 1:ncol(relprobs)
@@ -1400,25 +1472,67 @@ get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states
 	ML_states = as.list(rep(NA,nrow(relprobs)))
 	ML_states_indices = as.list(rep(NA,nrow(relprobs)))
 	
-	# get index (col #) of the ML state(s)
-	# 
-	for (i in 1:nrow(relprobs))
+
+	if (if_ties == "takefirst")
 		{
-		relprobs_row = relprobs[i,]
-		maxprob = maxprobs[i]
-		ML_states_indices[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="takefirst")
-		ML_states[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="takefirst")
-		}
+		# get index (col #) of the ML state(s)
+		for (i in 1:nrow(relprobs))
+			{
+			relprobs_row = relprobs[i,]
+			maxprob = maxprobs[i]
+			ML_states_indices[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="takefirst")
+			ML_states[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="takefirst")
+			}
+		} # end takefirst
+
+
+	if (if_ties == "asterisk")
+		{
+		# get index (col #) of the ML state(s)
+		for (i in 1:nrow(relprobs))
+			{
+			relprobs_row = relprobs[i,]
+			maxprob = maxprobs[i]
+			ML_states_indices[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="all")
+			ML_states[[i]] = get_ML_state_indices(relprobs_row, nums, maxprob, if_ties="takefirst")
+			}
+		
+		# Check for situations where multiple states tied
+		more_than_one_maxprob_state = function(MLstate_index)
+			{
+			if (length(MLstate_index) > 2)
+				{
+				return(TRUE)
+				} else {
+				return(FALSE)
+				}
+			} # end function
+		# Make a TRUE/FALSE array
+		ML_states_tied_TF = unlist(sapply(X=ML_states_indices, FUN=more_than_one_maxprob_state))
+		} # end if ties=asterisk
+	
 
 	# return values
 	if (returnwhat == "states")
 		{
 		foo = function(MLstate, statenames)
 			{
-			statenames[MLstate]
+			if (is.na(MLstate))
+				{
+				return("-")
+				} else {
+				return(statenames[MLstate])
+				}
 			}
-		ML_states2 = unlist(sapply(X=ML_states, FUN=foo, statenames))
+		ML_states2 = unlist(sapply(X=ML_states_indices, FUN=foo, statenames))
 		ML_states2
+		
+		# Mark ties with asterisk if desired
+		if (if_ties == "asterisk")
+			{
+			ML_states2[ML_states_tied_TF] = paste("*", ML_states2[ML_states_tied_TF], sep="")
+			}
+		
 		
 		return(ML_states2)
 		}
@@ -1443,8 +1557,14 @@ get_ML_states_from_relprobs <- function(relprobs, statenames, returnwhat="states
 #' @param relprobs_row A row from a \code{relprobs}, a numeric matrix of relative probabilities
 #' @param nums Numbers indexing the states from 1 to numstates
 #' @param maxprob The value of the maximum probability for the row.
-#' @param if_ties What to do with ties. Currently, the only option is to take the first (this will be
-#' shown in e.g. a pie chart, of course).
+#' @param if_ties What to do with ties in probability. Currently, 
+#' the options are:
+#' (1) "takefirst", which takes the first tied state in the 
+#' probabilities column (The full probabilities of all states will be
+#' shown in e.g. pie charts, of course); (2) "all", which returns all 
+#' indices with the highest probability. Some items in 
+#' \code{index_of_ML_state_s} could therefore have lengths of 2 or
+#' greater.
 #' @return \code{index_of_ML_state_s} 
 #' @export
 #' @seealso \code{\link{get_ML_states}}
@@ -1471,6 +1591,31 @@ get_ML_state_indices <- function(relprobs_row, nums, maxprob, if_ties="takefirst
 		}
 	
 	return(index_of_ML_state_s)
+	}
+
+
+# Takes the inferred probabilities; returns 1 for the highest-probability state (taking
+# the first in a tie) and 0 for all others.  This is for comparison of the "best-guess"
+# state to the true state.
+# 
+# Function assumes the first state is the correct one, when there is a tie
+# in the inferences
+get_inf_ML_stateprobs <- function(inf_ancprobs, return_1based_indices=TRUE)
+	{
+	defaults='
+	return_1based_indices=TRUE
+	'
+
+	inf_ML_statenums = get_ML_states(relprobs_matrix=inf_ancprobs, unlist_TF=TRUE, return_1based_indices=return_1based_indices)
+	inf_ML_stateprobs = matrix(data=0, nrow=nrow(inf_ancprobs), ncol=ncol(inf_ancprobs))
+	
+	# Loop through the rows
+	for (i in 1:nrow(inf_ancprobs))
+		{
+		inf_ML_stateprobs[i,inf_ML_statenums[i]] = 1
+		}
+		
+	return(inf_ML_stateprobs)
 	}
 
 

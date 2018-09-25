@@ -154,11 +154,12 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -183,11 +184,11 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		ys = 0.5
@@ -210,8 +211,15 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -351,19 +359,25 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		d = optim_result2$par[1]
 		e = optim_result2$par[2]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			}
 		}
 
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ys = 0.5
@@ -384,7 +398,13 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -415,7 +435,7 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 
 
 #######################################################
-# bears_2param_standard_fast
+# bears_2param_standard_fast_fixnode
 #######################################################
 #' 2-parameter model, fixed cladogenesis model (as in LAGRANGE)
 #' 
@@ -561,11 +581,11 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -590,11 +610,11 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		ys = 0.5
@@ -617,8 +637,15 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -762,19 +789,25 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 # 		d = optim_result2$par[1]
 # 		e = optim_result2$par[2]
 # 		} else {
-# 		d = optim_result2$par[[1]][1]
-# 		e = optim_result2$par[[1]][2]
+#		if (packageVersion("optimx") < 2013)
+#			{
+#			d = optim_result2$par[[1]][1]
+#			e = optim_result2$par[[1]][2]
+#			} else {
+#			d = optim_result2$p1
+#			e = optim_result2$p2
+#			}
 # 		}
 # 
 # 	# Equal dispersal in all directions (unconstrained)
 # 	# Equal extinction probability for all areas
 # 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 # 
-# 	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+# 	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 # 	elist = rep(e, length(areas))
 # 	
 # 	# Set up the instantaneous rate matrix (Q matrix)
-# 	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+# 	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 # 
 # 	# Cladogenic model
 # 	ys = 0.5
@@ -795,7 +828,13 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 # 	# Cladogenesis model inputs
 # 	spPmat_inputs = NULL
 # 	states_indices = states_list
-# 	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+# 
+# 	# shorten the states_indices by 1 (cutting the 
+# 	# null range state from the speciation matrix)
+# 	if (include_null_range == TRUE)
+# 		{
+# 		states_indices[1] = NULL
+# 		} # END if (include_null_range == TRUE)
 # 	spPmat_inputs$l = states_indices
 # 	spPmat_inputs$s = ys
 # 	spPmat_inputs$v = v
@@ -982,11 +1021,12 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -1011,11 +1051,11 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		ys = 0.5
@@ -1038,8 +1078,15 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = 0
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -1179,19 +1226,25 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 		d = optim_result2$par[1]
 		e = optim_result2$par[2]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			}
 		}
 
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ys = 0.5
@@ -1212,7 +1265,13 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -1380,11 +1439,12 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -1405,11 +1465,11 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		ys = 0.5
@@ -1432,8 +1492,15 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -1576,19 +1643,25 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 		d = optim_result2$par[1]
 		e = optim_result2$par[2]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			}
 		}
 
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ys = 0.5
@@ -1609,7 +1682,13 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -1791,11 +1870,11 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.9999
@@ -1816,11 +1895,11 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		ys = 1
@@ -1843,8 +1922,15 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = 0.0001
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -1987,19 +2073,25 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 		d = optim_result2$par[1]
 		e = optim_result2$par[2]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			}
 		}
 
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ys = 1
@@ -2022,7 +2114,13 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = 0.0001
 	spPmat_inputs$v = v
@@ -2195,11 +2293,11 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.9999
@@ -2220,11 +2318,11 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		ys = 1
@@ -2247,8 +2345,15 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+
 		spPmat_inputs$s = 0.0001
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -2391,19 +2496,25 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 		d = optim_result2$par[1]
 		e = optim_result2$par[2]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			}
 		}
 
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ys = 1
@@ -2426,7 +2537,13 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = 0.0001
 	spPmat_inputs$v = v
@@ -2596,11 +2713,11 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -2621,11 +2738,11 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -2649,8 +2766,15 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -2795,20 +2919,27 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 # 		e = optim_result2$par[2]
 # 		j = optim_result2$par[3]
 # 		} else {
-# 		d = optim_result2$par[[1]][1]
-# 		e = optim_result2$par[[1]][2]
-# 		j = optim_result2$par[[1]][3]
+#		if (packageVersion("optimx") < 2013)
+#			{
+#			d = optim_result2$par[[1]][1]
+#			e = optim_result2$par[[1]][2]
+#			j = optim_result2$par[[1]][3]
+#			} else {
+#			d = optim_result2$p1
+#			e = optim_result2$p2
+#			j = optim_result2$p3
+#			}
 # 		}
 # 
 # 	# Equal dispersal in all directions (unconstrained)
 # 	# Equal extinction probability for all areas
 # 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 # 
-# 	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+# 	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 # 	elist = rep(e, length(areas))
 # 	
 # 	# Set up the instantaneous rate matrix (Q matrix)
-# 	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+# 	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 # 
 # 	# Cladogenic model
 # 	ysv = 1-j
@@ -2830,7 +2961,13 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 # 	# Cladogenesis model inputs
 # 	spPmat_inputs = NULL
 # 	states_indices = states_list
-# 	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+# 
+# 	# shorten the states_indices by 1 (cutting the 
+# 	# null range state from the speciation matrix)
+# 	if (include_null_range == TRUE)
+# 		{
+# 		states_indices[1] = NULL
+# 		} # END if (include_null_range == TRUE)
 # 	spPmat_inputs$l = states_indices
 # 	spPmat_inputs$s = ys
 # 	spPmat_inputs$v = v
@@ -2990,11 +3127,11 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -3015,11 +3152,11 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -3043,8 +3180,15 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -3189,20 +3333,27 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		e = optim_result2$par[2]
 		j = optim_result2$par[3]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		j = optim_result2$par[[1]][3]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			j = optim_result2$par[[1]][3]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			j = optim_result2$p3
+			}
 		}
 
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -3224,7 +3375,13 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -3391,11 +3548,11 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -3416,11 +3573,11 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = 0
@@ -3444,8 +3601,15 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -3589,20 +3753,27 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 		e = optim_result2$par[2]
 		v = optim_result2$par[3]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		v = optim_result2$par[[1]][3]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			v = optim_result2$par[[1]][3]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			v = optim_result2$p3
+			}
 		}
 	j = 0
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -3624,7 +3795,13 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -3796,11 +3973,11 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -3821,11 +3998,11 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -3849,8 +4026,15 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -4008,20 +4192,28 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		j = optim_result2$par[3]
 		v = optim_result2$par[4]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		j = optim_result2$par[[1]][3]
-		v = optim_result2$par[[1]][4]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			j = optim_result2$par[[1]][3]
+			v = optim_result2$par[[1]][4]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			j = optim_result2$p3
+			v = optim_result2$p4
+			}
 		}
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -4043,7 +4235,13 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -4212,11 +4410,11 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -4237,11 +4435,11 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -4267,8 +4465,15 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -4414,21 +4619,30 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 		v = optim_result2$par[4]
 		maxent_constraint_01 = optim_result2$par[5]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		j = optim_result2$par[[1]][3]
-		v = optim_result2$par[[1]][4]
-		maxent_constraint_01 = optim_result2$par[[1]][5]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			j = optim_result2$par[[1]][3]
+			v = optim_result2$par[[1]][4]
+			maxent_constraint_01 = optim_result2$par[[1]][5]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			j = optim_result2$p3
+			v = optim_result2$p4
+			maxent_constraint_01 = optim_result2$p5
+			}
 		}
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -4450,7 +4664,13 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -4611,11 +4831,11 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -4636,11 +4856,11 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -4669,8 +4889,15 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -4816,21 +5043,30 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 		v = optim_result2$par[4]
 		maxent_constraint_01 = optim_result2$par[5]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		j = optim_result2$par[[1]][3]
-		v = optim_result2$par[[1]][4]
-		maxent_constraint_01 = optim_result2$par[[1]][5]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			j = optim_result2$par[[1]][3]
+			v = optim_result2$par[[1]][4]
+			maxent_constraint_01 = optim_result2$par[[1]][5]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			j = optim_result2$p3
+			v = optim_result2$p4
+			maxent_constraint_01 = optim_result2$p5
+			}
 		}
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -4852,7 +5088,13 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -5024,11 +5266,11 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -5049,11 +5291,11 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -5079,8 +5321,15 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -5227,21 +5476,30 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 		v = optim_result2$par[4]
 		maxent01v_param = optim_result2$par[5]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		j = optim_result2$par[[1]][3]
-		v = optim_result2$par[[1]][4]
-		maxent01v_param = optim_result2$par[[1]][5]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			j = optim_result2$par[[1]][3]
+			v = optim_result2$par[[1]][4]
+			maxent01v_param = optim_result2$par[[1]][5]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			j = optim_result2$p3
+			v = optim_result2$p4
+			maxent01v_param = optim_result2$p5
+			}
 		}
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -5265,7 +5523,13 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -5438,11 +5702,11 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -5463,11 +5727,11 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -5493,8 +5757,15 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -5642,22 +5913,32 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 		maxent01_param = optim_result2$par[5]
 		maxent01v_param = optim_result2$par[6]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		j = optim_result2$par[[1]][3]
-		v = optim_result2$par[[1]][4]
-		maxent01_param = optim_result2$par[[1]][5]
-		maxent01v_param = optim_result2$par[[1]][6]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			j = optim_result2$par[[1]][3]
+			v = optim_result2$par[[1]][4]
+			maxent01_param = optim_result2$par[[1]][5]
+			maxent01v_param = optim_result2$par[[1]][6]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			j = optim_result2$p3
+			v = optim_result2$p4
+			maxent01_param = optim_result2$p5
+			maxent01v_param = optim_result2$p6
+			}
 		}
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -5681,7 +5962,13 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -5856,11 +6143,11 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -5881,11 +6168,11 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 	
 		# Cladogenic model
 		j = params[3]
@@ -5911,8 +6198,15 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 		# Cladogenesis model inputs
 		spPmat_inputs = NULL
 		states_indices = states_list
-		states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+	
+		# shorten the states_indices by 1 (cutting the 
+		# null range state from the speciation matrix)
+		if (include_null_range == TRUE)
+			{
+			states_indices[1] = NULL
+			} # END if (include_null_range == TRUE)
 		spPmat_inputs$l = states_indices
+	
 		spPmat_inputs$s = ys
 		spPmat_inputs$v = v
 		spPmat_inputs$j = j
@@ -6060,22 +6354,32 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 		maxent01_param = optim_result2$par[5]
 		maxent01v_param = optim_result2$par[6]
 		} else {
-		d = optim_result2$par[[1]][1]
-		e = optim_result2$par[[1]][2]
-		j = optim_result2$par[[1]][3]
-		v = optim_result2$par[[1]][4]
-		maxent01_param = optim_result2$par[[1]][5]
-		maxent01v_param = optim_result2$par[[1]][6]
+		if (packageVersion("optimx") < 2013)
+			{
+			d = optim_result2$par[[1]][1]
+			e = optim_result2$par[[1]][2]
+			j = optim_result2$par[[1]][3]
+			v = optim_result2$par[[1]][4]
+			maxent01_param = optim_result2$par[[1]][5]
+			maxent01v_param = optim_result2$par[[1]][6]
+			} else {
+			d = optim_result2$p1
+			e = optim_result2$p2
+			j = optim_result2$p3
+			v = optim_result2$p4
+			maxent01_param = optim_result2$p5
+			maxent01v_param = optim_result2$p6
+			}
 		}
 	# Equal dispersal in all directions (unconstrained)
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=force_sparse)
 
 	# Cladogenic model
 	ysv = 1-j
@@ -6099,7 +6403,13 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 	# Cladogenesis model inputs
 	spPmat_inputs = NULL
 	states_indices = states_list
-	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
+
+	# shorten the states_indices by 1 (cutting the 
+	# null range state from the speciation matrix)
+	if (include_null_range == TRUE)
+		{
+		states_indices[1] = NULL
+		} # END if (include_null_range == TRUE)
 	spPmat_inputs$l = states_indices
 	spPmat_inputs$s = ys
 	spPmat_inputs$v = v
@@ -6277,11 +6587,11 @@ bears_2param_standard_slowQ_slowSP <- function(trfn = "Psychotria_5.2.newick", g
 	
 	
 	# Load the phylogenetic tree
-	phy = read.tree(file=trfn)
-
+	#phy = read.tree(file=trfn)
+	phy = check_trfn(trfn=trfn)
 
 	# The likelihood of each state at the tips
-	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas)
+	tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, include_null_range=include_null_range, maxareas=max_numareas)
 	tip_condlikes_of_data_on_each_state
 
 	maxent_constraint_01 = 0.0001
@@ -6302,11 +6612,11 @@ bears_2param_standard_slowQ_slowSP <- function(trfn = "Psychotria_5.2.newick", g
 		# Equal extinction probability for all areas
 		distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-		dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+		dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 		elist = rep(e, length(areas))
 		
 		# Set up the instantaneous rate matrix (Q matrix)
-		Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=FALSE)
+		Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=FALSE)
 	
 		# Cladogenic model
 		ys = 0.5
@@ -6379,11 +6689,11 @@ bears_2param_standard_slowQ_slowSP <- function(trfn = "Psychotria_5.2.newick", g
 	# Equal extinction probability for all areas
 	distances_mat = matrix(1, nrow=length(areas), ncol=length(areas))
 
-	dmat = matrix(d, nrow=length(areas), ncol=length(areas))
+	dmat_times_d = matrix(d, nrow=length(areas), ncol=length(areas))
 	elist = rep(e, length(areas))
 	
 	# Set up the instantaneous rate matrix (Q matrix)
-	Qmat = rcpp_states_list_to_DEmat(areas_list, states_list, dmat, elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=FALSE)
+	Qmat = rcpp_states_list_to_DEmat(areas_list=areas_list, states_list=states_list, dmat=dmat_times_d, elist=elist, include_null_range=TRUE, normalize_TF=TRUE, makeCOO_TF=FALSE)
 
 	# Cladogenic model
 	ys = 0.5

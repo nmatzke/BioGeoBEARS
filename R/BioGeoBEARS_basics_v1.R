@@ -14,7 +14,12 @@ require("cladoRcpp")
 #######################################################
 #' axisPhylo with more flexibility in labeling
 #' 
-#' Hacking axisPhylo to make it more flexible
+#' Hacking APE's axisPhylo() to make it more flexible.
+#' 
+#' Note: to have ages ending at, say, 2016 (for an analysis
+#' by calendar year), just set minage to "-2016".  
+#' This will produce e.g. "2013 2014 2015 2016" as
+#' x-axis labels.
 #' 
 #' @param side The side to plot on (default 1, bottom)
 #' @param roundlabels Number of digits to round to, if desired
@@ -32,7 +37,7 @@ require("cladoRcpp")
 #' @examples
 #' testval=1
 #' 
-axisPhylo2 <- function (side = 1, roundlabels=FALSE, minage=0, ...) 
+axisPhylo2 <- function (side = 1, roundlabels=TRUE, minage=0, ...) 
 	{
     lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
     if (lastPP$type %in% c("phylogram", "cladogram")) {
@@ -55,14 +60,19 @@ axisPhylo2 <- function (side = 1, roundlabels=FALSE, minage=0, ...)
             }
         }
     }
-    if (roundlabels)
+    
+    if (roundlabels == FALSE)
 		{
-		axis(side = side, at = c(maxi - x), labels = abs(minage+x), ...)
-		}
-	else
+	    label_nums = abs(minage+x)
+	    } # END  if (roundlabels == FALSE)
+	if (roundlabels == TRUE)
 		{
-		axis(side = side, at = c(maxi - x), labels = round(abs(minage+x), digits=roundlabels), ...)
-		}
+		label_nums = round(abs(minage+x), digits=roundlabels)
+		} # END if (roundlabels == TRUE)
+    
+	# Plot the axis labels
+	axis_at = axis(side = side, at = c(maxi - x), labels=label_nums, ...)
+	return(axis_at)
 	}
 
 
@@ -140,6 +150,9 @@ normat <- function(relative_matrix)
 #' an OTU has more than one geographic range in the original table, these should be 
 #' split by "|".
 #' 
+#' (4) optionally, the specimen to use as the representative of each tree 
+#' (marked with "yes")
+#' 
 #' When the pruning occurs, all tips belonging to the same species are cut, except the first.
 #'
 #' NOTE: Tips that should be cut because they are outgroups, or because they are geographically 
@@ -154,6 +167,9 @@ normat <- function(relative_matrix)
 #' region in xls$region. Default is NULL, in which case the program imposes A, B, C, D, etc. \code{areas_abbr}
 #' must have column headings \code{abbr} and \code{letter}.
 #' @param plot_intermediate If TRUE, the starting, ending, and intermediate stages of tree pruning are plotted.
+#' @param pick_specimens_to_use If TRUE, use the column xls$specimen_to_use to
+#' pick the specimen to represent the species (with "yes").  If the column, 0 "yes", or 
+#' >1 "yes" are found, reverts to default behavior (the first specimen is kept)
 #' @return The outputs are a \code{\link[base]{list}} with a pruned tree and, optionally, a tipranges object.
 #' @export
 #' @seealso \code{\link[ape]{drop.tip}}, \code{\link{define_tipranges_object}}, 
@@ -167,7 +183,7 @@ normat <- function(relative_matrix)
 #' areanames = getareas_from_tipranges_object(tipranges_object)
 #' areanames
 #'
-prune_specimens_to_species <- function(original_tr, xls, group_name="default", titletxt="", areas_abbr=NULL,  plot_intermediate=TRUE)#, inputs="Robjects", outputs="Robjects")
+prune_specimens_to_species <- function(original_tr, xls, group_name="default", titletxt="", areas_abbr=NULL,  plot_intermediate=TRUE, pick_specimens_to_use=FALSE)#, inputs="Robjects", outputs="Robjects")
 	{
 	runjunk='
 	group_name="default"; titletxt=""; areas_abbr=NULL;  plot_intermediate=TRUE
@@ -310,12 +326,12 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 	
 	#######################################################
 	# Cut the outgroups and taxa outside of your analysis 
-	# (represented by "out_group" or "Out")
+	# (represented by "out_group" or "Out" or "out" or "Outgroup" or "outgroup")
 	#######################################################
 	if ("region" %in% names(xls) == TRUE)
 		{
 		# Get outgroups and cut; also cut blank ranges
-		outgroups_TF = ((xls$region == "Out") + (xls$region == "out_group") + (xls$region == "") + (xls$region == " ")) == 1
+		outgroups_TF = ((xls$region == "Out") + (xls$region == "out_group") + (xls$region == "out") + (xls$region == "outgroup") + (xls$region == "Outgroup") + (xls$region == "") + (xls$region == " ")) == 1
 		outgroup_tips = xls$OTUs[outgroups_TF]
 		outgroup_species = unique(xls$species[outgroups_TF])
 		tmptxt = paste(outgroup_species, collapse=", ", sep="")
@@ -358,7 +374,7 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 		}
 	areas_abbr
 
-	# Go through and drop all non-uniq tips
+	# Go through and drop all non-unique tips
 	tmp_species_ranges_table = NULL
 	for (j in 1:length(species_uniq))
 		{
@@ -367,13 +383,37 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 		#######################################################
 		# Collapsing species
 		species_name = species_uniq[j]
-		cat("\nCollapsing OTUs to species: ", species_name, sep="")
+		cat("\n\n\nCollapsing OTUs to species: ", species_name, "...", sep="")
 
 		OTU_names_for_this_species_TF = xls$species == species_name
 		OTU_names_for_this_species = xls$OTUs[OTU_names_for_this_species_TF]
 	
 		# The OTU to keep/rename
-		OTU_to_keep = OTU_names_for_this_species[1]
+		if (pick_specimens_to_use == FALSE)
+			{
+			# Then just use the first one in the list
+			OTU_to_keep = OTU_names_for_this_species[1]
+			} else {
+			if ("specimen_to_use" %in% names(xls) == FALSE)
+				{
+				errortxt = paste("\n\nWARNING in prune_specimens_to_species(): option pick_specimens_to_use=TRUE only works if\nxls has a column named xls$specimen_to_use. Defaulting to just use the first\nspecimen: '", OTU_names_for_this_species[1], "'\n", sep="")
+				cat(errortxt)
+				OTU_to_keep = OTU_names_for_this_species[1]
+				} else {
+				list_of_specimen_yes_nos = xls$specimen_to_use[OTU_names_for_this_species_TF]
+				TF = list_of_specimen_yes_nos == "yes"
+				
+				# There should be one and only one "yes" per species; otherwise, default
+				if (sum(TF) == 1)
+					{
+					OTU_to_keep = OTU_names_for_this_species[TF]
+					} else {
+					errortxt = paste("\n\nWARNING in prune_specimens_to_species(): something other than one 'yes' found in\nxls$specimen_to_use for species '", species_name, "'. Defaulting to just use the first\nspecimen: '", OTU_names_for_this_species[1], "'\n", sep="")
+					cat(errortxt)
+					OTU_to_keep = OTU_names_for_this_species[1]
+					} # end if (sum(TF) == 1)
+				} # end if ("specimen_to_use" %in% names(xls) == FALSE)
+			} # end if (pick_specimens_to_use == FALSE)
 	
 		# Leave the first OTU, drop the rest
 		OTU_names_for_this_species = OTU_names_for_this_species[-1]
@@ -444,7 +484,9 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 			tmp_species_ranges_table = rbind(tmp_species_ranges_table, tmprow)
 			} # End if regions
 		} # end forloop
-
+	
+	
+	
 	if ("region" %in% names(xls) == TRUE)
 		{
 		tmp_species_ranges_table = dfnums_to_numeric(adf2(tmp_species_ranges_table))
@@ -453,9 +495,12 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 		tipranges = letter_strings_to_tipranges_df(letter_strings=tmp_species_ranges_table$letterrange, letter_codes_in_desired_order=areas_abbr$letter, tipnames_in_order=tmp_species_ranges_table$species)
 		tipranges
 
+
 		# Then, check the output
 		tipnames1 = sort(tr$tip.label)
 		tipnames2 = sort(rownames(tipranges@df))
+
+
 		
 		if (length(tipnames1) != length(tipnames2))
 			{
@@ -476,7 +521,7 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 			
 			stop(stoptxt)
 			}
-		
+
 		
 		TF = rowSums(tipranges@df) == 0
 		if (sum(TF) > 0)
@@ -487,12 +532,9 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 			print(tipranges@df[TF, ])
 			stop(stoptxt)
 			}
+		} # end if (sum(TF) != length(TF))
 
-
-
-		}
-
-	is.ultrametric(tr)
+	#is.ultrametric(tr)
 
 
 
@@ -502,6 +544,7 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 
 
 
+		print("Checkpoint #2")
 
 
 
@@ -514,6 +557,7 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 		axisPhylo()
 		title(titletxt)
 		}
+
 
 
 	pruning_results = list()
@@ -569,7 +613,7 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 #'
 getareas_from_tipranges_object <- function(tipranges)
 	{
-	areanames = names(tipranges@df)
+	areanames = as.character(names(tipranges@df))
 	return(areanames)
 	}
 
@@ -643,8 +687,16 @@ get_tiplabel_ranges <- function(tipranges, tr, sep="")
 #' 
 #' @param tipranges An object of class \code{tipranges}.
 #' @param phy A phylogenetic tree (\code{\link[ape]{ape}} object of class \code{\link[ape]{phylo}})
-#' @param states_list A complete list of the different states, of class \code{\link{list}} form
+#' @param states_list A complete list of the different states, of class \code{\link{list}}
+#' form. If NULL (default), the states list is generated based on maxareas.
 #' @param maxareas The maximum number of areas in a geographic range, if the user does 
+#' @param include_null_range If states_list is NULL, when the states_list 
+#' is generated, should the null range be included? Default TRUE.
+#' @param useAmbiguities If TRUE, ambiguities ("?") are allowed in the geography input 
+#' file. Any possible ranges/states that include the area with the question mark are 
+#' given a tip likelihood of 1.
+#' @trait A trait, in the format of class tipranges (i.e., 
+#' loaded from a trait coded as a geography object). Default is NULL.
 #' @return \code{tip_condlikes_of_data_on_each_state} For each tip/row, likelihood of that tip's data under each possible true geographic range (columns)
 #' @export
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}}, 
@@ -686,14 +738,14 @@ get_tiplabel_ranges <- function(tipranges, tr, sep="")
 #' tipranges=tipranges_object, phy=phy, states_list=states_list, maxareas=maxareas )
 #' tip_condlikes_of_data_on_each_state
 #' 
-tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, states_list=NULL, maxareas=length(getareas_from_tipranges_object(tipranges)) )
+tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, states_list=NULL, maxareas=length(getareas_from_tipranges_object(tipranges)), include_null_range=TRUE, useAmbiguities=FALSE, trait_as_tip_condlikes=NULL, allow_null_tips=FALSE)
 	{
 	default='
 	tipranges
 	phy
 	maxareas=length(getareas_from_tipranges_object(tipranges))
 	'
-	require(cladoRcpp)
+	#require(cladoRcpp)
 	
 	# Reorder the edge matrix into pruningwise order
 	# This (may be) CRUCIAL!!
@@ -701,13 +753,18 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 	# NOTE: phy and phy2 have the tips in the same order, it's just the
 	# edge matrix that gets reordered...
 	
+	#print(tipranges)
+	
 	areanames = getareas_from_tipranges_object(tipranges)
+	areas_list_0based = seq(0, (length(areanames)-1), 1)
+	#print(areanames)
+	#print("stop here")
 	
 	if (is.null(states_list))
 		{
 		cat("Note: tipranges_to_tip_condlikes_of_data_on_each_state() is\n")
 		cat("      creating 'states_list' automatically.\n")
-		states_list = areas_list_to_states_list_new(areas=areanames, include_null_range=TRUE, maxareas=maxareas)
+		states_list = areas_list_to_states_list_new(areas=areas_list_0based, include_null_range=include_null_range, maxareas=maxareas)
 		}
 	
 	# Check for ranges greater than the maximum number of areas in states_list
@@ -715,34 +772,323 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 	# Reduce states_list accordingly, if any are found
 	if (sum(ranges_greater_than_maxareas_TF) > 0)
 		{
-		states_list = states_list[ranges_greater_than_maxareas_TF]
+		states_list = states_list[ranges_greater_than_maxareas_TF == FALSE]
 		}
-	
-	# Get the letter code ranges for each binary state
-	letter_code_ranges = binary_ranges_to_letter_codes(tipranges, areanames)
-	names(letter_code_ranges) = NULL
-	letter_code_ranges
-	
-	# Empty matrix of tip relative likelihoods
-	tip_condlikes_of_data_on_each_state = matrix(data=0, nrow=length(phy$tip.label), ncol=length(states_list))
 
-	# Make sure the letter code ranges are in the same order as the 
+
+	
+	tipranges_orig = tipranges
+	# Make sure the letter code ranges and number code ranges are in the same order as the 
 	# phylogeny tips
 	tipranges_df_order = match(phy$tip.label, rownames(tipranges@df))
-	letter_code_ranges = letter_code_ranges[tipranges_df_order]
-	
-	# Collapse the states to text fields and compare
-	states_list_txt = sapply(X=states_list, FUN=paste, collapse="", sep="")
-	for (rownum in 1:nrow(tip_condlikes_of_data_on_each_state))
+
+	tipranges_in_treeTip_order = tipranges@df[tipranges_df_order,]
+	if (ncol(tipranges@df) == 1)
 		{
-		temp_state = paste(letter_code_ranges[rownum][[1]], collapse="", sep="")
-		state_match_TF = temp_state == states_list_txt
-		tip_condlikes_of_data_on_each_state[rownum, state_match_TF] = 1
+		tmpmat = matrix(data=tipranges_in_treeTip_order, ncol=1)
+		tmpdf = as.data.frame(tipranges_in_treeTip_order, stringsAsFactors=FALSE)
+		names(tmpdf) = names(tipranges@df)
+		row.names(tmpdf) = row.names(tipranges@df)[tipranges_df_order]
+		tipranges_in_treeTip_order = tmpdf
 		}
+	
+	tipranges@df = tipranges_in_treeTip_order
+	
+	if ((useAmbiguities == FALSE) || (sum(tipranges@df == "?") == 0))
+		{
+		# Get the letter code ranges for each binary state
+		tipranges@df[tipranges@df == "?"] = 0
+		letter_code_ranges = binary_ranges_to_letter_codes(tipranges=tipranges, areanames=areanames)
+		number_code_ranges_0based = binary_ranges_to_letter_codes(tipranges=tipranges, areanames=areas_list_0based)
+		#print(letter_code_ranges)
+		names(letter_code_ranges) = NULL
+		letter_code_ranges
+		
+	
+		# Empty matrix of tip relative likelihoods
+		tip_condlikes_of_data_on_each_state = matrix(data=0, nrow=length(phy$tip.label), ncol=length(states_list))
+
+		#letter_code_ranges = letter_code_ranges[tipranges_df_order]
+		#number_code_ranges_0based = number_code_ranges_0based[tipranges_df_order]
+		
+		# Collapse the states to text fields and compare
+		allowed_states_list_0based_txt = sapply(X=states_list, FUN=paste, collapse="_", sep="")
+		#print(allowed_states_list_0based_txt)
+		#print(allowed_states_list_0based_txt)
+		for (rownum in 1:nrow(tip_condlikes_of_data_on_each_state))
+			{
+			temp_state_txt = paste(letter_code_ranges[rownum][[1]], collapse="_", sep="")
+			temp_state = paste(number_code_ranges_0based[rownum][[1]], collapse="_", sep="")
+			
+			# Check null range for test
+			changeflag = FALSE
+			if (temp_state == "")
+				{
+				temp_state = "NA"
+				changeflag = TRUE
+				}
+			
+			# See if this tipstate matches anything in the list
+			state_match_TF = temp_state == allowed_states_list_0based_txt
+			
+			# See if this tipstate matches anything in the list
+			# If not...
+			# Error check added 2015-04-03
+			if (sum(state_match_TF) == 0)
+				{
+				error_txt = paste0("STOP ERROR in tipranges_to_tip_condlikes_of_data_on_each_state():\n\nYour geography file has a tip range which is not allowed in your specified state space (states_list).\n\nThe tip is: ", phy$tip.label[rownum], "\nThe 0-based areas in the range is/are: '", temp_state, "'\nThe letter codes in the range are: '", temp_state_txt, "'\n\n\nTry editing either the geography file, the areas_allowed or areas_adjacency matrices, or the states_list (non-stratified) / lists_of_states_lists_0based (stratified).\n")
+				cat("\n\n")
+				cat(error_txt)
+				cat("\n")
+				stop(error_txt)
+				} # END if (sum(state_match_TF) == 0)
+
+			if (changeflag == TRUE)
+				{
+				temp_state = ""
+				changeflag = FALSE
+				}
+
+			
+			tip_condlikes_of_data_on_each_state[rownum, state_match_TF] = 1
+			} # END for (rownum in 1:nrow(tip_condlikes_of_data_on_each_state))
+		# End tip likelihoods calculation when useAmbiguities==FALSE
+		} else {
+		# useAmbiguities == TRUE
+		
+		# In the add-fossils-randomly script, these changes are made to the geography file:
+		#
+		# "presence-only" means:
+		#    areas with 1s are 1s
+		#    areas with 0s are ?
+		#
+		# "absence-only" means:
+		#    areas with 1s are ?
+		#    areas with 0s are 0
+		# 
+		# "both" means:
+		# use ranges like usual
+		#
+
+		# Get the basic likelihoods (no ambiguities)
+		tipranges_noAmbig = tipranges
+		Qs_mat_TF = tipranges_noAmbig@df == "?"
+		
+		someQs_TF = rowSums(Qs_mat_TF) > 0
+		tipranges_noAmbig@df[Qs_mat_TF] = 0
+		letter_code_ranges = binary_ranges_to_letter_codes(tipranges=tipranges_noAmbig, areanames=areanames)
+		number_code_ranges_0based = binary_ranges_to_letter_codes(tipranges=tipranges_noAmbig, areanames=areas_list_0based)
+		#print(letter_code_ranges)
+		names(letter_code_ranges) = NULL
+		letter_code_ranges
+		
+	
+		# Empty matrix of tip relative likelihoods
+		tip_condlikes_of_data_on_each_state_noAmbigs = matrix(data=0, nrow=length(phy$tip.label), ncol=length(states_list))
+
+		#letter_code_ranges = letter_code_ranges[tipranges_df_order]
+		#number_code_ranges_0based = number_code_ranges_0based[tipranges_df_order]
+		
+		# Collapse the states to text fields and compare
+		allowed_states_list_0based_txt = sapply(X=states_list, FUN=paste, collapse="_", sep="")
+		#print(allowed_states_list_0based_txt)
+		#print(allowed_states_list_0based_txt)
+		for (rownum in 1:nrow(tip_condlikes_of_data_on_each_state_noAmbigs))
+			{
+			temp_state_txt = paste(letter_code_ranges[rownum][[1]], collapse="_", sep="")
+			temp_state = paste(number_code_ranges_0based[rownum][[1]], collapse="_", sep="")
+			
+			# See if this tipstate matches anything in the list
+			state_match_TF = temp_state == allowed_states_list_0based_txt
+			
+			# See if this tipstate matches anything in the list
+			# If not...
+			# Error check added 2015-04-03
+			if (sum(state_match_TF) == 1)
+				{
+				tip_condlikes_of_data_on_each_state_noAmbigs[rownum, state_match_TF] = 1
+				} # END if (sum(state_match_TF) == 0)
+
+			} # END for (rownum in 1:nrow(tip_condlikes_of_data_on_each_state))
+
+	
+		#tipranges_orig
+		tipranges_hard_0s_as_1s = tipranges
+		tipranges_hard_1s = tipranges
+		
+		
+		# ALL ?'s get all-1s for tip likelihoods
+		
+		
+		# KNOWN ABSENCES FROM AREAS (HARD ZEROS)
+		# ANY TIP WITH THESE AREAS GETS LIKELIHOOD 0
+		# Get the letter code ranges for each binary state
+		# RE-CODE the 0s as 1s
+		tipranges_hard_0s_as_1s@df[tipranges_hard_0s_as_1s@df == "?"] = "z"
+		tipranges_hard_0s_as_1s@df[tipranges_hard_0s_as_1s@df == "1"] = "z"
+		tipranges_hard_0s_as_1s@df[tipranges_hard_0s_as_1s@df == "0"] = "1" # flip 0s to 1s
+		tipranges_hard_0s_as_1s@df[tipranges_hard_0s_as_1s@df == "z"] = "0" # flip 1s and ?s to 0s
+
+		# KNOWN PRESENCES FROM AREAS (HARD ZEROS)
+		# ANY TIP WITH*OUT* THESE AREAS GETS LIKELIHOOD 0
+		# Get the letter code ranges for each binary state
+		tipranges_hard_1s@df[tipranges_hard_1s@df == "?"] = "0"
+		tipranges_hard_1s@df[tipranges_hard_1s@df == "1"] = "1" # flip 1s to 1
+
+		# Lists of areas that are DISALLOWED
+		letter_code_ranges = binary_ranges_to_letter_codes(tipranges=tipranges_hard_0s_as_1s, areanames=areanames)
+		names(letter_code_ranges) = NULL
+		number_code_ranges_0based = binary_ranges_to_letter_codes(tipranges=tipranges_hard_0s_as_1s, areanames=areas_list_0based)
+		letter_code_ranges
+
+		# Make sure the letter code ranges are in the same order as the 
+		# phylogeny tips
+		#tipranges_df_order = match(phy$tip.label, rownames(tipranges_hard_0s_as_1s@df))
+		#letter_code_ranges = letter_code_ranges[tipranges_df_order]
+		#number_code_ranges_0based = number_code_ranges_0based[tipranges_df_order]
+
+
+
+		# Lists of areas that are REQUIRED
+		letter_code_ranges_hard_1s_as_0s = binary_ranges_to_letter_codes(tipranges=tipranges_hard_1s, areanames=areanames)
+		names(letter_code_ranges_hard_1s_as_0s) = NULL
+		number_code_ranges_0based_hard_1s_as_0s = binary_ranges_to_letter_codes(tipranges=tipranges_hard_1s, areanames=areas_list_0based)
+		letter_code_ranges_hard_1s_as_0s
+
+		# Make sure the letter code ranges are in the same order as the 
+		# phylogeny tips
+		#tipranges_df_order = match(phy$tip.label, rownames(tipranges_hard_0s_as_1s@df))
+		#letter_code_ranges_hard_1s_as_0s = letter_code_ranges_hard_1s_as_0s[tipranges_df_order]
+		#number_code_ranges_0based_hard_1s_as_0s = number_code_ranges_0based_hard_1s_as_0s[tipranges_df_order]
+
+
+		
+		# Empty matrix of tip relative likelihoods
+		# HERE, set likelihoods to 1, then set some to 0
+		tip_condlikes_of_data_on_each_state = matrix(data=1, nrow=length(phy$tip.label), ncol=length(states_list))
+
+		# Here, the only meaningful thing is areas with 1s; exclude these states/ranges
+		
+		# Exclude the null range! (add it back in, if warranted, later on)
+		tip_condlikes_of_data_on_each_state[,1] = 0
+
+		# Quick function to find states in states_list that have disallowed areas
+		return_TF_disallowed_areas_in_state <- function(state, disallowed_areas_0based)
+			{
+			TF = any(disallowed_areas_0based %in% state)
+			return(TF)
+			}
+
+		# Quick function to find states in states_list that DON'T have REQUIRED areas
+		return_TF_required_areas_not_found_in_state <- function(state, required_areas_0based)
+			{
+			TF = any((required_areas_0based %in% state) == FALSE)
+			return(TF)
+			}
+
+		
+		# Collapse the states to text fields and compare
+		# 
+		#states_list_txt = sapply(X=states_list, FUN=paste, collapse="_", sep="")
+		for (rownum in 1:nrow(tip_condlikes_of_data_on_each_state))
+			{
+			#temp_states = letter_code_ranges[rownum][[1]]
+			# temp_states: A 0-based list of area lists, by tip
+			# states_list: A 0-based list of area lists, by state (column of the tip_condlikes matrix)
+			disallowed_areas_0based = number_code_ranges_0based[rownum][[1]]
+			
+			# KNOWN ABSENCE AREAS -- set states with those areas to likelihood zero
+			# Any state in states_list that has one or more of the 0-based areas in temp_states
+			states_list 
+			
+			disallowed_TF = sapply(X=states_list, FUN=return_TF_disallowed_areas_in_state, disallowed_areas_0based=disallowed_areas_0based)
+			tip_condlikes_of_data_on_each_state[rownum,disallowed_TF] = 0
+
+
+			# KNOWN PRESENCE AREAS -- set states WITHOUT those areas to likelihood zero
+			required_areas_0based = number_code_ranges_0based_hard_1s_as_0s[rownum][[1]]
+			
+			# Any state in states_list that has one or more of the 0-based areas in temp_states
+			states_list 
+			
+			required_areas_missing_TF = sapply(X=states_list, FUN=return_TF_required_areas_not_found_in_state, required_areas_0based=required_areas_0based)
+			tip_condlikes_of_data_on_each_state[rownum,required_areas_missing_TF] = 0
+
+			
+# 			if (length(temp_states) <= 0)
+# 				{
+# 				next()	# skip to the next loop
+# 				}
+# 			
+# 			# E.g., temp_states = "A", "B"
+# 			for (j in 1:length(temp_states))
+# 				{
+# 				temp_state = temp_states[j]
+# 				#print(temp_state)
+# 				state_match_TF = grepl(pattern=temp_state, x=states_list_txt)
+# 				tip_condlikes_of_data_on_each_state[rownum, state_match_TF] = 0
+# 				}
+			} # END for (rownum in 1:nrow(tip_condlikes_of_data_on_each_state))
+		
+
+		# Check for rows with ALL Qs
+		rows_with_allQs_TF = check_tipranges_for_allQs(tipranges, symbol_to_check="?")
+		tip_condlikes_of_data_on_each_state[rows_with_allQs_TF, ] = 1
+
+		# Also, set the null range (if it exists) to likelihood 0
+		#state_match_TF = states_list_txt == "_"
+		#tip_condlikes_of_data_on_each_state[, state_match_TF] = 0
+
+		#print("printing 'tip_condlikes_of_data_on_each_state':")
+		#print(tip_condlikes_of_data_on_each_state[1:5,])
+		
+		
+		# Input any tip likelihoods for rows WITHOUT any ambiguities (no ?s)
+		tip_condlikes_of_data_on_each_state[someQs_TF==FALSE, ] = tip_condlikes_of_data_on_each_state_noAmbigs[someQs_TF==FALSE, ]
+		
+		# But, if you have any rows that are actually null range (e.g. fossils), set those to likelihood c(1, 0, 0, ...)
+		# Check for rows with ALL ZEROS (null ranges, i.e. fossils)
+		if (include_null_range == TRUE)
+			{
+			rows_with_all0s_TF = check_tipranges_for_allQs(tipranges, symbol_to_check="0")
+			#print(tipranges_orig)
+			#print(rows_with_all0s_TF)
+			state_match_TF = is.na(states_list)
+			tip_condlikes_of_data_on_each_state[rows_with_all0s_TF, ][,state_match_TF] = 1
+			}
+		
+		#print("printing 'tip_condlikes_of_data_on_each_state':")
+		#print(tip_condlikes_of_data_on_each_state[1:5,])
+		#stop()
+		
+		} # End tip likelihoods calculation when useAmbiguities==TRUE
+	
+	
+	# If there is a trait, double-up the conditional likelihoods matrix
+	# (or x3, or whatever) 
+	if (is.null(trait_as_tip_condlikes) == FALSE)
+		{
+		tip_condlikes_of_data_on_each_state_ORIG = tip_condlikes_of_data_on_each_state
+		ntrait_states = ncol(trait_as_tip_condlikes)
+		ncols_orig = ncol(tip_condlikes_of_data_on_each_state)
+		nrows_orig = nrow(tip_condlikes_of_data_on_each_state)
+		
+		new_tip_condlikes = matrix(data=0, nrow=nrows_orig, ncol=ntrait_states*ncols_orig)
+		
+		# Loop through the trait states
+		for (traitstate in 1:ntrait_states)
+			{
+			startcol = ((traitstate-1) * ncols_orig) + 1
+			endcol = (traitstate * ncols_orig) 
+			new_tip_condlikes[,startcol:endcol] = tip_condlikes_of_data_on_each_state * trait_as_tip_condlikes[,traitstate]			
+			} # END for (traitstate in 1:ntrait_states)
+		
+		# Use the new tip_condlikes
+		tip_condlikes_of_data_on_each_state = new_tip_condlikes
+		} # END if (is.null(trait_as_tip_condlikes) == FALSE)
 	
 	return(tip_condlikes_of_data_on_each_state)
 	}
-
 
 
 
@@ -821,7 +1167,11 @@ areas_list_to_states_list_new <- function(areas=c("A","B","C"), maxareas=length(
 	
 	
 	# Initialize the states_list to the correct size
+	#print(areas)
+	#print(maxareas)
+	#print(include_null_range)
 	nstates = numstates_from_numareas(numareas=length(areas), maxareas=maxareas, include_null_range=include_null_range)
+	#print(nstates)
 	states_list = rep(NA, times=nstates)
 
 	if (split_ABC == TRUE)
@@ -873,6 +1223,58 @@ areas_list_to_states_list_new <- function(areas=c("A","B","C"), maxareas=length(
 	}
 	
 
+#######################################################
+# states_list_0based_to_ranges_txt_list
+#######################################################
+# Convert a 0-based list of range lists 
+# to a list of collapsed text for ranges
+#' areanames = c("K", "O", "M", "H")
+#' state_indices_0based = list(c(NA), c(0), c(1), c(2), c(3), c(0,1),
+#' c(0,2), c(0,3), c(1,2), c(1,3), c(2,3), c(0,1,2), c(0,1,3), c(1,2,3),
+#' c(0,1,2,3))
+#' ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based,
+#' areanames)
+#' 
+#' # areas = getareas_from_tipranges_object(tipranges)
+#' max_range_size = 4
+#' state_indices_0based = rcpp_areas_list_to_states_list(areas=areas, 
+#' maxareas=max_range_size, include_null_range=TRUE)
+#' ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based,
+#' areanames)
+states_list_0based_to_ranges_txt_list <- function(state_indices_0based, areanames)
+	{
+	examples_txt='
+	areanames = c("K", "O", "M", "H")
+	state_indices_0based = list(c(NA), c(0), c(1), c(2), c(3), c(0,1), c(0,2), c(0,3), c(1,2), c(1,3), c(2,3), c(0,1,2), c(0,1,3), c(1,2,3), c(0,1,2,3))
+	ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based, areanames)
+	ranges_list
+
+	# areas = getareas_from_tipranges_object(tipranges)
+	max_range_size = 4
+	state_indices_0based = rcpp_areas_list_to_states_list(areas=areas, 	maxareas=max_range_size, include_null_range=TRUE)
+	ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based, areanames)
+	ranges_list
+	'#END examples_txt
+	
+	
+	states_list = state_indices_0based
+	
+	# Get the list of text ranges
+	ranges_list = list()
+	for (i in 1:length(states_list))
+		{
+		if ( ( length(states_list[[i]]) == 1) && (is.na(states_list[[i]])) )
+			{
+			ranges_list[[i]] = "_"
+			} else {
+			ranges_list[[i]] = paste(areanames[ 1+states_list[[i]] ], sep="", collapse="")
+			}
+		}
+	ranges_list
+	
+	return(ranges_list)
+	} # END states_list_0based_to_ranges_txt()
+	
 
 
 
@@ -990,6 +1392,15 @@ binary_range_to_letter_code_list <- function(tipranges_row, areanames)
 binary_ranges_to_letter_codes <- function(tipranges, areanames)
 	{
 	letter_code_ranges = apply(X=tipranges@df, MARGIN=1, FUN=binary_range_to_letter_code_list, areanames=areanames)
+	
+	# DAMN, BUG DUE TO INCONSISTENT APPLY OUTPUT!!
+	# 2017-06-23_NJM
+	# Produces a matrix instead of a list if all ranges are the same length!
+	# This then truncates ranges!
+	if (is.matrix(letter_code_ranges) == TRUE)
+		{
+		letter_code_ranges = lapply(X=seq_len(ncol(letter_code_ranges)), FUN=function(i) letter_code_ranges[,i])
+		}
 	
 	return(letter_code_ranges)
 	}
@@ -1125,7 +1536,96 @@ letter_strings_to_tipranges_df <- function(letter_strings, letter_codes_in_desir
 	# Use function to put in well-defined object
 	tipranges = define_tipranges_object(tmpdf=binary_ranges_df)
 	
+
+	
+	
 	return(tipranges)
+	}
+
+
+#######################################################
+# allQs
+#######################################################
+#' Checks a row/vector to see if it is all question marks ("?")
+#' 
+#' Rows with geography data consisting of all "?" (i.e., no information) 
+#' are NOT allowed in standard BioGeoBEARS analysis.  Presumably any 
+#' specimen/fossil was observed somewhere, whether or not the complete 
+#' range is known.  
+#'
+#' By changing symbol_to_check, you can search for other values, e.g., all 0s.
+#' 
+#' This function is used by check_tipranges_for_allQs(). 
+#' 
+#' @rowvals The values of a row in tipranges@df
+#' @symbol_to_check The symbol to check for uniformity in the row. Default "?".
+#' @return \code{TRUE} or \code{FALSE}
+#' @export
+#' @seealso \code{\link{check_tipranges_for_allQs}}, \code{\link{getranges_from_LagrangePHYLIP}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#'	 @cite SmithRee2010_CPPversion
+#' @examples
+#' 
+#' x = c("?", "?", "?", "?")
+#' allQs(rowvals=x, symbol_to_check="?")
+#' 
+#' x = c("0", "0", "0", "0")
+#' allQs(rowvals=x, symbol_to_check="0")
+#' 
+allQs <- function(rowvals, symbol_to_check="?")
+	{
+	TF = rowvals == symbol_to_check
+	if (sum(TF) == length(rowvals))
+		{
+		return(TRUE)
+		} else {
+		return(FALSE)
+		}
+	}
+	
+
+#######################################################
+# check_tipranges_for_allQs
+#######################################################
+#' Checks row of a tipranges object for all-question-marks ("?")
+#' 
+#' Rows with geography data consisting of all "?" (i.e., no information) 
+#' are NOT allowed in standard BioGeoBEARS analysis.  Presumably any 
+#' specimen/fossil was observed somewhere, whether or not the complete 
+#' range is known.  
+#'
+#' This function is used by getranges_from_LagrangePHYLIP(). 
+#' 
+#' @rowvals The values of a row in tipranges@df
+#' @symbol_to_check The symbol to check for uniformity in the row. Default "?".
+#' @return \code{TRUE} or \code{FALSE}
+#' @export
+#' @seealso \code{\link{allQs}}, \code{\link{getranges_from_LagrangePHYLIP}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#'	 @cite ReeSmith2008
+#'	 @cite SmithRee2010_CPPversion
+#' @examples
+#' 
+#' x = c("?", "?", "?", "?")
+#' allQs(x)
+#' 
+check_tipranges_for_allQs <- function(tipranges, symbol_to_check="?")
+	{
+	TF = apply(X=tipranges@df, MARGIN=1, FUN=allQs, symbol_to_check=symbol_to_check)
+	return(TF)
 	}
 
 
@@ -1154,6 +1654,7 @@ letter_strings_to_tipranges_df <- function(letter_strings, letter_codes_in_desir
 #' The file above is part of the geographic range data for the Hawaiian \emph{Psychotria} dataset used by \cite{ReeSmith2008}.
 #'
 #' @param lgdata_fn The LAGRANGE geographic data file to be read.
+#' @param block_allQs Should a row with all "?" be blocked? Default \code{TRUE}.
 #' @return \code{tipranges_object} An object of class \code{tipranges}
 #' @export
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
@@ -1177,15 +1678,56 @@ letter_strings_to_tipranges_df <- function(letter_strings, letter_codes_in_desir
 #' fn = np(paste(extdata_dir, "/Psychotria_geog.data", sep=""))
 #' getranges_from_LagrangePHYLIP(lgdata_fn=fn)
 #' 
-getranges_from_LagrangePHYLIP <- function(lgdata_fn="lagrange_area_data_file.data")
+getranges_from_LagrangePHYLIP <- function(lgdata_fn, block_allQs=TRUE)
 	{
 	# Make a tipranges instance
 	#tipranges_object = define_tipranges_object()
 	#tipranges_object@df = dfnums_to_numeric(tipranges_object@df)
+
+	if (file.exists(lgdata_fn) == FALSE)
+		{
+		txt = paste0("STOP ERROR in getranges_from_LagrangePHYLIP(): file lgdata_fn='", lgdata_fn, "' was not found. Check your inputs and your working directory (wd). Use commands like:\n - 'getwd()' to get your current R working directory (wd)\n - '?setwd' to see how to set your R working directory\n - 'list.files()' to list the files in your current R working directory\n - and use 'system('open .')' to open your file browsing program from the R command line (this works on macs, at least). ")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		} # END if (file.exists(lgdata_fn) == FALSE)
+
 	
 	# Read the Lagrange geographic ranges data file
 	tmp_blah = read_PHYLIP_data(lgdata_fn)
-	tmp_input = adf2(data.matrix(tmp_blah))
+	
+	# 2014-11-18_NJM Error check: do NOT allow duplicated area names
+	area_names = colnames(tmp_blah)
+	uniq_area_names = unique(area_names)
+	if (length(uniq_area_names) != length(area_names))
+		{
+		# Count area names
+		countnames = rep(0, times=length(uniq_area_names))
+		for (i in 1:length(uniq_area_names))
+			{
+			TF = uniq_area_names[i] == area_names
+			countnames[i] = sum(TF)
+			}
+		TF_gt_1 = countnames > 1
+		
+		error_txt = paste("\n\nSTOP ERROR in getranges_from_LagrangePHYLIP(): Duplicate area names in your geography text file.\n\nEach area name should be used only once. The counts of each name are printed below:\n\n", sep="")
+		cat(error_txt)
+		
+		dup_names = adf2(cbind(uniq_area_names, countnames))
+		names(dup_names) = c("area_name", "count")
+		print(dup_names)
+		
+		cat("\n\n")
+		error_txt2 = paste("STOP ERROR in getranges_from_LagrangePHYLIP(): Duplicate area names in your geography text file. Each area name should be used only once.", sep="")
+		stop(error_txt2)
+		} # END if (length(uniq_area_names) != length(area_names))
+	
+	
+	# 2014-05-05_NJM: Changed to allow question marks
+	#tmp_input = adf2(data.matrix(tmp_blah))
+	tmp_input = adf2(tmp_blah)
+
 	#nums_as_char = as.numeric(unlist(tmp_input))
 	#tmpdf = adf2(matrix(data=nums_as_char, nrow=nrow(tmp_input), ncol=ncol(tmp_input), byrow=TRUE))
 	#names(tmpdf) = names(tmp_input)
@@ -1199,9 +1741,24 @@ getranges_from_LagrangePHYLIP <- function(lgdata_fn="lagrange_area_data_file.dat
 	# you can get the dataframe with
 	# tipranges_object@df
 	
-	tipranges_object@df = adf2(data.matrix(tipranges_object@df))
-	
+	# 2014-05-05_NJM: Changed to allow question marks
+	#tipranges_object@df = adf2(data.matrix(tipranges_object@df))
+	tipranges_object@df = adf2(tipranges_object@df)
 	rownames(tipranges_object@df) = rownames(tmp_blah)
+	
+	# Check for allQs (all question marks)
+	TF = check_tipranges_for_allQs(tipranges_object)
+	if ( (block_allQs==TRUE) && (any(TF)) )
+		{
+		errortxt = paste("\n\nERROR in getranges_from_LagrangePHYLIP():\n", 
+						  "Your input geography file, '", lgdata_fn, "' has all '?'\n", 
+						  "in these rows:\n\n", sep="")
+		cat(errortxt)
+		print(tipranges_object@df[TF, ])
+		
+		cat("\n\nPlease fix the geography file before proceeding.\n\n", sep="")
+		stop("Stopping getranges_from_LagrangePHYLIP() on geography file error.")
+		}
 	
 	return(tipranges_object)
 	}
@@ -1586,11 +2143,21 @@ save_tipranges_to_LagrangePHYLIP <- function(tipranges_object, lgdata_fn="lagran
 #' tmpdf	# Note that regionnames are only 
 #' # used if they are NOT specified in the file.
 #' 
-read_PHYLIP_data <- function(lgdata_fn="lagrange_area_data_file.data", regionnames=NULL)
+read_PHYLIP_data <- function(lgdata_fn, regionnames=NULL)
 	{
 	setup='
 	lgdata_fn = "/Users/nickm/Desktop/__projects/_2011-07-15_Hannah_spider_fossils/_data/lagrange_for_nick2/palp_no_Lacun.data"
 	'
+
+	if (file.exists(lgdata_fn) == FALSE)
+		{
+		txt = paste0("STOP ERROR in read_PHYLIP_data(): file lgdata_fn='", lgdata_fn, "' was not found. Check your inputs and your working directory (wd). Use commands like:\n - 'getwd()' to get your current R working directory (wd)\n - '?setwd' to see how to set your R working directory\n - 'list.files()' to list the files in your current R working directory\n - and use 'system('open .')' to open your file browsing program from the R command line (this works on macs, at least). ")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		} # END if (file.exists(lgdata_fn) == FALSE)
+
 
 	# Read the 1st line, split on whitespaces
 	firstline = scan(lgdata_fn, what="character", nlines=1)
@@ -1617,14 +2184,49 @@ read_PHYLIP_data <- function(lgdata_fn="lagrange_area_data_file.data", regionnam
 	tmpdf = matrix(data=NA, nrow=ntips, ncol=nareas)
 	
 	# Parse the remaining rows
-	tmplines = scan(lgdata_fn, what="character", sep="\t", skip=1)
+	# Original:
+	#tmplines = scan(lgdata_fn, what="character", sep="\t", skip=1)
+	# 2016-05-08_more flexible:
+	tmplines = scan(lgdata_fn, what="character", skip=1, strip.white=TRUE)
 	tmplines = matrix(data=tmplines, ncol=2, byrow=TRUE)
 	tmplines
 
 	tipnames = tmplines[,1]
 	areas_char = tmplines[,2]
 	
+	# Check for missing characters (e.g. 3 instead of 4)
+	incorrect_numchars_TF = nchar(areas_char) != nareas
+	
+	if ( sum(incorrect_numchars_TF) > 0)
+		{
+		errortxt = paste("\n\nSTOP ERROR in read_PHYLIP_data():\n\nThe first line of data file '", lgdata_fn, "' says that you have ", ntips, " tips and ", nareas, " characters/columns/areas.\n\nHowever, ", sum(incorrect_numchars_TF), " rows have the wrong number of areas.\n\nPrinting these out:\n\n", sep="")
+		cat(errortxt)
+		
+		rows_to_print = tmplines[incorrect_numchars_TF,]
+		print(rows_to_print)
+		
+		cat("\n\n")
+		
+		errortxt = "STOPPING on ERROR in read_PHYLIP_data()."
+		stop(errortxt)
+		}
+	
 	areas_char2 = unlist(mapply(strsplit, x=areas_char, split=""))
+	
+	# Error check! Do the number of data
+	# the number of species * number of areas?
+	TF = length(areas_char2) == (ntips * nareas)
+	if (TF == FALSE)
+		{
+		cat("\n\n===============================================\n")
+		txt = paste0("STOP ERROR in BioGeoBEARS::read_PHYLIP_data(), which is usually called by BioGeoBEARS::getranges_from_LagrangePHYLIP(). These functions try to load your geographic areas file (which is basically in PHYLIP format).\n\nThe problem is that, in the first line of your geography data file, you specified that:\n\n* the number of species = ", ntips, "\n* the number of areas   = ", nareas, "\n\nThis means you should have (", ntips, " x ", nareas, ") = ", ntips * nareas, " entries (1s and 0s) in your geography matrix.  However, read_PHYLIP_data() only sees ", length(areas_char2), " of these.  Check your geography file in a plain-text editor.  Likely things to check:\n\n* Your number of species is incorrect\n* Your number of areas is incorrect\n* You have accidentally left out a 1 or 0 somewhere\n* (or included an extra area, dropped or duplicated a line somewhere etc.)\n\nPlease fix the error(s) in a plain-text editor, re-save the geography file, and re-run.\n\nThis long and detailed error message was brought to you by Nick, who has made these mistakes many times himself. Please have a nice day.")
+		cat("\n\n")
+		cat(txt)
+		cat("\n===============================================\n\n")
+		stop(txt)
+		} # END if (TF == FALSE)
+	
+	
 	areas_char3 = matrix(data=areas_char2, nrow=ntips, byrow=TRUE)
 
 
@@ -1670,9 +2272,15 @@ read_PHYLIP_data <- function(lgdata_fn="lagrange_area_data_file.data", regionnam
 # 	# Cladogenesis model inputs
 # 	spPmat_inputs = NULL
 # 	states_indices = states_list
-# 	states_indices[1] = NULL	# shorten the states_indices by 1 (cutting the null range state from the speciation matrix)
-# 	l = states_indices
+# 
+# 	# shorten the states_indices by 1 (cutting the 
+# 	# null range state from the speciation matrix)
+# 	if (include_null_range == TRUE)
+# 		{
+# 		states_indices[1] = NULL
+# 		} # END if (include_null_range == TRUE)
 # 	spPmat_inputs$l = states_indices
+# 	l = states_indices
 # 	spPmat_inputs$s = ys
 # 	spPmat_inputs$v = v
 # 	spPmat_inputs$j = j
@@ -1790,9 +2398,17 @@ default_states_list <- function ()
 #' 
 #' @param areas A list of areas; if \code{NULL}, the states list will be used.
 #' @param states_list A list of states, where each state consists of a list of areas. A default example list is provided.
-#' @param dispersal_multipliers_matrix Default NULL.
-#' @param distances_mat Default NULL.
-#' @param x_exponent Default 0.
+#' @param dispersal_multipliers_matrix Input dispersal_multipliers_matrix, which will
+#' be multiplied by further modifiers. Default NULL, which will populate the matrix 
+#' with 1s.
+#' @param w_exponent Exponent on dispersal multipliers matrix. Default 1 (the dispersal multipliers
+#' are not modified).
+#' @param distances_mat Distances matrix (can be any distance 
+#' measure the user likes, however). Default NULL.
+#' @param x_exponent Exponent on distance. Default 0.
+#' @param envdistances_mat Environmental distances matrix (can be any distance 
+#' measure the user likes, however). Default NULL.
+#' @param n_exponent Exponent on the environmental distances matrix. Default 0.
 #' @return \code{dispersal_multiplier_matrix} A square matrix, with 1s for all cells.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_de}}
@@ -1810,7 +2426,7 @@ default_states_list <- function ()
 #' c("A","B"), c("B","C"), c("A","C"), c("A","B","C")))
 #' make_dispersal_multiplier_matrix(areas=c("A","B","C","D"))
 #' 
-make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=default_states_list(), dispersal_multipliers_matrix=NULL, distances_mat=NULL, x_exponent=0)
+make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=default_states_list(), dispersal_multipliers_matrix=NULL, distances_mat=NULL, envdistances_mat=NULL, w_exponent=0, x_exponent=0, n_exponent=0)
 	{
 	defaults='
 	areas=NULL
@@ -1842,6 +2458,7 @@ make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=default_sta
 		names(dispersal_multipliers_matrix) = areas
 		rownames(dispersal_multipliers_matrix) = areas
 		}
+	dispersal_multipliers_matrix = dispersal_multipliers_matrix ^ w_exponent
 	
 	# If the distances matrix is NOT null, multiply it by the distance^-x_exponent matrix
 	if (!is.null(distances_mat))
@@ -1850,6 +2467,15 @@ make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=default_sta
 		prob_dispersal_by_distance = distances_mat ^ (1 * x_exponent)
 		dispersal_multipliers_matrix = dispersal_multipliers_matrix * prob_dispersal_by_distance
 		}
+
+	# If the distances matrix is NOT null, multiply it by the distance^-x_exponent matrix
+	if (!is.null(envdistances_mat))
+		{
+		# By default, x_exponent is 0, i.e., no effect
+		prob_dispersal_by_distance = envdistances_mat ^ (1 * n_exponent)
+		dispersal_multipliers_matrix = dispersal_multipliers_matrix * prob_dispersal_by_distance
+		}
+
 	
 	return(dispersal_multipliers_matrix)
 	}
@@ -4181,7 +4807,7 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 		maxent_constraint = quantile(x=seq(0,length(tmpstates)+1,1), probs=maxent_constraint_01)
 
 		# Apply Maxent constraint to weight the different numbers of areas
-		maxent_result = maxent(constr=maxent_constraint, states=tmpstates)
+		maxent_result = FD::maxent(constr=maxent_constraint, states=tmpstates)
 		probs_of_subset_ranges = maxent_result$prob
 		probs_of_subset_ranges
 		
@@ -4315,7 +4941,7 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 	maxent_constraint_01v = 0.0001
 	maxent_constraint_v = quantile(x=seq(0,max_numareas+1,1), probs=maxent_constraint_01v)
 	maxent_constraint_v
-	'
+	' # END defaults
 	
 	# Require FD for maxent function
 	# FD::maxent
@@ -4333,7 +4959,20 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 	# (redundant with NA declaration of relprob_vicar_matrix;
 	#  basically an error check)
 	relprob_vicar_matrix[1,] = NA_val
-
+	
+	# Error check (2015-03-29)
+	# If the state space is reduced so that the maximum number of areas is 1, 
+	# just return:
+	# [,1]
+    # [1,]    1
+    if (max_numareas < 2)
+    	{
+    	relprob_vicar_matrix[1,] = 1
+    	return(relprob_vicar_matrix)
+    	} # END if (max_numareas < 2)
+    
+    
+	
 	for (rownum in 2:max_numareas)
 		{
 		numcols = rownum
@@ -4355,7 +4994,7 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 		maxent_constraint = quantile(x=seq(0,length(possible_vicariance_smaller_rangesizes)+1,1), probs=maxent_constraint_01v)
 		
 		# Apply Maxent constraint to weight the different numbers of areas
-		maxent_result = maxent(constr=maxent_constraint, states=possible_vicariance_smaller_rangesizes)
+		maxent_result = FD::maxent(constr=maxent_constraint, states=possible_vicariance_smaller_rangesizes)
 		probs_of_subset_ranges = maxent_result$prob
 		probs_of_subset_ranges
 		
@@ -4973,5 +5612,142 @@ process_optim <- function(optim_results, max_num_params=NULL)
 
 
 
+
+
+#######################################################
+# Scale BioGeoBEARS params table
+#######################################################
+scale_BGB_params <- function(orig_params_table, add_smin=0, add_smax=1)
+	{
+	defaults='
+	orig_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
+	add_smin=0
+	add_smax=1
+	scaled_params_table = scale_BGB_params(orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table)
+	scaled_params_table
+	unscaled_params_table = unscale_BGB_params(scaled_params_table)
+	unscaled_params_table
+	
+	unscaled_params_table$min == orig_params_table$min
+	unscaled_params_table$max == orig_params_table$max
+	unscaled_params_table$init == orig_params_table$init
+	unscaled_params_table$est == orig_params_table$est
+	'
+	
+	params_table = orig_params_table
+	
+	# Add columns if needed:
+	# smin = scaled min
+	# smax = scaled max
+	if (is.null(params_table$smin))
+		{
+		params_table$smin = add_smin
+		}
+	if (is.null(params_table$smax))
+		{
+		params_table$smax = add_smax
+		}
+	min_scaled = params_table$smin
+	max_scaled = params_table$smax
+	newscale = max_scaled - min_scaled
+	
+	# Get the "real" original min and max (could be outside the stated min and max,
+	# e.g. when a value is fixed to 0)
+	orig_min = params_table$min
+	for (i in 1:length(orig_min))
+		{
+		orig_min[i] = min(c(params_table$min[i], params_table$init[i], params_table$est[i]))
+		}
+	orig_max = params_table$max
+	for (i in 1:length(orig_max))
+		{
+		orig_max[i] = max(c(params_table$max[i], params_table$init[i], params_table$est[i]))
+		}
+	params_table$orig_min = orig_min
+	params_table$orig_max = orig_max
+	
+	# Calculate the original scale accordingly
+	orig_scale = orig_max - orig_min
+	
+	# New minimums
+	params_table$min = (((orig_params_table$min - orig_min) / orig_scale) * newscale) + min_scaled
+
+	# New maximums
+	params_table$max = (((orig_params_table$max - orig_min) / orig_scale) * newscale) + min_scaled
+
+	# New initials
+	params_table$init = (((orig_params_table$init - orig_min) / orig_scale) * newscale) + min_scaled
+
+	# New estimates
+	params_table$est = (((orig_params_table$est - orig_min) / orig_scale) * newscale) + min_scaled
+	
+	return(params_table)
+	}
+
+
+unscale_BGB_params <- function(scaled_params_table)
+	{
+	defaults='
+	orig_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
+	add_smin=0
+	add_smax=1
+	scaled_params_table = scale_BGB_params(orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table)
+	scaled_params_table
+	unscaled_params_table = unscale_BGB_params(scaled_params_table)
+	unscaled_params_table
+	
+	unscaled_params_table$min == orig_params_table$min
+	unscaled_params_table$max == orig_params_table$max
+	unscaled_params_table$init == orig_params_table$init
+	unscaled_params_table$est == orig_params_table$est
+	'
+	
+	params_table = scaled_params_table
+	
+	# Error checks
+	if (is.null(params_table$smin))
+		{
+		stop("ERROR: unscale_BGB_params() requires a BioGeoBEARS params_table, with columns smin, smax, orig_min, orig_max. You are missing at least one of these.")
+		}
+	if (is.null(params_table$smax))
+		{
+		stop("ERROR: unscale_BGB_params() requires a BioGeoBEARS params_table, with columns smin, smax, orig_min, orig_max. You are missing at least one of these.")
+		}
+	if (is.null(params_table$orig_min))
+		{
+		stop("ERROR: unscale_BGB_params() requires a BioGeoBEARS params_table, with columns smin, smax, orig_min, orig_max. You are missing at least one of these.")
+		}
+	if (is.null(params_table$orig_max))
+		{
+		stop("ERROR: unscale_BGB_params() requires a BioGeoBEARS params_table, with columns smin, smax, orig_min, orig_max. You are missing at least one of these.")
+		}
+
+
+	min_scaled = params_table$smin
+	max_scaled = params_table$smax
+	newscale = max_scaled - min_scaled
+	
+	# Get the "real" original min and max (could be outside the stated min and max,
+	# e.g. when a value is fixed to 0)
+	orig_min = params_table$orig_min
+	orig_max = params_table$orig_max
+	
+	# Calculate the original scale accordingly
+	orig_scale = orig_max - orig_min
+	
+	# New minimums
+	params_table$min = (((scaled_params_table$min - min_scaled) / newscale) * orig_scale) + orig_min
+
+	# New maximums
+	params_table$max = (((scaled_params_table$max - min_scaled) / newscale) * orig_scale) + orig_min
+
+	# New initials
+	params_table$init = (((scaled_params_table$init - min_scaled) / newscale) * orig_scale) + orig_min
+
+	# New estimates
+	params_table$est = (((scaled_params_table$est - min_scaled) / newscale) * orig_scale) + orig_min
+	
+	return(params_table)
+	} # END unscale_BGB_params <- function(scaled_params_table)
 
 
