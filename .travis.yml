@@ -6,9 +6,20 @@
 
 language: c
 
-r_binary_packages: Rcpp, ape, phytools, phylobase, optimx, GenSA, xtable, plotrix, gdata
+r_binary_packages:
+  - Rcpp
+  - ape
+  - phytools
+  - phylobase
+  - optimx
+  - GenSA
+  - xtable
+  - plotrix
+  - gdata
 
-r_github_packages: nmatzke/rexpokit, nmatzke/cladoRcpp
+r_github_packages: 
+  - nmatzke/rexpokit
+  - nmatzke/cladoRcpp
 
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh

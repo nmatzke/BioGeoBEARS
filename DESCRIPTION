@@ -6,7 +6,7 @@ Date: 2018-09-26
 Authors@R: c(person("Nicholas J.", "Matzke", email = "matzke@berkeley.edu", role =
         c("aut", "cre", "cph")))
 Maintainer: Nicholas J. Matzke <matzke@berkeley.edu>
-Depends: rexpokit, cladoRcpp, ape, phylobase, methods
+Depends: rexpokit, cladoRcpp, ape, phylobase, methods, phytools
 Imports: optimx, parallel, xtable, plotrix, gdata, GenSA
 LinkingTo: ape
 Suggests: testthat
