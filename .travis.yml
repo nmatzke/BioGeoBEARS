@@ -4,10 +4,40 @@
 # see the wiki:
 #   https://github.com/craigcitro/r-travis/wiki
 
-language: c
+language: r
+sudo: false
+cache: packages
 
-r_binary_packages:
+r_packages:
   - Rcpp
+  - devtools
+  - dlplyr
+  - tibble
+  - plogr
+  - rncl
+  - progress
+  - ade4
+  - gdata
+  - gtools
+  - stringi
+  - optimx
+  - XML
+  - xml2
+  - uuid
+  - RNeXML
+  - animation
+  - clusterGeneration
+  - coda
+  - combinat
+  - expm
+  - maps
+  - mnormt
+  - phangorn
+  - fastmatch
+  - igraph
+  - quadprog
+  - plotrix
+  - scatterplot3d
   - ape
   - phytools
   - phylobase
