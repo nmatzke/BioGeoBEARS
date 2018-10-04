@@ -7,7 +7,7 @@ Authors@R: c(person("Nicholas J.", "Matzke", email = "matzke@berkeley.edu", role
         c("aut", "cre", "cph")))
 Maintainer: Nicholas J. Matzke <matzke@berkeley.edu>
 Remotes: github::nmatzke/rexpokit, github::nmatzke/cladoRcpp
-Depends: rexpokit, cladoRcpp, ape, phylobase, methods, phytools
+Depends: rexpokit, cladoRcpp, ape, phylobase, methods, phytools, FD
 Imports: optimx, parallel, xtable, plotrix, gdata, GenSA
 LinkingTo: ape
 Suggests: testthat

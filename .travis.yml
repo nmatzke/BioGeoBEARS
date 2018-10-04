@@ -11,6 +11,7 @@ r_packages:
   - Rcpp
   - devtools
   - dlplyr
+  - FD
   - tibble
   - plogr
   - rncl
