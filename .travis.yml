@@ -4,8 +4,48 @@
 # see the wiki:
 #   https://github.com/craigcitro/r-travis/wiki
 
-language: c
+language: r
 sudo: false
+
+r_binary_packages:
+  - Rcpp
+  - devtools
+  - dlplyr
+  - FD
+  - tibble
+  - plogr
+  - rncl
+  - progress
+  - ade4
+  - gdata
+  - gtools
+  - stringi
+  - optimx
+  - XML
+  - xml2
+  - uuid
+  - RNeXML
+  - animation
+  - clusterGeneration
+  - coda
+  - combinat
+  - expm
+  - maps
+  - mnormt
+  - phangorn
+  - fastmatch
+  - igraph
+  - quadprog
+  - plotrix
+  - scatterplot3d
+  - ape
+  - phytools
+  - phylobase
+  - optimx
+  - GenSA
+  - xtable
+  - plotrix
+  - gdata
 
 r_packages:
   - Rcpp
@@ -55,8 +95,9 @@ before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
-install:
-  - ./travis-tool.sh install_deps
+
+#install:
+#  - ./travis-tool.sh install_deps
 
 script: ./travis-tool.sh run_tests
 
