@@ -9,6 +9,7 @@ sudo: false
 
 r_binary_packages:
   - Rcpp
+  - snow
   - devtools
   - dlplyr
   - FD
@@ -49,6 +50,7 @@ r_binary_packages:
 
 r_packages:
   - Rcpp
+  - snow
   - devtools
   - dlplyr
   - FD
