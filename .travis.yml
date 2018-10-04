@@ -24,3 +24,9 @@ notifications:
     on_failure: change
 
 sudo: required
+
+after_success:
+  - cat /home/travis/build/nmatzke/BioGeoBEARS/BioGeoBEARS.Rcheck/00check.log
+  - cat /home/travis/build/nmatzke/BioGeoBEARS/BioGeoBEARS.Rcheck/00install.out
+  - Rscript -e 'devtools::install();devtools::test()'
+  
