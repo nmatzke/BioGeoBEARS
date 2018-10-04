@@ -101,7 +101,7 @@ before_install:
 install:
  - ./travis-tool.sh install_deps
 
-script: travis_wait 40 ./travis-tool.sh run_tests
+script: travis_wait 49 ./travis-tool.sh run_tests
 
 after_failure:
   - ./travis-tool.sh dump_logs
