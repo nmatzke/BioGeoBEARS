@@ -1,2 +1,3 @@
 library(testthat)
-test_check("BioGeoBEARS")
+library(BioGeoBEARS)
+test_package("BioGeoBEARS")
