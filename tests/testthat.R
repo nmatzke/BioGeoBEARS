@@ -1,3 +1,3 @@
 library(testthat)
 library(BioGeoBEARS)
-test_package("BioGeoBEARS")
+test_dir(path="tests")
