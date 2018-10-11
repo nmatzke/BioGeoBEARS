@@ -10,12 +10,14 @@ To install the GitHub version of BioGeoBEARS, first:
 1. Install the new versions of rexpokit and cladoRcpp, both available on CRAN (which gives you binaries for easy installation; the GitHub versions have to be compiled from source):
 
 ```install.packages("rexpokit")
-install.packages("cladoRcpp")```
+install.packages("cladoRcpp")
+```
 
 2. Install the new version of BioGeoBEARS from GitHub, using devtools:
 
 ```library(devtools)
-devtools::install_github("nmatzke/BioGeoBEARS")```
+devtools::install_github("nmatzke/BioGeoBEARS")
+```
 
 Benefit: you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
 
