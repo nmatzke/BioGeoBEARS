@@ -36,3 +36,13 @@ BioGeoBEARS version 1.1 also includes 156 unit-tests in the "tests" directory, u
 The tests all run successfully on my Mac, but they take too long to build in Travis-CI (which has a time-limit of 50 minutes). See [Build #24 for a successful build](https://travis-ci.org/nmatzke/BioGeoBEARS/builds/439942601) that does only some of the tests.
 
 (The present version of BioGeoBEARS will install from GitHub regardless of the unit-tests issue.)
+
+# CITATION INFORMATION
+Matzke, Nicholas J. (2018). BioGeoBEARS: BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts. version 1.1, published on GitHub on October 10, 2018. DOI: http://dx.doi.org/10.5281/zenodo.1463216
+
+**Release v1.1** registered on Zenodo: [![DOI](https://zenodo.org/badge/9406671.svg)](https://zenodo.org/badge/latestdoi/9406671)
+
+**Zenodo link for release:** https://zenodo.org/badge/latestdoi/9406671
+
+**Zenodo DOI for release:** http://dx.doi.org/10.5281/zenodo.1463216
+
