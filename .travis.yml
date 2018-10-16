@@ -47,51 +47,53 @@ r_binary_packages:
   - xtable
   - plotrix
   - gdata
+  - rexpokit
+  - cladoRcpp
 
-r_packages:
-  - Rcpp
-  - snow
-  - devtools
-  - dlplyr
-  - FD
-  - tibble
-  - plogr
-  - rncl
-  - progress
-  - ade4
-  - gdata
-  - gtools
-  - stringi
-  - optimx
-  - XML
-  - xml2
-  - uuid
-  - RNeXML
-  - animation
-  - clusterGeneration
-  - coda
-  - combinat
-  - expm
-  - maps
-  - mnormt
-  - phangorn
-  - fastmatch
-  - igraph
-  - quadprog
-  - plotrix
-  - scatterplot3d
-  - ape
-  - phytools
-  - phylobase
-  - optimx
-  - GenSA
-  - xtable
-  - plotrix
-  - gdata
+#r_packages:
+#  - Rcpp
+#  - snow
+#  - devtools
+#  - dlplyr
+#  - FD
+#  - tibble
+#  - plogr
+#  - rncl
+#  - progress
+#  - ade4
+#  - gdata
+#  - gtools
+#  - stringi
+#  - optimx
+#  - XML
+#  - xml2
+#  - uuid
+#  - RNeXML
+#  - animation
+#  - clusterGeneration
+#  - coda
+#  - combinat
+#  - expm
+#  - maps
+#  - mnormt
+#  - phangorn
+#  - fastmatch
+#  - igraph
+#  - quadprog
+#  - plotrix
+#  - scatterplot3d
+#  - ape
+#  - phytools
+#  - phylobase
+#  - optimx
+#  - GenSA
+#  - xtable
+#  - plotrix
+#  - gdata
 
-r_github_packages: 
-  - nmatzke/rexpokit
-  - nmatzke/cladoRcpp
+#r_github_packages: 
+#  - nmatzke/rexpokit
+#  - nmatzke/cladoRcpp
 
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
