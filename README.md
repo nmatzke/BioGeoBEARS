@@ -7,21 +7,21 @@ The GitHub repository contains all updates formerly posted on PhyloWiki. This in
 
 To install the GitHub version of BioGeoBEARS, first:
 
-1. Install the new versions of rexpokit and cladoRcpp, both available on CRAN (which gives you binaries for easy installation; the GitHub versions have to be compiled from source):
+1. Install the new versions of [rexpokit](https://CRAN.R-project.org/package=rexpokit) and [cladoRcpp](https://CRAN.R-project.org/package=cladoRcpp), both available on CRAN (which gives you binaries for easy installation; the GitHub versions have to be compiled from source):
 
 ```
 install.packages("rexpokit")
 install.packages("cladoRcpp")
 ```
 
-2. Install the new version of BioGeoBEARS from GitHub, using devtools:
+2. Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [devtools](https://CRAN.R-project.org/package=devtools):
 
 ```
 library(devtools)
-devtools::install_github("nmatzke/BioGeoBEARS")
+devtools::install_github(repo="nmatzke/BioGeoBEARS")
 ```
 
-Benefit: you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
+**Benefit:** you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
 
 
 # DESCRIPTION
@@ -33,6 +33,16 @@ BioGeoBEARS allows probabilistic inference of both historical biogeography (ance
 
 BioGeoBEARS version 1.1 also includes 156 unit-tests in the "tests" directory, using the R package "testthat". These check the likelihood calculations, ancestral state probabilities, and ML optimizations for regular, time-stratified, and trait-dependent models.
 
-The tests all run successfully on my Mac, but they take too long to build in Travis-CI (which has a time-limit of 50 minutes). See Build #24 for a successful build that does only some of the tests.
+The tests all run successfully on my Mac, but they take too long to build in Travis-CI (which has a time-limit of 50 minutes). See [Build #24 for a successful build](https://travis-ci.org/nmatzke/BioGeoBEARS/builds/439942601) that does only some of the tests.
 
-(The present version will install from GitHub regardless of the unit-tests issue.)
+(The present version of BioGeoBEARS will install from GitHub regardless of the unit-tests issue.)
+
+# CITATION INFORMATION
+Matzke, Nicholas J. (2018). BioGeoBEARS: BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts. version 1.1, published on GitHub on October 10, 2018. DOI: http://dx.doi.org/10.5281/zenodo.1463216
+
+**Release v1.1** registered on Zenodo: [![DOI](https://zenodo.org/badge/9406671.svg)](https://zenodo.org/badge/latestdoi/9406671)
+
+**Zenodo link for release:** https://zenodo.org/badge/latestdoi/9406671
+
+**Zenodo DOI for release:** http://dx.doi.org/10.5281/zenodo.1463216
+
