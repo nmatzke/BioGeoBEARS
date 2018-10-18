@@ -531,6 +531,11 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	require(cladoRcpp)
 	require(rexpokit)
 	
+	
+	# Wipe out any old/previous warnings()
+	assign("last.warning", NULL, envir = baseenv())
+	
+	
 	if (is.null(BioGeoBEARS_run_object$allow_null_tips))
 		{
 		BioGeoBEARS_run_object$allow_null_tips = FALSE
