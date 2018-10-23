@@ -2381,7 +2381,12 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 			cat(stoptxt1)
 			}
 		
-		stop(stoptxt1)
+		if (is.null(BioGeoBEARS_run_object$on_NaN_error) == TRUE)
+			{
+			stop(stoptxt1)
+			} else {
+			grand_total_likelihood = BioGeoBEARS_run_object$on_NaN_error
+			}
 		}
 	
 	
