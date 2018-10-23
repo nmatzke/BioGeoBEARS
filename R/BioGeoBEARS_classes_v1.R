@@ -1404,7 +1404,7 @@ calc_linked_params_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object
 #' @examples
 #' test=1
 #' 
-define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGeoBEARS_model_object=define_BioGeoBEARS_model_object(minval_anagenesis=1e-12, minval_cladogenesis=1e-5, maxval=5), trfn=NULL, geogfn=NULL, timesfn=NA, distsfn=NA, dispersal_multipliers_fn=NA, area_of_areas_fn=NA, areas_allowed_fn=NA, areas_adjacency_fn=NA, detects_fn=NA, controls_fn=NA, max_range_size=NA, states_list=NULL, force_sparse=FALSE, use_detection_model=FALSE, print_optim=TRUE, printlevel=0, on_NaN_error=-1e50, num_cores_to_use=NA, cluster_already_open=FALSE, use_optimx=TRUE, rescale_params=FALSE, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE, calc_ancprobs=TRUE, fixnode=NULL, fixlikes=NULL, speedup=TRUE, include_null_range=TRUE, min_branchlength=0.000001, tmpwd=getwd())
+define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGeoBEARS_model_object=define_BioGeoBEARS_model_object(minval_anagenesis=1e-12, minval_cladogenesis=1e-5, maxval=5), trfn=NULL, geogfn=NULL, timesfn=NA, distsfn=NA, dispersal_multipliers_fn=NA, area_of_areas_fn=NA, areas_allowed_fn=NA, areas_adjacency_fn=NA, detects_fn=NA, controls_fn=NA, max_range_size=NA, states_list=NULL, force_sparse=FALSE, use_detection_model=FALSE, print_optim=TRUE, printlevel=0, on_NaN_error=-1e50, num_cores_to_use=NA, cluster_already_open=FALSE, use_optimx=TRUE, rescale_params=FALSE, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE, calc_ancprobs=TRUE, fixnode=NULL, fixlikes=NULL, speedup=TRUE, include_null_range=TRUE, useAmbiguities=FALSE, min_branchlength=0.000001, tmpwd=getwd())
 	{
 	inputs = list()
 	
