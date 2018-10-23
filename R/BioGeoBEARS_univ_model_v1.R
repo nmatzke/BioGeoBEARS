@@ -65,7 +65,7 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 	
 	if (is.null(BioGeoBEARS_run_object$printlevel))
 		{
-		BioGeoBEARS_run_object$printlevel = 1
+		BioGeoBEARS_run_object$printlevel = 0
 		}
 	printlevel = BioGeoBEARS_run_object$printlevel
 	
@@ -1058,7 +1058,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	
 	if (is.null(BioGeoBEARS_run_object$printlevel))
 		{
-		BioGeoBEARS_run_object$printlevel = 1
+		BioGeoBEARS_run_object$printlevel = 0
 		}
 	printlevel = BioGeoBEARS_run_object$printlevel
 	

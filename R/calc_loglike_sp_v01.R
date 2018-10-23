@@ -739,7 +739,7 @@ check_if_state_is_allowed_by_adjacency <- function(state_0based_indexes, areas_a
 #' @examples
 #' testval=1
 #'
-calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=0.000001, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=1, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, include_null_range=TRUE, fixnode=NULL, fixlikes=NULL, stratified=FALSE, states_allowed_TF=NULL, m=NULL, jts_matrix=NULL, BioGeoBEARS_model_object=NULL, on_NaN_error=NULL)
+calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qmat, spPmat=NULL, min_branchlength=0.000001, return_what="loglike", probs_of_states_at_root=NULL, rootedge=FALSE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, include_null_range=TRUE, fixnode=NULL, fixlikes=NULL, stratified=FALSE, states_allowed_TF=NULL, m=NULL, jts_matrix=NULL, BioGeoBEARS_model_object=NULL, on_NaN_error=NULL)
 	{
 	defaults='
 	# Phylogeny
@@ -1422,7 +1422,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 # 				save(condlikes_Right_row, file="condlikes_Right.Rdata")
 # 
 # 				save(tip_probs_left, file="tip_probs_left.Rdata")
-# 				save(tip_probs_right, file="tip_probs_right.Rdata")
+# 				scalc_loglike_for_optim_stratifiedave(tip_probs_right, file="tip_probs_right.Rdata")
 # 
 # 				}
 # 			
@@ -1459,7 +1459,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				
 				if (is.null(on_NaN_error))
 					{
-					stop("\n\nStopping on error in dense exponentiation downpass (left branch): NaNs produced in likelihood calculation. This may mean your transition matrix disallows necessary transitions.  E.g., if your ranges are 'A' and 'B', and your model is DEC, then allowing range 'AB' as a possible state is required, so that you can get from 'A' to 'B' via 'AB' as the intermediate. Alternatively, NaNs can be produced sometimes if your Maximum Likelihood (ML) search proposes weird parameter values (such as a negative rate or weight) or a parameter so small that required transitions have a probability that machine precision rounds to zero or negative.  Sometimes this seems to occur because optim, optimx, etc. propose parameters slightly outside the user-specified upper and lower (min/max) boundaries for some reason. One solution is often to narrow the min/max limits. \n\nAnother solution: To have this error report an extremely low log-likelihood,, set BioGeoBEARS_run_object$on_NaN_error to something like -1e50.\n\n")
+					stop("\n\nStopping on error in dense exponentiation downpass (left branch): NaNs produced in likelihood calculation. This may mean your transition matrix disallows necessary transitions.  E.g., if your ranges are 'A' and 'B', and your model is DEC, then allowing range 'AB' as a possible state is required, so that you can get from 'A' to 'B' via 'AB' as the intermediate. Alternatively, NaNs can be produced sometimes if your Maximum Likelihood (ML) search proposes weird parameter values (such as a negative rate or weight) or a parameter so small that required transitions have a probability that machine precision rounds to zero or negative.  Sometimes this seems to occur because optim, optimx, etc. propose parameters slightly outside the user-specified upper and lower (min/max) boundaries for some reason. One solution is often to narrow the min/max limits. \n\nAnother solution: To have this error report an extremely low log-likelihood, set BioGeoBEARS_run_object$on_NaN_error to something like -1e50.\n\n")
 					}
 				
 				if ( (is.numeric(on_NaN_error)) && (return_what == "loglike") )
@@ -1505,7 +1505,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 
 				if (is.null(on_NaN_error))
 					{
-					stop("\n\nStopping on error in dense exponentiation downpass (right branch): NaNs produced in likelihood calculation. This may mean your transition matrix disallows necessary transitions.  E.g., if your ranges are 'A' and 'B', and your model is DEC, then allowing range 'AB' as a possible state is required, so that you can get from 'A' to 'B' via 'AB' as the intermediate. Alternatively, NaNs can be produced sometimes if your Maximum Likelihood (ML) search proposes weird parameter values (such as a negative rate or weight) or a parameter so small that required transitions have a probability that machine precision rounds to zero or negative.  Sometimes this seems to occur because optim, optimx, etc. propose parameters slightly outside the user-specified upper and lower (min/max) boundaries for some reason. One solution is often to narrow the min/max limits. \n\nAnother solution: To have this error report an extremely low log-likelihood,, set BioGeoBEARS_run_object$on_NaN_error to something like -1e50.\n\n")
+					stop("\n\nStopping on error in dense exponentiation downpass (right branch): NaNs produced in likelihood calculation. This may mean your transition matrix disallows necessary transitions.  E.g., if your ranges are 'A' and 'B', and your model is DEC, then allowing range 'AB' as a possible state is required, so that you can get from 'A' to 'B' via 'AB' as the intermediate. Alternatively, NaNs can be produced sometimes if your Maximum Likelihood (ML) search proposes weird parameter values (such as a negative rate or weight) or a parameter so small that required transitions have a probability that machine precision rounds to zero or negative.  Sometimes this seems to occur because optim, optimx, etc. propose parameters slightly outside the user-specified upper and lower (min/max) boundaries for some reason. One solution is often to narrow the min/max limits. \n\nAnother solution: To have this error report an extremely low log-likelihood, set BioGeoBEARS_run_object$on_NaN_error to something like -1e50.\n\n")
 					}
 				
 				if (printlevel > 0)
