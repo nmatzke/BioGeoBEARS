@@ -1460,13 +1460,10 @@ define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGe
 	inputs$include_null_range = include_null_range
 	
 	# 2014-05-07
-	inputs$useAmbiguities = FALSE
+	inputs$useAmbiguities = useAmbiguities
 
 	# 2016-02-24
 	inputs$min_branchlength = min_branchlength
-	
-	# 2016-02-24
-	inputs$printlevel = 1
 	
 	return(inputs)
 	}
