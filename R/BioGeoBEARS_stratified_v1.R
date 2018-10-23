@@ -946,7 +946,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 	BioGeoBEARS_run_object = inputs
 	if (is.null(inputs$printlevel))
 		{
-		inputs$printlevel = 1
+		inputs$printlevel = 0
 		}
 	printlevel = inputs$printlevel
 
@@ -2376,7 +2376,10 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 		"One possible cause of this: your dispersal matrix may be too restrictive; try changing\n",
 		"e.g. the 0 values to e.g. 0.0000001.  Good luck!", sep="")
 		
-		cat(stoptxt1)
+		if (printlevel > 0)
+			{
+			cat(stoptxt1)
+			}
 		
 		stop(stoptxt1)
 		}
