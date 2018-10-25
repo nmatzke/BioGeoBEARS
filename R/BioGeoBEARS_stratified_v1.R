@@ -903,10 +903,10 @@ chainsaw2 <- function(tr, timepoint=10, return_pieces=TRUE, remove_root_edge=TRU
 #' @examples
 #' testval=1
 #'
-calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=0.000001, return_what="loglike", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, include_null_range=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE, m=NULL)
+calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=0.000001, return_what="loglike", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=FALSE, printlevel=0, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=NULL, calc_ancprobs=FALSE, include_null_range=TRUE, fixnode=NULL, fixlikes=NULL, inputs=inputs, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=FALSE, calc_TTL_loglike_from_condlikes_table=TRUE)
 	{
 	defaults='
-	Qmat=NULL; spPmat=NULL; min_branchlength=0.000001; return_what="loglike"; probs_of_states_at_root=NULL; rootedge=FALSE; sparse=FALSE; printlevel=1; use_cpp=TRUE; input_is_COO=FALSE; spPmat_inputs=NULL; cppSpMethod=3; cluster_already_open=NULL; calc_ancprobs=FALSE; include_null_range=TRUE; fixnode=NULL; fixlikes=NULL; inputs=inputs; allareas=allareas; all_states_list=all_states_list; return_condlikes_table=FALSE; calc_TTL_loglike_from_condlikes_table=TRUE; m=NULL
+	Qmat=NULL; spPmat=NULL; min_branchlength=0.000001; return_what="loglike"; probs_of_states_at_root=NULL; rootedge=FALSE; sparse=FALSE; printlevel=1; use_cpp=TRUE; input_is_COO=FALSE; spPmat_inputs=NULL; cppSpMethod=3; cluster_already_open=NULL; calc_ancprobs=FALSE; include_null_range=TRUE; fixnode=NULL; fixlikes=NULL; inputs=inputs; allareas=allareas; all_states_list=all_states_list; return_condlikes_table=FALSE; calc_TTL_loglike_from_condlikes_table=TRUE
 	'
 	
 	defaults='
@@ -1168,11 +1168,16 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 		user_specified_constraints_on_states_list_TF = FALSE
 		states_allowed_TF1 = rep(TRUE, length(all_states_list))
 		states_allowed_TF2 = rep(TRUE, length(all_states_list))
+		states_allowed_TF3 = rep(TRUE, length(all_states_list))
 		if ( (is.null(inputs$list_of_areas_allowed_mats) == FALSE))
 			{
 			user_specified_constraints_on_states_list_TF = TRUE
 			}
 		if ( (is.null(inputs$list_of_areas_adjacency_mats) == FALSE))
+			{
+			user_specified_constraints_on_states_list_TF = TRUE
+			}
+		if ( (is.null(inputs$lists_of_states_lists_0based) == FALSE))
 			{
 			user_specified_constraints_on_states_list_TF = TRUE
 			}
@@ -1225,8 +1230,20 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 				# NO; use all areas for this
 				# states_to_use_TF = states_allowed_TF
 				} # END if ( (is.null(inputs$list_of_areas_adjacency_mats) == FALSE))
-			# Combine the two (areas_allowed and areas_adjacency)
-			states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2) == 2)
+
+			# Manual list of allowed states
+			if ( (is.null(inputs$lists_of_states_lists_0based) == FALSE))
+				{
+				states_allowed_TF3 = all_states_list %in% inputs$lists_of_states_lists_0based[[i]]
+				
+				if (include_null_range == TRUE)
+					{
+					states_allowed_TF3[1] = TRUE
+					}
+				} # END if ( (is.null(inputs$lists_of_states_lists_0based) == FALSE))
+
+			# Combine the 3 (areas_allowed, areas_adjacency, lists_of_states_lists_0based)
+			states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2 + states_allowed_TF3) == 3)
 			} else {
 			# Otherwise, 
 			# make no change
@@ -2173,7 +2190,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 				#chainsaw_result$conditional_likelihoods_at_branch_section_bottom[[jj]] = 
 				
 				# Also, store the conditional likelihoods for all nodes in this subtree
-				# MINUS THE GODDAMN TIPS OF THE SUBTREE, THESE ARE ALREADY IN THERE
+				# MINUS THE TIPS OF THE SUBTREE, THESE ARE ALREADY IN THERE
 				tmp_tipnums = 1:length(tipnames)
 				
 				#tmp_tr_table = prt(tmp_subtree, printflag=FALSE, get_tipnames=FALSE)
@@ -2210,11 +2227,11 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 									# Get relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS
 									# For subtree tip and internal nodes
 									tmp = calc_loglike_sp_results$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[rownum,]
-																		relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE[condlikes_table_rownum,] = tmp
+									relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE[condlikes_table_rownum,] = tmp
 									} else {
 									# For subtree root node
 									tmp = calc_loglike_sp_results$relative_probs_of_each_state_at_bottom_of_root_branch
-																		relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE[condlikes_table_rownum,] = tmp
+									relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE[condlikes_table_rownum,] = tmp
 									}
 								} # END check of subtree internal/tip vs. subtree root
 							# Store the state probabilities at the branch bottom below the root node of the subtree	
@@ -2395,10 +2412,10 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 		#print ("HEY!")
 		
 		# Standard LAGRANGE result (exactly)
-		TF2 = inputs$master_table$SUBnode.type == "internal"
+		TF2 = inputs$master_table$SUBnode.type == "internal"    # internal nodes in subtrees are also internal nodes in the master tree
 		TF3 = inputs$master_table$SUBnode.type == "orig_tip"	# These are the original tips likelihoods; doesn't matter for unambiguous tips, but
 																# DOES matter if there is a detection model.
-		TF4 = inputs$master_table$SUBnode.type == "root"
+		TF4 = inputs$master_table$SUBnode.type == "root"		# root nodes in subtrees are also internal nodes in the master tree
 		TF234 = (TF2 + TF3 + TF4) == 1
 		sum(TF234)
 		
@@ -2529,11 +2546,16 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 			user_specified_constraints_on_states_list_TF = FALSE
 			states_allowed_TF1 = rep(TRUE, length(all_states_list))
 			states_allowed_TF2 = rep(TRUE, length(all_states_list))
+			states_allowed_TF3 = rep(TRUE, length(all_states_list))
 			if ( (is.null(inputs$list_of_areas_allowed_mats) == FALSE))
 				{
 				user_specified_constraints_on_states_list_TF = TRUE
 				}
 			if ( (is.null(inputs$list_of_areas_adjacency_mats) == FALSE))
+				{
+				user_specified_constraints_on_states_list_TF = TRUE
+				}
+			if ( (is.null(inputs$lists_of_states_lists_0based) == FALSE))
 				{
 				user_specified_constraints_on_states_list_TF = TRUE
 				}
@@ -2577,8 +2599,22 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 					# NO; use all areas for this
 					# states_to_use_TF = states_allowed_TF
 					} # END if ( (is.null(inputs$list_of_areas_adjacency_mats) == FALSE))
-				# Combine the two (areas_allowed and areas_adjacency)
-				states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2) == 2)
+
+
+				# Manual list of allowed states
+				if ( (is.null(inputs$lists_of_states_lists_0based) == FALSE))
+					{
+					states_allowed_TF3 = all_states_list %in% inputs$lists_of_states_lists_0based[[i]]
+				
+					if (include_null_range == TRUE)
+						{
+						states_allowed_TF3[1] = TRUE
+						}
+					} # END if ( (is.null(inputs$lists_of_states_lists_0based) == FALSE))
+
+
+				# Combine the 3 (areas_allowed, areas_adjacency, lists_of_states_lists_0based)
+				states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2 + states_allowed_TF3) == 3)
 				} else {
 				# Otherwise, 
 				# make no change
@@ -4178,7 +4214,8 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 						relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum = inputs$master_table$node[TF]
 						
 						if (traitTF == FALSE)
-							{	relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum, ][states_allowed_TF] = tmp_relprobs
+							{
+							relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum, ][states_allowed_TF] = tmp_relprobs
 							} else {
 							relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum, ][wTrait_states_allowed_TF] = tmp_relprobs
 							} # END if (traitTF == FALSE)
@@ -4204,9 +4241,10 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 						tmp_relprobs = tmp_relprobs_at_branchbot_BELOW_node_UPPASS[rownum,]						
 						
 						if (traitTF == FALSE)
-							{	relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum, ][states_allowed_TF] = tmp_relprobs
+							{
+							relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum, ][states_allowed_TF] = tmp_relprobs
 							} else {
-relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum, ][wTrait_states_allowed_TF] = tmp_relprobs
+							relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[relative_probs_of_each_state_at_branch_top_AT_node_UPPASS_rownum, ][wTrait_states_allowed_TF] = tmp_relprobs
 							}
 
 						} # END Store the UPPASS relprobs in the main matrix
@@ -4298,12 +4336,15 @@ relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[relative_probs_o
 			# The branch bottoms should be fine
 			}
 
-		cat("\nUppass completed for (STRATIFIED) marginal ancestral states estimation!\n", sep="")
+		cat("\nASDFASDFUppass completed for (STRATIFIED) marginal ancestral states estimation!\n", sep="")
 		} # End UPPASS calculations, if calc_ancprobs == TRUE
 
 	
 	#return(grand_total_likelihood)
 	# If you are storing ALL of the conditional likelihoods that were calculated
+	#print(return_condlikes_table)
+	#print(calc_TTL_loglike_from_condlikes_table)
+	
 	if ((return_condlikes_table == TRUE) || (calc_TTL_loglike_from_condlikes_table == TRUE))
 		{
 		# Return an object with the condlikes_table, AND the grand conditional likelihood
@@ -4411,6 +4452,9 @@ relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[relative_probs_o
 			
 			# print
 			ML_marginal_prob_each_state_at_branch_top_AT_node
+			#print("ML_marginal_prob_each_state_at_branch_top_AT_node[62,14]")
+			#print(ML_marginal_prob_each_state_at_branch_top_AT_node[62,14])
+
 			sum_MLs_top = rowSums(ML_marginal_prob_each_state_at_branch_top_AT_node)
 			sum_MLs_top
 			

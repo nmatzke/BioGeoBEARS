@@ -526,6 +526,9 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 	BioGeoBEARS_run_object
 	skip_optim=FALSE
+	
+	skip_optim=TRUE
+	skip_optim_option="return_all"
 	'
 	
 	require(cladoRcpp)
@@ -1886,7 +1889,9 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		inputs2 = BioGeoBEARS_run_object
 		inputs2$BioGeoBEARS_model_object = BioGeoBEARS_model_object
 		
-		model_results = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=min_branchlength, return_what="all", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=force_sparse, printlevel=BioGeoBEARS_run_object$printlevel, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=cluster_already_open, calc_ancprobs=calc_ancprobs, include_null_range=BioGeoBEARS_run_object$include_null_range, fixnode=fixnode, fixlikes=fixlikes, inputs=inputs2, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=return_condlikes_table)
+		calc_TTL_loglike_from_condlikes_table = BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table
+		
+		model_results = calc_loglike_sp_stratified(tip_condlikes_of_data_on_each_state, phy, Qmat=NULL, spPmat=NULL, min_branchlength=min_branchlength, return_what="all", probs_of_states_at_root=NULL, rootedge=TRUE, sparse=force_sparse, printlevel=BioGeoBEARS_run_object$printlevel, use_cpp=TRUE, input_is_COO=FALSE, spPmat_inputs=NULL, cppSpMethod=3, cluster_already_open=cluster_already_open, calc_ancprobs=calc_ancprobs, include_null_range=BioGeoBEARS_run_object$include_null_range, fixnode=fixnode, fixlikes=fixlikes, inputs=inputs2, allareas=allareas, all_states_list=all_states_list, return_condlikes_table=return_condlikes_table, calc_TTL_loglike_from_condlikes_table=calc_TTL_loglike_from_condlikes_table)
 		} else {
 		#print(params)
 		params = BioGeoBEARS_model_object_to_est_params(BioGeoBEARS_model_object)
