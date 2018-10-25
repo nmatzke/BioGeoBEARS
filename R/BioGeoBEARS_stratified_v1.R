@@ -4336,7 +4336,7 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 			# The branch bottoms should be fine
 			}
 
-		cat("\nASDFASDFUppass completed for (STRATIFIED) marginal ancestral states estimation!\n", sep="")
+		cat("\nUppass completed for (STRATIFIED) marginal ancestral states estimation!\n", sep="")
 		} # End UPPASS calculations, if calc_ancprobs == TRUE
 
 	
