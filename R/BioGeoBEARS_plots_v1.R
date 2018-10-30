@@ -611,7 +611,7 @@ plot_stratum_lines=TRUE
 		if (skiplabels == FALSE)
 			{
 			nodelabels(text=MLstates[nodes], node=nodes, bg=cols_byNode[nodes], cex=statecex)		
-			tiplabels(text=MLstates[tips], tip=tips, bg=cols_byNode[tips], cex=statecex)
+			tiplabels(text=MLstates[tips], tip=tips, bg=cols_byNode[tips], cex=statecex, adj=tiplabel_adj)
 			} # END if (skiplabels == FALSE)
 		
 		par(fg="black")	# set to default for most things
