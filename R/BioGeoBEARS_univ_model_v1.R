@@ -1362,7 +1362,21 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			
 				cat("\n\nResults of optimx:::scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")
 				print(scalecheck_results)
-			
+
+				minqa_TF = is.element("minqa", installed.packages()[,1])
+				if (minqa_TF == FALSE)
+					{
+					if (packageVersion("optimx") > 2017)
+						{
+						txt = "Warning in bears_optim_run(): optimx version 2018.7.10 requires package 'minqa' to do optimx ML optimization with the 'bobyqa' method (optimization with mix/max limits on parameters). However, optimx 2018.7.10 doesn't load 'minqa' automatically, so you may have to do:\n\ninstall.packages('minqa')\n\n...and re-run, to get rid of this warning, and/or the error where optimx returns NA for the parameter inferences after one step, and crashes the resulting uppass calculations."
+						cat("\n\n")
+						cat(txt)
+						cat("\n\n")
+						warning(txt)
+						require(minqa)
+						} # END if (packageVersion("optimx") > 2017)
+					} # END if (minqa_TF == FALSE)
+
 				optim_result2 = optimx(par=params, fn=calc_loglike_for_optim_stratified, lower=lower, upper=upper, itnmax=itnmax, method=c("bobyqa"), control=control_list, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 				} # END if (skip_optim == TRUE)
 
@@ -1625,7 +1639,21 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			
 					cat("\n\nResults of optimx:::scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")
 					print(scalecheck_results)
-			
+					
+					# Check if minqa is installed, for the newest optimx (needed for optimx with 'bobyqa' optimizer)
+					minqa_TF = is.element("minqa", installed.packages()[,1])
+					if (minqa_TF == FALSE)
+						{
+						if (packageVersion("optimx") > 2017)
+							{
+							txt = "Warning in bears_optim_run(): optimx version 2018.7.10 requires package 'minqa' to do optimx ML optimization with the 'bobyqa' method (optimization with mix/max limits on parameters). However, optimx 2018.7.10 doesn't load 'minqa' automatically, so you may have to do:\n\ninstall.packages('minqa')\n\n...and re-run, to get rid of this warning, and/or the error where optimx returns NA for the parameter inferences after one step, and crashes the resulting uppass calculations."
+							cat("\n\n")
+							cat(txt)
+							cat("\n\n")
+							warning(txt)
+							require(minqa)
+							} # END if (packageVersion("optimx") > 2017)
+						} # END if (minqa_TF == FALSE)
 
 					# optimx 2013
 					optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, gr=NULL, hess=NULL, lower=lower, upper=upper, method=c("bobyqa"), itnmax=itnmax, hessian=FALSE, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
@@ -1747,6 +1775,22 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		}
 
 	BioGeoBEARS_model_object = update_BioGeoBEARS_model_object_w_optimx_result(BioGeoBEARS_model_object, optimx_result, use_optimx)
+
+	
+	# ERROR CHECK
+	if (any(is.na(BioGeoBEARS_model_object@params_table$est)) == TRUE)
+		{
+		txt = "STOP ERROR in bears_optim_run(). For some reason, your ML optimizer returned one or more NA / NaN values for the estimated parameters. Probably this is a version conflict with an update to one of the optimizer functions/packages (e.g., optim, optimx, minqa, GenSA. Printing BioGeoBEARS_model_object@params_table to screen, below.  Email the BioGeoBEARS Google Group if you cannot figure out the problem."
+		
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		cat("BioGeoBEARS_model_object@params_table:\n\n")
+		print(BioGeoBEARS_model_object@params_table)
+		cat("\n\n")
+		stop(txt)
+		} # END if (any(is.na(BioGeoBEARS_model_object@params_table$est)) == TRUE)
+	
 	
 	######################################################
 	# 2016-03-23_NJM: adding rescaling
