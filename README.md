@@ -3,18 +3,18 @@ BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts
 
 # UPDATES, September 2018
 
-The GitHub repository contains all updates formerly posted on PhyloWiki. This includes functions for Biogeographical Stochastic Mapping (BSM) and trait-dependent dispersal models. Further updates will be posted to GitHub.
+The GitHub repository contains all updates formerly posted on PhyloWiki. This includes functions for Biogeographical Stochastic Mapping (BSM) and trait-dependent dispersal models. Further updates will be posted to GitHub. **Benefit:** you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
 
 To install the GitHub version of BioGeoBEARS, first:
 
-1. Install the new versions of [rexpokit](https://CRAN.R-project.org/package=rexpokit) and [cladoRcpp](https://CRAN.R-project.org/package=cladoRcpp), both available on CRAN (which gives you binaries for easy installation; the GitHub versions have to be compiled from source):
+**1.** Install the new versions of [rexpokit](https://CRAN.R-project.org/package=rexpokit) and [cladoRcpp](https://CRAN.R-project.org/package=cladoRcpp), both available on CRAN (which gives you binaries for easy installation; the GitHub versions have to be compiled from source):
 
 ```
 install.packages("rexpokit")
 install.packages("cladoRcpp")
 ```
 
-2. Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [devtools](https://CRAN.R-project.org/package=devtools):
+**2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [devtools](https://CRAN.R-project.org/package=devtools):
 
 ```
 library(devtools)
@@ -28,10 +28,21 @@ library(devtools)
 devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
 ```
 
-**NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. The tools needed to do this are discussed here (or, you can re-install R): https://groups.google.com/forum/#!searchin/biogeobears/detach$20%7Csort:date/biogeobears/2f9etrphhmg/0Jg1YIoOBwAJ
+**3. NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. The tools needed to do this are discussed here (or, you can re-install R): https://groups.google.com/forum/#!searchin/biogeobears/detach$20%7Csort:date/biogeobears/2f9etrphhmg/0Jg1YIoOBwAJ
 
 
-**Benefit:** you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
+**4.** If you get an unexpected error that you didn't used to get, probably you haven't actually updated everything. **BE SURE TO CAREFULLY CHECK #1, #2, and #3, above.** Use packageVersion to double-check that you've got the correct versions installed:
+
+```
+packageVersion("rexpokit")
+# ‘0.26.6.0.9001’ or higher
+> packageVersion("cladoRcpp")
+# ‘0.15’ or higher
+> packageVersion("BioGeoBEARS")
+# ‘1.1’ or higher
+```
+
+Next, search the error on the BioGeoBEARS Google Group. If that doesn't help, email the Google Group, and include the specific error messages, and (ideally) the input files and script you were using.
 
 
 # DESCRIPTION
