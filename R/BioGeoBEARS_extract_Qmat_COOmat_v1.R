@@ -182,21 +182,46 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 
 
 
-
-	# Take the list of areas, and get list of possible states
-	# (the user can manually input states if they like)
-	if (is.null(BioGeoBEARS_run_object$states_list))
+	# Get the areas and states list from time-stratified list
+	newstrat = TRUE
+	if ((is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE) && (newstrat == TRUE))
 		{
-		states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=include_null_range)
-		states_list
-		#BioGeoBEARS_run_object$states_list = states_list
-		#inputs$states_list = states_list
-		} else {
-		states_list = BioGeoBEARS_run_object$states_list
-		#BioGeoBEARS_run_object$states_list = states_list
-		#inputs$states_list = states_list
-		}
+		area_nums = sort(unique(unlist(res$inputs$lists_of_states_lists_0based)))
+		area_nums
+		
+		state_indices_0based_all_timeperiods = unique(unlist(res$inputs$lists_of_states_lists_0based, recursive=FALSE))
+		# Get the numbers as collapsed characters, to be sure sorting into correct order
+		state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
+		
+		
+		states_list_this_timeperiod = res$inputs$lists_of_states_lists_0based[[timeperiod_i]]
+		states_allowed_this_timeperiod_TF = state_indices_0based_all_timeperiods %in% states_list_this_timeperiod
+		states_allowed_this_timeperiod_TF
+		
+		states_list = states_list_this_timeperiod
+		} # END if (!is.null(res$inputs$lists_of_states_lists_0based) == TRUE)
 
+	
+	
+	# Or get the (fixed) list of states
+	if ((is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == TRUE) || (newstrat == FALSE))
+		{
+		# Take the list of areas, and get list of possible states
+		# (the user can manually input states if they like)
+		if (is.null(BioGeoBEARS_run_object$states_list))
+			{
+			states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=include_null_range)
+			states_list
+			#BioGeoBEARS_run_object$states_list = states_list
+			#inputs$states_list = states_list
+			} else {
+			states_list = BioGeoBEARS_run_object$states_list
+			#BioGeoBEARS_run_object$states_list = states_list
+			#inputs$states_list = states_list
+			}
+		} # END if ((is.null(res$inputs$lists_of_states_lists_0based) == TRUE) || (newstrat == FALSE))
+		
+	
 	if (is.na(BioGeoBEARS_run_object$force_sparse))
 		{
 		if (length(states_list) > 128)

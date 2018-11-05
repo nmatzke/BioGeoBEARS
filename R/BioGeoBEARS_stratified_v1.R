@@ -1244,6 +1244,9 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 
 			# Combine the 3 (areas_allowed, areas_adjacency, lists_of_states_lists_0based)
 			states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2 + states_allowed_TF3) == 3)
+			
+			# CHANGE the inputs here, so that it can be used easily in BSM
+			inputs$lists_of_states_lists_0based[[i]] = all_states_list[states_allowed_TF]
 			} else {
 			# Otherwise, 
 			# make no change
@@ -2615,6 +2618,9 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 
 				# Combine the 3 (areas_allowed, areas_adjacency, lists_of_states_lists_0based)
 				states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2 + states_allowed_TF3) == 3)
+				
+				# CHANGE the inputs here, so that it can be used easily in BSM
+				inputs$lists_of_states_lists_0based[[i]] = all_states_list[states_allowed_TF]
 				} else {
 				# Otherwise, 
 				# make no change

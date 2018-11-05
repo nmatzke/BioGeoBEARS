@@ -304,7 +304,25 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# Exponentiate up (well, sorta, exponential pre-calculated)
 		#condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_by_tree_piece_for_timeperiod_i[[piecenum]]
 		branch_length = trtable$SUBedge.length[root_nodenum]
-		independent_likelihoods_on_root_branch_of_subtree = expokit_dgpadm_Qmat2(times=branch_length, Qmat=Qmat, transpose_needed=TRUE)
+
+
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+			{
+			independent_likelihoods_on_root_branch_of_subtree = expokit_dgpadm_Qmat2(times=branch_length, Qmat=Qmat, transpose_needed=TRUE)
+			}
+
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+			{
+			subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]
+			
+			# Expand the subset Qmat to be full-size
+			Qmat_big = matrix(data=0, nrow=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF), ncol=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+			Qmat_big[subset_nums,subset_nums] = Qmat
+			independent_likelihoods_on_root_branch_of_subtree = expokit_dgpadm_Qmat2(times=branch_length, Qmat=Qmat_big, transpose_needed=TRUE)
+			}
+
+
+		
 		
 		condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_on_root_branch_of_subtree
 		
@@ -370,7 +388,24 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		#######################################################
 		
 		# Stochastic mapping of events on the subtree root branch
-		events_table_for_branch_below_subtree_root_node = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=trtable, Qmat=Qmat, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+			{
+			events_table_for_branch_below_subtree_root_node = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=trtable, Qmat=Qmat, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+			}
+
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+			{
+			subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]
+			
+			# Expand the subset Qmat to be full-size
+			Qmat_big = matrix(data=0, nrow=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF), ncol=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+			Qmat_big[subset_nums,subset_nums] = Qmat
+			
+			events_table_for_branch_below_subtree_root_node = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=trtable, Qmat=Qmat_big, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+			}
+
+
 
 		# Store the text representation
 		# (extract to table with events_txt_into_events_table() )
@@ -568,9 +603,25 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			# OLD (2014-05-ish)
 			#sampled_split_descendants = sample_split_scenario2(COO_weights_columnar, probs_ancstate, left_branch_downpass_likes, right_branch_downpass_likes, sample_which="both", return_prob_each_split_scenario=FALSE, include_null_range=TRUE, Rsp_rowsums=NULL, numstates_wo_null=NULL, printflag=printflag)
 			
-			# NEW (2015-01-10)
-			sample_uppass_res = sample_uppass_split_scenario_given_probs_ancstate(probs_ancstate=probs_ancstate, COO_weights_columnar=COO_weights_columnar, numstates=numstates, include_null_range=include_null_range, left_branch_downpass_likes=left_branch_downpass_likes, right_branch_downpass_likes=right_branch_downpass_likes, Rsp_rowsums=NULL)
-
+			if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+				{
+				# NEW (2015-01-10)
+				sample_uppass_res = sample_uppass_split_scenario_given_probs_ancstate(probs_ancstate=probs_ancstate, COO_weights_columnar=COO_weights_columnar, numstates=numstates, include_null_range=include_null_range, left_branch_downpass_likes=left_branch_downpass_likes, right_branch_downpass_likes=right_branch_downpass_likes, Rsp_rowsums=NULL)
+				}
+			if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+				{
+				subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]
+				probs_ancstate_subset = probs_ancstate[subset_nums]
+				numstates_subset = length(probs_ancstate_subset)
+				left_branch_downpass_likes_subset = left_branch_downpass_likes[subset_nums]
+				right_branch_downpass_likes_subset = right_branch_downpass_likes[subset_nums]
+				sample_uppass_res_subset = sample_uppass_split_scenario_given_probs_ancstate(probs_ancstate=probs_ancstate_subset, COO_weights_columnar=COO_weights_columnar, numstates=numstates_subset, include_null_range=include_null_range, left_branch_downpass_likes=left_branch_downpass_likes_subset, right_branch_downpass_likes=right_branch_downpass_likes_subset, Rsp_rowsums=NULL)
+				# Convert the sampled states in the subset list, 
+				# to the sampled states in the full list
+				sample_uppass_res = list()
+				sample_uppass_res$left_decstate_1based = subset_nums[sample_uppass_res_subset$left_decstate_1based]
+				sample_uppass_res$right_decstate_1based = subset_nums[sample_uppass_res_subset$right_decstate_1based]
+				}
 			} # END if (hooknode_TF == TRUE)
 		
 		
@@ -634,12 +685,34 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		condprobs_Right_branch_bot[right_decstate_1based] = 1
 	
 		# Dense matrix exponentiation, which has been done already!
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+			{
+			nothing = TRUE
+			} # END if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+			{
+			subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]
+			
+			# Change the size of the inputs
+			condprobs_Left_branch_bot_orig = condprobs_Left_branch_bot
+			condprobs_Right_branch_bot_orig = condprobs_Right_branch_bot
+			condprobs_Left_branch_top_orig = condprobs_Left_branch_top
+			condprobs_Right_branch_top_orig = condprobs_Right_branch_top
+			
+			condprobs_Left_branch_bot = condprobs_Left_branch_bot[subset_nums]
+			condprobs_Right_branch_bot = condprobs_Right_branch_bot[subset_nums]
+			condprobs_Left_branch_top = condprobs_Left_branch_top[subset_nums]
+			condprobs_Right_branch_top = condprobs_Right_branch_top[subset_nums]
+			} # END if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+
+
 		TF2 = ( (length(cluster_already_open)==1) && (cluster_already_open==FALSE) )
 		if (is.null(cluster_already_open) || (TF2))
 			{
 			# Relative probabilities of states at the top of left branch
 			condprobs_Left_branch_top = try(condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i])
-			
+		
 			if (class(condprobs_Left_branch_top) == "try-error")
 				{
 				print(i)
@@ -654,7 +727,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 				print("STOPPING on error in 'condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i]'")
 				stop("STOPPING on error in 'condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i]'")
 				}
-					
+				
 			# Relative probabilities of states at the top of right branch
 			condprobs_Right_branch_top = try(condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j])
 
@@ -664,23 +737,47 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 				print(length(condprobs_Right_branch_bot))
 				print(dim(independent_likelihoods_on_each_branch[,,j]))
 				#print(condprobs_Right_branch_top)
-				
+			
 				save(condprobs_Right_branch_bot, file="condprobs_Right_branch_bot.Rdata")
 				save(independent_likelihoods_on_each_branch, file="independent_likelihoods_on_each_branch.Rdata")
 				save(independent_likelihoods_on_each_branch[,,j], file="independent_likelihoods_on_each_branch_i.Rdata")
-				
+			
 				print("STOPPING on error in 'condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j]'")
 				stop("STOPPING on error in 'condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j]'")
 				}
 			} else {
-		
+	
 			# Here, the independent_likelihoods_on_each_branch are stored in a list of matrices
 			# Relative probabilities of states at the top of left branch
 			condprobs_Left_branch_top = condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[[i]]
-					
+				
 			# Relative probabilities of states at the top of right branch
 			condprobs_Right_branch_top = condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[[j]]
 			} # END if (is.null(cluster_already_open))
+
+
+		# Un-subset the results
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+			{
+			subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]
+			
+			# Change the size of the outputs
+			condprobs_Left_branch_bot_subset = condprobs_Left_branch_bot
+			condprobs_Right_branch_bot_subset = condprobs_Right_branch_bot
+			condprobs_Left_branch_top_subset = condprobs_Left_branch_top
+			condprobs_Right_branch_top_subset = condprobs_Right_branch_top
+			
+			condprobs_Left_branch_bot = rep(0, times=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+			condprobs_Right_branch_bot = rep(0, times=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+			condprobs_Left_branch_top = rep(0, times=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+			condprobs_Right_branch_top = rep(0, times=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+
+			condprobs_Left_branch_bot[subset_nums] = condprobs_Left_branch_bot_subset
+			condprobs_Right_branch_bot[subset_nums] = condprobs_Right_branch_bot_subset
+			condprobs_Left_branch_top[subset_nums] = condprobs_Left_branch_top_subset
+			condprobs_Right_branch_top[subset_nums] = condprobs_Right_branch_top_subset
+			} # END if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+
 
 		# zero out the NULL range, since it is impossible in a survivor
 		if (include_null_range == TRUE)
@@ -899,12 +996,29 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# Stochastic mapping, once the states at branch bottoms
 		# and branch tops have been sampled
 		#######################################################
-		
-		# Stochastic mapping of events on the left branch
-		events_table_for_branch_below_Left_node = stochastic_map_branch(nodenum_at_top_of_branch=left_branch_decnode, trtable=trtable, Qmat=Qmat, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
 
-		# Stochastic mapping of events on the right branch
-		events_table_for_branch_below_Right_node = stochastic_map_branch(nodenum_at_top_of_branch=right_branch_decnode, trtable=trtable, Qmat=Qmat, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+			{
+			# Stochastic mapping of events on the left branch
+			events_table_for_branch_below_Left_node = stochastic_map_branch(nodenum_at_top_of_branch=left_branch_decnode, trtable=trtable, Qmat=Qmat, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+
+			# Stochastic mapping of events on the right branch
+			events_table_for_branch_below_Right_node = stochastic_map_branch(nodenum_at_top_of_branch=right_branch_decnode, trtable=trtable, Qmat=Qmat, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+			}
+			
+		if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+			{
+			# Expand the subset Qmat to be full-size
+			subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]
+			Qmat_big = matrix(data=0, nrow=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF), ncol=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+			Qmat_big[subset_nums,subset_nums] = Qmat
+	
+			# Stochastic mapping of events on the left branch
+			events_table_for_branch_below_Left_node = stochastic_map_branch(nodenum_at_top_of_branch=left_branch_decnode, trtable=trtable, Qmat=Qmat_big, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+
+			# Stochastic mapping of events on the right branch
+			events_table_for_branch_below_Right_node = stochastic_map_branch(nodenum_at_top_of_branch=right_branch_decnode, trtable=trtable, Qmat=Qmat_big, state_indices_0based=state_indices_0based, ranges_list=ranges_list, areas=areas, stratified=stratified, maxtries=maxtries)
+			}
 	
 		# Store the text representation
 		# (extract to table with events_txt_into_events_table() )
@@ -1345,8 +1459,27 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 					stop(txt)
 					}
 				
-				# Exponentiate up (well, sorta, exponential pre-calculated)
-				condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_by_tree_piece_for_timeperiod_i[[piecenum]]
+				# HERE
+				
+				if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+					{
+					# Exponentiate up (well, sorta, exponential pre-calculated)
+					condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_by_tree_piece_for_timeperiod_i[[piecenum]]
+					}
+					
+				if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+					{
+					indlikes_subset = independent_likelihoods_by_tree_piece_for_timeperiod_i[[piecenum]]
+					subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]
+					condprobs_branch_top_subset = condprobs_branch_bot[subset_nums]
+					condprobs_branch_top_subset = condprobs_branch_top_subset %*% indlikes_subset
+					condprobs_branch_top = rep(0, times=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+					condprobs_branch_top[subset_nums] = condprobs_branch_top_subset
+					
+					# Expand the subset Qmat to be full-size
+					Qmat_big = matrix(data=0, nrow=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF), ncol=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
+					Qmat_big[subset_nums,subset_nums] = Qmat
+					}
 				
 				if (res$inputs$include_null_range == TRUE)
 					{
@@ -1526,7 +1659,15 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 					{
 					events_table_for_branch = NULL
 					} else {
-					events_table_for_branch = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=master_table_timeperiod_i, Qmat, state_indices_0based, ranges_list, areas, single_branch=single_branch, stratified=stratified, maxtries=maxtries, manual_history_for_difficult_branches=TRUE)
+					if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
+						{
+						events_table_for_branch = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=master_table_timeperiod_i, Qmat, state_indices_0based, ranges_list, areas, single_branch=single_branch, stratified=stratified, maxtries=maxtries, manual_history_for_difficult_branches=TRUE)
+						}
+					if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
+						{
+						events_table_for_branch = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=master_table_timeperiod_i, Qmat=Qmat_big, state_indices_0based, ranges_list, areas, single_branch=single_branch, stratified=stratified, maxtries=maxtries, manual_history_for_difficult_branches=TRUE)
+						}
+						
 					} # END if (branch_length_subsection > branch_length_full_tree)
 				#cat("\nABC2_stochastic_map_given_inputs():\n")
 			

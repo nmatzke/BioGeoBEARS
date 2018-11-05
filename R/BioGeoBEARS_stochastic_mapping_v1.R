@@ -955,14 +955,21 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 				
 				# Randomly sort table, make sure you never pass through a null range
 				# Repeat until one of the break statements is reached
+				num_manual_tries = 0
+				num_manual_tries_max = 10000
+				cat("\n")
 				while (1)
 					{
+					num_manual_tries = num_manual_tries+1
 					rownums = 1:nrow(manual_table)
+					
+					# Random step
 					rownums = sample(x=rownums, size=length(rownums), replace=FALSE)
 					sorted_manual_table = manual_table[rownums,]
 					
 					tmp_area_indices = area_indices_0based_branch_bottom
 					
+					unsampled_range_anywhere = FALSE
 					break_condition = TRUE
 					for (mm in 1:(nrow(sorted_manual_table)) )
 						{
@@ -971,9 +978,8 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 							tmp_area_indices = sort(c(tmp_area_indices, sorted_manual_table[mm,1]))
 							} else {
 							tmp_area_indices = tmp_area_indices[tmp_area_indices != sorted_manual_table[mm,1]]
-							}
+							} # END if (sorted_manual_table[mm,2] == "add")
 						#print(tmp_area_indices)	
-							
 						if (length(tmp_area_indices) == 0)
 							{
 							break_condition = FALSE
@@ -982,9 +988,43 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 								{
 								break_condition = TRUE
 								}
-							}
+							} # END if (length(tmp_area_indices) == 0)
+
+						# tmp_area_indices has been updated and has positive length,
+						# now check if it is in the states_list
+						if (length(tmp_area_indices) > 0)
+							{
+							tmp_rangetxt = paste0(areas[tmp_area_indices+1], collapse="")
+							TF = ranges_list == tmp_rangetxt
+							#print("tmp_rangetxt")
+							#print(tmp_rangetxt)
+							if (sum(TF) == 1)
+								{
+								junk = FALSE
+								} else {
+								unsampled_range_anywhere = TRUE
+								txt = paste0("Note: Attempted manual history sampled disallowed state '", tmp_rangetxt, "', try #", num_manual_tries, "/", num_manual_tries_max, ".\n")
+								cat(txt)
+								}
+							} # END if (length(tmp_area_indices) > 0)
 						
 						} # END for (mm in 1:(nrow(sorted_manual_table)-1) )
+					
+					
+					if (num_manual_tries >= num_manual_tries_max)
+						{
+						break_condition = TRUE
+						txt = paste0("FATAL ERROR in stochastic_map_branch(): It appears that even the manual mapping of a state history failed to succeed.   Stochastic mapping will likely crash once you run out of tries.  The problem is probably this: you are attempting a very complex history on a single branch (e.g., ABCD -> EFGH), but you have disallowed necessary intermediate states (e.g., DE, CF, CEF, ABGH, etc.).  Probably it would help to have a less constrained list of ranges (a bigger state space).")
+						cat("\n\n")
+						cat(txt)
+						cat("\n\n")
+						stop(txt)
+						} # END if (num_manual_tries >= num_manual_tries_max)
+					
+					if (unsampled_range_anywhere == TRUE)
+						{
+						break_condition = FALSE
+						}
 					
 					if (break_condition == TRUE)
 						{
@@ -992,6 +1032,7 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 						}
 					} # END while (1)
 				
+				cat("\n")
 				# Now check if the events go through a null state (except the end state, which 
 				# could be null)
 				curr_time = 0
@@ -1014,6 +1055,10 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 				current_rangetxt = range_at_branch_bottom
 				current_area_indices_0based = area_indices_0based_branch_bottom
 				events_table_for_branch = NULL
+				
+				
+				#print("sorted_manual_table")
+				#print(sorted_manual_table)
 				
 				# 2016-05-07: taking the -1 out of nrow(sorted_manual_table)-1
 				for (mm in 1:(nrow(sorted_manual_table)) )
@@ -1066,12 +1111,32 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 						current_area_indices_0based = sort(c(current_area_indices_0based, sorted_manual_table[mm,1]))
 						# 2016-05-07_bugfix: add 1 to 0-based areas!!
 						new_rangetxt = paste0(areas[current_area_indices_0based+1], collapse="")
+
+# 						print("mm")
+# 						print(mm)
+# 						print("sorted_manual_table[mm,]")
+# 						print(sorted_manual_table[mm,])
+# 						print("areas")
+# 						print(areas)
+# 						print("current_area_indices_0based")
+# 						print(current_area_indices_0based)
+# 						
+# 						print("new_rangetxt add")
+# 						print(new_rangetxt)
 						
 						# Get the range numbers
 						new_range_TF = (new_rangetxt == ranges_list)
 						new_rangenum_1based = (1:length(ranges_list))[new_range_TF]
+# 						print("new_rangenum_1based")
+# 						print(new_rangenum_1based)
+# 
+# 						print("length(ranges_list)")
+# 						print(length(ranges_list))
+
 						current_range_TF = (current_rangetxt == ranges_list)
 						current_rangenum_1based = (1:length(ranges_list))[current_range_TF]
+# 						print("current_rangenum_1based")
+# 						print(current_rangenum_1based)
 						}
 
 					if (sorted_manual_table[mm,2] == "sub")
@@ -1083,19 +1148,62 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 						lost_area_num_1based = 1+sorted_manual_table[mm,1]
 						extirpation_from = areas[lost_area_num_1based]
 						
-						current_area_indices_0based = current_area_indices_0based[current_area_indices_0based != sorted_manual_table[mm,1]]
-						# 2016-05-07_bugfix: add 1 to 0-based areas!!
-						new_rangetxt = paste0(areas[current_area_indices_0based+1], collapse="")
+# 						print("mm")
+# 						print(mm)
+# 					
+# 						print("sorted_manual_table[mm,]")
+# 						print(sorted_manual_table[mm,])
+# 						print("current_area_indices_0based")
+# 						print(current_area_indices_0based)
 						
+						current_area_indices_0based = current_area_indices_0based[current_area_indices_0based != sorted_manual_table[mm,1]]
+# 						print("current_area_indices_0based")
+# 						print(current_area_indices_0based)
+						
+
+						# 2016-05-07_bugfix: add 1 to 0-based areas!!
+# 						print("new_rangetxt1")
+# 						print(new_rangetxt)
+						
+						new_rangetxt = paste0(areas[current_area_indices_0based+1], collapse="")
+# 						print("new_rangetxt2")
+# 						print(new_rangetxt)
+# 						
 						# Get the range numbers
+# 						print("current_rangetxt")
+# 						print(current_rangetxt)
+						
 						current_range_TF = (current_rangetxt == ranges_list)
+# 						print("current_range_TF")
+# 						print(current_range_TF)
 						current_rangenum_1based = (1:length(ranges_list))[current_range_TF]
+# 						print("current_rangenum_1based")
+# 						print(current_rangenum_1based)
+# 						
+# 						print("new_rangetxt3")
+# 						print(new_rangetxt)
+						
+					
 						new_range_TF = (new_rangetxt == ranges_list)
 						new_rangenum_1based = (1:length(ranges_list))[new_range_TF]
 						}
-
+					
+# 					print("mm")
+# 					print(mm)
+# 					
+# 					print("sorted_manual_table[mm,]")
+# 					print(sorted_manual_table[mm,])
+					
 					# Make a row for a data.table
-				
+					#print("ranges_list")
+					#print(ranges_list)
+# 					print("length(ranges_list)")
+# 					print(length(ranges_list))
+# 					
+# 					print("new_rangenum_1based")
+# 					print(new_rangenum_1based)
+# 					
+					
 					# event_txt
 					event_txt = paste(ranges_list[[current_rangenum_1based]], "->", ranges_list[[new_rangenum_1based]], sep="")
 		
@@ -1632,6 +1740,9 @@ get_inputs_for_stochastic_mapping_from_results_object <- function(res, cluster_a
 	'
 	# Necessary setting to avoid getting numbers etc. in the stochastic mapping output
 	options(stringsAsFactors=FALSE)
+	
+	# Null range needed?
+	include_null_range = res$inputs$include_null_range
 		
 	# Get the input run object
 	#BioGeoBEARS_run_object = res$inputs
@@ -1686,49 +1797,113 @@ get_inputs_for_stochastic_mapping_from_results_object <- function(res, cluster_a
 		tipranges = tipranges_from_detects_fn(detects_fn=res$inputs$detects_fn)
 		} # END if (res$inputs$use_detection_model == TRUE)
 
-
-
-	# Get the areas and states list
+	# Get the letter codes for aras
 	areas = getareas_from_tipranges_object(tipranges)
-	areas_list = seq(0, length(areas)-1, 1)		# 0-base indexes
-	areanames = areas
-	areas
-	areas_list
 
-	# Get the 0-based states list, if needed
-	include_null_range = res$inputs$include_null_range
-	if (is.null(res$inputs$states_list))
+
+
+	# Get the areas and states list from time-stratified list
+	store_stratum_states_list_TF = FALSE
+	newstrat = TRUE
+	if ((is.null(res$inputs$lists_of_states_lists_0based) == FALSE) && (newstrat == TRUE))
 		{
-		state_indices_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=res$inputs$max_range_size, include_null_range=include_null_range)
-		state_indices_0based
-		states_list = state_indices_0based
-
-		# Get the ranges
-		ranges_list = areas_list_to_states_list_new(areas=areas, maxareas=res$inputs$max_range_size,
-		include_null_range=include_null_range, split_ABC=FALSE)
-		ranges_list
-		ranges = unlist(ranges_list)
-		ranges
-		} else {
-		state_indices_0based = res$inputs$states_list
-		states_list = state_indices_0based
+		area_nums = sort(unique(unlist(res$inputs$lists_of_states_lists_0based)))
+		area_nums
 		
-		# Get the list of text ranges
-		ranges_list = list()
-		for (i in 1:length(states_list))
+		state_indices_0based_all_timeperiods = unique(unlist(res$inputs$lists_of_states_lists_0based, recursive=FALSE))
+		# Get the numbers as collapsed characters, to be sure sorting into correct order
+		state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
+		state_indices_0based = state_indices_0based_all_timeperiods
+		
+		states_list_this_timeperiod = res$inputs$lists_of_states_lists_0based[[timeperiod_i]]
+		state_indices_0based_this_timeperiod = states_list_this_timeperiod
+		states_allowed_this_timeperiod_TF = state_indices_0based_all_timeperiods %in% states_list_this_timeperiod
+		states_allowed_this_timeperiod_TF
+		
+		store_stratum_states_list_TF = TRUE
+
+		numstates_all_timeperiods = length(state_indices_0based_all_timeperiods)
+		numstates_this_timeperiod = length(states_list_this_timeperiod)
+		
+		# Get the list of text ranges in this timeperiod
+		ranges_list_this_timeperiod = list()
+		for (i in 1:length(states_list_this_timeperiod))
 			{
-			if ( is.na(states_list[[i]]) )
+			if ( length(states_list_this_timeperiod[[i]])==1 && is.na(states_list_this_timeperiod[[i]]) )
+				{
+				ranges_list_this_timeperiod[[i]] = "_"
+				} else {
+				ranges_list_this_timeperiod[[i]] = paste(areas[ 1+states_list_this_timeperiod[[i]] ], sep="", collapse="")
+				}
+			}
+		ranges_list_this_timeperiod
+		ranges_this_timeperiod = unlist(ranges_list_this_timeperiod)
+		ranges_this_timeperiod	
+
+
+		# Get the list of text ranges for ALL timeperiods
+		ranges_list = list()
+		for (i in 1:length(state_indices_0based_all_timeperiods))
+			{
+			if ( length(state_indices_0based_all_timeperiods[[i]])==1 && is.na(state_indices_0based_all_timeperiods[[i]]) )
 				{
 				ranges_list[[i]] = "_"
 				} else {
-				ranges_list[[i]] = paste(areas[ 1+states_list[[i]] ], sep="", collapse="")
+				ranges_list[[i]] = paste(areas[ 1+state_indices_0based_all_timeperiods[[i]] ], sep="", collapse="")
 				}
 			}
 		ranges_list
 		ranges = unlist(ranges_list)
-		ranges	
-		}
+		ranges
+		
+		ranges_list_all_timeperiods = ranges_list
+		ranges_all_timeperiods = ranges
+		} # END if (!is.null(res$inputs$lists_of_states_lists_0based) == TRUE)
 
+	
+	
+	# Get the (fixed) list of states
+	if ((is.null(res$inputs$lists_of_states_lists_0based) == TRUE) || (newstrat == FALSE))
+		{
+		areas = getareas_from_tipranges_object(tipranges)
+		areas_list = seq(0, length(areas)-1, 1)		# 0-base indexes
+		areanames = areas
+		areas
+		areas_list
+
+		# Get the 0-based states list, if needed
+		if (is.null(res$inputs$states_list))
+			{
+			state_indices_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=res$inputs$max_range_size, include_null_range=include_null_range)
+			state_indices_0based
+			states_list = state_indices_0based
+
+			# Get the ranges
+			ranges_list = areas_list_to_states_list_new(areas=areas, maxareas=res$inputs$max_range_size,
+			include_null_range=include_null_range, split_ABC=FALSE)
+			ranges_list
+			ranges = unlist(ranges_list)
+			ranges
+			} else {
+			state_indices_0based = res$inputs$states_list
+			states_list = state_indices_0based
+		
+			# Get the list of text ranges
+			ranges_list = list()
+			for (i in 1:length(states_list))
+				{
+				if ( is.na(states_list[[i]]) )
+					{
+					ranges_list[[i]] = "_"
+					} else {
+					ranges_list[[i]] = paste(areas[ 1+states_list[[i]] ], sep="", collapse="")
+					}
+				}
+			ranges_list
+			ranges = unlist(ranges_list)
+			ranges	
+			}
+		} # END if (is.null(res$inputs$lists_of_states_lists_0based) == TRUE)
 
 
 	# Make the tree_table
@@ -1751,6 +1926,7 @@ get_inputs_for_stochastic_mapping_from_results_object <- function(res, cluster_a
 	#######################################################
 	
 	# timeperiod_i will be 1 for non-stratified analysis
+	# This now changes as the states_list changes
 	returned_mats2 = get_Qmat_COOmat_from_res(res, timeperiod_i=timeperiod_i, include_null_range=include_null_range)
 	returned_mats2
 
@@ -1813,13 +1989,37 @@ get_inputs_for_stochastic_mapping_from_results_object <- function(res, cluster_a
 	stochastic_mapping_inputs$Qmat = Qmat
 	stochastic_mapping_inputs$COO_weights_columnar = COO_weights_columnar
 	stochastic_mapping_inputs$Rsp_rowsums = Rsp_rowsums
-
+	
 	# Store the tree info
-	stochastic_mapping_inputs$tipranges = tipranges
-	stochastic_mapping_inputs$areas = areas
-	stochastic_mapping_inputs$state_indices_0based = state_indices_0based
-	stochastic_mapping_inputs$ranges_list = ranges_list
-	stochastic_mapping_inputs$numstates = numstates
+	if (store_stratum_states_list_TF == FALSE)
+		{
+		stochastic_mapping_inputs$tipranges = tipranges
+		stochastic_mapping_inputs$areas = areas
+		stochastic_mapping_inputs$state_indices_0based = state_indices_0based
+		stochastic_mapping_inputs$ranges_list = ranges_list
+		stochastic_mapping_inputs$numstates = numstates
+		stochastic_mapping_inputs$store_stratum_states_list_TF = store_stratum_states_list_TF
+		}
+	if (store_stratum_states_list_TF == TRUE)
+		{
+		stochastic_mapping_inputs$tipranges = tipranges
+		stochastic_mapping_inputs$areas = areas
+		stochastic_mapping_inputs$state_indices_0based = state_indices_0based
+		stochastic_mapping_inputs$state_indices_0based_all_timeperiods = state_indices_0based_all_timeperiods
+		stochastic_mapping_inputs$state_indices_0based_this_timeperiod = state_indices_0based_this_timeperiod
+		stochastic_mapping_inputs$states_allowed_this_timeperiod_TF = states_allowed_this_timeperiod_TF
+		
+		stochastic_mapping_inputs$ranges_list = ranges_list
+		stochastic_mapping_inputs$ranges_list_all_timeperiods = ranges_list_all_timeperiods
+		stochastic_mapping_inputs$ranges_this_timeperiod = ranges_this_timeperiod
+		
+		stochastic_mapping_inputs$numstates = numstates
+		stochastic_mapping_inputs$numstates_all_timeperiods = numstates_all_timeperiods
+		stochastic_mapping_inputs$numstates_this_timeperiod = numstates_this_timeperiod
+
+		stochastic_mapping_inputs$store_stratum_states_list_TF = store_stratum_states_list_TF
+		}	
+	
 	
 	if (stratified == FALSE)
 		{

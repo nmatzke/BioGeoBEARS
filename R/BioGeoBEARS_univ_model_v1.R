@@ -758,7 +758,10 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		#BioGeoBEARS_run_object$states_list = states_list
 		#inputs$states_list = states_list
 		}
-
+	
+	# Used if time-changing stratified states list
+	all_states_list = states_list
+	
 	#######################################################
 	# NON-STRATIFIED: Modify the states_list if needed
 	#######################################################
@@ -935,6 +938,60 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	if (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE)
 		{
 		ntimes = length(BioGeoBEARS_run_object$timeperiods)
+		
+		for (ntimes_i in 1:ntimes)
+			{
+			# Combine the 3 ways of changing states lists		
+			# Areas allowed in this time bin
+			if ( (is.null(BioGeoBEARS_run_object$list_of_areas_allowed_mats) == FALSE))
+				{
+				areas_allowed_mat = BioGeoBEARS_run_object$list_of_areas_allowed_mats[[ntimes_i]]
+
+				states_allowed_TF1 = sapply(X=all_states_list, FUN=check_if_state_is_allowed, areas_allowed_mat)
+				#states_to_use_TF = all_states_list %in% tmp_states_list
+		
+				if (include_null_range == TRUE)
+					{
+					states_allowed_TF1[1] = TRUE
+					}
+				# NO; use all areas for this
+				# states_to_use_TF = states_allowed_TF
+				} # END if ( (is.null(BioGeoBEARS_run_object$list_of_areas_allowed_mats) == FALSE))
+		
+			# Areas adjacency
+			if ( (is.null(BioGeoBEARS_run_object$list_of_areas_adjacency_mats) == FALSE))
+				{
+				areas_adjacency_mat = BioGeoBEARS_run_object$list_of_areas_adjacency_mats[[ntimes_i]]
+
+				states_allowed_TF2 = sapply(X=all_states_list, FUN=check_if_state_is_allowed_by_adjacency, areas_adjacency_mat)
+				#states_to_use_TF = all_states_list %in% tmp_states_list
+		
+				if (include_null_range == TRUE)
+					{
+					states_allowed_TF2[1] = TRUE
+					}
+				# NO; use all areas for this
+				# states_to_use_TF = states_allowed_TF
+				} # END if ( (is.null(BioGeoBEARS_run_object$list_of_areas_adjacency_mats) == FALSE))
+
+			# Manual list of allowed states
+			if ( (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE))
+				{
+				states_allowed_TF3 = all_states_list %in% BioGeoBEARS_run_object$lists_of_states_lists_0based[[ntimes_i]]
+			
+				if (include_null_range == TRUE)
+					{
+					states_allowed_TF3[1] = TRUE
+					}
+				} # END if ( (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE))
+
+			# Combine the 3 (areas_allowed, areas_adjacency, lists_of_states_lists_0based)
+			states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2 + states_allowed_TF3) == 3)
+
+			# CHANGE the inputs here, so that it can be used easily in BSM
+			BioGeoBEARS_run_object$lists_of_states_lists_0based[[ntimes_i]] = all_states_list[states_allowed_TF]
+			} # END for (ntimes_i in 1:ntimes)
+		
 		txt = paste0("bears_optim_run() note: BioGeoBEARS_run_object$lists_of_states_lists_0based has been specified. This means there is a different state space in each timebin / stratum / epoch.")
 		cat("\n")
 		cat(txt)

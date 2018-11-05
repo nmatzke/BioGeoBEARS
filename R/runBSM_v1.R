@@ -41,6 +41,18 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 		maxnum_maps_to_try = 2 * nummaps_goal
 		} # END if (nummaps_goal > maxnum_maps_to_try)
 	
+	# Set time-stratification
+	stratified = FALSE
+	if ((is.numeric(res$inputs$timeperiods))) #&& (length(inputs$timeperiods) > 1))
+		{
+		stratified = TRUE
+		strat_TF = TRUE
+		} else {
+		stratified = FALSE
+		strat_TF = FALSE		
+		}
+
+	
 
 	# Loop through the number of attempts
 	for (m in 1:maxnum_maps_to_try)
@@ -59,18 +71,6 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 		
 		startseed = seedval + m
 
-		# Check if this is stratified or not
-		strat_TF = FALSE
-		if (is.null(stochastic_mapping_inputs_list$stratified) == FALSE)
-			{
-			if (stochastic_mapping_inputs_list$stratified == TRUE)
-				{
-				strat_TF = TRUE
-				}
-			} else {
-			strat_TF = TRUE
-			} # END if (is.null(stochastic_mapping_inputs_list$stratified) == FALSE)
-		
 		#print(paste0("runBSM startseed = ", startseed))
 		
 		# Run stratified or non-stratified stochastic mapping

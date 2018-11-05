@@ -4725,6 +4725,42 @@ compare_two_name_lists <- function(names1, names2, listdesc1="file1", listdesc2=
 
 
 
+# state_indices_0based_all_timeperiods A list of lists of numbers (e.g. range 0, range 1, range 12),
+# perhaps with NA representing null range
+sort_list_of_lists_of_numbers <- function(state_indices_0based_all_timeperiods)
+	{
+	# Get the numbers as collapsed characters, to be sure sorting into correct order
+	state_indices_charcodes = rep("_", times=length(state_indices_0based_all_timeperiods))
+	lengthvals = rep(0, times=length(state_indices_0based_all_timeperiods))
+	for (ss in 1:length(state_indices_0based_all_timeperiods))
+		{
+		if (length(state_indices_0based_all_timeperiods[[ss]] == 1) && is.na(state_indices_0based_all_timeperiods[[ss]]))
+			{
+			state_indices_charcodes[ss] = "_"
+			lengthvals[ss] = 0
+			} else {
+			# Convert e.g. 0, 1, 2 to 0000, 0001, 0002 (for sorting later)
+			charvals = sprintf("%04.0f", state_indices_0based_all_timeperiods[[ss]])
+			state_indices_charcodes[ss] = paste0(charvals, collapse=",", sep="")
+			lengthvals[ss] = length(state_indices_0based_all_timeperiods[[ss]])
+			}
+		}
+	lengthvals = sprintf("%04.0f", lengthvals)
+	state_indices_charcodes
+	state_indices_charcodes = paste0(lengthvals, "-", state_indices_charcodes, sep="")
+	ordernums = order(state_indices_charcodes)
+	
+	oldlist = state_indices_0based_all_timeperiods
+	for (ss in 1:length(state_indices_0based_all_timeperiods))
+		{
+		state_indices_0based_all_timeperiods[[ss]] = oldlist[[ordernums[ss]]]
+		}
+	state_indices_0based_all_timeperiods
+	
+	return(state_indices_0based_all_timeperiods)
+	}
+
+
 
 
 
