@@ -21,6 +21,16 @@ library(devtools)
 devtools::install_github(repo="nmatzke/BioGeoBEARS")
 ```
 
+Or, if you want to see if byte-compiling leads to a speedup:
+
+```
+library(devtools)
+devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
+```
+
+**NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. The tools needed to do this are discussed here (or, you can re-install R): https://groups.google.com/forum/#!searchin/biogeobears/detach$20%7Csort:date/biogeobears/2f9etrphhmg/0Jg1YIoOBwAJ
+
+
 **Benefit:** you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
 
 
