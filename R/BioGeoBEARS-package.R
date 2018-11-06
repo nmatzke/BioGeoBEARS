@@ -4,7 +4,7 @@
 #' Package: \tab BioGeoBEARS\cr
 #' Type: \tab Package\cr
 #' Version: \tab 1.1.1\cr
-#' Date: \tab 2018-09-26\cr
+#' Date: \tab 2018-11-06\cr
 #' License: \tab GPL (>= 3)\cr
 #' LazyLoad: \tab yes\cr
 #' }
