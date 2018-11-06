@@ -94,8 +94,23 @@ expect_equal(object=numstates, expected=1024)
 
 test_that(desc="check numstates_from_numareas for 1831 states", code={
 
-numstates = numstates_from_numareas(numareas=20, maxareas=2, include_null_range=TRUE)
+numstates = numstates_from_numareas(numareas=60, maxareas=2, include_null_range=TRUE)
 expect_equal(object=numstates, expected=1831)
+
+}) # END test_that
+
+test_that(desc="check numstates_from_numareas for 211 states", code={
+
+numstates = numstates_from_numareas(numareas=20, maxareas=2, include_null_range=TRUE)
+expect_equal(object=numstates, expected=211)
+
+}) # END test_that
+
+
+test_that(desc="check numstates_from_numareas for 210 states (no null range)", code={
+
+numstates = numstates_from_numareas(numareas=20, maxareas=2, include_null_range=FALSE)
+expect_equal(object=numstates, expected=210)
 
 }) # END test_that
 
