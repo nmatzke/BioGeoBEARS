@@ -77,6 +77,10 @@ expect_equal(object=TF, expected=TRUE)
 
 test_that(desc="Check Biogeographic Stochastic Mapping on a 3-taxon tree, with changing areas allowed", code={
 
+# Skip the slow tests in online checks
+testthat::skip_on_cran()
+testthat::skip_on_travis()
+
 #######################################################
 # SETUP: YOUR WORKING DIRECTORY
 #######################################################

@@ -49,6 +49,11 @@ expect_equal(object=TF, expected=TRUE)
 
 test_that(desc="Check trait-dependent dispersal inference, for base models derived from 'BAYAREALIKE'", code={
 
+# Skip the slow tests in online checks
+testthat::skip_on_cran()
+testthat::skip_on_travis()
+
+
 
 setup='
 library(parallel)

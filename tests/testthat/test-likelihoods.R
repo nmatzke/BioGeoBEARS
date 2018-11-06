@@ -55,6 +55,13 @@ expect_equal(object=TF, expected=TRUE)
 
 test_that(desc="Check BioGeoBEARS Mk model (a modified BAYAREALIKE+a model) against the phytools R package's Mk model, on Hawaiian Psychotria dataset (Ree & Smith 2008).", code={
 
+
+# Skip the slow tests in online checks
+testthat::skip_on_cran()
+testthat::skip_on_travis()
+
+
+
 #######################################################
 # phytools ancestral states (ER model)
 #######################################################
@@ -353,6 +360,11 @@ cat("\n\n")
 
 
 test_that(desc="Check BioGeoBEARS DEC model ML and parameters against Lagrange (M0) with Hawaiian Psychotria dataset (Ree & Smith 2008).", code={
+
+# Skip the slow tests in online checks
+testthat::skip_on_cran()
+testthat::skip_on_travis()
+
 
 library(cladoRcpp)
 #source("/drives/Dropbox/_njm/__packages/cladoRcpp_setup/cladoRcpp.R")
@@ -669,6 +681,11 @@ cat("\n\n")
 
 
 test_that(desc="Check BioGeoBEARS DEC model ML and parameters against Lagrange (M0, but time-stratified) with Hawaiian Psychotria dataset (Ree & Smith 2008).", code={
+
+# Skip the slow tests in online checks
+testthat::skip_on_cran()
+testthat::skip_on_travis()
+
 
 library(cladoRcpp)
 #source("/drives/Dropbox/_njm/__packages/cladoRcpp_setup/cladoRcpp.R")
@@ -995,6 +1012,11 @@ cat("\n\n")
 
 test_that(desc="Check BioGeoBEARS DEC+J ML likelihood and parameters with Hawaiian Psychotria dataset (Ree & Smith 2008).", code={
 
+# Skip the slow tests in online checks
+testthat::skip_on_cran()
+testthat::skip_on_travis()
+
+
 library(cladoRcpp)
 #source("/drives/Dropbox/_njm/__packages/cladoRcpp_setup/cladoRcpp.R")
 library(BioGeoBEARS)
@@ -1227,6 +1249,11 @@ cat("\n\n")
 
 
 test_that(desc="check the 6 BioGeoBEARS base models on Hawaiian Psychotria", code={
+
+# Skip the slow tests in online checks
+testthat::skip_on_cran()
+testthat::skip_on_travis()
+
 
 library(cladoRcpp)
 #source("/drives/Dropbox/_njm/__packages/cladoRcpp_setup/cladoRcpp.R")
