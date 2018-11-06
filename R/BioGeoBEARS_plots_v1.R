@@ -3377,7 +3377,9 @@ stochastic_map_states_into_res <- function(res, master_table_cladogenetic_events
 	resmod = res
 	master_table_cladogenetic_events = stochastic_mapping_results2$master_table_cladogenetic_events
 	' # 
-
+	
+	# Load the tree
+	tr = ape::read.tree(file=res$inputs$trfn)
 	
 	# Error checks -- is this a stratified analysis?
 	strat_TF = ("SUBnode.type" %in% names(master_table_cladogenetic_events))

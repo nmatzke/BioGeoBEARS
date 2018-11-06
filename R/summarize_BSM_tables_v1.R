@@ -1651,12 +1651,24 @@ table2 <- function(event_counts, xlims)
 #######################################################
 check_ML_vs_BSM <- function(res, clado_events_tables, model_name, tr=NULL, plot_each_node=FALSE, linreg_plot=TRUE, MultinomialCI=TRUE)
 	{
+	# Get tree if needed
 	if (is.null(tr))
 		{
 		#tr = read.tree(res$inputs$trfn)
 		tr = check_trfn(trfn=res$inputs$trfn)
 		} # END if (is.null(tr))
-
+	
+	# Determine if a stratified analysis if needed
+	if (is.null(res$inputs$stratified))
+		{
+		if (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE)
+			{
+			res$inputs$stratified = TRUE
+			} # END if (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE)
+		} # END if (is.null(res$inputs$stratified))
+	stratified = res$inputs$stratified
+	
+	
 	pdffn = paste0(model_name, "_ML_vs_BSM.pdf")
 	pdf(file=pdffn, height=6, width=6)
 
