@@ -539,6 +539,12 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	assign("last.warning", NULL, envir = baseenv())
 	
 	
+	if (is.null(BioGeoBEARS_run_object$include_null_range))
+		{
+		BioGeoBEARS_run_object$include_null_range = TRUE
+		}	
+	include_null_range = BioGeoBEARS_run_object$include_null_range
+	
 	if (is.null(BioGeoBEARS_run_object$allow_null_tips))
 		{
 		BioGeoBEARS_run_object$allow_null_tips = FALSE
