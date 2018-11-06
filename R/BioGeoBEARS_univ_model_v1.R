@@ -945,6 +945,10 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		{
 		ntimes = length(BioGeoBEARS_run_object$timeperiods)
 		
+		states_allowed_TF1 = rep(TRUE, times=length(all_states_list))
+		states_allowed_TF2 = rep(TRUE, times=length(all_states_list))
+		states_allowed_TF3 = rep(TRUE, times=length(all_states_list))
+		
 		for (ntimes_i in 1:ntimes)
 			{
 			# Combine the 3 ways of changing states lists		

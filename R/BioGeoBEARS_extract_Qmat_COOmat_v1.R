@@ -186,20 +186,20 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 	newstrat = TRUE
 	if ((is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE) && (newstrat == TRUE))
 		{
-		area_nums = sort(unique(unlist(res$inputs$lists_of_states_lists_0based)))
+		area_nums = sort(unique(unlist(inputs$lists_of_states_lists_0based)))
 		area_nums
 		
-		state_indices_0based_all_timeperiods = unique(unlist(res$inputs$lists_of_states_lists_0based, recursive=FALSE))
+		state_indices_0based_all_timeperiods = unique(unlist(inputs$lists_of_states_lists_0based, recursive=FALSE))
 		# Get the numbers as collapsed characters, to be sure sorting into correct order
 		state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
 		
 		
-		states_list_this_timeperiod = res$inputs$lists_of_states_lists_0based[[timeperiod_i]]
+		states_list_this_timeperiod = inputs$lists_of_states_lists_0based[[timeperiod_i]]
 		states_allowed_this_timeperiod_TF = state_indices_0based_all_timeperiods %in% states_list_this_timeperiod
 		states_allowed_this_timeperiod_TF
 		
 		states_list = states_list_this_timeperiod
-		} # END if (!is.null(res$inputs$lists_of_states_lists_0based) == TRUE)
+		} # END if (!is.null(inputs$lists_of_states_lists_0based) == TRUE)
 
 	
 	
@@ -219,7 +219,7 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 			#BioGeoBEARS_run_object$states_list = states_list
 			#inputs$states_list = states_list
 			}
-		} # END if ((is.null(res$inputs$lists_of_states_lists_0based) == TRUE) || (newstrat == FALSE))
+		} # END if ((is.null(inputs$lists_of_states_lists_0based) == TRUE) || (newstrat == FALSE))
 		
 	
 	if (is.na(BioGeoBEARS_run_object$force_sparse))
