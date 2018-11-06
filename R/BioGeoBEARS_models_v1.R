@@ -263,7 +263,7 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -689,7 +689,7 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -1130,7 +1130,7 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -1542,7 +1542,7 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -1973,7 +1973,7 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -2396,7 +2396,7 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -2817,7 +2817,7 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -3231,7 +3231,7 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -3652,7 +3652,7 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -4078,7 +4078,7 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -4516,7 +4516,7 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -4940,7 +4940,7 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -5372,7 +5372,7 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -5808,7 +5808,7 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -6249,7 +6249,7 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
@@ -6659,7 +6659,7 @@ bears_2param_standard_slowQ_slowSP <- function(trfn = "Psychotria_5.2.newick", g
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).

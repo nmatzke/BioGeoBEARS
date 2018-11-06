@@ -1166,7 +1166,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	# [...]
 	#
 	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained
-	# optimization. SIAM J. Scientific Computing, 16, 1190–1208.
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.
 	#####################################################################################################
 	#
 	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).
