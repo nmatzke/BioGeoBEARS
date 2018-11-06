@@ -78,24 +78,24 @@ expect_equal(object=numstates, expected=56)
 
 
 
-test_that(desc="check ", code={
+test_that(desc="check numstates_from_numareas for 16 states", code={
 
 numstates = numstates_from_numareas(numareas=4, maxareas=4, include_null_range=TRUE)
 expect_equal(object=numstates, expected=16)
 
 }) # END test_that
 
-test_that(desc="check ", code={
+test_that(desc="check numstates_from_numareas for 1024 states", code={
 
-numstates = numstates_from_numareas(numareas=4, maxareas=4, include_null_range=TRUE)
-expect_equal(object=numstates, expected=16)
+numstates = numstates_from_numareas(numareas=10, maxareas=10, include_null_range=TRUE)
+expect_equal(object=numstates, expected=1024)
 
 }) # END test_that
 
-test_that(desc="check ", code={
+test_that(desc="check numstates_from_numareas for 1831 states", code={
 
-numstates = numstates_from_numareas(numareas=4, maxareas=4, include_null_range=TRUE)
-expect_equal(object=numstates, expected=16)
+numstates = numstates_from_numareas(numareas=20, maxareas=2, include_null_range=TRUE)
+expect_equal(object=numstates, expected=1831)
 
 }) # END test_that
 
