@@ -1248,7 +1248,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 
 			# Print the matrix to screen from C++
 			printmat = FALSE
-			if (printlevel >= 2)
+			if (printlevel >= 3)
 				{
 				printmat = TRUE
 				}
@@ -1286,7 +1286,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	
 			if (cppSpMethod == 3)
 				{
-				if (printlevel >= 2)
+				if (printlevel >= 3)
 					{
 					params_to_print = c("tmpca_1", "tmpcb_1", "l", "s", "v", "j", "y", "dmat", "maxent01s", "maxent01v", "maxent01j", "maxent01y", "max_minsize_as_function_of_ancsize")
 
@@ -1302,7 +1302,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						# Print it
 						print(tmppval)
 						}
-					} # END if (printlevel >= 2)
+					} # END if (printlevel >= 3)
 				
 				#print(m)
 				
@@ -1365,7 +1365,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			#condlikes_Right <- matexpo(Qmat * phy2$edge.length[j]) %*% relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
 
 
-			if (printlevel >= 2)
+			if (printlevel >= 3)
 				{
 				print("dense matrix exponentiation")
 				}
@@ -1526,12 +1526,12 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 					
 				} # END if (any(is.nan(condlikes_Right)))
 			
-			if (printlevel >= 2) {
+			if (printlevel >= 3) {
 			txt = paste("condlikes at bottom of L: ", paste(round(condlikes_Left, 4), collapse=" ", sep=""), sep="")
 			print(txt)
 			}
 			
-			if (printlevel >= 2) {
+			if (printlevel >= 3) {
 			txt = paste("condlikes at bottom of R: ", paste(round(condlikes_Right, 4), collapse=" ", sep=""), sep="")
 			print(txt)
 			}
@@ -1561,7 +1561,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 			#
 			# To fix this, multiple the output probabilities by 0 if check_for_0_rows[i[ == TRUE
 
-			if (printlevel >= 2)
+			if (printlevel >= 3)
 				{
 				print("sparse matrix exponentiation")
 				}
@@ -1782,7 +1782,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				# no speciational model of range change
 				##################################
 				node_likelihood <- condlikes_Left * condlikes_Right
-				if (printlevel >= 2)
+				if (printlevel >= 3)
 					{
 					print("use_cpp=FALSE, direct multiplication")
 					}
@@ -1792,7 +1792,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				# of range change
 				##################################
 
-				if (printlevel >= 2)
+				if (printlevel >= 3)
 					{
 					print("use_cpp=FALSE, speciation model")
 					}
@@ -1879,7 +1879,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 				##################################
 				# no speciational model of range change
 				##################################
-				if (printlevel >= 2) 
+				if (printlevel >= 3) 
 					{
 					print("use_cpp=TRUE, direct multiplication")
 					}
@@ -1903,7 +1903,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 
 						} else {
 						# otherwise ...
-						if (printlevel >= 2)
+						if (printlevel >= 3)
 							{
 							print("use_cpp=TRUE, no spPmat_inputs, speciation model")
 							}
@@ -1986,7 +1986,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 						}
 					} else {
 					## if ( is.null(spPmat_inputs)==FALSE )
-					if (printlevel >= 2)
+					if (printlevel >= 3)
 						{
 						print("use_cpp=TRUE, yes spPmat_inputs, speciation model")
 						}
@@ -2029,7 +2029,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 	
 					# Print the matrix to screen from C++
 					printmat = FALSE
-					if (printlevel >= 2) {
+					if (printlevel >= 3) {
 					printmat = TRUE
 					}
 					
@@ -2037,7 +2037,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 					# Actually, just do this ONCE (above)
 					#Rsp_rowsums = rcpp_calc_anclikes_sp_rowsums(Rcpp_leftprobs=tmpca_1, Rcpp_rightprobs=tmpcb_1, l=l, s=s, v=v, j=j, y=y, dmat=dmat, maxent01s, maxent01v, maxent01j, maxent01y, printmat=printmat)
 					
-					if (printlevel >= 2)
+					if (printlevel >= 3)
 						{
 						print("Rsp_rowsums:")
 						print(Rsp_rowsums)
@@ -2089,7 +2089,7 @@ calc_loglike_sp_prebyte <- function(tip_condlikes_of_data_on_each_state, phy, Qm
 					
 
 					
-					if (printlevel >= 2)
+					if (printlevel >= 3)
 						{
 						print("node_likelihood_with_speciation:")
 						print(node_likelihood_with_speciation)
@@ -2827,7 +2827,7 @@ relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[right_desc_nodenum,][s
 		} # End IF calc_ancprobs==TRUE
 
 
-	if (printlevel >= 2)
+	if (printlevel >= 3)
 		{
 		cat("total_loglikelihood:	", total_loglikelihood, "\n", sep="")
 		}

@@ -418,7 +418,7 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 		#print(jts_matrix)
 		#print("BioGeoBEARS_run_object$printlevel #1")
 		#print(BioGeoBEARS_run_object$printlevel)
-		ttl_loglike = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="loglike", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, cppSpMethod=3, printlevel=BioGeoBEARS_run_object$printlevel, cluster_already_open=cluster_already_open, calc_ancprobs=FALSE, fixnode=fixnode, fixlikes=fixlikes, include_null_range=BioGeoBEARS_run_object$include_null_range, m=m, jts_matrix=jts_matrix, BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, on_NaN_error=BioGeoBEARS_run_object$on_NaN_error)
+		ttl_loglike = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="loglike", probs_of_states_at_root=NULL, sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, cppSpMethod=3, printlevel=BioGeoBEARS_run_object$printlevel, cluster_already_open=cluster_already_open, calc_ancprobs=FALSE, fixnode=fixnode, fixlikes=fixlikes, include_null_range=BioGeoBEARS_run_object$include_null_range, states_allowed_TF=NULL, m=m, jts_matrix=jts_matrix, BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, on_NaN_error=BioGeoBEARS_run_object$on_NaN_error)
 		ttl_loglike
 
 		if (print_optim == TRUE)
@@ -453,7 +453,7 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 		
 		# Calculate EVERYTHING!
 		#print(jts_matrix)
-		model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=BioGeoBEARS_run_object$printlevel, cluster_already_open=cluster_already_open, calc_ancprobs=TRUE, fixnode=fixnode, fixlikes=fixlikes, include_null_range=BioGeoBEARS_run_object$include_null_range, m=m, jts_matrix=jts_matrix, BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, on_NaN_error=BioGeoBEARS_run_object$on_NaN_error)
+		model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", probs_of_states_at_root=NULL, sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=BioGeoBEARS_run_object$printlevel, cluster_already_open=cluster_already_open, calc_ancprobs=TRUE, fixnode=fixnode, fixlikes=fixlikes, include_null_range=BioGeoBEARS_run_object$include_null_range, states_allowed_TF=NULL, m=m, jts_matrix=jts_matrix, BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, on_NaN_error=BioGeoBEARS_run_object$on_NaN_error)
 		return(model_results)
 		}
 	} # END calc_loglike_for_optim
@@ -1304,11 +1304,23 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			{
 
 			
-			cat("\n\nNOTE: Before running optim(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values...\nif this crashes, the error messages are more helpful\nthan those from inside optim().\n", sep="")
+			cat("\n\nNOTE: Before running optim(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optim().\n", sep="")
 			
 			inputs = BioGeoBEARS_run_object
+			inputs$printlevel = 2
 			loglike = calc_loglike_for_optim_stratified(params=params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)
-
+			
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+				{
+				txt = paste0("STOP ERROR #1 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")
+				
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				
+				stop(txt)
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+			
 			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optim()...\n\n", sep="")
 			
 			if (skip_optim == TRUE)
@@ -1392,10 +1404,23 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			#params = c(0.03645000, 4.49500e-08)
 			
 			
-			cat("\n\nNOTE: Before running optimx(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values...\nif this crashes, the error messages are more helpful\nthan those from inside optimx().\n\n", sep="")
+			cat("\n\nNOTE: Before running optimx(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optimx().\n\n", sep="")
 			
 			inputs = BioGeoBEARS_run_object
+			inputs$printlevel = 2
 			loglike = calc_loglike_for_optim_stratified(params=params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)
+
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+				{
+				txt = paste0("STOP ERROR #2 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")
+				
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				
+				stop(txt)
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+
 
 			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optimx()...\n\n", sep="")
 
@@ -1481,10 +1506,23 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA may be better for more complex problems (4+ parameters, wildly different scalings), but has not been extensively tested for BioGeoBEARS yet. And it may be slower.")
 
 			
-			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n", sep="")
+			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n", sep="")
 			
 			inputs = BioGeoBEARS_run_object
+			inputs$printlevel = 2
 			loglike = calc_loglike_for_optim_stratified(params=params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)
+
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+				{
+				txt = paste0("STOP ERROR #3 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")
+				
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				
+				stop(txt)
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+
 
 			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA()...\n\n", sep="")
 			
@@ -1549,9 +1587,23 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			{
 
 			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!
-			cat("\n\nNOTE: Before running optim(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values...\nif this crashes, the error messages are more helpful\nthan those from inside optim().\n\n", sep="")
+			cat("\n\nNOTE: Before running optim(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optim().\n\n", sep="")
 			
-			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
+			inputs = BioGeoBEARS_run_object
+			inputs$printlevel = 2
+			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
+
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+				{
+				txt = paste0("STOP ERROR #4 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")
+				
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				
+				stop(txt)
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+
 			
 			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optim()...\n\n", sep="")			
 
@@ -1661,11 +1713,24 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 				} # END if (speedup)
 
 			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!
-			cat("\n\nNOTE: Before running optimx(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values...\nif this crashes, the error messages are more helpful\nthan those from inside optimx().\n\n", sep="")
+			cat("\n\nNOTE: Before running optimx(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optimx().\n\n", sep="")
 
+			inputs = BioGeoBEARS_run_object
+			inputs$printlevel = 2
 			
-			
-			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
+			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
+
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+				{
+				txt = paste0("STOP ERROR #5 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")
+				
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				
+				stop(txt)
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+
 			
 			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optimx()...\n\n", sep="")
 
@@ -1761,9 +1826,26 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA may be better for more complex problems (4+ parameters, wildly different scalings), but has not been extensively tested for BioGeoBEARS yet. And it may be slower.")
 			
 			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!
-			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n\n", sep="")
+			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n\n", sep="")
 
-			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
+			inputs = BioGeoBEARS_run_object
+			inputs$printlevel = 2
+
+			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
+
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+				{
+				txt = paste0("STOP ERROR #6 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")
+				
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				
+				stop(txt)
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
+
+
+
 			
 			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA()...\n\n", sep="")
 
