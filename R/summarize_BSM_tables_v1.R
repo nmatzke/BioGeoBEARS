@@ -1664,7 +1664,9 @@ check_ML_vs_BSM <- function(res, clado_events_tables, model_name, tr=NULL, plot_
 		if (is.numeric(res$inputs$timeperiods) == TRUE)
 			{
 			res$inputs$stratified = TRUE
-			} # END if (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE)
+			} else {
+			res$inputs$stratified = FALSE
+			}# END if (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE)
 		} # END if (is.null(res$inputs$stratified))
 	stratified = res$inputs$stratified
 	

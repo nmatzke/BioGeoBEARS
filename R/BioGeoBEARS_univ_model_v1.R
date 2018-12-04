@@ -1503,7 +1503,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			{
 			require(GenSA)
 
-			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA may be better for more complex problems (4+ parameters, wildly different scalings), but has not been extensively tested for BioGeoBEARS yet. And it may be slower.")
+			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")
 
 			
 			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n", sep="")
@@ -1823,7 +1823,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 			{
 			require(GenSA)
 			
-			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA may be better for more complex problems (4+ parameters, wildly different scalings), but has not been extensively tested for BioGeoBEARS yet. And it may be slower.")
+			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")
 			
 			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!
 			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n\n", sep="")
