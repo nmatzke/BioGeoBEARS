@@ -4716,12 +4716,12 @@ calc_loglike_for_optim_stratified <- function(params, BioGeoBEARS_run_object, ph
 		# specified in the inputs
 		if (is.null(BioGeoBEARS_run_object$prior_by_range_size) == FALSE)
 			{
-			cat("\n\nNOTE: BioGeoBEARS is multiplying the initial tip conditional likelihoods ('tip_condlikes_of_data_on_each_state') by the user-specified 'BioGeoBEARS_run_object$prior_by_range_size'")
+			#cat("\n\nNOTE: BioGeoBEARS is multiplying the initial tip conditional likelihoods ('tip_condlikes_of_data_on_each_state') by the user-specified 'BioGeoBEARS_run_object$prior_by_range_size'")
 			for (iii in 1:nrow(tip_condlikes_of_data_on_each_state))
 				{
 				tip_condlikes_of_data_on_each_state[iii,] = tip_condlikes_of_data_on_each_state[iii,] * BioGeoBEARS_run_object$prior_by_range_size
 				}
-			cat("\n...done.\n")
+			#cat("\n...done.\n")
 			}
 		}
 
