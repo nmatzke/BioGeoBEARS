@@ -2419,3 +2419,320 @@ post_prob_states_matrix <- function(prob_of_each_range, tip_condlikes_of_data_on
 # 	return(sum_lnPs)
 # 	}
 
+
+
+
+
+
+
+
+
+
+
+
+# Get the size distribution of range sizes
+# from tipranges
+#'
+#' dtf A data.frame, e.g. from tipranges@df
+#' fill_in If TRUE, put in 1s for null_range (0 areas), and unobserved sizes; 
+#' copy value above for intermediate range sizes
+get_distribution_of_range_sizes_in_tipranges <- function(dtf, max_range_size, include_null_range=TRUE)
+	{
+	junk='
+	living_tipranges = structure(list(N = c("0", "0", "0", "0", "1", "1", "0", "1", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "1", "1", "1", "0", "0", "1", "1", "1", "1", "0", "0", "0", 
+"0", "0", "0"), S = c("1", "0", "0", "0", "0", "0", "0", "0", 
+"0", "1", "1", "0", "1", "1", "0", "0", "0", "1", "1", "1", "1", 
+"1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0"), R = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "1", "0", "0", "0", "1", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "1", "1", "1", "0", "0", "1", "0", "0", "0", 
+"0", "0", "0"), E = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "1", "0", "0", "1", "0", "0", "0", 
+"1", "0", "1"), M = c("0", "0", "0", "1", "0", "0", "1", "0", 
+"1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0", 
+"1", "0", "1"), F = c("0", "1", "1", "1", "0", "0", "1", "0", 
+"0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", 
+"0", "1", "0"), I = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "1", "1", "0", "0", "0", "1", "0", "0", "1", 
+"1", "0", "1")), row.names = c("Atelocynus_microtis", "Lupulella_adustus", 
+"Canis_anthus", "Canis_aureus", "Canis_latrans", "Canis_lupus", 
+"Lupulella_mesomelas", "Canis_rufus", "Canis_simensis", "Cerdocyon_thous", 
+"Chrysocyon_brachyurus", "Cuon_alpinus", "Dusicyon_australis", 
+"Lycalopex_fulvipes", "Lycaon_pictus", "Nyctereutes_procyonoides", 
+"Otocyon_megalotis", "Lycalopex_culpaeus", "Lycalopex_griseus", 
+"Lycalopex_gymnocercus", "Lycalopex_sechurae", "Pseudalopex_vetulus", 
+"Speothos_venaticus", "Urocyon_cinereoargenteus", "Urocyon_littoralis", 
+"Vulpes_corsac", "Vulpes_ferrilata", "Vulpes_lagopus", "Vulpes_macrotis", 
+"Vulpes_velox", "Vulpes_vulpes", "Vulpes_zerda", "Vulpes_pallida", 
+"Vulpes_bengalensis", "Vulpes_cana", "Vulpes_chama", "Vulpes_rueppellii"
+), class = "data.frame")
+	dtf = living_tipranges
+	max_range_size = 7
+	include_null_range=TRUE
+	get_distribution_of_range_sizes_in_tipranges(dtf=living_tipranges, max_range_size=max_range_size, include_null_range=TRUE)
+	'
+	
+	
+	# To take a tipranges object directly
+	if ("tipranges" %in% class(dtf))
+		{
+		dtf = dtf@df
+		}
+	
+	numareas = ncol(dtf)
+	
+	if (include_null_range == FALSE)
+		{
+		range_sizes = 1:max_range_size
+		} # END if (include_null_range == FALSE)
+
+	if (include_null_range == TRUE)
+		{
+		range_sizes = 0:max_range_size
+		} # END if (include_null_range == TRUE)
+
+	observed_range_sizes = table(rowSums(dfnums_to_numeric(dtf)))
+	
+	if (fill_in == TRUE)
+		{
+		new_observed_range_sizes = NULL
+		for (range_size in range_sizes)
+			{
+			observed_range_size = observed_range_sizes[as.character(range_size)]
+			if (is.na(observed_range_size))
+				{
+				new_observed_range_sizes[as.character(range_size)] = 0
+				} else {
+				new_observed_range_sizes[as.character(range_size)] = observed_range_size
+				}
+			}
+		new_observed_range_sizes
+		} # END if (fill_in == TRUE)
+	
+	# Input 1 for range size 0 (null_range)
+	TF = (include_null_range == TRUE) && (new_observed_range_sizes["0"] == 0)
+	if (TF == TRUE)
+		{
+		new_observed_range_sizes["0"] = 1
+		}
+	
+	# Counting down from the largest ranges, input 1 for 
+	# largest unobserved ranges, for other 0s, input previous value 
+	last_value_input = 1
+	for (i in (length(range_sizes):1))
+		{
+		range_size = range_sizes[i]
+		new_observed_range_size = new_observed_range_sizes[as.character(range_size)]
+		
+		if (new_observed_range_size == 0)
+			{
+			new_observed_range_sizes[as.character(range_size)] = last_value_input
+			}
+		last_value_input = new_observed_range_sizes[as.character(range_size)] 
+		}
+	names(new_observed_range_sizes) = range_sizes
+	new_weighting_by_range_size = new_observed_range_sizes
+	
+	
+	res = NULL
+	res$observed_range_sizes = observed_range_sizes
+	res$new_weighting_by_range_size = new_weighting_by_range_size
+	junk='
+	observed_range_sizes = res$observed_range_sizes
+	new_weighting_by_range_size = res$new_weighting_by_range_size
+	'
+	
+	
+	return(res)
+	}
+
+
+
+get_distribution_of_range_sizes_in_states_list <- function(states_list_0based)
+	{
+	junk='
+	living_tipranges = structure(list(N = c("0", "0", "0", "0", "1", "1", "0", "1", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "1", "1", "1", "0", "0", "1", "1", "1", "1", "0", "0", "0", 
+"0", "0", "0"), S = c("1", "0", "0", "0", "0", "0", "0", "0", 
+"0", "1", "1", "0", "1", "1", "0", "0", "0", "1", "1", "1", "1", 
+"1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0"), R = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "1", "0", "0", "0", "1", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "1", "1", "1", "0", "0", "1", "0", "0", "0", 
+"0", "0", "0"), E = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "1", "0", "0", "1", "0", "0", "0", 
+"1", "0", "1"), M = c("0", "0", "0", "1", "0", "0", "1", "0", 
+"1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0", 
+"1", "0", "1"), F = c("0", "1", "1", "1", "0", "0", "1", "0", 
+"0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", 
+"0", "1", "0"), I = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "1", "1", "0", "0", "0", "1", "0", "0", "1", 
+"1", "0", "1")), row.names = c("Atelocynus_microtis", "Lupulella_adustus", 
+"Canis_anthus", "Canis_aureus", "Canis_latrans", "Canis_lupus", 
+"Lupulella_mesomelas", "Canis_rufus", "Canis_simensis", "Cerdocyon_thous", 
+"Chrysocyon_brachyurus", "Cuon_alpinus", "Dusicyon_australis", 
+"Lycalopex_fulvipes", "Lycaon_pictus", "Nyctereutes_procyonoides", 
+"Otocyon_megalotis", "Lycalopex_culpaeus", "Lycalopex_griseus", 
+"Lycalopex_gymnocercus", "Lycalopex_sechurae", "Pseudalopex_vetulus", 
+"Speothos_venaticus", "Urocyon_cinereoargenteus", "Urocyon_littoralis", 
+"Vulpes_corsac", "Vulpes_ferrilata", "Vulpes_lagopus", "Vulpes_macrotis", 
+"Vulpes_velox", "Vulpes_vulpes", "Vulpes_zerda", "Vulpes_pallida", 
+"Vulpes_bengalensis", "Vulpes_cana", "Vulpes_chama", "Vulpes_rueppellii"
+), class = "data.frame")
+	dtf = living_tipranges
+	max_range_size = 7
+	include_null_range=TRUE
+	#areas = getareas_from_tipranges_object(tipranges)
+	areas = names(dtf)
+	states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+	'
+	
+	numareas_per_state = sapply(X=states_list_0based, FUN=length)
+	numareas_per_state
+	
+	# Correct the rangesize for null range (NA or "_") to 0
+	if (is.na(states_list_0based[[1]]) == TRUE)
+		{
+		numareas_per_state[1] = 0
+		} else {
+		if ((states_list_0based[[1]] == "_") || (states_list_0based[[1]] == ""))
+			{
+			numareas_per_state[1] = 0
+			}
+		} # END if (is.na(states_list_0based[[1]]) == TRUE)
+	
+	numstates_per_numareas = table(numareas_per_state)
+	
+	res = NULL
+	res$numareas_per_state = numareas_per_state
+	res$numstates_per_numareas = numstates_per_numareas
+	junk='
+	numareas_per_state = res$numareas_per_state
+	numstates_per_numareas = res$numstates_per_numareas
+
+	'
+	return(res)
+	} # END get_distribution_of_range_sizes_in_states_list <- function(states_list_0based)
+
+
+
+get_rangesize_prior_by_observed_rangesize <- function(observed_rangesizes_dtf, max_range_size, include_null_range=TRUE, states_list_0based=NULL)
+	{
+	junk='
+	living_tipranges = structure(list(N = c("0", "0", "0", "0", "1", "1", "0", "1", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "1", "1", "1", "0", "0", "1", "1", "1", "1", "0", "0", "0", 
+"0", "0", "0"), S = c("1", "0", "0", "0", "0", "0", "0", "0", 
+"0", "1", "1", "0", "1", "1", "0", "0", "0", "1", "1", "1", "1", 
+"1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0"), R = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "1", "0", "0", "0", "1", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "1", "1", "1", "0", "0", "1", "0", "0", "0", 
+"0", "0", "0"), E = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "1", "0", "0", "1", "0", "0", "0", 
+"1", "0", "1"), M = c("0", "0", "0", "1", "0", "0", "1", "0", 
+"1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0", 
+"1", "0", "1"), F = c("0", "1", "1", "1", "0", "0", "1", "0", 
+"0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", 
+"0", "1", "0"), I = c("0", "0", "0", "1", "0", "0", "0", "0", 
+"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+"0", "0", "0", "0", "1", "1", "0", "0", "0", "1", "0", "0", "1", 
+"1", "0", "1")), row.names = c("Atelocynus_microtis", "Lupulella_adustus", 
+"Canis_anthus", "Canis_aureus", "Canis_latrans", "Canis_lupus", 
+"Lupulella_mesomelas", "Canis_rufus", "Canis_simensis", "Cerdocyon_thous", 
+"Chrysocyon_brachyurus", "Cuon_alpinus", "Dusicyon_australis", 
+"Lycalopex_fulvipes", "Lycaon_pictus", "Nyctereutes_procyonoides", 
+"Otocyon_megalotis", "Lycalopex_culpaeus", "Lycalopex_griseus", 
+"Lycalopex_gymnocercus", "Lycalopex_sechurae", "Pseudalopex_vetulus", 
+"Speothos_venaticus", "Urocyon_cinereoargenteus", "Urocyon_littoralis", 
+"Vulpes_corsac", "Vulpes_ferrilata", "Vulpes_lagopus", "Vulpes_macrotis", 
+"Vulpes_velox", "Vulpes_vulpes", "Vulpes_zerda", "Vulpes_pallida", 
+"Vulpes_bengalensis", "Vulpes_cana", "Vulpes_chama", "Vulpes_rueppellii"
+), class = "data.frame")
+	dtf = living_tipranges
+	observed_rangesizes_dtf = dtf
+	max_range_size = 7
+	include_null_range=TRUE
+	states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+	'
+
+	# To take a tipranges object directly
+	if ("tipranges" %in% class(observed_rangesizes_dtf))
+		{
+		observed_rangesizes_dtf = observed_rangesizes_dtf@df
+		}
+	dtf = observed_rangesizes_dtf
+	
+	areanames = names(dtf)
+	
+	# Generate the states_list, if needed
+	if (is.null(states_list_0based))
+		{
+		states_list_0based = rcpp_areas_list_to_states_list(areas=areanames, maxareas=max_range_size, include_null_range=include_null_range)
+		}
+	numstates = length(states_list_0based)
+	
+	# Get the observed range sizes
+	res = get_distribution_of_range_sizes_in_tipranges(dtf, max_range_size=max_range_size, include_null_range=include_null_range)
+	observed_range_sizes = res$observed_range_sizes
+	new_weighting_by_range_size = res$new_weighting_by_range_size
+	
+	# Get the range sizes of the state space
+	res = get_distribution_of_range_sizes_in_states_list(states_list_0based)
+	numareas_per_state = res$numareas_per_state
+	numstates_per_numareas = res$numstates_per_numareas
+	
+	
+	# new_weighting_by_range_size: 
+	# 0  1  2  3  4  5  6  7 
+	# 1 23  9  3  2  2  1  1 
+	# 
+	# This suggests that the tip likelihoods, for tips with uncertain ranges, should be 
+	# 	
+	# multiplied by this prior:
+	# default: 1/numranges for all tips, total=1
+	# size_wt: 
+	# 0:
+	# 1: 7  ranges possible, so they get (23/43), divided among the 7 ranges
+	# 2: 21 ranges possible, so they get (9/43), divided among the 21 ranges
+	# ...etc...
+
+	# Character vector	
+	list_of_numareas_in_state_space = names(numstates_per_numareas)
+	
+	prior_by_range_size = rep(0, times=length(states_list_0based))
+	statenums_start = 0
+	statenums_end = 0
+	tmp_numstates = 0
+	for (i in 1:length(list_of_numareas_in_state_space))
+		{
+		# Character vector
+		tmp_numareas = list_of_numareas_in_state_space[i]
+		numstates_in_this_numareas = numstates_per_numareas[tmp_numareas]
+		statenums_start = statenums_end
+		statenums_start = statenums_start + 1
+		statenums_end = statenums_end + numstates_in_this_numareas
+	
+		prior_by_range_size[statenums_start:statenums_end] = (new_weighting_by_range_size[tmp_numareas] / sum(new_weighting_by_range_size)) * (1/numstates_in_this_numareas) 
+		}
+	prior_by_range_size
+	sum(prior_by_range_size)
+	# 1
+	
+	return(prior_by_range_size)	
+	} # END get_rangesize_prior_by_observed_rangesize(observed_rangesizes_dtf, max_range_size, include_null_range=TRUE, states_list_0based=NULL)
+
