@@ -356,7 +356,7 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 	# Cladogenic model
 	#######################################################
 	spPmat_inputs = get_spPmat_inputs_from_BGB(BioGeoBEARS_run_object=BioGeoBEARS_run_object, states_list=states_list, dispersal_multipliers_matrix=dispersal_multipliers_matrix)
-
+	
 	#######################################################
 	# Detection model
 	#######################################################
@@ -399,7 +399,6 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 		# Pre-specified (custom) tip-likelihoods
 		tip_condlikes_of_data_on_each_state = BioGeoBEARS_run_object$tip_condlikes_of_data_on_each_state
 		} # END if (is.null(BioGeoBEARS_run_object$tip_condlikes_of_data_on_each_state) == FALSE)
-
 
 
 	if (print_optim == TRUE)

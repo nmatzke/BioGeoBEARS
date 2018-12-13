@@ -4711,6 +4711,18 @@ calc_loglike_for_optim_stratified <- function(params, BioGeoBEARS_run_object, ph
 		
 		# return_LnLs=TRUE ensures no under-flow
 		tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, phy=phy, numareas=numareas, detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)
+
+		# Multiply tip likelihoods by a prior on given range sizes, if
+		# specified in the inputs
+		if (is.null(BioGeoBEARS_run_object$prior_by_range_size) == FALSE)
+			{
+			cat("\n\nNOTE: BioGeoBEARS is multiplying the initial tip conditional likelihoods ('tip_condlikes_of_data_on_each_state') by the user-specified 'BioGeoBEARS_run_object$prior_by_range_size'")
+			for (iii in 1:nrow(tip_condlikes_of_data_on_each_state))
+				{
+				tip_condlikes_of_data_on_each_state[iii,] = tip_condlikes_of_data_on_each_state[iii,] * BioGeoBEARS_run_object$prior_by_range_size
+				}
+			cat("\n...done.\n")
+			}
 		}
 
 
