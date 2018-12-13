@@ -2432,10 +2432,11 @@ post_prob_states_matrix <- function(prob_of_each_range, tip_condlikes_of_data_on
 
 # Get the size distribution of range sizes
 # from tipranges
+#'  put in 1s for null_range (0 areas), and unobserved sizes; 
+#' copy value above for intermediate range sizes
+#'
 #'
 #' dtf A data.frame, e.g. from tipranges@df
-#' fill_in If TRUE, put in 1s for null_range (0 areas), and unobserved sizes; 
-#' copy value above for intermediate range sizes
 get_distribution_of_range_sizes_in_tipranges <- function(dtf, max_range_size, include_null_range=TRUE)
 	{
 	junk='
@@ -2499,21 +2500,18 @@ get_distribution_of_range_sizes_in_tipranges <- function(dtf, max_range_size, in
 
 	observed_range_sizes = table(rowSums(dfnums_to_numeric(dtf)))
 	
-	if (fill_in == TRUE)
+	new_observed_range_sizes = NULL
+	for (range_size in range_sizes)
 		{
-		new_observed_range_sizes = NULL
-		for (range_size in range_sizes)
+		observed_range_size = observed_range_sizes[as.character(range_size)]
+		if (is.na(observed_range_size))
 			{
-			observed_range_size = observed_range_sizes[as.character(range_size)]
-			if (is.na(observed_range_size))
-				{
-				new_observed_range_sizes[as.character(range_size)] = 0
-				} else {
-				new_observed_range_sizes[as.character(range_size)] = observed_range_size
-				}
+			new_observed_range_sizes[as.character(range_size)] = 0
+			} else {
+			new_observed_range_sizes[as.character(range_size)] = observed_range_size
 			}
-		new_observed_range_sizes
-		} # END if (fill_in == TRUE)
+		}
+	new_observed_range_sizes
 	
 	# Input 1 for range size 0 (null_range)
 	TF = (include_null_range == TRUE) && (new_observed_range_sizes["0"] == 0)
