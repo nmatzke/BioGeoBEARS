@@ -22,6 +22,9 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 	save_after_every_try=TRUE
 	savedir=getwd()
 	seedval=12345
+	
+	
+	res; stochastic_mapping_inputs_list=stochastic_mapping_inputs_list; maxnum_maps_to_try=100; nummaps_goal=1; maxtries_per_branch=40000; save_after_every_try=TRUE; savedir=getwd(); seedval=12345; wait_before_save=0.01; master_nodenum_toPrint=0
 	'
 	
 	
@@ -55,6 +58,7 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 	
 
 	# Loop through the number of attempts
+	m=1
 	for (m in 1:maxnum_maps_to_try)
 		{
 		# Initialize
@@ -80,6 +84,11 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 			} else {
 			# Stratified
 			#maxtries=40000; seedval=521; master_nodenum_toPrint=0
+			
+			# stochastic_mapping_results = stochastic_mapping_on_stratified(res=res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxtries=40000, seedval=12346, master_nodenum_toPrint=master_nodenum_toPrint)
+			
+			# stochastic_mapping_inputs_list=stochastic_mapping_inputs_list; maxtries=40000; seedval=12346; master_nodenum_toPrint=9
+			
 			cmdstr = paste0("stochastic_mapping_results = stochastic_mapping_on_stratified(res=res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxtries=", maxtries_per_branch, ", seedval=", startseed, ", master_nodenum_toPrint=master_nodenum_toPrint)")
 			} # END if (strat_TF == FALSE)
 		#print("AA_stochastic_mapping_on_stratified")

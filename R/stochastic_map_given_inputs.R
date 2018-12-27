@@ -141,6 +141,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		
 		# This works, the reverse does not -- 2015-04-06
 		# (LR for tree plots is opposite for the internal structure)
+		# NJMtest: should be right, then left
 		trtable$left_desc_nodes[nodenums] = leftright_nodes_matrix$right
 		trtable$right_desc_nodes[nodenums] = leftright_nodes_matrix$left
 		trtable[nodenums,]
@@ -225,7 +226,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 	#print(TF2)
 	if ( TF1 || TF2 )
 		{
-		# Sample a state at the root
+		# Sample a state at the global root
 		
 		# The global root nodenum will be different than the subtree root nodenum
 		if (stratified == TRUE)
@@ -309,6 +310,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)
 			{
 			independent_likelihoods_on_root_branch_of_subtree = expokit_dgpadm_Qmat2(times=branch_length, Qmat=Qmat, transpose_needed=TRUE)
+			# NJMtest: tried FALSE, still issue
 			}
 
 		if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)
@@ -319,16 +321,19 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			Qmat_big = matrix(data=0, nrow=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF), ncol=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
 			Qmat_big[subset_nums,subset_nums] = Qmat
 			independent_likelihoods_on_root_branch_of_subtree = expokit_dgpadm_Qmat2(times=branch_length, Qmat=Qmat_big, transpose_needed=TRUE)
+			# NJMtest: tried FALSE, still issue
 			}
 
 
 		
-		
+		# NJMtest: reversing, no effect
+		# NJMtest: transpose, no effect
 		condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_on_root_branch_of_subtree
 		
 		if (include_null_range == TRUE)
 			{
 			condprobs_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
+			downpass_relprobs_at_branch_top[1] = 0
 			}
 		
 		# State probabilities at the top of the branch
@@ -524,6 +529,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			# stratified==TRUE
 			daughter_nodenums_global = trtable$daughter_nds[nodenum][[1]]
 			# names(leftright_nodes_matrix) = c("right", "left")
+			# NJMtest switch left and right: NO. Should be 1,2
 			left_branch_decnode_global = daughter_nodenums_global[1]
 			right_branch_decnode_global = daughter_nodenums_global[2]
 			left_branch_downpass_likes = res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[left_branch_decnode_global, ]
@@ -554,6 +560,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			#sampled_split_descendants$right_decstate_1based = statenum_1based
 			
 			# 2017-04-07_bug_fix
+			# *IF* a hook, copy the node state to both descendant corners
 			sample_uppass_res = list()
 			sample_uppass_res$left_decstate_1based = statenum_1based
 			sample_uppass_res$right_decstate_1based = statenum_1based
@@ -794,13 +801,17 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# Here, left_desc_nodenum & right_desc_nodenum are for the SUBTREE
 		if (stratified == FALSE)
 			{
+			# NJM CHECK!!
+			
 			# OK, now multiply the UPPASS and DOWNPASS probabilities
+			# 2015 version - prob OK
 			probs_Left_branch_top = condprobs_Left_branch_top * res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
 			probs_Right_branch_top = condprobs_Right_branch_top * res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
 			
 			# In case users want to trace what's going on
 			left_desc_nodenum_global = left_desc_nodenum
-			left_desc_nodenum_global = right_desc_nodenum
+			right_desc_nodenum_global = right_desc_nodenum
+			# NJMfix: 2018-12-20
 			} else {
 			# When stratified == TRUE, we have to dig up the corresponding rows of res
 			# to get the correct downpass condlikes
@@ -1249,6 +1260,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 	# NEVER a root branch
 
 	# Now, you have to walk up the time pieces (including root branches)
+	timeperiod_i = num_timeperiods
 	for (timeperiod_i in num_timeperiods:1)
 		{
 		stratum = timeperiod_i
@@ -1295,7 +1307,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 		areas = stochastic_mapping_inputs$areas
 	
 	  
-
+		piecenum = 1
 		for (piecenum in 1:num_pieces)
 			{
 			# 2016-05-07_bugfix
