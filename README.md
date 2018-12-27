@@ -58,6 +58,8 @@ BioGeoBEARS version 1.1.1 also includes 156+ unit-tests in the "tests" directory
 
 The tests all run successfully on my Mac, but they take too long to build in Travis-CI (which has a time-limit of 50 minutes). See [Build #24](https://travis-ci.org/nmatzke/BioGeoBEARS/builds/439942601) or [Build #52](https://travis-ci.org/nmatzke/BioGeoBEARS/builds/451188909) for successful builds that do only some of the tests.
 
+I have also noticed that builds that were working fine suddenly started to fail, due to some change in how Travis-CI's backend handled a C++ Magick library dependency. I wasn't using it but some dependency of some depenency may have needed it. Fixed in [Build #70](https://travis-ci.org/nmatzke/BioGeoBEARS/builds/472808886) due to help [here](https://github.com/travis-ci/travis-ci/issues/9625#issuecomment-389931623).
+
 (The present version of BioGeoBEARS will install from GitHub regardless of the unit-tests issue.)
 
 # CITATION INFORMATION
