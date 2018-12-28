@@ -3,7 +3,15 @@ BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts
 
 # UPDATES, September 2018
 
-The GitHub repository contains all updates formerly posted on PhyloWiki. This includes functions for Biogeographical Stochastic Mapping (BSM) and trait-dependent dispersal models. Further updates will be posted to GitHub. **Benefit:** you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
+The GitHub repository now contains all updates formerly posted on PhyloWiki. This includes functions for Biogeographical Stochastic Mapping (BSM) and trait-dependent dispersal models. Further updates will be posted to GitHub. **Benefit:** you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
+
+# Running BioGeoBEARS example script, "out of the box"
+
+The R script to run a basic BioGeoBEARS analysis "out of the box" is still [posted at PhyloWiki](http://phylo.wikidot.com/biogeobears#script), [here](http://phylo.wikidot.com/biogeobears#script): [http://phylo.wikidot.com/biogeobears#script](http://phylo.wikidot.com/biogeobears#script) .
+
+Other run scripts, and many tips and answers to FAQs, are still available at the various links on the [BioGeoBEARS PhyloWiki page](http://phylo.wikidot.com/biogeobears#script): [http://phylo.wikidot.com/biogeobears](http://phylo.wikidot.com/biogeobears#script) . This material needs to be reorganized, but this will take some time.
+
+# Installing BioGeoBEARS from GitHub
 
 To install the GitHub version of BioGeoBEARS, first:
 
@@ -28,8 +36,50 @@ library(devtools)
 devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
 ```
 
-**3. NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. The tools needed to do this are discussed here (or, you can re-install R): https://groups.google.com/forum/#!searchin/biogeobears/detach$20%7Csort:date/biogeobears/2f9etrphhmg/0Jg1YIoOBwAJ
+**3. NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. Instructions for removing old versions:
 
+```
+# library BioGeoBEARS to load whatever you have currently installed
+library(BioGeoBEARS)
+
+# Find where this version of package is installed:
+find.package(package="BioGeoBEARS")
+
+# You might get something like:
+# "/Library/Frameworks/R.framework/Resources/library/"
+
+# Remove and detach the package
+remove.packages(pkgs="BioGeoBEARS", lib="/Library/Frameworks/R.framework/Resources/library/")
+detach("package:BioGeoBEARS") # (detach might not work or be needed, not sure)
+
+
+# Repeat until library(BioGeoBEARS) says BioGeoBEARS is not installed:
+library(BioGeoBEARS)
+find.package(package="BioGeoBEARS")
+remove.packages(pkgs="BioGeoBEARS", lib="/Users/nickm/Library/R/3.0/library/")
+detach("package:BioGeoBEARS")
+
+library(BioGeoBEARS)
+find.package(package="BioGeoBEARS")
+remove.packages(pkgs="BioGeoBEARS", lib="/Users/nickm/Library/R/3.1/library/")
+detach("package:BioGeoBEARS")
+
+# (Obviously, change the "lib" argument to match 
+# whatever find.package() returned)
+
+
+# Once "clean", install BioGeoBEARS from GitHub (see above)
+# and make sure you now have the latest version:
+library(BioGeoBEARS)
+packageVersion("BioGeoBEARS")
+
+# If all the above fails, re-install R and install all packages afresh
+# (DON'T install BioGeoBEARS from CRAN, install it from GitHub)
+```
+
+Another discussion of the tools needed to do this are discussed here (or, you can re-install R): https://groups.google.com/forum/#!searchin/biogeobears/detach$20%7Csort:date/biogeobears/2f9etrphhmg/0Jg1YIoOBwAJ
+
+Basically, open R, type library(BioGeoBEARS), and if you already have an install, remove it.  Repeat this process until library(BioGeoBEARS) returns an error.  THEN install BioGeoBEARS from GitHub.
 
 **4.** If you get an unexpected error that you didn't used to get, probably you haven't actually updated everything. **BE SURE TO CAREFULLY CHECK #1, #2, and #3, above.** Use packageVersion to double-check that you've got the correct versions installed:
 
