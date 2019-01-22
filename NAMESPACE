@@ -1,6 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 exportClasses(
     "BioGeoBEARS_model",
-     "BioGeoBEARS_run",
      "tipranges" 
 )
