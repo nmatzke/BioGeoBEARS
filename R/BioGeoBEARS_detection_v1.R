@@ -4,9 +4,9 @@
 
 # source("/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_detection_v1.R")
 
-require("ape")
-require("rexpokit")
-require("cladoRcpp")
+#require("ape")
+#require("rexpokit")
+#require("cladoRcpp")
 
 # Get geographic ranges at tips, from the detections file rather than a geog file
 tipranges_from_detects_fn <- function(detects_fn)

@@ -1603,7 +1603,7 @@ cornerlabels <- function(text, coords, bg="green3", col="black", adj=c(0.5,0.5),
 #' 
 cornerpies <- function(pievals, coords, piecol, adj=c(0.5,0.5), ...)
 	{
-	require(ape)	# for ape:::floating.pie.asp
+	#require(ape)	# for ape:::floating.pie.asp
 	
 	args <- list(...)
     CEX <- if ("cex" %in% names(args)) 

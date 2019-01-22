@@ -2,9 +2,9 @@
 # Functions in this file implement various standard 
 # models of interest
 #######################################################
-require("ape")
-require("rexpokit")
-require("cladoRcpp")
+# require("ape")
+# require("rexpokit")
+# require("cladoRcpp")
 
 
 
@@ -84,8 +84,8 @@ bears_2param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	num_cores_to_use=NULL
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 
 
@@ -511,8 +511,8 @@ bears_2param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	num_cores_to_use=NULL
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+#	require(cladoRcpp)
+#	require(rexpokit)
 
 
 
@@ -951,8 +951,8 @@ bears_2param_DIVA_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = "Psy
 	num_cores_to_use=NULL
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 
 
@@ -1364,8 +1364,8 @@ bears_2param_standard_fast_fortest <- function(trfn = "test.newick", geogfn = "t
 	geogfn="Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -1803,8 +1803,8 @@ bears_2param_standard_fast_symOnly <- function(trfn = "Psychotria_5.2.newick", g
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -2226,8 +2226,8 @@ bears_2param_standard_fast_symOnly_simp <- function(trfn = "Psychotria_5.2.newic
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -2647,8 +2647,8 @@ bears_3param_standard_fast_fixnode <- function(trfn = "Psychotria_5.2.newick", g
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -3061,8 +3061,8 @@ bears_3param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -3482,8 +3482,8 @@ bears_3param_standard_fast_noJ <- function(trfn = "Psychotria_5.2.newick", geogf
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -3907,8 +3907,8 @@ bears_4param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -4344,8 +4344,8 @@ bears_5param_standard_fast <- function(trfn = "Psychotria_5.2.newick", geogfn = 
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -4765,8 +4765,8 @@ bears_5param_standard_fast_diffstart <- function(trfn = "Psychotria_5.2.newick",
 	num_cores_to_use=NULL
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -5200,8 +5200,8 @@ bears_5param_standard_fast_v <- function(trfn = "Psychotria_5.2.newick", geogfn 
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -5636,8 +5636,8 @@ bears_6param_standard_fast_ys_v <- function(trfn = "Psychotria_5.2.newick", geog
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -6077,8 +6077,8 @@ bears_9param_standard_fast_ys_v_cb <- function(trfn = "Psychotria_5.2.newick", g
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
@@ -6519,8 +6519,8 @@ bears_2param_standard_slowQ_slowSP <- function(trfn = "Psychotria_5.2.newick", g
 	geogfn = "Psychotria_geog.data"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+# 	require(cladoRcpp)
+# 	require(rexpokit)
 
 	# Get geographic ranges at tips
 	tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)

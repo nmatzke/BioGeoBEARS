@@ -34,7 +34,7 @@ run_bears_optim_on_multiple_trees <- function(BioGeoBEARS_run_object, newick_fns
 	plot_params=FALSE
 	'
 	
-	require(stringr)
+# 	require(stringr)
 	
 	# Check the input newick_fns to make sure they end in .newick
 	num_newick_strings = str_count(string=newick_fns, pattern="\\.newick")

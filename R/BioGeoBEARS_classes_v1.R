@@ -1,7 +1,7 @@
 
-require("ape")
-require("rexpokit")
-require("cladoRcpp")
+#require("ape")
+#require("rexpokit")
+#require("cladoRcpp")
 
 
 #######################################################
@@ -1494,7 +1494,38 @@ define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGe
 #' @examples
 #' test=1
 #'
-setClass(Class="BioGeoBEARS_run", representation=representation(inputs="list"), prototype=define_BioGeoBEARS_run())
+# setClass(Class="BioGeoBEARS_run", representation=representation(inputs="list"), prototype=define_BioGeoBEARS_run())
+
+# setClass(Class="BioGeoBEARS_run", contains="list", slots=list(abbr = "character", 
+# description = "character", 
+# trfn = "character", 
+# geogfn = "character", 
+# BioGeoBEARS_model_object = "BioGeoBEARS_model", 
+# timesfn = "character", 
+# distsfn = "character", 
+# dispersal_multipliers_fn = "character", 
+# area_of_areas_fn = "character", 
+# areas_allowed_fn = "character", 
+# areas_adjacency_fn = "character", 
+# detects_fn = "character", 
+# controls_fn = "character", 
+# max_range_size = "numeric", 
+# force_sparse = "logical", 
+# use_detection_model = "logical", 
+# print_optim = "logical", 
+# printlevel = "numeric", 
+# on_NaN_error = "numeric", 
+# num_cores_to_use = "numeric", 
+# cluster_already_open = "character", 
+# speedup = "logical", 
+# include_null_range = "logical", 
+# useAmbiguities = "logical", 
+# min_branchlength = "numeric",
+# use_optimx = "character", 
+# rescale_params = "logical", 
+# return_condlikes_table = "logical", 
+# calc_TTL_loglike_from_condlikes_table = "logical", 
+# calc_ancprobs = "logical"))
 
 
 

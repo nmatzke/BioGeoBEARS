@@ -1,7 +1,7 @@
 
-require("ape")
-require("rexpokit")
-require("cladoRcpp")
+# require("ape")
+# require("rexpokit")
+# require("cladoRcpp")
 
 
 
@@ -1058,7 +1058,7 @@ prt_tree_to_phylo4 <- function(prt_tr)
 #' 
 label_nodes_postorder_phylo3 <- function(tr2)
 	{
-	require(phylobase)
+	#require(phylobase)
 	tr4 = as(tr2, "phylo4")
 	tr5 = reorder(tr4, "postorder")
 	
@@ -1116,7 +1116,7 @@ label_nodes_postorder_phylo3 <- function(tr2)
 #' 
 postorder_nodes_phylo4_return_table <- function(tr4)
 	{
-	require(phylobase)
+	#require(phylobase)
 	
 	# Check if phylo instead of phylo4
 	if (is(tr4, "phylo") == TRUE)
@@ -2470,7 +2470,7 @@ process_DIVA_output <- function(outfn, one_geog_range_per_row=TRUE)
 	'
 
 
-	require(gdata)	# for "trim" function
+	#require(gdata)	# for "trim" function
 	
 	# Read a text file into a list of strings
 	tmplines = scan(outfn, what="character", sep="\n")
@@ -2617,7 +2617,7 @@ find_instring <- function(findthis, string)
 # Trim surrounding spaces, AND remove any tabs
 trim2 <- function(tmpstr)
 	{
-	require(gdata) # for trim
+	#require(gdata) # for trim
 	
 	# Convert any tabs to space; leading/trailing tabs will be removed by trim
 	tmpstr = gsub(pattern="\t", replacement=" ", tmpstr)

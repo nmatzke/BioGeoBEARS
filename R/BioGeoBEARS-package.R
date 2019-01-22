@@ -76,4 +76,3 @@
 #' citation(package="rexpokit")		# Roger Sidje is a coauthor of rexpokit 
 #'                                  # and author of the FORTRAN EXPOKIT
 #' 
-require(roxygen2)

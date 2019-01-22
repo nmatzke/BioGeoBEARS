@@ -1764,7 +1764,7 @@ check_ML_vs_BSM <- function(res, clado_events_tables, model_name, tr=NULL, plot_
 	if (MultinomialCI == TRUE)
 		{
 		# Try doing confidence intervals
-		require(MultinomialCI)
+		#require(MultinomialCI)
 		sumBSMcounts2 = sumBSMcounts[-(1:numtips),]
 
 		# Confident intervals for a particular node

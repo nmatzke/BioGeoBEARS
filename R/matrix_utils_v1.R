@@ -172,7 +172,7 @@ Qmat_to_Rmat <- function(Qmat, basefreqs, return_scalefactor=FALSE)
 # The Pmat should have each row add to 1
 Pmat_to_Qmat <- function(Pmat)
 	{
-	require(expm) 	# for logm, the *matrix* log
+	#require(expm) 	# for logm, the *matrix* log
 	
 	# Take the *matrix* log of the Pmat
 	logPmat = logm::logm(Pmat)

@@ -1,8 +1,8 @@
 # source("/Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_simulate_v1.R")
 
-require("ape")
-require("rexpokit")
-require("cladoRcpp")
+# require("ape")
+# require("rexpokit")
+# require("cladoRcpp")
 
 
 # Qmat contains the d & e probs

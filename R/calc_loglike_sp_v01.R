@@ -1,9 +1,9 @@
 #######################################################
 # Calc loglike speciation -- separated to its own file, because it's such a huge function
 #######################################################
-require("ape")
-require("rexpokit")
-require("cladoRcpp")
+# require("ape")
+# require("rexpokit")
+# require("cladoRcpp")
 #require("parallel")
 
 #######################################################
@@ -43,7 +43,7 @@ require("cladoRcpp")
 #' 
 expokit_dgpadm_Qmat2_prebyte <- function(times, Qmat, transpose_needed=TRUE)
 	{
-	require("rexpokit")
+	#require("rexpokit")
 	rexpokit::expokit_dgpadm_Qmat(Qmat=Qmat, t=times, transpose_needed)
 	}
 

@@ -1488,7 +1488,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 						cat(txt)
 						cat("\n\n")
 						warning(txt)
-						require(minqa)
+						#require(minqa)
 						} # END if (packageVersion("optimx") > 2017)
 					} # END if (minqa_TF == FALSE)
 
