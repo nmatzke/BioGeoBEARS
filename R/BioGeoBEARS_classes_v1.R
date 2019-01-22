@@ -2909,9 +2909,9 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE, allow_null_ra
 		}
 
 	# Check for polytomies
-	if (is.binary.tree(tmptr) == FALSE)
+	if (is.binary(tmptr) == FALSE)
 		{
-		stoptxt = paste("\ncheck_BioGeoBEARS_run() says: FATAL ERROR in inputs: Your tree not bifurcating, i.e. is.binary.tree(tmptr) returns FALSE.\n", 
+		stoptxt = paste("\ncheck_BioGeoBEARS_run() says: FATAL ERROR in inputs: Your tree not bifurcating, i.e. is.binary(tmptr) returns FALSE.\n", 
 		"\nYou must fix the Newick file. APE's multi2di() function is an option.  See ?check_BioGeoBEARS_run for comments.\n", sep="")
 		cat(stoptxt)
 		stop(stoptxt)

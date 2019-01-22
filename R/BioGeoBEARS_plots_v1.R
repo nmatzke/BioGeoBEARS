@@ -597,7 +597,7 @@ plot_stratum_lines=TRUE
 			} # END if (show.tip.label == TRUE)
 		
 		#axisPhylo(cex.axis=titlecex)
-		axis(side=1,  at=xaxis_ticks_locs, label=xticks_desired)
+		axis(side=1,  at=xaxis_ticks_locs, labels=xticks_desired)
 		# Plot the title
 		mtext(text=xlab, side=1, line=2, cex=titlecex)
 		}
@@ -1578,7 +1578,8 @@ cornerlabels <- function(text, coords, bg="green3", col="black", adj=c(0.5,0.5),
 #' Make pie charts for plotting ranges on corners
 #' 
 #' This function makes pie charts for plotting ranges on corners.  It makes use of 
-#' \code{ape:::floating.pie.asp} to plot the pie charts on the corners.
+#' \code{ape:::floating.pie.asp} (copied to ape_floating_pie_asp in 
+#' BioGeoBEARS) to plot the pie charts on the corners.
 #' 
 #' To get the corner coordinates, use \code{\link{corner_coords}}.  Please note the 
 #' special input required in that function to get it to access a corner-coordinates 
@@ -1647,7 +1648,7 @@ cornerpies <- function(pievals, coords, piecol, adj=c(0.5,0.5), ...)
 			{
 			next()
 			}
-		ape:::floating.pie.asp(XX[i], YY[i], pievals[i, ], radius = xrad[i], col = piecol, ...)
+		ape_floating_pie_asp(XX[i], YY[i], pievals[i, ], radius = xrad[i], col = piecol, ...)
 		}
 	
 	
@@ -3120,7 +3121,7 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 	
 	# Make the table into a plot
 	#require(plotrix)
-	addtable2plot(x=0.1, y=0.80, table=dtf, xjust=0, yjust=0, cex=1)
+	plotrix::addtable2plot(x=0.1, y=0.80, table=dtf, xjust=0, yjust=0, cex=1)
 	title("Cladogenetic\nparameters", font.main=2, cex.main=1, line=-2)
 
 
@@ -3210,25 +3211,25 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 	# for color2D.matplot
 	#require(plotrix)	# for color2D.matplot
 	
-	color2D.matplot(x=maxent01y, c(1,0), c(1,0), c(1,0), cellcolors=y_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
+	plotrix::color2D.matplot(x=maxent01y, c(1,0), c(1,0), c(1,0), cellcolors=y_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
 	axis(side=2, at=rangesizes_at_y, labels=rangesizes, tick=FALSE, padj=0.5, las=1, cex.axis=1.5, line=-0.8)
 	axis(side=3, at=rangesizes_at_x, labels=rangesizes, tick=FALSE, hadj=0.5, cex.axis=1.5, line=-0.8)			
 	title("y:Sympatric (copying)", line=2, font.main=2, cex.main=1.1)
 	mtext("decsize", side=1, cex=0.8, line=0.2, font.main=1, cex.main=0.9)
 	
-	color2D.matplot(x=maxent01s, c(1,0), c(1,0), c(1,0), cellcolors=s_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
+	plotrix::color2D.matplot(x=maxent01s, c(1,0), c(1,0), c(1,0), cellcolors=s_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
 	axis(side=2, at=rangesizes_at_y, labels=rangesizes, tick=FALSE, padj=0.5, las=1, cex.axis=1.5, line=-0.8)
 	axis(side=3, at=rangesizes_at_x, labels=rangesizes, tick=FALSE, hadj=0.5, cex.axis=1.5, line=-0.8)			
 	title("s:Sympatric (subset)", line=2, font.main=2, cex.main=1.1)
 	mtext("decsize", side=1, cex=0.8, line=0.2, font.main=1, cex.main=0.9)
 	
-	color2D.matplot(x=maxent01v, c(1,0), c(1,0), c(1,0), cellcolors=v_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
+	plotrix::color2D.matplot(x=maxent01v, c(1,0), c(1,0), c(1,0), cellcolors=v_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
 	axis(side=2, at=rangesizes_at_y, labels=rangesizes, tick=FALSE, padj=0.5, las=1, cex.axis=1.5, line=-0.8)
 	axis(side=3, at=rangesizes_at_x, labels=rangesizes, tick=FALSE, hadj=0.5, cex.axis=1.5, line=-0.8)			
 	title("v:Vicariance", line=2, font.main=2, cex.main=1.1)
 	mtext("decsize", side=1, cex=0.8, line=0.2, font.main=1, cex.main=0.9)
 	
-	color2D.matplot(x=maxent01j, c(1,0), c(1,0), c(1,0), cellcolors=j_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
+	plotrix::color2D.matplot(x=maxent01j, c(1,0), c(1,0), c(1,0), cellcolors=j_cellcolors, show.values=TRUE, show.legend=FALSE, xlab="", ylab="", axes=FALSE, nslices=100, xaxt="n", yaxt="n")
 	axis(side=2, at=rangesizes_at_y, labels=rangesizes, tick=FALSE, padj=0.5, las=1, cex.axis=1.5, line=-0.8)
 	axis(side=3, at=rangesizes_at_x, labels=rangesizes, tick=FALSE, hadj=0.5, cex.axis=1.5, line=-0.8)			
 	title("j:Founder-event (jump)", line=2, font.main=2, cex.main=1.1)
@@ -3238,8 +3239,8 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 	par(mar=c(0,0,0,0), xaxs = "i", yaxs = "i") 
 	# Row 2 right thin column
 	plot(x=c(0,1), y=c(0,1), pch=".", col="white", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
-	testcol = rev(color.gradient(c(0,1),c(0,1),c(0,1),nslices=100))
-	color.legend(xl=0.15, yb=0.3, xr=0.4, yt=0.8, legend=c(0,1), align="rb", rect.col=testcol, gradient="y")	# gradient in x-axis
+	testcol = rev(plotrix::color.gradient(c(0,1),c(0,1),c(0,1),nslices=100))
+	plotrix::color.legend(xl=0.15, yb=0.3, xr=0.4, yt=0.8, legend=c(0,1), align="rb", rect.col=testcol, gradient="y")	# gradient in x-axis
 	
 
 
@@ -4249,65 +4250,6 @@ BioGeoBEARS_reorder <- function(res, tr1, tr2, trfn_for_BGB_inputs=NULL)
 
 
 
-run_BioGeoBEARS_reorder <- function()
-		{
-	#######################################################
-	# Reorder Robin Becks tree so that the BioGeoBEARS plots look better
-	#######################################################
-	# Convert BioGeoBEARS object from one tree to another
-	# tr1 = new tree
-	# tr2 = original tree, used the BioGeoBEARS analysis
-	wd  = "/drives/Dropbox/_njm/__packages/BioGeoBEARS_setup/z_help/Robin_Beck/"
-	setwd(wd)
-
-	# Original tree
-	trfn = "PBG_TE_no_Alo_IGR_topcons_MCC_no_zero.tre"
-	tr2 = read.tree(trfn)
-	plot(tr2)
-
-	# Ladderize the tree
-	# GOOD LADDERIZE
-	tr1 = ladderize_and_reorder(phy=tr2, right=FALSE)
-	plot(tr1)
-
-	tr1 = rotate_tips(tr=tr1, tipname1="Kulbeckia", tipname2="Paranyctoides")
-	plot(tr1)
-
-	tr1 = rotate_tips(tr=tr1, tipname1="Paranyctoides", tipname2="Sheikhdzheilia")
-	plot(tr1)
-
-
-
-
-	new_trfn = "tree_ladderized.newick"
-	write.tree(phy=tr1, file=new_trfn)
-
-
-
-	resfns = c("Mammals_BAYAREALIKE+J_M0_unconstrained_v1.Rdata",
-	"Mammals_BAYAREALIKE_M0_unconstrained_v1.Rdata",
-	"Mammals_DIVALIKE+J_M0_unconstrained_v1.Rdata",
-	"Mammals_DIVALIKE_M0_unconstrained_v1.Rdata",
-	"Mammals_DEC+J_M0_unconstrained_v1.Rdata",
-	"Mammals_DEC_M0_unconstrained_v1.Rdata")
-
-	for (i in 1:length(resfns))
-		{
-		# Convert each file
-	
-		# Loads to res
-		load(file=resfns[i])
-		res2 = BioGeoBEARS_reorder(res, tr1, tr2, trfn_for_BGB_inputs=new_trfn)
-	
-		new_resfn = gsub(pattern="\\.Rdata", replacement="_ladderized.Rdata", x=resfns[i])
-		res = res2
-		# Loads to res
-		save(res, file=new_resfn)
-		} # END for (i in 1:length(resfns))
-
-	} # END run_BioGeoBEARS_reorder
-
-
 
 
 
@@ -4323,7 +4265,7 @@ run_BioGeoBEARS_reorder <- function()
 #
 # https://groups.google.com/forum/#!topic/biogeobears/gQ4bZ4U3FU8
 # 
-# BioGeoBEARS ›
+# BioGeoBEARS
 # node_height error
 # 1 post by 1 author  
 # 
@@ -4527,8 +4469,8 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
             yy <- r * sin(theta)
         }, unrooted = {
             nb.sp <- .nodeDepth(Ntip, Nnode, z$edge, Nedge, node.depth)
-            XY <- if (use.edge.length) unrooted.xy(Ntip, Nnode, 
-                z$edge, z$edge.length, nb.sp, rotate.tree) else unrooted.xy(Ntip, 
+            XY <- if (use.edge.length) ape_unrooted_xy(Ntip, Nnode, 
+                z$edge, z$edge.length, nb.sp, rotate.tree) else ape_unrooted_xy(Ntip, 
                 Nnode, z$edge, rep(1, Nedge), nb.sp, rotate.tree)
             xx <- XY$M[, 1] - min(XY$M[, 1])
             yy <- XY$M[, 2] - min(XY$M[, 2])
@@ -4752,7 +4694,7 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
             }
         }
         if (type == "phylogram") {
-            phylogram.plot(x$edge, Ntip, Nnode, xx, yy, horizontal, 
+            ape_phylogram_plot(x$edge, Ntip, Nnode, xx, yy, horizontal, 
                 edge.color, edge.width, edge.lty)
         } else {
             if (type == "fan") {
@@ -4769,10 +4711,10 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
                   edge.lty <- rep(edge.lty, length.out = Nedge)
                   edge.lty <- edge.lty[ereorder]
                 }
-                circular.plot(z$edge, Ntip, Nnode, xx, yy, theta, 
+                ape_circular_plot(z$edge, Ntip, Nnode, xx, yy, theta, 
                   r, edge.color, edge.width, edge.lty)
             }
-            else cladogram.plot(x$edge, xx, yy, edge.color, edge.width, 
+            else ape_cladogram_plot(x$edge, xx, yy, edge.color, edge.width, 
                 edge.lty)
         }
         if (root.edge) {
@@ -4786,7 +4728,7 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
                 edge.lty
             else 1
             if (type == "fan") {
-                tmp <- polar2rect(x$root.edge, theta[ROOT])
+                tmp <- ape_polar2rect(x$root.edge, theta[ROOT])
                 segments(0, 0, tmp$x, tmp$y, col = rootcol, lwd = rootw, 
                   lty = rootlty)
             }
@@ -4863,9 +4805,9 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
                 }
                 else {
                   if (align.tip.label) {
-                    POL <- rect2polar(xx.tips, yy.tips)
+                    POL <- ape_rect2polar(xx.tips, yy.tips)
                     POL$r[] <- max(POL$r)
-                    REC <- polar2rect(POL$r, POL$angle)
+                    REC <- ape_polar2rect(POL$r, POL$angle)
                     xx.tips <- REC$x
                     yy.tips <- REC$y
                     segments(xx[1:Ntip], yy[1:Ntip], xx.tips, 
@@ -4915,7 +4857,246 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
 
 
 
+# From: ape:::floating.pie.asp
+ape_floating_pie_asp <- function (xpos, ypos, x, edges = 200, radius = 1, col = NULL, 
+    startpos = 0, ...) 
+{
+    u <- par("usr")
+    user.asp <- diff(u[3:4])/diff(u[1:2])
+    p <- par("pin")
+    inches.asp <- p[2]/p[1]
+    asp <- user.asp/inches.asp
+    if (!is.numeric(x) || any(is.na(x) | x < 0)) 
+        stop("floating.pie: x values must be non-negative")
+    x <- c(0, cumsum(x)/sum(x))
+    dx <- diff(x)
+    nx <- length(dx)
+    col <- if (is.null(col)) 
+        rainbow(nx)
+    else rep_len(col, nx)
+    if (length(i <- which(dx == 1))) {
+        symbols(xpos, ypos, circles = radius, inches = FALSE, 
+            add = TRUE, fg = par("fg"), bg = col[i])
+    }
+    else {
+        bc <- 2 * pi * (x[1:nx] + dx/2) + startpos
+        for (i in seq_len(nx)) {
+            n <- max(2, floor(edges * dx[i]))
+            t2p <- 2 * pi * seq(x[i], x[i + 1], length = n) + 
+                startpos
+            xc <- c(cos(t2p) * radius + xpos, xpos)
+            yc <- c(sin(t2p) * radius * asp + ypos, ypos)
+            polygon(xc, yc, col = col[i], ...)
+        }
+    }
+}
+
+# From ape:::unrooted.xy
+ape_unrooted_xy <- function (Ntip, Nnode, edge, edge.length, nb.sp, rotate.tree) 
+{
+    foo <- function(node, ANGLE, AXIS) {
+        ind <- which(edge[, 1] == node)
+        sons <- edge[ind, 2]
+        start <- AXIS - ANGLE/2
+        for (i in 1:length(sons)) {
+            h <- edge.length[ind[i]]
+            angle[sons[i]] <<- alpha <- ANGLE * nb.sp[sons[i]]/nb.sp[node]
+            axis[sons[i]] <<- beta <- start + alpha/2
+            start <- start + alpha
+            xx[sons[i]] <<- h * cos(beta) + xx[node]
+            yy[sons[i]] <<- h * sin(beta) + yy[node]
+        }
+        for (i in sons) if (i > Ntip) 
+            foo(i, angle[i], axis[i])
+    }
+    Nedge <- dim(edge)[1]
+    yy <- xx <- numeric(Ntip + Nnode)
+    axis <- angle <- numeric(Ntip + Nnode)
+    foo(Ntip + 1L, 2 * pi, 0 + rotate.tree)
+    M <- cbind(xx, yy)
+    axe <- axis[1:Ntip]
+    axeGTpi <- axe > pi
+    axe[axeGTpi] <- axe[axeGTpi] - 2 * pi
+    list(M = M, axe = axe)
+}
 
 
+# From ape:::phylogram.plot
+ape_phylogram_plot <- function (edge, Ntip, Nnode, xx, yy, horizontal, edge.color, 
+    edge.width, edge.lty) 
+{
+    nodes <- (Ntip + 1):(Ntip + Nnode)
+    if (!horizontal) {
+        tmp <- yy
+        yy <- xx
+        xx <- tmp
+    }
+    x0v <- xx[nodes]
+    y0v <- y1v <- numeric(Nnode)
+    NodeInEdge1 <- vector("list", Nnode)
+    e1 <- edge[, 1]
+    for (i in seq_along(e1)) {
+        j <- e1[i] - Ntip
+        NodeInEdge1[[j]] <- c(NodeInEdge1[[j]], i)
+    }
+    for (i in 1:Nnode) {
+        j <- NodeInEdge1[[i]]
+        tmp <- range(yy[edge[j, 2]])
+        y0v[i] <- tmp[1]
+        y1v[i] <- tmp[2]
+    }
+    x0h <- xx[edge[, 1]]
+    x1h <- xx[edge[, 2]]
+    y0h <- yy[edge[, 2]]
+    nc <- length(edge.color)
+    nw <- length(edge.width)
+    nl <- length(edge.lty)
+    if (nc + nw + nl == 3) {
+        color.v <- edge.color
+        width.v <- edge.width
+        lty.v <- edge.lty
+    }
+    else {
+        Nedge <- dim(edge)[1]
+        edge.color <- rep(edge.color, length.out = Nedge)
+        edge.width <- rep(edge.width, length.out = Nedge)
+        edge.lty <- rep(edge.lty, length.out = Nedge)
+        DF <- data.frame(edge.color, edge.width, edge.lty, stringsAsFactors = FALSE)
+        color.v <- rep("black", Nnode)
+        width.v <- rep(1, Nnode)
+        lty.v <- rep(1, Nnode)
+        for (i in 1:Nnode) {
+            br <- NodeInEdge1[[i]]
+            if (length(br) == 1) {
+                A <- br[1]
+                color.v[i] <- edge.color[A]
+                width.v[i] <- edge.width[A]
+                lty.v[i] <- edge.lty[A]
+            }
+            else if (length(br) > 2) {
+                x <- unique(DF[br, 1])
+                if (length(x) == 1) 
+                  color.v[i] <- x
+                x <- unique(DF[br, 2])
+                if (length(x) == 1) 
+                  width.v[i] <- x
+                x <- unique(DF[br, 3])
+                if (length(x) == 1) 
+                  lty.v[i] <- x
+            }
+            else {
+                A <- br[1]
+                B <- br[2]
+                if (any(DF[A, ] != DF[B, ])) {
+                  color.v[i] <- edge.color[B]
+                  width.v[i] <- edge.width[B]
+                  lty.v[i] <- edge.lty[B]
+                  y0v <- c(y0v, y0v[i])
+                  y1v <- c(y1v, yy[i + Ntip])
+                  x0v <- c(x0v, x0v[i])
+                  color.v <- c(color.v, edge.color[A])
+                  width.v <- c(width.v, edge.width[A])
+                  lty.v <- c(lty.v, edge.lty[A])
+                  y0v[i] <- yy[i + Ntip]
+                }
+                else {
+                  color.v[i] <- edge.color[A]
+                  width.v[i] <- edge.width[A]
+                  lty.v[i] <- edge.lty[A]
+                }
+            }
+        }
+    }
+    if (horizontal) {
+        segments(x0h, y0h, x1h, y0h, col = edge.color, lwd = edge.width, 
+            lty = edge.lty)
+        segments(x0v, y0v, x0v, y1v, col = color.v, lwd = width.v, 
+            lty = lty.v)
+    }
+    else {
+        segments(y0h, x0h, y0h, x1h, col = edge.color, lwd = edge.width, 
+            lty = edge.lty)
+        segments(y0v, x0v, y1v, x0v, col = color.v, lwd = width.v, 
+            lty = lty.v)
+    }
+}
+
+
+# From ape:::circular.plot
+ape_circular_plot <- function (edge, Ntip, Nnode, xx, yy, theta, r, edge.color, edge.width, 
+    edge.lty) 
+{
+    r0 <- r[edge[, 1]]
+    r1 <- r[edge[, 2]]
+    theta0 <- theta[edge[, 2]]
+    costheta0 <- cos(theta0)
+    sintheta0 <- sin(theta0)
+    x0 <- r0 * costheta0
+    y0 <- r0 * sintheta0
+    x1 <- r1 * costheta0
+    y1 <- r1 * sintheta0
+    segments(x0, y0, x1, y1, col = edge.color, lwd = edge.width, 
+        lty = edge.lty)
+    tmp <- which(diff(edge[, 1]) != 0)
+    start <- c(1, tmp + 1)
+    Nedge <- dim(edge)[1]
+    end <- c(tmp, Nedge)
+    foo <- function(edge.feat, default) {
+        if (length(edge.feat) == 1) 
+            return(as.list(rep(edge.feat, Nnode)))
+        edge.feat <- rep(edge.feat, length.out = Nedge)
+        feat.arc <- as.list(rep(default, Nnode))
+        for (k in 1:Nnode) {
+            tmp <- edge.feat[start[k]]
+            if (tmp == edge.feat[end[k]]) {
+                feat.arc[[k]] <- tmp
+            }
+            else {
+                if (nodedegree[k] == 2) 
+                  feat.arc[[k]] <- rep(c(tmp, edge.feat[end[k]]), 
+                    each = 50)
+            }
+        }
+        feat.arc
+    }
+    nodedegree <- tabulate(edge[, 1L])[-seq_len(Ntip)]
+    co <- foo(edge.color, "black")
+    lw <- foo(edge.width, 1)
+    ly <- foo(edge.lty, 1)
+    for (k in 1:Nnode) {
+        i <- start[k]
+        j <- end[k]
+        X <- rep(r[edge[i, 1]], 100)
+        Y <- seq(theta[edge[i, 2]], theta[edge[j, 2]], length.out = 100)
+        x <- X * cos(Y)
+        y <- X * sin(Y)
+        x0 <- x[-100]
+        y0 <- y[-100]
+        x1 <- x[-1]
+        y1 <- y[-1]
+        segments(x0, y0, x1, y1, col = co[[k]], lwd = lw[[k]], 
+            lty = ly[[k]])
+    }
+}
+
+
+
+# From ape::cladogram.plot
+ape_cladogram_plot <- function (edge, xx, yy, edge.color, edge.width, edge.lty) 
+	{
+	segments(xx[edge[, 1]], yy[edge[, 1]], xx[edge[, 2]], yy[edge[, 2]], col = edge.color, lwd = edge.width, lty = edge.lty)
+	}
+
+# From ape:::polar2rect
+ape_polar2rect <- function (r, angle) 
+	{
+	list(x = r * cos(angle), y = r * sin(angle))
+	}
+
+# From ape:::rect2polar
+ape_rect2polar <- function (x, y)
+	{
+	list(r = sqrt(x^2 + y^2), angle = atan2(y, x))
+	}
 
 

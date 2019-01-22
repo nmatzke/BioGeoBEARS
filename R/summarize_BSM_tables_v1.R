@@ -1739,7 +1739,7 @@ check_ML_vs_BSM <- function(res, clado_events_tables, model_name, tr=NULL, plot_
 	
 		if (plot_each_node == TRUE)
 			{
-			plot(x,y, xlim=c(0,1), ylim=c(0,1), xlab="ML marginal probs", ylab="BSM probs")
+			plot(x,y, xlim=c(0,1), ylim=c(0,1), xlabel="ML marginal probs", ylabel="BSM probs")
 			segments(0,0,1,1)
 			title(nodenum)
 			} # END if (plot_each_node == TRUE)
@@ -1749,14 +1749,14 @@ check_ML_vs_BSM <- function(res, clado_events_tables, model_name, tr=NULL, plot_
 	# Plot allnodes
 	if (linreg_plot == FALSE)
 		{
-		plot(x_all, y_all, xlim=c(0,1), ylim=c(0,1), xlab="ML marginal probs", ylab="BSM probs")
+		plot(x_all, y_all, xlim=c(0,1), ylim=c(0,1), xlabel="ML marginal probs", ylabel="BSM probs")
 		segments(0,0,1,1)
 		title("all nodes")
 		} # END if (linreg_plot == FALSE)
 
 	if (linreg_plot == TRUE)
 		{
-		linear_regression_plot(x=x_all, y=y_all, tmppch=1, xlab="State probabilities under ML model", ylab="State probabilities as mean of BSMs", xlim=c(0,1), ylim=c(0,1))
+		linear_regression_plot(x=x_all, y=y_all, tmppch=1, xlabel="State probabilities under ML model", ylabel="State probabilities as mean of BSMs", xlim=c(0,1), ylim=c(0,1))
 		# Multiple R-squared:  0.9655,	Adjusted R-squared:  0.9655 
 		title(paste0(model_name, ":\nML state probs vs. mean of BSMs"))
 		} # END if (linreg_plot == TRUE)
@@ -1777,7 +1777,7 @@ check_ML_vs_BSM <- function(res, clado_events_tables, model_name, tr=NULL, plot_
 			{
 			cat(i+numtips, " ", sep="")
 			tmpcounts = sumBSMcounts2[i,]
-			CI95 = multinomialCI(x=tmpcounts, alpha=0.05, verbose=FALSE)
+			CI95 = MultinomialCI::multinomialCI(x=tmpcounts, alpha=0.05, verbose=FALSE)
 			#xvals = tmpcounts / sum(tmpcounts)
 			xvals = MLstateprobs[-(1:numtips),][i,]
 			segments(x0=xvals, x1=xvals, y0=CI95[,1], y1=CI95[,2])

@@ -1,11 +1,50 @@
-importFrom("grDevices", "col2rgb", "rainbow", "rgb")
-importFrom("graphics", "axis", "barplot", "layout", "legend", "mtext",
+importFrom("gdata", "trim")
+
+importFrom("graphics", "abline", "box", "boxplot", "hist",
+		 "plot.default", "points", "segments", "axis", "barplot", "layout", "legend", "mtext",
 "par", "plot", "rect", "strheight", "strwidth", "text",
-"title", "xinch", "yinch")
+"title", "xinch", "yinch", "symbols", "polygon")
+
+importFrom("grDevices", "col2rgb", "rainbow", "rgb", "dev.off", "pdf", "png")
+
 importFrom("methods", "as", "is", "new")
-importFrom("stats", "median", "optim", "pchisq", "quantile", "reorder",
+
+
+importFrom("stats", "aggregate", "lm", "rexp", "rnorm", "sd", "median", "optim", "pchisq", "quantile", "reorder",
 "runif")
-importFrom("utils", "read.table", "write.table")
+importFrom("utils", "head", "installed.packages", "packageVersion",
+		 "tail", "read.table", "write.table")
+
+
+importFrom("devtools", "source_url")
+importFrom("fdrtool", "dhalfnorm")
+importFrom("httr", "GET", "content")
+importFrom("expm", "logm")
+importFrom("statmod", "dinvgauss")
+importFrom("SparseM", "as.matrix.csr")
+importFrom("spam", "spam", "diag.spam")
+importFrom("stringr", "str_count")
+
+importFrom("plotrix", "addtable2plot", "color2D.matplot", "color.gradient", "color.legend")
+importFrom("MultinomialCI", "multinomialCI")
+
+importFrom("optimx", "optimx")
+importFrom("GenSA", "GenSA")
+
+#importFrom("snow", "makeCluster", "clusterApply")
+importFrom("parallel", "makeCluster", "detectCores", "stopCluster", "clusterApply")
+
+
+
+importFrom("ape", "axisPhylo", "plot.phylo", "read.tree", "drop.tip", "extract.clade", "write.tree", "tiplabels", "nodelabels", "old2new.phylo", "read.nexus", "is.rooted", "dist.nodes", "ladderize", "getMRCA", "is.binary", "is.binary.tree", "is.ultrametric", "write.nexus")
+importFrom("phylobase", "children", "descendants", "ancestor", "nodeId", "nNodes", "nTips")
+
+
+
+
+importFrom("rexpokit", "maxent", "mat2coo", "expokit_dgpadm_Qmat")
+importFrom("cladoRcpp", "numstates_from_numareas", "rcpp_states_list_to_DEmat", "rcpp_calc_anclikes_sp", "rcpp_areas_list_to_states_list", "rcpp_calc_anclikes_sp_COOprobs", "rcpp_calc_anclikes_sp_using_COOprobs", "rcpp_calc_anclikes_sp_COOweights_faster", "rcpp_calc_rowsums_for_COOweights_columnar", "rcpp_calc_splitlikes_using_COOweights_columnar")
+
 
 exportPattern("^[[:alpha:]]+")
 exportClasses(

@@ -5,8 +5,8 @@ bibentry("Manual",
          organization = "University of California, Berkeley",
          address      = "Berkeley, CA",
          year         = 2013,
-         note         = "The rexpokit/cladoRcpp/BioGeoBEARS packages were first published in:\n\n1. Matzke, Nicholas J. (2013). "Probabilistic historical biogeography: new models for founder-event speciation, imperfect detection, and fossils allow improved accuracy and model-testing." Frontiers of Biogeography, 5(4), 242-248. http://escholarship.org/uc/item/44j7n141\n\n2. Matzke, Nicholas J. (2014). "Model Selection in Historical Biogeography Reveals that Founder-event Speciation is a Crucial Process in Island Clades." Systematic Biology, 63(6), 951–970. https://academic.oup.com/sysbio/article/63/6/951/2847892",
-         url          = "http://CRAN.R-project.org/package=BioGeoBEARS",
+         note         = "The rexpokit/cladoRcpp/BioGeoBEARS packages were first published in:\n\n1. Matzke, Nicholas J. (2013). 'Probabilistic historical biogeography: new models for founder-event speciation, imperfect detection, and fossils allow improved accuracy and model-testing.' Frontiers of Biogeography, 5(4), 242-248. http://escholarship.org/uc/item/44j7n141\n\n2. Matzke, Nicholas J. (2014). 'Model Selection in Historical Biogeography Reveals that Founder-event Speciation is a Crucial Process in Island Clades.' Systematic Biology, 63(6), 951-970. https://academic.oup.com/sysbio/article/63/6/951/2847892",
+         url          = "https://CRAN.R-project.org/package=BioGeoBEARS",
                 
          mheader = "To cite package 'BioGeoBEARS' in publications use:",
 	 

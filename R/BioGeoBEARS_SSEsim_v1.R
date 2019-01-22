@@ -1817,16 +1817,16 @@ SSEsim_to_files <- function(SSEsim_results, simdir, fossils_older_than=0.001, pr
 		write.tree(phy=simtr_observed, file="simtr_observed.newick")
 		write.tree(phy=simtr_observed, file="tree.newick")
 		
-		save_tipranges_to_LagrangePHYLIP(tipranges=tipranges_simulated, lgdata_fn="geog_sim_complete.txt")
-		save_tipranges_to_LagrangePHYLIP(tipranges=tipranges_observed, lgdata_fn="geog_sim_observed.txt")
-		save_tipranges_to_LagrangePHYLIP(tipranges=tipranges_observed, lgdata_fn="geog.data")
+		save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges_simulated, lgdata_fn="geog_sim_complete.txt")
+		save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges_observed, lgdata_fn="geog_sim_observed.txt")
+		save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges_observed, lgdata_fn="geog.data")
 		
 		if (trait_TF == TRUE)
 			{
 			areanames = LETTERS[1:num_trait_states]
-			save_tipranges_to_LagrangePHYLIP(tipranges=traits_simulated, lgdata_fn="traits_sim_complete.txt", areanames=areanames)
-			save_tipranges_to_LagrangePHYLIP(tipranges=traits_observed, lgdata_fn="traits_sim_observed.txt", areanames=areanames)
-			save_tipranges_to_LagrangePHYLIP(tipranges=traits_observed, lgdata_fn="traits.data", areanames=areanames)
+			save_tipranges_to_LagrangePHYLIP(tipranges_object=traits_simulated, lgdata_fn="traits_sim_complete.txt", areanames=areanames)
+			save_tipranges_to_LagrangePHYLIP(tipranges_object=traits_observed, lgdata_fn="traits_sim_observed.txt", areanames=areanames)
+			save_tipranges_to_LagrangePHYLIP(tipranges_object=traits_observed, lgdata_fn="traits.data", areanames=areanames)
 
 			# Also make geog files with just 1 area, always occupied
 			# (needed input for a traits-only analysis)
@@ -1851,8 +1851,8 @@ SSEsim_to_files <- function(SSEsim_results, simdir, fossils_older_than=0.001, pr
 			names(tipranges_observed_1area@df) = names(tipranges_observed)[1]
 			row.names(tipranges_observed_1area@df) = row.names(tipranges_observed@df)
 
-			save_tipranges_to_LagrangePHYLIP(tipranges=tipranges_simulated_1area, lgdata_fn="tipranges_simulated_1area.data", areanames=c("A"))
-			save_tipranges_to_LagrangePHYLIP(tipranges=tipranges_observed_1area, lgdata_fn="tipranges_observed_1area.data", areanames=c("A"))
+			save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges_simulated_1area, lgdata_fn="tipranges_simulated_1area.data", areanames=c("A"))
+			save_tipranges_to_LagrangePHYLIP(tipranges_object=tipranges_observed_1area, lgdata_fn="tipranges_observed_1area.data", areanames=c("A"))
 			} # END if (trait_TF == TRUE)
 		} # END if (write_files == TRUE)
 	

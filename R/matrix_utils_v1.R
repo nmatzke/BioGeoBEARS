@@ -175,7 +175,7 @@ Pmat_to_Qmat <- function(Pmat)
 	#require(expm) 	# for logm, the *matrix* log
 	
 	# Take the *matrix* log of the Pmat
-	logPmat = logm::logm(Pmat)
+	logPmat = expm::logm(Pmat)
 
 	# Get a matrix with 1s on off-diagonal, 0s on diagonal
 	offdiags_1 = zeros_diag_ones_offdiag(size=ncol(Qmat))
@@ -469,56 +469,6 @@ uniq_rates <- function(Qmat)
 	}
 
 
-#' Assign rate categories by CRP
-#'
-#' Assigns rate categories to an input matrix bye CRP (Chinese Restaurant
-#' Process, a form of clustering where the number of clusters is estimated
-#' and can range from 1 to infinity (or really, the maximum number of clusters
-#' is the number of things being clustered).
-#'
-#' @param nrows number of rows in the matrix (order of the square matrix)
-#' @param alpha the clustering (or concentration) parameter of the Chinese Restaurant Process (CRP)
-#' @param priorlambda a hyperparameter specifying the mean of the exponential for
-#' drawing a rate for each category.  This could itself be drawn from a hyperprior
-#' in another function.
-#' @return Qmat, the instantaneous transition matrix (Q matrix)
-#' @references
-#' \url{http://en.wikipedia.org/wiki/Chinese_restaurant_process}
-#' @export
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
-#' 
-assign_rate_categories_rchinese <- function(nrows, alpha, priorlambda = 0.1)
-	{
-	# empty list of categories
-	Qcategories = ones(nrows)
-	Qmat = Qcategories
-	diag(Qcategories) = 0
-	numrates = nrows * nrows - nrows
-
-	categories = rchinese(numrates, alpha)
-	
-	# randomly assign the categories to cells
-	Qcategories[Qcategories == 1] = categories
-	
-	# randomly draw rates for each category
-	uniq_categories = sort(unique(categories))
-	
-	# using a uniform as the prior
-	numcats = length(uniq_categories)
-	cat("# rate categories = ", numcats, "\n", sep="")
-	#uniq_rates = runif(numcats, priormin, priormax)
-	uniq_rates = rexp(numcats, priorlambda)
-	
-	for (i in 1:numcats)
-		{
-		tmpcat = uniq_categories[i]
-		Qmat[Qcategories == tmpcat] = uniq_rates[i]
-		}
-	
-	# normalize the diagonals so that the rows sum to 1:
-	Qmat = mat2q(Qmat)
-	return(Qmat)
-	}
 
 #' Count the number of each category in a Q matrix
 #'
@@ -1404,10 +1354,10 @@ make_lotsa_sparse_matrices <- function(num_to_make, matrix_dim, newvals_str="new
 	indices = 1:num_to_make
 	
 	# Initialize list of matrices
-	A_list = lapply(rep.int(0, time=num_to_make), matrix, nrow=matrix_dim, ncol=matrix_dim)
+	A_list = lapply(X=rep.int(0, times=num_to_make), FUN=matrix, nrow=matrix_dim, ncol=matrix_dim)
 	
 	# Make a list of matrices
-	A_list = lapply(indices, make_sparse_matrix_by_i, matrix_dim, newvals_str)
+	A_list = lapply(X=indices, FUN=make_sparse_matrix_by_i, matrix_dim=matrix_dim, newvals_str=newvals_st, numvals_to_change=matrix_dim)
 	return(A_list)
 	}
 
@@ -2795,7 +2745,7 @@ coo2crs <- function(ia, ja, a, n=NA, transpose_needed=FALSE)
 	Qmat = matrix(vals, nrow=16, ncol=16, byrow=FALSE)
 	library(SparseM)
 	library(kexpmv)
-	crsQmat = as.matrix.csr(Qmat)
+	crsQmat = SparseM::as.matrix.csr(Qmat)
 	crsQmat
 	
 	library(BioGeoBEARS)

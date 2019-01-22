@@ -11,8 +11,8 @@
 
 sourceall_git <- function(repo)
   {
-  library(httr)     # for GET
-  library(devtools) # for source_url
+  #library(httr)     # for GET
+  #library(devtools) # for source_url
 
   
   # Based on:
@@ -24,7 +24,7 @@ sourceall_git <- function(repo)
   httr::stop_for_status(req)
   
   # Find the .R files
-  filelist <- unlist(lapply(content(req)$tree, "[", "path"), use.names = F)
+  filelist <- unlist(lapply(httr::content(req)$tree, "[", "path"), use.names = F)
   Rfiles = grep("\\.R", filelist, value = TRUE, fixed = TRUE)
   
   # Remove .Rproj, add 
@@ -2696,7 +2696,7 @@ rel_likes_from_deltaAICs <- function(deltaAICs)
 # http://www.brianomeara.info/tutorials/aic
 # Akaike weights are can be used in model averaging. They represent the relative likelihood of a model. 
 # To calculate them, for each model first calculate the relative likelihood of the model, which is just 
-# exp( -0.5 * ∆AIC score for that model). The Akaike weight for a model is this value divided by the sum 
+# exp( -0.5 * deltaAIC score for that model). The Akaike weight for a model is this value divided by the sum 
 # of these values across all models.
 
 #######################################################
@@ -3316,154 +3316,7 @@ openwd <- function(wd=getwd())
 
 
 
-# Print tables to PDF
 
-# Print to PDF via xtable
-# source: http://tex.stackexchange.com/questions/15013/generate-a-pdf-containing-r-output-inside-latex-table
-# 
-#######################################################
-# pdfit
-#######################################################
-#' Print a table to LaTeX format
-#' 
-#' This function prints a table to PDF via \code{\link[xtable]{xtable}} and the LaTeX \code{pdflatex} function.  It will only 
-#' work if you have command-line LaTeX installed.
-#' 
-#' This function was inspired by \url{http://tex.stackexchange.com/questions/15013/generate-a-pdf-containing-r-output-inside-latex-table}.
-#' 
-#' @param table_vals A table, hopefully produced by \code{\link{conditional_format_table}}.
-#' @param file_prefix The prefix for the output PDF and the intermediate files.
-#' @param size Font size, overriding \code{getOption("xtable.size")}. Default is "tiny" (with backslashes).  
-#' You can also try "small".  Input \code{NULL} (without quotes or backslashes) for medium.  (\code{NULL} is the options default.) 
-#' @param gettex If TRUE, the \code{tex} code for the table is returned.
-#' @param caption A caption, if desired.
-#' @return \code{texfile} The filename of the \code{tex} file.
-#' @export
-#' @seealso \code{\link{pdftable}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' test=1
-#' 
-#' # Setup data
-#' \dontrun{
-#' data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,  
-#' 18.551051, 5.483625,  3.590745,  18.772389)
-#' result = matrix(data, nrow=3, byrow=TRUE)
-#' result = as.data.frame(result)
-#' names(result) = c("CV", "LCB", "UCB")
-#' rownames(result) = c("within", "between", "total")
-#' result
-#' pdfit(table_vals=result)#' }
-#' 
-pdfit <- function(table_vals, file_prefix="tmptable", size="\\tiny", gettex=FALSE, caption=NULL)
-	{
-	#require(xtable)
-	
-	cat("\nNOTE: the pdfit() function will only work if you have 'latex' installed on your machine.\n", sep="")
-	
-	#tab = table_vals
-	
-	# Make a temporary tex file
-	texfile <- paste(file_prefix, ".tex", sep="")
-	cat("\\documentclass{article}\n\\usepackage{changepage}\n\\begin{document}\n\\begin{figure}\n\\begin{adjustwidth}{-2cm}{}\n", file=texfile)
-	
-	# Stick in the table
-	getOption("xtable.size")
-	options(xtable.size=size)
-	getOption("xtable.size")
-	
-	print(xtable(table_vals, size, caption), include.rownames=FALSE, floating=FALSE, 
-		 file=texfile, append=TRUE)
-	cat("\\end{adjustwidth}\n\\end{figure}\n\\end{document}\n", file=texfile, append=TRUE)
-
-	# Print to PDF
-	system(paste("pdflatex", texfile))
-
-	options(xtable.size=NULL)
-	
-	if (gettex == TRUE)
-		{
-		return(texfile)
-		}
-	return(texfile)
-	}
-
-
-
-
-# Default directory for temp files is ~
-#######################################################
-# pdfit
-#######################################################
-#' Print a table to LaTeX format
-#' 
-#' This function prints a table to PDF via \code{\link{pdfit}}, which calls \code{\link[xtable]{xtable}}
-#' and the LaTeX \code{pdflatex} function.  It will only work if you have command-line LaTeX installed.
-#' 
-#' This function was inspired by \url{http://tex.stackexchange.com/questions/15013/generate-a-pdf-containing-r-output-inside-latex-table}.
-#' 
-#' @param table_vals A table, hopefully produced by \code{\link{conditional_format_table}}.
-#' @param pdffn The filename for the output PDF (and the prefix for the intermediate files).
-#' @param size Font size, overriding \code{getOption("xtable.size")}. Default is "tiny" (with backslashes).  
-#' You can also try "small".  Input \code{NULL} (without quotes or backslashes) for medium.  (\code{NULL} is the options default.) 
-#' @param tmpdir The location for the temporary files.
-#' @param openPDF If \code{TRUE}, open the PDF via a \code{\link[base]{system}} command.
-#' @param caption A caption, if desired.
-#' @return \code{pdffn} The filename of the PDF file.
-#' @export
-#' @seealso \code{\link{pdfit}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' test=1
-#' 
-#' # Setup data
-#' \dontrun{
-#' data = c(2.768443, 1.869964, 5.303702, 4.733483,  2.123816,  
-#' 18.551051, 5.483625,  3.590745,  18.772389)
-#' result = matrix(data, nrow=3, byrow=TRUE)
-#' result = as.data.frame(result)
-#' names(result) = c("CV", "LCB", "UCB")
-#' rownames(result) = c("within", "between", "total")
-#' result
-#' pdftable(table_vals=result)#' }
-#' 
-pdftable <- function(table_vals, pdffn="tmptable.pdf", size="\\tiny", tmpdir="~", openPDF=TRUE, caption=NULL)
-	{
-	#require(xtable)
-	
-	# pdfif no like it if columns are lists
-	#table_vals = unlist_df3(table_vals)
-	
-	# Set up tmp filenames
-	pdf_prefix = get_path_last(pdffn)
-	pdf_prefix = get_fn_prefix(pdf_prefix)
-	#pdf_prefix = paste(tmpdir, "/", pdf_prefix, sep="")
-
-	# Generate table in .tex form in the tmpdir
-	pdfit(table_vals, file_prefix=pdf_prefix, size=size, gettex=FALSE, caption)
-	
-	# Copy the PDF to pdffn
-	cmdstr = paste("cp ", pdf_prefix, ".pdf ", pdffn, sep="")
-	system(cmdstr)
-	
-	if (openPDF)
-		{
-		cmdstr = paste("open ", pdffn, sep="")
-		system(cmdstr)
-		}
-	
-	return(pdffn)
-	}
 
 
 
@@ -4023,7 +3876,7 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 	wd = "/drives/GDrive/__classes/BIOSCI210/lab3_genome_size/"
 	setwd(wd)
 
-	library(ape)
+	#library(ape)
 
 	# Read a Newick-formatted phylogeny file (which has been subset to birds and mammals 
 	# found in the table) to an APE tree object 

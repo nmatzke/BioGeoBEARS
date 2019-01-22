@@ -1,6 +1,6 @@
-require("ape")
-require("rexpokit")
-require("cladoRcpp")
+# require("ape")
+# require("rexpokit")
+# require("cladoRcpp")
 
 
 
@@ -217,7 +217,7 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 	TF = grepl(pattern="WALD", x=tmp_param_names)
 	if (sum(TF) > 0)
 		{
-		require(statmod)	# for dinvgauss
+		#require(statmod)	# for dinvgauss
 		tmpname = "WALD_mu"
 		TF = grepl(pattern=tmpname, x=tmp_param_names)
 		WALD_mu = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table[tmpname, "est"]
@@ -227,8 +227,8 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 		WALD_lambda = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table[tmpname, "est"]
 		
 		# Calculate the multipliers under this model
-		tmp_multipliers = dinvgauss(x=distances_mat, mean=WALD_mu, shape=WALD_lambda)
-		normalizer = dinvgauss(x=0, mean=WALD_mu, shape=WALD_lambda)
+		tmp_multipliers = statmod::dinvgauss(x=distances_mat, mean=WALD_mu, shape=WALD_lambda)
+		normalizer = statmod::dinvgauss(x=0, mean=WALD_mu, shape=WALD_lambda)
 		tmp_multipliers = tmp_multipliers / normalizer
 		
 		# Multiply element-wise
@@ -243,15 +243,15 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 	TF = grepl(pattern="HNORM", x=tmp_param_names)
 	if (sum(TF) > 0)
 		{
-		require(fdrtool)	# for dhalfnorm
+		#require(fdrtool)	# for dhalfnorm
 		tmpname = "HNORM_theta"
 		TF = grepl(pattern=tmpname, x=tmp_param_names)
 		HNORM_theta = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table[tmpname, "est"]
 
 
 		# Calculate the multipliers under this model
-		tmp_multipliers = dhalfnorm(x=distances_mat, theta=HNORM_theta)
-		normalizer = halfnorm(x=0, theta=HNORM_theta)
+		tmp_multipliers = fdrtool::dhalfnorm(x=distances_mat, theta=HNORM_theta)
+		normalizer = fdrtool::dhalfnorm(x=0, theta=HNORM_theta)
 		tmp_multipliers = tmp_multipliers / normalizer
 		
 		# Multiply element-wise
@@ -542,8 +542,8 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	skip_optim_option="return_all"
 	'
 	
-	require(cladoRcpp)
-	require(rexpokit)
+	#require(cladoRcpp)
+	#require(rexpokit)
 	
 	
 	# Wipe out any old/previous warnings()
@@ -1473,9 +1473,9 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 				inputs = BioGeoBEARS_run_object
 			
 				# Run optimx scalecheck
-				scalecheck_results = optimx:::scalecheck(par=params, lower=lower, upper=upper)
+				scalecheck_results = optimx_scalecheck(par=params, lower=lower, upper=upper)
 			
-				cat("\n\nResults of optimx:::scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")
+				cat("\n\nResults of optimx_scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")
 				print(scalecheck_results)
 
 				minqa_TF = is.element("minqa", installed.packages()[,1])
@@ -1488,7 +1488,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 						cat(txt)
 						cat("\n\n")
 						warning(txt)
-						#require(minqa)
+						requireNamespace("minqa")
 						} # END if (packageVersion("optimx") > 2017)
 					} # END if (minqa_TF == FALSE)
 
@@ -1524,12 +1524,12 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		# USING GenSA
 		if (use_optimx == "GenSA")
 			{
-			require(GenSA)
+			#require(GenSA)
 
-			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")
+			cat("\n\nNOTE: You are optimizing with GenSA::GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")
 
 			
-			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n", sep="")
+			cat("\n\nNOTE: Before running GenSA::GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA::GenSA().\n", sep="")
 			
 			inputs = BioGeoBEARS_run_object
 			inputs$printlevel = 2
@@ -1547,7 +1547,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
 
 
-			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA()...\n\n", sep="")
+			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA::GenSA()...\n\n", sep="")
 			
 			if (skip_optim == TRUE)
 				{
@@ -1587,7 +1587,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 					}
 			
 				inputs = BioGeoBEARS_run_object
-				optim_result2 = GenSA(par=params, fn=calc_loglike_for_optim_stratified_neg, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, lower=lower, upper=upper, control=control_list)
+				optim_result2 = GenSA::GenSA(par=params, fn=calc_loglike_for_optim_stratified_neg, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, lower=lower, upper=upper, control=control_list)
 		
 			#optim_result2 = nlminb(start=params, objective=calc_loglike_for_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))
 				} # END if (skip_optim == TRUE)
@@ -1790,9 +1790,9 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 					# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
 					} else {
 					# Run optimx scalecheck
-					scalecheck_results = optimx:::scalecheck(par=params, lower=lower, upper=upper)
+					scalecheck_results = optimx_scalecheck(par=params, lower=lower, upper=upper)
 			
-					cat("\n\nResults of optimx:::scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")
+					cat("\n\nResults of optimx_scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")
 					print(scalecheck_results)
 					
 					# Check if minqa is installed, for the newest optimx (needed for optimx with 'bobyqa' optimizer)
@@ -1806,7 +1806,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 							cat(txt)
 							cat("\n\n")
 							warning(txt)
-							require(minqa)
+							requireNamespace("minqa")
 							} # END if (packageVersion("optimx") > 2017)
 						} # END if (minqa_TF == FALSE)
 
@@ -1844,12 +1844,12 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		# wildly different parameter scalings)
 		if (use_optimx == "GenSA")
 			{
-			require(GenSA)
+			#require(GenSA)
 			
-			cat("\n\nNOTE: You are optimizing with GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")
+			cat("\n\nNOTE: You are optimizing with GenSA::GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")
 			
 			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!
-			cat("\n\nNOTE: Before running GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA().\n\n", sep="")
+			cat("\n\nNOTE: Before running GenSA::GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA::GenSA().\n\n", sep="")
 
 			inputs = BioGeoBEARS_run_object
 			inputs$printlevel = 2
@@ -1870,7 +1870,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 
 
 			
-			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA()...\n\n", sep="")
+			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA::GenSA()...\n\n", sep="")
 
 			cat("\n\nPrinting any warnings() that occurred during calc_loglike_for_optim():\n\n")
 			print(warnings())
@@ -1912,7 +1912,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 					control_list = c(control_list, list(max.call=max.call))
 					}
 						
-				optim_result2 = GenSA(par=params, fn=calc_loglike_for_optim_neg, lower=lower, upper=upper, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
+				optim_result2 = GenSA::GenSA(par=params, fn=calc_loglike_for_optim_neg, lower=lower, upper=upper, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
 				} # END if (skip_optim == TRUE)
 			} # END if ( (use_optimx == TRUE) || (use_optimx == "optimx") )
 		} # END if stratified
@@ -2157,4 +2157,42 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	return(bears_output)
 	} # END bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), skip_optim=FALSE)
 
+
+
+
+# From: optimx:::scalecheck
+optimx_scalecheck <- function (par, lower = lower, upper = upper, dowarn) 
+{
+    if (is.null(par)) {
+        stop("Null parameter vector")
+    }
+    npar <- length(par)
+    if (is.null(lower)) {
+        if (dowarn) 
+            warning("Null lower bounds vector")
+        lower <- rep(-Inf, npar)
+    }
+    if (is.null(upper)) {
+        if (dowarn) 
+            warning("Null upper bounds vector")
+        upper <- rep(Inf, npar)
+    }
+    newpar <- abs(par[which(is.finite(par))])
+    logpar <- log10(newpar[which(newpar > 0)])
+    newlower <- abs(lower[which(is.finite(lower))])
+    loglower <- log10(newlower[which(newlower > 0)])
+    newupper <- abs(upper[which(is.finite(upper))])
+    logupper <- log10(newupper[which(newupper > 0)])
+    bddiff <- upper - lower
+    bddiff <- bddiff[which(is.finite(bddiff))]
+    lbd <- log10(bddiff[which(bddiff > 0)])
+    lpratio <- max(logpar) - min(logpar)
+    if (length(lbd) > 0) {
+        lbratio <- max(lbd) - min(lbd)
+    }
+    else {
+        lbratio <- NA
+    }
+    ratios <- list(lpratio = lpratio, lbratio = lbratio)
+}
 

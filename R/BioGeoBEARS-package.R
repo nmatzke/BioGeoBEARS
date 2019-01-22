@@ -3,18 +3,18 @@
 #' \tabular{ll}{
 #' Package: \tab BioGeoBEARS\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.1.1\cr
-#' Date: \tab 2018-11-06\cr
+#' Version: \tab 1.1.2\cr
+#' Date: \tab 2019-01-22\cr
 #' License: \tab GPL (>= 3)\cr
 #' LazyLoad: \tab yes\cr
 #' }
 #'
-#' Summary: This package performs model-based statistical inference for historical biogeography. This
-#' includes inference of model parameters, ancestral states, and model comparison. This package 
+#' Summary: BioGeoBEARS performs model-based statistical inference for historical biogeography. This
+#' includes inference of model parameters, ancestral states, and model comparison. BioGeoBEARS 
 #' performs ML (maximum-likelihood) based inference, but the same functions can easily be 
 #' integrated into a Bayesian analysis via use of MCMC sampling functions from other packages.
 #' 
-#' Details: BioGeoBEARS allows probabilistic inference of both historical
+#' Details: Allows probabilistic inference of both historical
 #' biogeography (ancestral geographic ranges on a phylogeny) as well as
 #' comparison of different models of range evolution.  It reproduces
 #' the model available in LAGRANGE (Ree and Smith 2008), as well as
@@ -40,11 +40,11 @@
 #' incorporation of (1) imperfect detection of geographic ranges in the
 #' tips, and (2) inclusion of fossil geographic range data, when the
 #' fossils are tips on the phylogeny.  Bayesian analysis has been implemented
-#' through use of the "LaplacesDemon" package, however this package is 
+#' through use of the "LaplacesDemon" package, however LaplacesDemon is 
 #' now maintained off of CRAN, so its usage is not formally included in 
 #' BioGeoBEARS at the current time.  
 #' 
-#' CITATION INFO: This package is 
+#' CITATION INFO: BioGeoBEARS is 
 #' the result of my Ph.D. research, please cite the package if you use 
 #' it! Type: citation(package="BioGeoBEARS") to get the citation information.
 #' 

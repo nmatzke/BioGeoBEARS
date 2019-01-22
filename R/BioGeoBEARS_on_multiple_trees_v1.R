@@ -483,8 +483,8 @@ summarize_stateprobs_on_master_tree <- function(master_tree_fn, state_probs_at_n
 
 	# Basically, we want to find the SMALLEST clade including everything of interest
 	# clade_size = # of commas + 1
-	library(stringr)	# for str_count
-	numcommas_all_OTUs = str_count(string=OTUs_list_of_lists, pattern=",")
+	#library(stringr)	# for str_count
+	numcommas_all_OTUs = stringr::str_count(string=OTUs_list_of_lists, pattern=",")
 	numOTUs_all_OTUs = numcommas_all_OTUs + 1
 
 	# Translate the full list of names, to the list of names without fossils
