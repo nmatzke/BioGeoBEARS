@@ -266,7 +266,7 @@ LGpy_splits_fn_to_table <- function(splits_fn)
 	
 	
 	
-	splits = read.table(splits_fn)
+	splits = utils::read.table(splits_fn)
 	names(splits) = c("nodenum_LGpy", "splits", "LnL", "relprob")
 	
 	# Split the splits into left- and right- branch bottoms
@@ -342,7 +342,7 @@ LGpy_splits_fn_to_table <- function(splits_fn)
 #' 
 LGcpp_splits_fn_to_table2 <- function(splits_fn)
 	{
-	splits = read.table(splits_fn)
+	splits = utils::read.table(splits_fn)
 	names(splits) = c("nodenum_LGcpp", "splits", "LnL", "relprob")
 	
 	# Split the splits into left- and right- branch bottoms
@@ -887,7 +887,7 @@ get_leftright_nodes_matrix_from_results <- function(tr)
 #' # LGcpp_splits_fn_to_table(splits_fn)
 LGcpp_splits_fn_to_table <- function(splits_fn)
 	{
-	splits = read.table(splits_fn)
+	splits = utils::read.table(splits_fn)
 	names(splits) = c("nodenum_LGcpp", "splits", "relprob", "LnL")
 	splits = splits[ , c("nodenum_LGcpp", "splits", "LnL", "relprob")]
 	splits$LnL = -1 * splits$LnL
@@ -961,7 +961,7 @@ LGcpp_splits_fn_to_table <- function(splits_fn)
 #' # LGcpp_states_fn_to_table(states_fn)
 LGcpp_states_fn_to_table <- function(states_fn)
 	{
-	states = read.table(states_fn)
+	states = utils::read.table(states_fn)
 	names(states) = c("nodenum_LGcpp", "states", "relprob", "LnL")
 	states = states[ , c("nodenum_LGcpp", "states", "LnL", "relprob")]
 	states$LnL = -1 * states$LnL

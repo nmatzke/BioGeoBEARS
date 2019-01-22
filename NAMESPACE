@@ -1,3 +1,12 @@
+importFrom("grDevices", "col2rgb", "rainbow", "rgb")
+importFrom("graphics", "axis", "barplot", "layout", "legend", "mtext",
+"par", "plot", "rect", "strheight", "strwidth", "text",
+"title", "xinch", "yinch")
+importFrom("methods", "as", "is", "new")
+importFrom("stats", "median", "optim", "pchisq", "quantile", "reorder",
+"runif")
+importFrom("utils", "read.table", "write.table")
+
 exportPattern("^[[:alpha:]]+")
 exportClasses(
     "BioGeoBEARS_model",

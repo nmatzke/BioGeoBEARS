@@ -242,12 +242,12 @@ read_detections <- function(detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0
 	
 	if (is.null(OTUnames) == TRUE)
 		{
-		dtf = read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="\t", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
+		dtf = utils::read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="\t", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
 		dtf
 		OTUnames = row.names(dtf)
 		} else {
 		# Assumes no OTU names
-		dtf = read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=OTUnames)
+		dtf = utils::read.table(file=detects_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=OTUnames)
 		dtf
 		}
 
@@ -380,12 +380,12 @@ read_controls <- function(controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0,
 
 	if (is.null(OTUnames) == TRUE)
 		{
-		dtf = read.table(file=controls_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
+		dtf = utils::read.table(file=controls_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=1)
 		dtf
 		OTUnames = row.names(dtf)
 		} else {
 		# Assumes no OTU names
-		dtf = read.table(file=controls_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=OTUnames)
+		dtf = utils::read.table(file=controls_fn, header=TRUE, skip=tmpskip, sep="	", quote="", stringsAsFactors = FALSE, strip.white=TRUE, fill=TRUE, row.names=OTUnames)
 		dtf
 		}
 
