@@ -5751,3 +5751,146 @@ unscale_BGB_params <- function(scaled_params_table)
 	} # END unscale_BGB_params <- function(scaled_params_table)
 
 
+
+
+
+#######################################################
+# order_tipranges_by_tr
+#######################################################
+#' Order the tipranges in a tipranges object so they match the order of tips in a tree
+#' 
+#' Utility function. Orders the tipranges in a tipranges object so they match the order 
+#' of tips in a tree. Life can get very confusing if you don't do this before plotting.
+#' 
+#' @param tipranges A \code{tipranges} object.
+#' @param tr An ape tree object.
+#' @return \code{tipranges} The \code{tipranges} object with a reordered \code{data.frame}
+#'         inside \code{tipranges@df}.
+#' @export
+#' @seealso \code{\link[base]{unlist}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @examples
+#' test=1
+#'
+#' \dontrun{
+#' require(BioGeoBEARS)
+#' 
+#' # trfn = "/GitHub/BioGeoBEARS/inst/extdata/examples/BSM_3taxa/M0/tree.newick"
+#' # geogfn = "/GitHub/BioGeoBEARS/inst/extdata/examples/BSM_3taxa/M0/geog.data"
+#' # 
+#' # tr = read.tree(trfn)
+#' # write.tree(tr, file="")
+#' #
+#' # ((human:1,chimp:1):1,gorilla:2);
+#' # 
+#' # tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
+#' # tipranges
+#' # 
+#' # dput_string = dput(tipranges)
+#' # dput_string
+#' # "new(\"tipranges\", .Data = numeric(0), df = structure(list(A = c(\"0\", 
+#' # \n\"0\", \"1\"), B = c(\"0\", \"0\", \"1\"), C = c(\"1\", \"1\", \"0\")), 
+#' # class = \"data.frame\", row.names = c(\"human\", \n\"chimp\", \"gorilla\")))"
+#' 
+#' # Load hard-coded tree and tipranges object:
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' plot(tr)
+#' 
+#' tipranges = new("tipranges", .Data = numeric(0), df = structure(list(A = c("1", 
+#' "0", "0"), B = c("1", "0", "0"), C = c("0", "1", "1")), class = "data.frame", row.names = c("gorilla", 
+#' "chimp", "human")))
+#' tipranges
+#' 
+#' # An object of class "tipranges" (from the global environment)
+#' # numeric(0)
+#' # Slot "df":
+#' #         A B C
+#' # gorilla 1 1 0
+#' # chimp   0 0 1
+#' # human   0 0 1
+#' 
+#' tipranges_reorderd = order_tipranges_by_tr(tipranges, tr)
+#' tipranges_reorderd
+#' 
+#' # An object of class "tipranges" (from the global environment)
+#' # numeric(0)
+#' # Slot "df":
+#' #         A B C
+#' # human   0 0 1
+#' # chimp   0 0 1
+#' # gorilla 1 1 0
+#' 
+#' tr$tip.label
+#' # [1] "human"   "chimp"   "gorilla"
+#' 
+#' }
+order_tipranges_by_tr <- function(tipranges, tr)
+	{
+	tipranges_names = rownames(tipranges@df)
+	tr_names = tr$tip.label
+	
+	match_indices = get_indices_where_list1_occurs_in_list2(list1=tr_names, list2=tipranges_names)
+	
+	tmpdf = tipranges@df[match_indices, ]
+	tipranges@df = tmpdf
+	
+	return(tipranges)
+	}
+
+
+
+
+
+#' Put the j column after the e column
+#'
+#' This function puts the column with "j" directly after the column with "e",
+#' if both column names are found, and if column j is after column e+1 
+#'
+#' @param tmptable A \code{data.frame} or \code{matrix}.
+#' @return tmptable The input table, with reordered columns
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#'
+#' # Set up a data.frame
+#' student_names = c("Nick", "Tom", "Bob")
+#' grade1 = c(37, 100, 60)
+#' grade2 = c(43, 80, 70)
+#' grade3 = c(100, 90, 100)
+#' 
+#' # convert to data frame
+#' tmptable = cbind(student_names, grade1, grade2, grade3)
+#' tmptable = as.data.frame(tmptable, stringsAsFactors=FALSE)
+#' col_headers = c("d", "e", "x", "j")
+#' names(tmptable) = col_headers
+#' put_jcol_after_ecol(tmptable)
+#' 
+put_jcol_after_ecol <- function(tmptable)
+	{
+	ex='
+	tmptable = cbind(student_names, grade1, grade2, grade3)
+	tmptable = as.data.frame(tmptable, stringsAsFactors=FALSE)
+	col_headers = c("d", "e", "x", "j")
+	names(tmptable) = col_headers
+	put_jcol_after_ecol(tmptable)
+	'
+	
+	e_col = which(names(tmptable)=="e")
+	j_col = which(names(tmptable)=="j")
+	if ((length(j_col) > 0) && (length(e_col) > 0))
+		{
+		if ( (j_col > e_col) && (j_col != (e_col+1)) )
+			{
+			colnums1 = 1:e_col
+			tmp_colnums = (e_col+1) : ncol(tmptable)
+			colnums2 = tmp_colnums[tmp_colnums != j_col]
+			colnums_final = c(colnums1, j_col, colnums2)
+			tmptable = tmptable[,colnums_final]
+			}
+		}
+	return(tmptable)
+	} # END put_jcol_after_ecol <- function(tmptable)
+
+
+

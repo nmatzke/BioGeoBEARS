@@ -3,35 +3,118 @@
 #require("cladoRcpp")
 
 
-# Source ALL of the R files in a particular R/ directory
+# Source ALL of the R files in a particular directory
 # (so we don't have to have a fully-functioning package)
 
 # Author: Nick Matzke, nmatzke
 # License: GPL-3
-
-sourceall_git <- function(repo)
+#' Source all of the .R files in a directory of
+#' the master of a GitHub package, except "compile" and "package" files.
+#'
+#' \code{sourceall_git} sources all of the .R files in the 
+#' R/ directory of
+#' a GitHub package. This can be useful for code that 
+#' isn't developed into a package yet, or
+#' isn't compiling yet, it can be 
+#' useful to source all of the R files in a particular 
+#' online directory.  
+#' 
+#' See \code{sourceall} for sourcing .R files in a
+#' locally-saved directory.
+#'
+#' @param repo Should be username/repository_name, e.g. 
+#'             "nmatzke/BioGeoBEARS" 
+#'
+#' @param subdir A desired subdirectory of the GitHub
+#'               repository.  E.g. "R" or "R/" will work
+#'               on an R package repository. Default "".
+#' @param continue_recursion Should .R files in subdirectories of
+#'               the specified directory be included? Default
+#'               is FALSE.
+#' @return Returns a vector of the .R files sourced.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' \dontrun{
+#' 
+#'   repo = "nmatzke/BioGeoBEARS"
+#'   subdir = "R"
+#'   continue_recursion = FALSE
+#'   sourceall_git(repo, subdir)
+#' 
+#' }
+sourceall_git <- function(repo, subdir="", continue_recursion=FALSE)
   {
+  junk='
+  repo = "nmatzke/BioGeoBEARS"
+  subdir = "R"
+  continue_recursion = FALSE
+  sourceall_git(repo, subdir)
+  '
+  
+  
   #library(httr)     # for GET
   #library(devtools) # for source_url
 
   
   # Based on:
   # http://stackoverflow.com/questions/25485216/how-to-get-list-files-from-a-github-repository-folder-using-r
-  
-  git_api = paste0("https://api.github.com/repos/", repo, "/git/trees/master?recursive=1")
+  # 
+  git_api = paste0("https://api.github.com/repos/", repo, "/git/trees/master?recursive=2")
 
   req <- httr::GET(git_api)
   httr::stop_for_status(req)
   
   # Find the .R files
   filelist <- unlist(lapply(httr::content(req)$tree, "[", "path"), use.names = F)
-  Rfiles = grep("\\.R", filelist, value = TRUE, fixed = TRUE)
+
+  # Filter by subdirectory
+  if (subdir != "")
+  	{
+	# Add a slash at the end of subdir, if needed
+	string_to_startwith = addslash(subdir)
+
+	# Remove first slash, if needed
+	if (startsWith(string_to_startwith, prefix="/") == TRUE)
+		{
+		string_to_startwith = substr(text=string_to_startwith, first=2, last=nchar(string_to_startwith))
+		}
+  	
+  	# Go through filelist and subset
+  	TF = startsWith(x=filelist, prefix=string_to_startwith)
+  	filelist = filelist[TF]
+  	}
+  
+  # Remove deeper subdirectories, if desired
+  if (continue_recursion == FALSE)
+  	{
+  	number_of_slashes = stringr::str_count(string=filelist, pattern="/")
+  	if (subdir == "")
+  		{
+	  	TF = number_of_slashes == 0
+	  	} else {
+	  	TF = number_of_slashes == 1
+	  	}
+		filelist = filelist[TF]
+  	}
+  
+	# Keep only files that end with .R
+	#Rfiles = grep("\\.R", filelist, value = TRUE, fixed = TRUE)
+
+	# Files to remove
+	Rfiles_remove_TF1 = grepl(pattern="compile", x=filelist)
+	Rfiles_remove_TF2 = grepl(pattern="package", x=filelist)
+	Rfiles_remove_TF3 = grepl(pattern="\\.Rproj", x=filelist)
+	Rfiles_remove_TF = (Rfiles_remove_TF1 + Rfiles_remove_TF2 + Rfiles_remove_TF3) >= 1
+	filelist = filelist[Rfiles_remove_TF==FALSE]
+
   
   # Remove .Rproj, add 
-  keepTF = grepl(pattern=".Rproj", x=Rfiles) == FALSE
-  Rfiles_fns = Rfiles[keepTF]
+  #keepTF = grepl(pattern=".Rproj", x=Rfiles) == FALSE
+  keepTF = endsWith(x=filelist, suffix=".R")
+  filelist = filelist[keepTF]
   rawurl = paste0("https://raw.githubusercontent.com/", repo, "/master/")
-  Rfiles = paste0(rawurl, Rfiles_fns)
+  Rfiles = paste0(rawurl, filelist)
   cat("\nAttempting to source all *.R files in ", rawurl, ":\n", sep="")
   for (i in 1:length(Rfiles))
     {
@@ -52,23 +135,29 @@ sourceall_git <- function(repo)
 #' 
 #' @param path The path to source
 #' @param pattern Default is .R
-#' @param ... Additional arguments to source
+#' @param ... Additional arguments to \code{\link{source}}.
 #' @return \code{path} The path that was sourced.
 #' @export
 #' @seealso \code{\link[base]{source}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' 
+#'
+#' \dontrun{
+#' 
+#' sourceall("/GitHub/BioGeoBEARS/R/")
+#' 
+#' }
+#' 
 sourceall <- function(path=path, pattern="\\.R", ...)
 	{
 	tmppath = np(addslash(path))
 	Rfiles = list.files(path=tmppath, pattern="\\.R", ...)
+	
+	# Keep only if it ends in .R
+	TF = endsWith(x=Rfiles, suffix=".R")
+	Rfiles = Rfiles[TF]
 	
 	# Files to remove
 	Rfiles_remove_TF1 = grepl("compile", Rfiles)
@@ -92,11 +181,45 @@ sourceall <- function(path=path, pattern="\\.R", ...)
 	return(path)
 	} # END sourceall
 
+
+
+
 #######################################################
 # catdf
 #######################################################
 # Cat a data frame to screen, tab-delimited
 # (handy for pasting into Excel)
+
+#' Print a data.frame to screen with tab-delimination
+#'
+#' Uses \code{cat} to print a data.frame to screen with tab-
+#' delimited columns. Useful for pasting into
+#' e.g. Excel.
+#'
+#' @param dtf An input data.fram
+#' @return NULL
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' 
+#' # Set up a data.frame
+#' student_names = c("Nick", "Tom", "Bob")
+#' grade1 = c(37, 100, 60)
+#' grade2 = c(43, 80, 70)
+#' grade3 = c(100, 90, 100)
+#' 
+#' # convert to data frame
+#' temp_table = cbind(student_names, grade1, grade2, grade3)
+#' grade_dtf = as.data.frame(temp_table, stringsAsFactors=FALSE)
+#' col_headers = c("names", "test1", "test2", "test3")
+#' names(grade_dtf) = col_headers
+#' 
+#' # This might not paste well into Excel
+#' grade_dtf
+#' 
+#' # But this will
+#' catdf(grade_dtf)
+#' 
 catdf <- function(dtf)
 	{
 	cat(names(dtf), sep="\t")
@@ -106,6 +229,7 @@ catdf <- function(dtf)
 		cat(unlist(dtf[i,]), sep="\t")
 		cat("\n")
 		} # END for (i in 1:nrow(dtf))
+		
 	} # END catdf
 
 
@@ -123,20 +247,34 @@ catdf <- function(dtf)
 #' is hard to remember.  Your current setting is \code{getOption("max.print")}.
 #' 
 #' @param dtf The \code{\link[base]{data.frame}} to \code{\link[base]{print}}.
-#' @param chunksize_toprint Number of lines to print. Default 50.
+#' @param chunksize_toprint Number of lines to print (1 line is added, to 
+#'        repeat between printing pages). Default 40.
 #' @param printflag For optional printing. Passed to \code{\link{prflag}}.
 #' @return NULL
 #' @export
 #' @seealso \code{\link[base]{print}}, \code{\link{prflag}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
-#' test=1
-printall <- function(dtf, chunksize_toprint = 40, printflag=TRUE)
+#' # Set up a data.frame
+#' student_names = c("Nick", "Tom", "Bob")
+#' grade1 = c(37, 100, 60)
+#' grade2 = c(43, 80, 70)
+#' grade3 = c(100, 90, 100)
+#' 
+#' # convert to data frame
+#' temp_table = cbind(student_names, grade1, grade2, grade3)
+#' grade_dtf = as.data.frame(temp_table, stringsAsFactors=FALSE)
+#' col_headers = c("names", "test1", "test2", "test3")
+#' names(grade_dtf) = col_headers
+#' 
+#' # Print
+#' x=printall(dtf=grade_dtf, chunksize_toprint=40, printflag=TRUE)
+#' x=printall(dtf=grade_dtf, chunksize_toprint=12, printflag=TRUE)
+#' 
+#' # Don't print
+#' x=printall(dtf=grade_dtf, chunksize_toprint=40, printflag=FALSE)
+#' 
+printall <- function(dtf, chunksize_toprint=40, printflag=TRUE)
 	{
 	# Print everything in a data frame, in chunks of e.g. 50 rows
 	if (nrow(dtf) <= chunksize_toprint)
@@ -178,15 +316,12 @@ printall <- function(dtf, chunksize_toprint = 40, printflag=TRUE)
 #' @param printflag If TRUE, do the printing
 #' @return nothing
 #' @export
-#' @seealso \code{\link{get_daughters}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
+#' @seealso \code{get_daughters}, \code{chainsaw2}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' prflag(x=test, printflag=TRUE)
+#' 
 prflag <- function(x, printflag=TRUE)
 	{
 	# A standard function to print (or not) certain variables,
@@ -229,12 +364,7 @@ prflag <- function(x, printflag=TRUE)
 #' @return \code{path} The path that was normalized.
 #' @export
 #' @seealso \code{\link[base]{normalizePath}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' # Get a path
 #' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
@@ -268,12 +398,7 @@ np <- function(path=path, mustWork=FALSE, ...)
 #' @return \code{list_of_strs} 
 #' @export
 #' @seealso \code{\link[base]{strsplit}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' tmpline = "Hello world see	my	tabs."
 #' strsplit_whitespace(tmpline)
@@ -305,16 +430,19 @@ strsplit_whitespace <- function(tmpline)
 #' @return Nothing returned.
 #' @export
 #' @seealso \code{\link[base]{scan}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 #' 
-moref <- function(fn, printnotcat = FALSE)
+#' \dontrun{
+#' fn = "filename"  # put the name of a text file here
+#' moref(fn, printnotcat=FALSE)
+#' moref(fn, printnotcat=TRUE)
+#' 
+#' }
+
+#' 
+moref <- function(fn, printnotcat=FALSE)
 	{
 	lines = scan(file=fn, what="character", sep="\n")
 	
@@ -349,20 +477,14 @@ moref <- function(fn, printnotcat = FALSE)
 #' Return matching TRUE/FALSE values.  E.g. list1 (e.g. a big list) TRUE if it is found
 #' in list2 (e.g. a smaller list)
 #'
-#' Utility function for %in%, when one's brain gets confused.
+#' Utility function for \code{\link{%in% }}and \code{\link[base]{match}}, when one's brain gets confused.
 #' 
 #' @param list1 The list of things you want to check
 #' @param list2 The list of things you want to check against
 #' @return \code{matchlist} The TRUE/FALSE list for list1
 #' @export
 #' @seealso \code{\link[base]{match}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 match_list1_in_list2 <- function(list1, list2)
@@ -378,22 +500,42 @@ match_list1_in_list2 <- function(list1, list2)
 #######################################################
 #' Unlist the columns in a data.frame
 #' 
-#' Utility function. What it says.
+#' This function takes \code{\link[base]{data.frame}} and applies \code{\link{unlist}}
+#' to each column, returning a \code{\link[base]{data.frame}} that hopefully
+#' can be used without list-related errors.
+#' 
+#' Because R is not a strongly typed language, odd things 
+#' can happen when e.g. sticking together columns of data
+#' to make a \code{data.frame} object (a data table). 
+#' 
+#' After many years of encountering this error at 
+#' inconvenient times, I found it was easier to just
+#' write a function to nuke the issue when it appeared. 
 #' 
 #' @param dtf Input \code{\link[base]{data.frame}}
-#' @param printflag Print the results if TRUE.
+#' @param printflag Print the results if TRUE (default: FALSE).
 #' @return \code{dtf} The data.frame, hopefully without lists for columns
 #' @export
 #' @seealso \code{\link[base]{unlist}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' 
+#' # Set up a data.frame
+#' student_names = c("Nick", "Tom", "Bob")
+#' grade1 = c(37, 100, 60)
+#' grade2 = c(43, 80, 70)
+#' grade3 = c(100, 90, 100)
+#' 
+#' # convert to data frame
+#' temp_table = cbind(student_names, grade1, grade2, grade3)
+#' grade_dtf = as.data.frame(temp_table, stringsAsFactors=FALSE)
+#' col_headers = c("names", "test1", "test2", "test3")
+#' names(grade_dtf) = col_headers
+#' 
+#' unlist_dtf_cols(grade_dtf, printflag=FALSE)
+#' unlist_dtf_cols(grade_dtf, printflag=TRUE)
+#' 
 unlist_dtf_cols <- function(dtf, printflag=FALSE)
 	{
 	# Sometimes cbind makes each column a list, this can screw up use/searching of
@@ -436,8 +578,9 @@ unlist_dtf_cols <- function(dtf, printflag=FALSE)
 #######################################################
 #' Return (first!) indices in second list matching the first list
 #' 
-#' This function will return one match (the first) for each item in the list; i.e. the second-list
-#' index for each item in the first list.  Only the first hit in the second list is returned.
+#' This function will return one 2nd-list index (the first match) for each item in the 1st list.
+#' (In other words, the second-list index for each item in the first list.  Only the 
+#' first hit in the second list is returned.
 #' 
 #' This is used by \code{\link{prt}}.
 #'
@@ -446,12 +589,7 @@ unlist_dtf_cols <- function(dtf, printflag=FALSE)
 #' @return \code{match_indices} The match indices.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}, \code{\link{get_indices_where_list1_occurs_in_list2_noNA}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' list1 = c("N", "I", "C", "K")
 #' list2 = LETTERS
@@ -469,11 +607,13 @@ get_indices_where_list1_occurs_in_list2 <- function(list1, list2)
 #######################################################
 #' Return (first!) indices in second list matching the first list, excluding NAs
 #' 
-#' This function will return one match (the first) for each item in the list; i.e. the second-list
-#' index for each item in the first list.  Only the first hit in the second list is returned.  Unlike 
+#' This function will return one 2nd-list index (the first match) for each item in the 1st list.
+#' (In other words, the second-list index for each item in the first list.  Only the 
+#' first hit in the second list is returned.  Unlike 
 #' \code{\link{get_indices_where_list1_occurs_in_list2}}, non-hits (NAs) are excluded.
 #' 
-#' This is used by get_indices_of_branches_under_tips, which is used by \code{\link{extend_tips_to_ultrametricize}}, which can be used by section_the_tree.
+#' This is used by \code{\link{get_indices_of_branches_under_tips}}, which is used by 
+#' \code{\link{extend_tips_to_ultrametricize}}, which can be used by \code{\link{section_the_tree}}.
 #'
 #' @param list1 The first list. 
 #' @param list2 The second list list.
@@ -481,12 +621,7 @@ get_indices_where_list1_occurs_in_list2 <- function(list1, list2)
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}, \code{\link{get_indices_where_list1_occurs_in_list2}}, 
 #' \code{\link{extend_tips_to_ultrametricize}}, \code{\link{section_the_tree}}, \code{\link{return_items_not_NA}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' list1 = c("N", "I", "C", "K")
 #' list2 = LETTERS
@@ -516,12 +651,7 @@ get_indices_where_list1_occurs_in_list2_noNA <- function(list1, list2)
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link[base]{LETTERS}}, \code{\link{get_indices_where_list1_occurs_in_list2_noNA}},  
 #' \code{\link{get_indices_where_list1_occurs_in_list2}}, \code{\link{extend_tips_to_ultrametricize}}, \code{\link{section_the_tree}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' list1 = c("N", "I", NA, "C", "K")
 #' return_items_not_NA(list1)
@@ -530,41 +660,6 @@ return_items_not_NA <- function(x)
 	{
 	y = x[!is.na(x)]
 	return(y)
-	}
-
-
-#######################################################
-# order_tipranges_by_tr
-#######################################################
-#' Order the tipranges in a tipranges object so they match the order of tips in a tree
-#' 
-#' Utility function. What it says.  Life can get very confusing if you don't do this before plotting.
-#' 
-#' @param tipranges A tipranges object.
-#' @param tr An ape tree object.
-#' @return \code{tipranges} The reordered data.frame
-#' @export
-#' @seealso \code{\link[base]{unlist}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#' @examples
-#' test=1
-order_tipranges_by_tr <- function(tipranges, tr)
-	{
-	tipranges_names = rownames(tipranges@df)
-	tr_names = tr$tip.label
-	
-	match_indices = get_indices_where_list1_occurs_in_list2(list1=tr_names, list2=tipranges_names)
-	
-	tmpdf = tipranges@df[match_indices, ]
-	tipranges@df = tmpdf
-	
-	return(tipranges)
 	}
 
 
@@ -586,12 +681,7 @@ order_tipranges_by_tr <- function(tipranges, tr)
 #' @return \code{x2} The list of numbers
 #' @export
 #' @seealso \code{\link[base]{gregexpr}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' tmpstr = "190Ma - 65Ma"
 #' extract_numbers(tmpstr)
@@ -633,21 +723,22 @@ extract_numbers <- function(tmpstr)
 #' @return \code{tmpstr} The output string.
 #' @export
 #' @seealso \code{\link[base]{paste}}, \code{\link[base]{as.character}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#'	 @cite FosterIdiots
 #' @examples
 #' test=1
-#' 
+#' list1 = c("one", "two", "three")
+#' list2str(list1)
+#' list2 = c(1,2,3)
+#' list2str(list2)
+
 list2str <- function(list1, spacer=" ")
 	{
-	
+	junk='
+	list1 = c("one", "two", "three")
+	list2str(list1)
+	list2 = c(1,2,3)
+	list2str(list2)
+	'
 	for (i in 1:length(list1))
 		{
 		if (i == 1)
@@ -694,12 +785,7 @@ list2str <- function(list1, spacer=" ")
 #' @return \code{dtf_classes} A \code{\link[base]{data.frame}} showing the column, column name, and column class.
 #' @export
 #' @seealso \code{\link{dfnums_to_numeric}}, \code{\link{unlist_df4}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' x = matrix(c(1,2,3,4,5,6), nrow=3, ncol=2)
 #' cls.df(x)
@@ -797,12 +883,7 @@ cls.df <- function(dtf, printout=FALSE)
 #' @return \code{dtf} The output \code{\link[base]{data.frame}}.
 #' @export
 #' @seealso \code{\link{cls.df}}, \code{\link{unlist_df4}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' x = matrix(c(1,2,3,4,5,6), nrow=3, ncol=2)
 #' cls.df(x)
@@ -861,12 +942,7 @@ dfn2n <- function(dtf, max_NAs=0.5, printout=FALSE, roundval=NULL, disallow_dupl
 #' @return \code{dtf} The output \code{\link[base]{data.frame}}.
 #' @export
 #' @seealso \code{\link{cls.df}}, \code{\link{unlist_df4}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' x = matrix(c(1,2,3,4,5,6), nrow=3, ncol=2)
 #' cls.df(x)
@@ -1400,12 +1476,7 @@ addslash <- function(tmpstr)
 #' @return \code{cellval} The value, reformatted and of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 #' 
@@ -1578,12 +1649,7 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 #' 
@@ -1638,6 +1704,8 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #######################################################
 #' Conditionally format the numbers (mostly) in a table
 #' 
+#' Shortcut for \code{\link{conditional_format_table}}.
+#' 
 #' When a table has numbers that range over many orders of magnitude, it can be
 #' very distracting if the display program forces each column to the same format.  This
 #' function uses \code{\link{conditional_format_cell}} via \code{\link[base]{sapply}} to format a cell much like Excel would.
@@ -1655,12 +1723,7 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 #' 
@@ -1698,15 +1761,7 @@ cft <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits
 #' @return \code{lastword} A string with the filename, without the path.
 #' @export
 #' @seealso \code{\link{get_path_first}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#'	 @cite FosterIdiots
 #' @examples
 #' get_path_last("/Users/nickm/Psychotria_geog.data")
 #' 
@@ -1731,12 +1786,7 @@ get_path_last <- function(path)
 #' @return \code{outpath} A string with the full path, without the file.
 #' @export
 #' @seealso \code{\link{get_path_last}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' get_path_first("/Users/nickm/Library/Psychotria_geog.data")
 #' 
@@ -1772,12 +1822,7 @@ get_path_first <- function(inpath, addslash="FALSE")
 #' @return \code{prefix} The output string.
 #' @export
 #' @seealso \code{\link{get_path_last}}, \code{\link{get_path_first}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' get_fn_prefix("/Users/nickm/Library/R/Psychotria_geog.data")
 #' get_fn_prefix("Psychotria_geog.data")
@@ -1826,14 +1871,10 @@ get_fn_prefix <- function(fn)
 #' @return \code{AIC_vals} A vector of AIC results.
 #' @export
 #' @seealso \code{\link{calc_AIC_column}}, \code{\link{calc_AICc_column}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' LnL_vals = c(-34.5, -20.9)
 #' nparam_vals = c(2, 3)
@@ -1871,14 +1912,10 @@ calc_AIC_vals <- function(LnL_vals, nparam_vals)
 #' @return \code{AIC_col} A \code{\link[base]{data.frame}} column of AIC results.
 #' @export
 #' @seealso \code{\link{calc_AIC_vals}}, \code{\link{calc_AICc_vals}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -1927,14 +1964,10 @@ calc_AIC_column <- function(LnL_vals, nparam_vals)
 #' @return \code{AICc_vals} A vector of AICc results.
 #' @export
 #' @seealso \code{\link{calc_AIC_vals}}, \code{\link{calc_AICc_column}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' LnL_vals = c(-34.5, -20.9)
 #' nparam_vals = c(2, 3)
@@ -1978,14 +2011,10 @@ calc_AICc_vals <- function(LnL_vals, nparam_vals, samplesize)
 #' @return \code{AICc_col} A \code{\link[base]{data.frame}} column of AICc results.
 #' @export
 #' @seealso \code{\link{calc_AICc_vals}}, \code{\link{calc_AIC_column}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' LnL_vals = c(-34.5, -20.9)
 #' nparam_vals = c(2, 3)
@@ -2024,7 +2053,7 @@ calc_AICc_column <- function(LnL_vals, nparam_vals, samplesize)
 #' the LRT may be unreliable in data-poor situations, and inherits whatever difficulties there may be
 #' in ML searches.  See \cite{Burnham_Anderson_2002} for discussion.
 #'
-#' This function assumes that the log-likelihoods are in the column "LnL", and the number of parameters is specified in "nparams"
+#' This function assumes that the log-likelihoods are in the column "LnL", and the number of parameters is specified in "nparams".
 #' 
 #' @param restable A \code{\link[base]{data.frame}} with at least columns named "LnL" and "nparams".
 #' @param row_to_use_as_null This is the row specifying the model to which the others will be compared in pairwise fashion.
@@ -2034,12 +2063,7 @@ calc_AICc_column <- function(LnL_vals, nparam_vals, samplesize)
 #' @return \code{pval} or \code{LRTrow}, both \code{\link[base]{data.frame}}.  Depends on \code{returnwhat}.
 #' @export
 #' @seealso \code{\link{lrttest}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
@@ -2116,14 +2140,10 @@ lrttest_on_summary_table <- function(restable, row_to_use_as_null, rows_to_exclu
 #' @return \code{restable}, the modified table, or \code{wt_vBest}, the Akaike Weights results.
 #' @export
 #' @seealso \code{\link{calc_AIC_column}}, \code{\link{calc_AICc_column}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2170,31 +2190,6 @@ AkaikeWeights_on_summary_table <- function(restable, colname_to_use="AIC", add_t
 
 
 
-#' put_jcol_after_ecol
-#' 
-#' This function puts the column with "j" directly after the column with "e",
-#' if both column names are found, and if column j is after column e+1 
-#' 
-put_jcol_after_ecol <- function(tmptable)
-	{
-	e_col = which(names(tmptable)=="e")
-	j_col = which(names(tmptable)=="j")
-	if ((length(j_col) > 0) && (length(e_col) > 0))
-		{
-		if ( (j_col > e_col) && (j_col != (e_col+1)) )
-			{
-			colnums1 = 1:e_col
-			tmp_colnums = (e_col+1) : ncol(tmptable)
-			colnums2 = tmp_colnums[tmp_colnums != j_col]
-			colnums_final = c(colnums1, j_col, colnums2)
-			tmptable = tmptable[,colnums_final]
-			}
-		}
-	return(tmptable)
-	} # END put_jcol_after_ecol <- function(tmptable)
-
-
-
 #######################################################
 # AICstats_2models
 #######################################################
@@ -2217,12 +2212,7 @@ put_jcol_after_ecol <- function(tmptable)
 #' @return \code{LRT_AIC_results} A table of LRT and AIC results.
 #' @export
 #' @seealso \code{\link{lrttest}}, \code{\link{lrttest_on_summary_table}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
@@ -2316,14 +2306,10 @@ AICstats_2models <- function(LnL_1, LnL_2, numparams1, numparams2)
 #' @export
 #' @seealso \code{\link{get_Akaike_weights_from_rel_likes_pairwise}}, \code{\link{get_Akaike_weights_from_rel_likes}}, 
 #' \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2412,12 +2398,7 @@ AkaikeWeights_and_Ratios_pairwise_on_summary_table_compared_to_ref <- function(r
 #' @return \code{pval} or \code{LRT_result2}. Depends on \code{returnwhat}.
 #' @export
 #' @seealso \code{\link{lrttest_on_summary_table}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
@@ -2497,14 +2478,10 @@ lrttest <- function(LnL_1, LnL_2, numparams1, numparams2, returnwhat="pval")
 #' @return \code{AICval} A vector of AIC results.
 #' @export
 #' @seealso \code{\link{calc_AIC_column}}, \code{\link{calc_AIC_column}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' LnL = -34.5
 #' numparams = 2
@@ -2546,14 +2523,10 @@ getAIC <- function(LnL, numparams)
 #' @return \code{AICcval} A vector of AICc results.
 #' @export
 #' @seealso \code{\link{calc_AICc_column}}, \code{\link{calc_AICc_column}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/AICc}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' LnL = -34.5
 #' numparams = 2
@@ -2619,14 +2592,10 @@ getAICc <- function(LnL, numparams, samplesize)
 #' @return \code{deltaAICs} A vector of deltaAICs.
 #' @export
 #' @seealso \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2667,14 +2636,10 @@ get_deltaAIC <- function(AICvals)
 #' @return \code{rel_likes_AIC} A vector of relative likelihoods.
 #' @export
 #' @seealso \code{\link{get_Akaike_weights_from_rel_likes}}, \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2714,14 +2679,10 @@ rel_likes_from_deltaAICs <- function(deltaAICs)
 #' @return \code{Akaike_weights} A vector of Akaike Weights.
 #' @export
 #' @seealso \code{\link{get_Akaike_weights_from_rel_likes}}, \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2761,20 +2722,22 @@ get_Akaike_weights_from_rel_likes <- function(rel_likes_AIC)
 #' @return \code{ref_model_num} The 
 #' @export
 #' @seealso \code{\link[stats]{convolve}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#'	 @cite FosterIdiots
 #' @examples
 #' test=1
 #' 
+#' AICvals = c(40, 50, 60)
+#' get_rownum_ref_model(AICvals, ref_model="best")
+#' get_rownum_ref_model(AICvals, ref_model="worst")
+#' 
 get_rownum_ref_model <- function(AICvals, ref_model="best")
 	{
+	ex='
+	AICvals = c(40, 50, 60)
+	get_rownum_ref_model(AICvals, ref_model="best")
+	get_rownum_ref_model(AICvals, ref_model="worst")
+	'
+	
 	# Get AIC of named model
 	nums = 1:length(AICvals)
 	if ( (ref_model == "best") || (ref_model == "worst"))
@@ -2823,14 +2786,10 @@ get_rownum_ref_model <- function(AICvals, ref_model="best")
 #' @return \code{deltaAICs_pairwise} A 2-column \code{\link[base]{data.frame}} of pairwise deltaAICs for each row (column 1) and the reference model (column 2).
 #' @export
 #' @seealso \code{\link{get_deltaAIC}}, \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2881,14 +2840,10 @@ get_deltaAIC_pairwise_w_ref_model <- function(AICvals, ref_model="best")
 #' @return \code{rel_likes_AIC_pairwise} A \code{\link[base]{data.frame}} of relative likelihoods for each row (column 1) and the reference model (column 2).
 #' @export
 #' @seealso \code{\link{get_Akaike_weights_from_rel_likes}}, \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2925,14 +2880,10 @@ rel_likes_from_deltaAICs_pairwise <- function(deltaAICs_pairwise)
 #' model (column 2). Note that only 2 models are being compared in each row, not all of them, as in \code{\link{get_Akaike_weights_from_rel_likes}}.
 #' @export
 #' @seealso \code{\link{get_Akaike_weights_from_rel_likes}}, \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -2980,14 +2931,10 @@ get_Akaike_weights_from_rel_likes_pairwise <- function(rel_likes_AIC_pairwise)
 #' @export
 #' @seealso \code{\link{get_Akaike_weights_from_rel_likes_pairwise}}, \code{\link{get_Akaike_weights_from_rel_likes}}, 
 #' \code{\link{rel_likes_from_deltaAICs}}, \code{\link{getAIC}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -3043,14 +2990,10 @@ get_Akaike_weight_ratio_from_Akaike_pairwise_weights <- function(Akaike_weights_
 #' @return \code{AICweight} AICweight for the models.
 #' @export
 #' @seealso \code{\link{AkaikeWeights_on_summary_table}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -3096,14 +3039,10 @@ getAIC_weight_for_model1 <- function(AICval_1, AICvals)
 #' @return \code{AICweight_ratio_model1} Ratio of Akaike Weights.
 #' @export
 #' @seealso \code{\link{AkaikeWeights_on_summary_table}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
 #' @examples
 #' test=1
 #' 
@@ -3131,122 +3070,6 @@ get_AICweight_ratio_model1_over_model2 <- function(AICval_1, AICval_2)
 	}
 
 
-#######################################################
-# get_AICweight_ratio_model1_over_model2
-#######################################################
-#' Calculate relative probability of model 1 (=Akaike Weight)
-#' 
-#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
-#' discussion of AIC and its uses.
-#'
-#' @param AICval_1 The AIC of the model of interest.
-#' @param AICval_2 The AIC of another model of interest, for a pairwise comparison.
-#' @return \code{relative_prob_model1} Akaike Weight of model 1.
-#' @export
-#' @seealso \code{\link{AkaikeWeights_on_summary_table}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
-#' @examples
-#' test=1
-#' 
-#' AICval_1 = 20
-#' AICval_2 = 30
-#' get_relative_prob_model1old(AICval_1, AICval_2)
-#' 
-get_relative_prob_model1old <- function(AICval_1, AICval_2)
-	{
-	if (AICval_1 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
-	if (AICval_2 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
-
-	AICvals = c(AICval_1, AICval_2)
-	
-	# find better AIC model (take first, if the same)
-	better_model_index = (1:2)[AICvals == min(AICvals)][1]
-	
-	# relative weight of model2 (lower # of paramters
-	relative_weight_model2 = exp(-0.5 * (AICval_2-AICvals[better_model_index]))
-
-
-	# relative weight of model1 (higher # of paramters
-	relative_weight_model1 = exp(-0.5 * (AICval_1-AICvals[better_model_index]))
-	
-	relative_prob_model1 = relative_weight_model1 / (relative_weight_model1 + relative_weight_model2)
-
-	return(relative_prob_model1)
-	}
-
-
-#######################################################
-# get_relative_prob_model2old
-#######################################################
-#' Calculate relative probability of model 1 (Akaike Weight)
-#' 
-#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
-#' discussion of AIC and its uses.
-#'
-#' This is an older version of \code{\link{get_relative_prob_model1old}}, kept for back-compatibility.
-#'
-#' @param AICval_1 The AIC of the model of interest.
-#' @param AICval_2 The AIC of another model of interest, for a pairwise comparison.
-#' @return \code{relative_prob_model1} Akaike Weight of model 1.
-#' @export
-#' @seealso \code{\link{AkaikeWeights_on_summary_table}}, \code{\link{get_relative_prob_model1old}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{http://www.brianomeara.info/tutorials/aic}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Burnham_Anderson_2002
-#' @examples
-#' test=1
-#' 
-#' AICval_1 = 20
-#' AICval_2 = 30
-#' get_relative_prob_model1old(AICval_1, AICval_2)
-#' 
-get_relative_prob_model2old <- function(AICval_1, AICval_2)
-	{
-	if (AICval_1 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
-	if (AICval_2 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
-
-	AICvals = c(AICval_1, AICval_2)
-	
-	# find better AIC model (take first, if the same)
-	better_model_index = (1:2)[AICvals == min(AICvals)][1]
-	
-	# relative weight of model2 (lower # of paramters
-	relative_weight_model2 = exp(-0.5 * (AICval_2-AICvals[better_model_index]))
-
-
-	# relative weight of model1 (higher # of paramters
-	relative_weight_model1 = exp(-0.5 * (AICval_1-AICvals[better_model_index]))
-	
-	relative_prob_model2 = relative_weight_model2 / (relative_weight_model1 + relative_weight_model2)
-	
-	return(relative_prob_model2)
-	}
-
-
-
-
-# Do the more-parameter model first as #1
-# model #1 = alternative model (more params)
-# model #2 = null model (fewer params, some of #1 fixed)
-
-#######################################################
-# AICstats_2models
-#######################################################
-
-
-
 
 # Open a directory
 #######################################################
@@ -3263,7 +3086,6 @@ get_relative_prob_model2old <- function(AICval_1, AICval_2)
 #' @return NULL
 #' @export
 #' @seealso \code{\link{system}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' # Use system() to open the current working directory.
@@ -3296,7 +3118,6 @@ opd <- function(wd=getwd())
 #' @return NULL
 #' @export
 #' @seealso \code{\link{system}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' # Use system() to open the current working directory.
@@ -3353,16 +3174,22 @@ openwd <- function(wd=getwd())
 #' @return \code{daughter_nodenums} List of the daughter node numbers
 #' @export
 #' @seealso \code{\link{findall}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' 
+#' # Load hard-coded tree
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_daughters(nodenum=4, t=tr)
+#' get_daughters(nodenum=5, t=tr)
+#' 
 get_daughters <- function(nodenum, t)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_daughters(nodenum=4, t=tr)
+	get_daughters(nodenum=5, t=tr)
+	'
 	daughter_edgenums = findall(nodenum, t$edge[,1])
 	daughter_nodenums = t$edge[,2][daughter_edgenums]
 	return(daughter_nodenums)
@@ -3377,23 +3204,27 @@ get_daughters <- function(nodenum, t)
 #######################################################
 #' Get indices of all matches to a list
 #'
-#' Just a handy shortcut function
+#' Get the indices of \code{what}, in list \code{inlist}.
 #' 
 #' @param what The item to find
 #' @param inlist The list to search in 
 #' @return \code{matching_indices} List of the matching indices
 #' @export
 #' @seealso \code{\link{get_daughters}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' 
+#' list_items = c("a", "b", "c", "b")
+#' findall(what="b", inlist=list_items)
+#' 
 findall <- function(what, inlist)
 	{
+	ex='
+	list_items = c("a", "b", "c", "b")
+	findall(what="b", inlist=list_items)	
+	'
+	
 	TFmatches = inlist == what
 	indices = 1:length(inlist)
 	matching_indices = indices[TFmatches]
@@ -3414,16 +3245,26 @@ findall <- function(what, inlist)
 #' @return \code{parent_nodenum}The parent node number
 #' @export
 #' @seealso \code{\link{findall}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_parent(nodenum=1, t=tr)
+#' get_parent(nodenum=2, t=tr)
+#' get_parent(nodenum=3, t=tr)
+#' get_parent(nodenum=4, t=tr)
+#' get_parent(nodenum=5, t=tr)
+#' 
 get_parent <- function(nodenum, t)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_parent(nodenum=1, t=tr)
+	get_parent(nodenum=2, t=tr)
+	get_parent(nodenum=3, t=tr)
+	get_parent(nodenum=4, t=tr)
+	get_parent(nodenum=5, t=tr)
+	'
 	matching_edges = findall(nodenum, t$edge[,2])
 	parent_nodenum = t$edge[,1][matching_edges][1]
 	return(parent_nodenum)
@@ -3435,7 +3276,7 @@ get_parent <- function(nodenum, t)
 #######################################################
 #' Get a node's level in the tree
 #'
-#' Finds how many nodes deep a node is.
+#' Finds how many nodes above the root a node is.
 #' 
 #' @param nodenum The node number to get the parent of
 #' @param t An ape phylo object
@@ -3443,16 +3284,26 @@ get_parent <- function(nodenum, t)
 #' @return \code{tmplevel} The level of the node.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_level(nodenum=1, t=tr)
+#' get_level(nodenum=2, t=tr)
+#' get_level(nodenum=3, t=tr)
+#' get_level(nodenum=4, t=tr)
+#' get_level(nodenum=5, t=tr)
+#' 
 get_level <- function(nodenum, t, tmplevel=0)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_level(nodenum=1, t=tr)
+	get_level(nodenum=2, t=tr)
+	get_level(nodenum=3, t=tr)
+	get_level(nodenum=4, t=tr)
+	get_level(nodenum=5, t=tr)
+	'
 	parent_nodenum = get_parent(nodenum, t)
 	if (is.na(parent_nodenum))
 		{
@@ -3482,12 +3333,7 @@ get_level <- function(nodenum, t, tmplevel=0)
 #' @return \code{TF_tips} The \code{TRUE}/\code{FALSE} list for each tip.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link{match_list1_in_list2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 get_TF_tips <- function(obj)
@@ -3514,12 +3360,7 @@ get_TF_tips <- function(obj)
 #' @return \code{tip_indices} The node numbers of the tips.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link[ape]{phylo}}, \code{\link{get_indices_of_branches_under_tips}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 get_indices_of_tip_nodes <- function(obj)
@@ -3539,12 +3380,7 @@ get_indices_of_tip_nodes <- function(obj)
 #' @return \code{branchnums_under_tips} The indices of the branches (row number in edge matrix) below each tip.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link{get_indices_of_tip_nodes}}, \code{\link{get_indices_where_list1_occurs_in_list2_noNA}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 get_indices_of_branches_under_tips <- function(obj)
@@ -3568,12 +3404,7 @@ get_indices_of_branches_under_tips <- function(obj)
 #' @return \code{TF_tips} The age (from the root) of each tip.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 get_node_ages_of_tips <- function(obj)
@@ -3597,12 +3428,7 @@ get_node_ages_of_tips <- function(obj)
 #' @return \code{TF_tips} The age (from the root) of each node.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 get_all_node_ages <- function(obj)
@@ -3624,12 +3450,7 @@ get_all_node_ages <- function(obj)
 #' @return \code{max_height} The age (from the root) of the highest node.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 get_max_height_tree <- function(obj)
@@ -3651,12 +3472,7 @@ get_max_height_tree <- function(obj)
 #' @return \code{edge_times_bp} A 2-column matrix with the age (from the present) of the top and bottom of each edge.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 get_edge_times_before_present <- function(t)
@@ -3702,12 +3518,7 @@ get_edge_times_before_present <- function(t)
 #' @return \code{ordered_nodenames} The node numbers, in order.
 #' @export
 #' @seealso \code{\link[ape]{phylo}}, \code{\link{get_nodenum_structural_root}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' blah = 1
 # this returns the NUMBERS identifying each node
@@ -3732,12 +3543,7 @@ get_nodenums <- function(t)
 #' @return \code{root_nodenums_list} 
 #' @export
 #' @seealso \code{\link[ape]{phylo}}, \code{\link{get_nodenums}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' blah=1
 #' 
@@ -3861,7 +3667,6 @@ level_tree_tips <- function(tr, method="mean", printflag=TRUE, fossils_older_tha
 #' @return \code{dtf} A \code{\link[base]{data.frame}} holding the table. (Similar to the printout of a \code{\link[phylobase]{phylo4}} object.)
 #' @export
 #' @seealso \code{\link[ape]{phylo}}, \code{\link{average_tr_tips}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://ape.mpl.ird.fr/ape_development.html}
@@ -4142,12 +3947,7 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 #' @return \code{obj} The corrected phylogeny
 #' @export
 #' @seealso \code{\link[ape]{read.tree}}, \code{\link{prt}}, \code{\link{average_tr_tips}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_date=NA, fossils_older_than=NULL)
@@ -4205,12 +4005,7 @@ extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_d
 #' @return \code{edge_times_bp} A 2-column matrix with the age (from the present) of the top and bottom of each edge.
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link{extend_tips_to_ultrametricize}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 average_tr_tips <- function(tr, fossils_older_than=0.6)
@@ -4332,12 +4127,7 @@ isblank_TF <- function(items)
 #' @return \code{TRUE} or \code{FALSE}
 #' @export
 #' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 is.not.na <- function(x)

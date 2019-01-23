@@ -286,3 +286,116 @@ run_BioGeoBEARS_reorder <- function()
 
 
 
+
+
+
+
+#######################################################
+# get_AICweight_ratio_model1_over_model2
+#######################################################
+#' Calculate relative probability of model 1 (=Akaike Weight)
+#' 
+#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
+#' discussion of AIC and its uses.
+#'
+#' @param AICval_1 The AIC of the model of interest.
+#' @param AICval_2 The AIC of another model of interest, for a pairwise comparison.
+#' @return \code{relative_prob_model1} Akaike Weight of model 1.
+#' @export
+#' @seealso \code{\link{AkaikeWeights_on_summary_table}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{http://www.brianomeara.info/tutorials/aic}
+#' @examples
+#' test=1
+#' 
+#' AICval_1 = 20
+#' AICval_2 = 30
+#' get_relative_prob_model1old(AICval_1, AICval_2)
+#' 
+get_relative_prob_model1old <- function(AICval_1, AICval_2)
+	{
+	if (AICval_1 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
+	if (AICval_2 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
+
+	AICvals = c(AICval_1, AICval_2)
+	
+	# find better AIC model (take first, if the same)
+	better_model_index = (1:2)[AICvals == min(AICvals)][1]
+	
+	# relative weight of model2 (lower # of paramters
+	relative_weight_model2 = exp(-0.5 * (AICval_2-AICvals[better_model_index]))
+
+
+	# relative weight of model1 (higher # of paramters
+	relative_weight_model1 = exp(-0.5 * (AICval_1-AICvals[better_model_index]))
+	
+	relative_prob_model1 = relative_weight_model1 / (relative_weight_model1 + relative_weight_model2)
+
+	return(relative_prob_model1)
+	}
+
+
+#######################################################
+# get_relative_prob_model2old
+#######################################################
+#' Calculate relative probability of model 1 (Akaike Weight)
+#' 
+#' See \cite{Burnham_Anderson_2002} and \url{http://www.brianomeara.info/tutorials/aic} for 
+#' discussion of AIC and its uses.
+#'
+#' This is an older version of \code{\link{get_relative_prob_model1old}}, kept for back-compatibility.
+#'
+#' @param AICval_1 The AIC of the model of interest.
+#' @param AICval_2 The AIC of another model of interest, for a pairwise comparison.
+#' @return \code{relative_prob_model1} Akaike Weight of model 1.
+#' @export
+#' @seealso \code{\link{AkaikeWeights_on_summary_table}}, \code{\link{get_relative_prob_model1old}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{http://www.brianomeara.info/tutorials/aic}
+#' @examples
+#' test=1
+#' 
+#' AICval_1 = 20
+#' AICval_2 = 30
+#' get_relative_prob_model1old(AICval_1, AICval_2)
+#' 
+get_relative_prob_model2old <- function(AICval_1, AICval_2)
+	{
+	if (AICval_1 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
+	if (AICval_2 < 0) {stop("ERROR: AIC cannot be negative, you probably put in log-likelihood (LnL)")}
+
+	AICvals = c(AICval_1, AICval_2)
+	
+	# find better AIC model (take first, if the same)
+	better_model_index = (1:2)[AICvals == min(AICvals)][1]
+	
+	# relative weight of model2 (lower # of paramters
+	relative_weight_model2 = exp(-0.5 * (AICval_2-AICvals[better_model_index]))
+
+
+	# relative weight of model1 (higher # of paramters
+	relative_weight_model1 = exp(-0.5 * (AICval_1-AICvals[better_model_index]))
+	
+	relative_prob_model2 = relative_weight_model2 / (relative_weight_model1 + relative_weight_model2)
+	
+	return(relative_prob_model2)
+	}
+
+
+
+
+# Do the more-parameter model first as #1
+# model #1 = alternative model (more params)
+# model #2 = null model (fewer params, some of #1 fixed)
+
+#######################################################
+# AICstats_2models
+#######################################################
+
+
+
+
