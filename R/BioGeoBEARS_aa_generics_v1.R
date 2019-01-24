@@ -77,7 +77,7 @@ sourceall_git <- function(repo, subdir="", continue_recursion=FALSE)
 	# Remove first slash, if needed
 	if (startsWith(string_to_startwith, prefix="/") == TRUE)
 		{
-		string_to_startwith = substr(text=string_to_startwith, first=2, last=nchar(string_to_startwith))
+		string_to_startwith = substr(x=string_to_startwith, start=2, stop=nchar(string_to_startwith))
 		}
   	
   	# Go through filelist and subset
@@ -3336,13 +3336,28 @@ get_level <- function(nodenum, t, tmplevel=0)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_TF_tips(obj=tr)
+#' 
 get_TF_tips <- function(obj)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_TF_tips(obj=tr)
+	'
+	
 	# Get TF for nodes being tips
 	
 	# BIG CHANGE?
 	#TF_tips = match_list1_in_list2(1:length(dists_from_root), obj$tip.label)
-	TF_tips = match_list1_in_list2(1:length(obj$edge), 1:length(obj$tip.label))
+	ntips = length(obj$tip.label)
+	numnodes = obj$Nnode
+	total_numnodes = ntips+numnodes
+	
+	# 2019-01-24_change
+	#TF_tips = match_list1_in_list2(list1=1:length(obj$edge), list2=1:length(obj$tip.label))
+	TF_tips = match_list1_in_list2(list1=1:total_numnodes, list2=1:length(obj$tip.label))
+	total_numnodes
 	#TF_tips = obj$tip.label[TF_tips_indices]
 	return(TF_tips)
 	}
@@ -3363,8 +3378,16 @@ get_TF_tips <- function(obj)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_indices_of_tip_nodes(obj=tr)
+#' 
 get_indices_of_tip_nodes <- function(obj)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_indices_of_tip_nodes(obj=tr)
+	'
+
 	tip_indices = 1:length(obj$tip.label)
 	return(tip_indices)
 	}
@@ -3383,10 +3406,18 @@ get_indices_of_tip_nodes <- function(obj)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_indices_of_branches_under_tips(obj=tr)
+#' 
 get_indices_of_branches_under_tips <- function(obj)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_indices_of_branches_under_tips(obj=tr)
+	'
+
 	tip_indices = get_indices_of_tip_nodes(obj)
-	branchnums_under_tips = get_indices_where_list1_occurs_in_list2_noNA(tip_indices, obj$edge[, 2])
+	branchnums_under_tips = get_indices_where_list1_occurs_in_list2_noNA(list1=tip_indices, list2=obj$edge[, 2])
 	return(branchnums_under_tips)
 	}
 
@@ -3398,7 +3429,8 @@ get_indices_of_branches_under_tips <- function(obj)
 #######################################################
 #' Get the ages of each tip above the root
 #'
-#' A utility function.
+#' A utility function to get the ages of each tip above the root.
+#' Uses \code{dist.nodes}, which may get slow with large trees.
 #' 
 #' @param obj An ape phylo object
 #' @return \code{TF_tips} The age (from the root) of each tip.
@@ -3407,8 +3439,15 @@ get_indices_of_branches_under_tips <- function(obj)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_node_ages_of_tips(obj=tr)
+#' 
 get_node_ages_of_tips <- function(obj)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_node_ages_of_tips(obj=tr)
+	'
 	TF_tips = get_TF_tips(obj)
 	root_node_num = get_nodenum_structural_root(obj)
 	dists_from_root = dist.nodes(obj)[root_node_num, ]
@@ -3422,7 +3461,8 @@ get_node_ages_of_tips <- function(obj)
 #######################################################
 #' Get the ages of all the nodes in the tree (above the root)
 #'
-#' A utility function. Use of \code{\link[ape]{dist.nodes}} may be slow.
+#' A utility function. \code{get_all_node_ages} uses of \code{\link[ape]{dist.nodes}}
+#' internally, which may be slow for large trees.
 #' 
 #' @param obj An ape phylo object
 #' @return \code{TF_tips} The age (from the root) of each node.
@@ -3431,8 +3471,15 @@ get_node_ages_of_tips <- function(obj)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_all_node_ages(obj=tr)
+#' 
 get_all_node_ages <- function(obj)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_all_node_ages(obj=tr)
+	'
 	node_ages = dist.nodes(obj)[get_nodenum_structural_root(obj), ]
 	return(node_ages)
 	}
@@ -3453,8 +3500,15 @@ get_all_node_ages <- function(obj)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_all_node_ages(obj=tr)
+#' 
 get_max_height_tree <- function(obj)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_max_height_tree(obj=tr)
+	'
 	max_height = max(get_node_ages_of_tips(obj))
 	return(max_height)
 	}
@@ -3466,7 +3520,8 @@ get_max_height_tree <- function(obj)
 #######################################################
 #' Get the times of the top and bottom of each edge
 #'
-#' A utility function. 
+#' A utility function that gets the times of the top and 
+#' bottom of each edge of the input tree.
 #' 
 #' @param t An ape phylo object
 #' @return \code{edge_times_bp} A 2-column matrix with the age (from the present) of the top and bottom of each edge.
@@ -3475,8 +3530,16 @@ get_max_height_tree <- function(obj)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_edge_times_before_present(t=tr)
+#' 
 get_edge_times_before_present <- function(t)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_edge_times_before_present(t=tr)
+	'
+
 	#height above root
 	hts_at_end_of_branches_aka_at_nodes = t$edge.length
 	hts_at_end_of_branches_aka_at_nodes = get_all_node_ages(t)
@@ -3513,6 +3576,7 @@ get_edge_times_before_present <- function(t)
 #' Get the unique node numbers in a tree
 #' 
 #' This is a utility function for \code{\link{get_nodenum_structural_root}}.
+#' It returns the the NUMBERS identifying each node.
 #'
 #' @param t A tree object in \code{\link[ape]{phylo}} format.
 #' @return \code{ordered_nodenames} The node numbers, in order.
@@ -3520,10 +3584,16 @@ get_edge_times_before_present <- function(t)
 #' @seealso \code{\link[ape]{phylo}}, \code{\link{get_nodenum_structural_root}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
-#' blah = 1
-# this returns the NUMBERS identifying each node
+#' test = 1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_nodenums(t=tr)
+#'  
 get_nodenums <- function(t)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	get_nodenums(t=tr)
+	'
 	# get just the unique node numbers from the edge list (left column: start node; right column: end node):
 	nodenames = unique(c(t$edge))
 	ordered_nodenames = nodenames[order(nodenames)]
@@ -3535,8 +3605,9 @@ get_nodenums <- function(t)
 #######################################################
 #' Gets the root node 
 #' 
-#' This function gets the root node by finding the node not in the descendants list (edge[,2]). This
-#' may be more reliable than e.g. assuming length(tr$tip.label)+1.
+#' This function gets the root node by finding the node not 
+#' in the descendants list (\code{edge[,2]}). This
+#' may be more reliable than e.g. assuming \code{length(tr$tip.label)+1}.
 #'
 #' @param t A tree object in \code{\link[ape]{phylo}} format.
 #' @param print_nodenum Print the node numbers as you go through the list? Default FALSE.
@@ -3547,8 +3618,21 @@ get_nodenums <- function(t)
 #' @examples
 #' blah=1
 #' 
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' x = get_nodenum_structural_root(t=tr, print_nodenum=FALSE)
+#' x
+#' x = get_nodenum_structural_root(t=tr, print_nodenum=TRUE)
+#' x
 get_nodenum_structural_root <- function(t, print_nodenum=FALSE)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	x = get_nodenum_structural_root(t=tr, print_nodenum=FALSE)
+	x
+	x = get_nodenum_structural_root(t=tr, print_nodenum=TRUE)
+	x
+	'
+
 	#numnodes = length(t$tip.label) + length(t$node.label)
 	#ordered_nodes = 1:length(numnodes)
 	
@@ -3583,13 +3667,73 @@ get_nodenum_structural_root <- function(t, print_nodenum=FALSE)
 #######################################################
 # level_tree_tips
 #######################################################
-level_tree_tips <- function(tr, method="mean", printflag=TRUE, fossils_older_than=0.6)
+#' Fix a tree where tips don't all have age of precisely 0.0
+#'
+#' Due to rounding errors or other issues, sometimes newick 
+#' strings encode phylogenies that are supposed to be ultrametric,
+#' but where all of the tips do not have precisely the same 
+#' height above the root. This function attempts to correct this by
+#' adjusting all of the tip branches so that all tips have the same 
+#' height. The methods are described in the method argument.
+#'
+#' NOTE: Use with caution!  If the tree is a non-dated tree, or
+#' is a dated tree with fossils, pathological behavior could
+#' easily result from applying this function (e.g., negative 
+#' branchlengths, or a radical alteration of the tree). As with 
+#' everything, you need to think before applying an particular
+#' function to a tree. This function is intended for fixing 
+#' very small discrepancies in tip height.
+#'
+#' That said, sometimes you want to equalize the tips that are 
+#' supposed to have age 0.0 Ma (mega-annum, million years before 
+#' present), but 
+#' leave the fossils unchanged. Any tips older than 
+#' \code{fossils_older_than} will be treated as fossils, and 
+#' left unchanged. (By default, tips older than 0.6 Ma will
+#' be considered fossils.)
+#'
+#' @param tr An ape \code{phylo} object.
+#' @param method The option "mean" (default) takes the average 
+#'               of the tip heights and adjusts all tips to 
+#'               match. The option "highest" brings all 
+#'               tips up to the heighest tip. The option 
+#'               "lowest" decreases all tips to the lowest tipl
+#' @param printflag \code{TRUE} or \code{FALSE}, passed to \code{\link{prt}}.
+#'                  Default is \code{FALSE}.
+#' @param fossils_older_than Tips older than this are left out of the 
+#'                adjustment of tip ages. Default 0.6.
+#' @return tr, the adjusted tree with leveled tips.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
+#' method="mean"
+#' printflag=TRUE
+#' fossils_older_than=0.6
+#' tr2 = level_tree_tips(tr, method="mean", printflag=FALSE, fossils_older_than=0.6)
+#' write.tree(tr2, file="")
+#' tr2 = level_tree_tips(tr, method="highest", printflag=FALSE, fossils_older_than=0.6)
+#' write.tree(tr2, file="")
+#' tr2 = level_tree_tips(tr, method="lowest", printflag=FALSE, fossils_older_than=0.6)
+#' write.tree(tr2, file="")
+#' 
+level_tree_tips <- function(tr, method="mean", printflag=FALSE, fossils_older_than=0.6)
 	{
-	defaults='
+	ex='
+	tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
 	method="mean"
 	printflag=TRUE
 	fossils_older_than=0.6
+	tr2 = level_tree_tips(tr, method="mean", printflag=FALSE, fossils_older_than=0.6)
+	write.tree(tr2, file="")
+	tr2 = level_tree_tips(tr, method="highest", printflag=FALSE, fossils_older_than=0.6)
+	write.tree(tr2, file="")
+	tr2 = level_tree_tips(tr, method="lowest", printflag=FALSE, fossils_older_than=0.6)
+	write.tree(tr2, file="")
 	'
+
+
 	# Look at the tree table:
 	trtable = prt(tr, printflag=printflag, fossils_older_than=fossils_older_than)
 	trtable$time_bp
@@ -3649,7 +3793,8 @@ level_tree_tips <- function(tr, method="mean", printflag=TRUE, fossils_older_tha
 #' Learning and using APE's tree structure can be difficult and confusing because much of the information is
 #' implicit.  This function prints the entire
 #' tree to a table, and makes much of the implicit information explicit.  It is not particularly fast, but
-#' it is useful.
+#' it is useful, especially for learning about ape's tree structure, and/or for easily accessing various
+#' information from the tree.
 #'
 #' See \url{http://ape.mpl.ird.fr/ape_development.html} for the official documentation of R tree objects.
 #' 
@@ -3670,29 +3815,29 @@ level_tree_tips <- function(tr, method="mean", printflag=TRUE, fossils_older_tha
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://ape.mpl.ird.fr/ape_development.html}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' 	tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
+#' 	trtable1 = prt(tr)
+#' 	trtable2 = prt(t=tr, printflag=FALSE, relabel_nodes=TRUE, get_tipnames=TRUE, fossils_older_than=0.000001)
 #' 
 prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=FALSE, fossils_older_than=0.6, silence_warnings=FALSE)
 	{
 	defaults='
-	wd = "/drives/GDrive/__classes/BIOSCI210/lab3_genome_size/"
-	setwd(wd)
+	#wd = "/drives/GDrive/__classes/BIOSCI210/lab3_genome_size/"
+	#setwd(wd)
 
 	#library(ape)
 
 	# Read a Newick-formatted phylogeny file (which has been subset to birds and mammals 
 	# found in the table) to an APE tree object 
-	trfn = "birds_mammals_subset_tree.newick"
-	tr = read.tree(trfn)
+	#trfn = "birds_mammals_subset_tree.newick"
+	#tr = read.tree(trfn)
 	
+	tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
 	trtable1 = prt(tr)
 	trtable2 = prt(t=tr, printflag=FALSE, relabel_nodes=TRUE, get_tipnames=TRUE, fossils_older_than=0.000001)
 
-	
-	
 	t = tr
 	printflag=TRUE;
 	relabel_nodes = FALSE;
@@ -3943,15 +4088,32 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 #' 
 #' @param obj An \code{\link[ape]{ape}} \code{\link[ape]{phylo}} object.
 #' @param age_of_root The length of the branch below the root. Default 0.
-#' @param tips_end_at_this_date The tips can be set to something other than 0, if desired.  (This could produce negative branclengths, however.)
+#' @param tips_end_at_this_date The tips can be set to something other than 0, if desired.
+#' (This could produce negative branchlengths, however.)
 #' @return \code{obj} The corrected phylogeny
 #' @export
 #' @seealso \code{\link[ape]{read.tree}}, \code{\link{prt}}, \code{\link{average_tr_tips}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
+#' tr2 = extend_tips_to_ultrametricize(obj=tr, age_of_root=0, tips_end_at_this_date=NA, fossils_older_than=NULL)
+#' write.tree(tr2, file="")
+#' 
+#' tr2 = extend_tips_to_ultrametricize(obj=tr, age_of_root=0, tips_end_at_this_date=NA, fossils_older_than=0.05)
+#' write.tree(tr2, file="")
+#' 
 extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_date=NA, fossils_older_than=NULL)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
+	tr2 = extend_tips_to_ultrametricize(obj=tr, age_of_root=0, tips_end_at_this_date=NA, fossils_older_than=NULL)
+	write.tree(tr2, file="")
+
+	tr2 = extend_tips_to_ultrametricize(obj=tr, age_of_root=0, tips_end_at_this_date=NA, fossils_older_than=0.05)
+	write.tree(tr2, file="")
+	'
+
 	#print("node ages of tips:")
 	tip_ages = age_of_root + get_node_ages_of_tips(obj)
 	#print(tip_ages)
@@ -4008,8 +4170,22 @@ extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_d
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
+#' tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
+#' tr2 = average_tr_tips(tr, fossils_older_than=0.6)
+#' write.tree(tr2, file="")
+#' tr2 = average_tr_tips(tr, fossils_older_than=0.05)
+#' write.tree(tr2, file="")
+#' 
 average_tr_tips <- function(tr, fossils_older_than=0.6)
 	{
+	ex='
+	tr = read.tree(file="", text="((human:0.9,chimp:1):1,gorilla:2);")
+	tr2 = average_tr_tips(tr, fossils_older_than=0.6)
+	write.tree(tr2, file="")
+	tr2 = average_tr_tips(tr, fossils_older_than=0.05)
+	write.tree(tr2, file="")
+	
+	'
 	#require(BioGeoBEARS)	# for prt()
 
 	# Check for negative branchlengths
@@ -4087,8 +4263,35 @@ average_tr_tips <- function(tr, fossils_older_than=0.6)
 # (from e.g. reading in an Excel spreadsheet with
 #  XLConnect::readWorksheetFromFile
 #######################################################
+#' Return TRUE for any "blank" items in list
+#'
+#' This function is especially useful for processing e.g. 
+#' data read in or copied from Excel or other derived 
+#' text files, where apparently 
+#' blank cells may convert to "", \code{\link[base]{NA}}, 
+#' \code{\link[base]{NaN}}, " ", "\t" (tab),
+#' "NA", "NaN" (character versions of NA and NaN) etc. 
+#' 
+#' isblank_TF runs a series of tests for these various forms
+#' of blank, and returns TRUE for each cell that matches 
+#' any of the tests.
+#'
+#' @param items A vector (e.g., a column of a data.frame).
+#' @return \code{blank_TF} A vector of \code{TRUE}/\code{FALSE}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' items = c(NA, NaN, "NA", "NaN", "na", "n/a", "nan", 0, " ", "", "\t", "\t\t")
+#' isblank_TF(items)
+#' 
 isblank_TF <- function(items)
 	{
+	ex='
+	# Showing which things currently match
+	items = c(NA, NaN, "NA", "NaN", "na", "n/a", "nan", 0, " ", "", "\t", "\t\t")
+	isblank_TF(items)
+	'
 	TF0 = is.null(items)
 	if (TF0 == TRUE)
 		{
@@ -4101,9 +4304,10 @@ isblank_TF <- function(items)
 	TF4 = is.na(items)
 	TF5 = is.nan(items)
 	TF6 = items == "NaN"
+	TF7 = items == "NA"
 	
 	# Keep only the items where none of the above occur
-	TFall = TF1 + TF2 + TF3 + TF4 + TF5 + TF6
+	TFall = TF1 + TF2 + TF3 + TF4 + TF5 + TF6 + TF7
 	
 	# Correct for NA, NaNs
 	TFall[is.na(TFall)] = 1
@@ -4121,12 +4325,12 @@ isblank_TF <- function(items)
 #######################################################
 #' Check for not NA
 #'
-#' A utility function. 
+#' A utility function, equivalent to \code{!is.na(x)}. 
 #' 
-#' @param x Thing to check for NA
+#' @param x Item to check for NA
 #' @return \code{TRUE} or \code{FALSE}
 #' @export
-#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}, \code{\link[base]{is.na}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
@@ -4137,10 +4341,85 @@ is.not.na <- function(x)
 
 
 # Avoid negative branchlengths
-
+#' Fix negative branchlengths, e.g. in a BEAST MCC tree
+#'
+#' Sometimes the MCC operation from TreeAnnotator can take
+#' a posterior sample of trees from e.g. \code{BEAST} or \code{Beast2},
+#' and produce a summary MCC tree where some of the branchlengths are
+#' negative. 
+#'
+#' This function iterates through the tree from tips to root, and
+#' if a negative branchlength (technically, a branchlength less 
+#' than \code{min_brlen}) is encountered, it is changed to 
+#' have the branchlength of \code{min_brlen}.  By default \code{min_brlen} is a
+#' low value (0.01), indicating a branchlength close to 0. Branches
+#' below are changed slightly to compensate for this change, keeping
+#' the tips of the output tree at the same height as the tips in the
+#' input tree.
+#'
+#' Advantage: this should produce a tree that can be run in 
+#' BioGeoBEARS or other comparative methods without producing
+#' the math errors that result from negative branchlengths.
+#' (BEAST starting trees also have to have positive branchlengths.)
+#'
+#' Disadvantage: This is effectively a manual modification of your
+#' tree, although a small one.  Branches with very short branchlengths
+#' are likely statistically unresolved, so the actual topology and 
+#' branchlength you are using are being arbitrarily determined. For a 
+#' few branches in a large tree this likely doesn't effect downstream
+#' analyses very much, but it might. An alternative is to run your 
+#' analysis over one or a series of trees sampled from the posterior
+#' sample of trees. 
+#' 
+#' MCC = Maximum Clade Credibility tree. This is the tree topology
+#'       that contains the set of clades that have the highest 
+#'       clade credibility. Once the topology is decided, the MCC
+#'       algorithm then calculates node heights (e.g. mean or median)
+#'       for the clades contained in the MCC tree, and also calculates
+#'       the posterior probabilities of each clade (the branch supports),
+#'       i.e. the frequency of each clade in the posterior sample.
+#' 
+#'       This procedure will not necessarily pick the absolute optimal
+#'       tree (e.g. the Maximum Likelihood tree), but it usually is a 
+#'       decent representation of the central tendency of the posterior
+#'       sample of trees.  I suspect that the reason for negative 
+#'       branchlengths is clades with very low support, which can 
+#'       happen especially in large phylogenies or with gaps in the
+#'       data matrix for some taxa.
+#' 
+#' @param phy An ape \code{\link[ape]{phylo}} object. 
+#' @param min_brlen Any negative branches (or technically, branches below 
+#'                  \code{min_brlen}) are converted to have length \code{min_brlen}.
+#'                  Default is 0.01 (reasonable if the time tree's scale
+#'                  is millions of years. Obviously, \code{min_brlen} should be adjusted
+#'                  for different timescales or time units.
+#' @param leave_BL0_terminals In "sampled ancestor" trees, some tips in 
+#'                  sampled trees can have 0 branchlengths, indicating
+#'                  that, according to the assumptions of the model, the
+#'                  sampling rate, etc., it is somewhat probable that the
+#'                  fossil is a member of a lineage that is directly ancestral
+#'                  to later taxa. If \code{leave_BL0_terminals=TRUE} (default), then
+#'                  these branches are left to have length zero (0.0). 
+#' @param direct_ancestor_brlen Branches that are between 0 and \code{direct_ancestor_brlen} 
+#'                  (inclusive) are treated as direct ancestors, and not modified.
+#' @param printlevel Default is 2 (prints all messages). 1 prints messages if something is
+#'                  edited, 0 prints nothing.
+#' @return phy3 The edited phylogeny.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' tr = read.tree(file="", text="((human:0.9,chimp:1):-0.1,gorilla:2);")
+#' tr2 = impose_min_brlen(phy=tr, min_brlen=0.01, leave_BL0_terminals=TRUE, direct_ancestor_brlen=1e-07, printlevel=2)
+#' write.tree(tr2, file="")
+#' 
 impose_min_brlen <- function(phy, min_brlen=0.01, leave_BL0_terminals=TRUE, direct_ancestor_brlen=1e-07, printlevel=2)
 	{
 	defaults='
+	tr = read.tree(file="", text="((human:0.9,chimp:1):-0.1,gorilla:2);")
+	tr2 = impose_min_brlen(phy=tr, min_brlen=0.01, leave_BL0_terminals=TRUE, direct_ancestor_brlen=1e-07, printlevel=2)
+	write.tree(tr2, file="")
+	
 	min_brlen = 1e-6
 	leave_BL0_terminals=TRUE
 	direct_ancestor_brlen=1e-07
@@ -4307,11 +4586,23 @@ impose_min_brlen <- function(phy, min_brlen=0.01, leave_BL0_terminals=TRUE, dire
 
 
 
-# A quick version of trim, so that we don't have
-# to depend on gdata's trim
-# Source: 
-# http://stackoverflow.com/questions/2261079/how-to-trim-leading-and-trailing-whitespace-in-r
-# returns string w/o leading or trailing whitespace
+#' Replacement for trim
+#'
+#' A quick version of \code{\link[gdata]{trim}}, so that we don't have
+# to depend on \code{gdata}'s \code{\link[gdata]{trim}}.
+#'
+#' @param x An string to apply quicktrim to. 
+#' @return Returns a string without leading or trailing whitespace.
+#' @seealso \code{\link[gdata]{trim}}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @references
+#' \url{http://stackoverflow.com/questions/2261079/how-to-trim-leading-and-trailing-whitespace-in-r}
+#' @examples
+#' test = "   hello!\t\t"
+#' test
+#' quicktrim(test)
+#' 
 quicktrim <- function (x)
 	{
 	gsub("^\\s+|\\s+$", "", x)
@@ -4324,7 +4615,37 @@ quicktrim <- function (x)
 # Compare two lists, produce an output table of 
 # matches/mismatches
 #######################################################
-
+#' Compare two lists, produce an output table of matches/mismatches
+#'
+#' This function is for purposes like matching a list of tipnames in a phylogeny
+#' against a list of taxa names in a traits file. The output table is 
+#' more readable -- help for identifying small differences in taxon names
+#' (e.g. Homo_sapiens vs. Homo sapiens vs. Homo Sapiens).
+#'
+#' Note: If you want to make your life easier, as well as that of 
+#' your friendly neighborhood computational biologist, just always
+#' use taxon names with "_" instead of spaces, and never use periods,
+#' commas, quote marks, parentheses, etc. in your taxon names.  Many of
+#' these special characters will mess up the reading of the data
+#' into other programs (NEXUS and Newick files, etc.)
+#'
+#' @param names1 The first list of names to match.
+#' @param names2 The second list of names to match.
+#' @param listdesc1 Description of the first list (e.g., "tree file").
+#' @param listdesc2 Description of the first list (e.g., "traits file").
+#' @param list_or_file_txt Description for comparison output text (default="lists").  
+#' @return something
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' names2 = c("sp1", "sp2", "sp3", "sp4")
+#' names1 = c("sp1", "sp2", "sp3", "Sp4")
+#' listdesc1="file1"
+#' listdesc2="file2"
+#' list_or_file_txt="lists"
+#' compare_two_name_lists(names1, names2, listdesc1="file1", listdesc2="file2", list_or_file_txt="lists")
+#' 
 compare_two_name_lists <- function(names1, names2, listdesc1="file1", listdesc2="file2", list_or_file_txt="lists")
 	{
 	defaults='
@@ -4333,6 +4654,7 @@ compare_two_name_lists <- function(names1, names2, listdesc1="file1", listdesc2=
 	listdesc1="file1"
 	listdesc2="file2"
 	list_or_file_txt="lists"
+	compare_two_name_lists(names1, names2, listdesc1="file1", listdesc2="file2", list_or_file_txt="lists")
 	'
 	
 	# Let's make the geography names the primary ones
@@ -4365,43 +4687,6 @@ compare_two_name_lists <- function(names1, names2, listdesc1="file1", listdesc2=
 	return(match_mismatch_table_df)
 	} # END compare_two_name_lists <- function(names1, names2, listdesc1="file1", listdesc2="file2")
 
-
-
-
-# state_indices_0based_all_timeperiods A list of lists of numbers (e.g. range 0, range 1, range 12),
-# perhaps with NA representing null range
-sort_list_of_lists_of_numbers <- function(state_indices_0based_all_timeperiods)
-	{
-	# Get the numbers as collapsed characters, to be sure sorting into correct order
-	state_indices_charcodes = rep("_", times=length(state_indices_0based_all_timeperiods))
-	lengthvals = rep(0, times=length(state_indices_0based_all_timeperiods))
-	for (ss in 1:length(state_indices_0based_all_timeperiods))
-		{
-		if (length(state_indices_0based_all_timeperiods[[ss]] == 1) && is.na(state_indices_0based_all_timeperiods[[ss]]))
-			{
-			state_indices_charcodes[ss] = "_"
-			lengthvals[ss] = 0
-			} else {
-			# Convert e.g. 0, 1, 2 to 0000, 0001, 0002 (for sorting later)
-			charvals = sprintf("%04.0f", state_indices_0based_all_timeperiods[[ss]])
-			state_indices_charcodes[ss] = paste0(charvals, collapse=",", sep="")
-			lengthvals[ss] = length(state_indices_0based_all_timeperiods[[ss]])
-			}
-		}
-	lengthvals = sprintf("%04.0f", lengthvals)
-	state_indices_charcodes
-	state_indices_charcodes = paste0(lengthvals, "-", state_indices_charcodes, sep="")
-	ordernums = order(state_indices_charcodes)
-	
-	oldlist = state_indices_0based_all_timeperiods
-	for (ss in 1:length(state_indices_0based_all_timeperiods))
-		{
-		state_indices_0based_all_timeperiods[[ss]] = oldlist[[ordernums[ss]]]
-		}
-	state_indices_0based_all_timeperiods
-	
-	return(state_indices_0based_all_timeperiods)
-	}
 
 
 

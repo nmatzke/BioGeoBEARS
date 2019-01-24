@@ -5894,3 +5894,82 @@ put_jcol_after_ecol <- function(tmptable)
 
 
 
+
+
+
+
+
+
+# state_indices_0based_all_timeperiods A list of lists of numbers (e.g. range 0, range 1, range 12),
+# perhaps with NA representing null range
+
+#' Sort a list of lists of numbers
+#'
+#' This function helps to get e.g. a single combined states_list from a list of states_lists
+#' (e.g. in a time-stratified analysis). Useful, for example, after combining several
+#' lists of 0-bases states_lists in a time-stratified \code{BioGeoBEARS} analysis. 
+#'
+#' @param \code{state_indices_0based_all_timeperiods} A list of states, where each state is 
+#'        one or more numbers (representing areas) or NA (representing a null_range).
+#' @return A sorted \code{state_indices_0based_all_timeperiods}, with the NA in front (if present).
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 	# This is the list of states/ranges, where each state/range
+#' 	# is a list of areas, counting from 0
+#' 	max_range_size = 4
+#' 	areas = c("A", "B", "C", "D")
+#' 	state_indices_0based_all_timeperiods = rev(cladoRcpp::rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE))
+#' 	state_indices_0based_all_timeperiods
+#' 	
+#' 	# Sort it
+#' 	sorted_state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
+#' 	sorted_state_indices_0based_all_timeperiods
+#' 
+sort_list_of_lists_of_numbers <- function(state_indices_0based_all_timeperiods)
+	{
+	ex='
+	# This is the list of states/ranges, where each state/range
+	# is a list of areas, counting from 0
+	max_range_size = 4
+	areas = c("A", "B", "C", "D")
+	state_indices_0based_all_timeperiods = rev(cladoRcpp::rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE))
+	state_indices_0based_all_timeperiods
+	
+	# Sort it
+	sorted_state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
+	sorted_state_indices_0based_all_timeperiods
+	'
+	# Get the numbers as collapsed characters, to be sure sorting into correct order
+	state_indices_charcodes = rep("_", times=length(state_indices_0based_all_timeperiods))
+	lengthvals = rep(0, times=length(state_indices_0based_all_timeperiods))
+	for (ss in 1:length(state_indices_0based_all_timeperiods))
+		{
+		if (length(state_indices_0based_all_timeperiods[[ss]] == 1) && is.na(state_indices_0based_all_timeperiods[[ss]]))
+			{
+			state_indices_charcodes[ss] = "_"
+			lengthvals[ss] = 0
+			} else {
+			# Convert e.g. 0, 1, 2 to 0000, 0001, 0002 (for sorting later)
+			charvals = sprintf("%04.0f", state_indices_0based_all_timeperiods[[ss]])
+			state_indices_charcodes[ss] = paste0(charvals, collapse=",", sep="")
+			lengthvals[ss] = length(state_indices_0based_all_timeperiods[[ss]])
+			}
+		}
+	lengthvals = sprintf("%04.0f", lengthvals)
+	state_indices_charcodes
+	state_indices_charcodes = paste0(lengthvals, "-", state_indices_charcodes, sep="")
+	ordernums = order(state_indices_charcodes)
+	
+	oldlist = state_indices_0based_all_timeperiods
+	for (ss in 1:length(state_indices_0based_all_timeperiods))
+		{
+		state_indices_0based_all_timeperiods[[ss]] = oldlist[[ordernums[ss]]]
+		}
+	state_indices_0based_all_timeperiods
+	
+	return(state_indices_0based_all_timeperiods)
+	}
+
+

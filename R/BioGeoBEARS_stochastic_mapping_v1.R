@@ -832,7 +832,7 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 			# event_txt
 			event_txt = paste(ranges_list[[current_rangenum_1based]], "->", ranges_list[[new_rangenum_1based]], sep="")
 		
-			# Make a row for a data.table
+			# Make a row for a data table
 			current_rangetxt = ranges_list[[current_rangenum_1based]]
 			new_rangetxt = ranges_list[[new_rangenum_1based]]
 			tmprow = c(nodenum_at_top_of_branch, trynum, brlen, current_rangenum_1based, new_rangenum_1based, current_rangetxt, new_rangetxt, abs_event_time, event_time, event_type, event_txt, new_area_num_1based, lost_area_num_1based, dispersal_to, extirpation_from)
@@ -1194,7 +1194,7 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 # 					print("sorted_manual_table[mm,]")
 # 					print(sorted_manual_table[mm,])
 					
-					# Make a row for a data.table
+					# Make a row for a data table
 					#print("ranges_list")
 					#print(ranges_list)
 # 					print("length(ranges_list)")
