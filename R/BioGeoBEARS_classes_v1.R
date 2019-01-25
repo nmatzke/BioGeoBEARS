@@ -23,7 +23,27 @@
 #######################################################
 #' Set up a default BioGeoBEARS model object
 #' 
-#' What it says.
+#' The default starting model is the DEC model (DEC=Dispersal-Extinction-Cladogenesis)
+#' of Ree & Smith (2008). The starting parameters are d=0.01 and e=0.01. All of the 
+#' other BioGeoBEARS models can be created by modifying the setup of the DEC model 
+#' (adding free parameters, changing the weight of different cladogenesis events, etc.).
+#' This does \emph{not} mean that all of these models are special cases of DEC. The 
+#' phrase "X is a special case of Y" means that model X can be produced by taking a 
+#' free parameter in Y and setting that parameter to a fixed value equal to the fixed
+#' value assumed in model X. Model X is said to be "nested" in Y.
+#' 
+#' Thus, DEC is a special case of DEC+J (when j=0), but not the reverse.
+#' DEC, DIVALIKE and BAYAREALIKE are not special cases of each other, but they are
+#' each, respectively, special cases of DEC+x, DIVALIKE+x, and BAYAREALIKE+x, for 
+#' instance, when x is fixed to x=0. 
+#'
+#' In the general way that all of these models involve dispersal, 
+#' extinction/extirpation, and cladogenesis, they can reasonably be termed "DEC-type"
+#' models, but that does not mean they are the same model as the DEC model originally
+#' implemented in the program \code{lagrange}. Similarly, the idea that DEC is a 
+#' "natural" or "default" model for biogeography must be questioned -- there are 
+#' many other models that could have been (and still could be) used in biogeography;
+#' the ubiquity of the DEC model is basically a historial accident.
 #' 
 #' @param minval_anagenesis Minimum value above zero for d, e, a, b parameters.
 #' @param minval_cladogenesis Minimum value above zero for j, v, etc.
@@ -35,8 +55,6 @@
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-12, minval_cladogenesis=1e-5, maxval=5)
@@ -455,8 +473,6 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-12, minval_cladogene
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' 
 #' # default DEC+J model
@@ -634,8 +650,6 @@ extract_params_from_BioGeoBEARS_results_object <- function(results_object, retur
 #' \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' tipranges_object = define_tipranges_object()
 #' tipranges_object
@@ -677,8 +691,6 @@ setClass(Class="BioGeoBEARS_model", representation=representation(params_table="
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' BioGeoBEARS_model_object = define_BioGeoBEARS_model_object()
@@ -705,7 +717,8 @@ define_BioGeoBEARS_model_object <- function(minval_anagenesis=1e-12, minval_clad
 #######################################################
 #' Produce initial parameters from a BioGeoBEARS model object
 #' 
-#' What it says.
+#' This function returns the initial values of the (free) parameters from
+#' a \code{BioGeoBEARS_model_object}.
 #' 
 #' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
 #' @return \code{params} parameter vector
@@ -715,12 +728,22 @@ define_BioGeoBEARS_model_object <- function(minval_anagenesis=1e-12, minval_clad
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+#' 
+#' BioGeoBEARS_model_object_to_init_params(BioGeoBEARS_model_object)
+#' 
+#' # [1] 0.01 0.01
 BioGeoBEARS_model_object_to_init_params <- function(BioGeoBEARS_model_object)
 	{
+	ex='
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+	BioGeoBEARS_model_object_to_init_params(BioGeoBEARS_model_object)
+	'
+	
 	free_params_TF = BioGeoBEARS_model_object@params_table$type == "free"
 	num_free_params = sum(free_params_TF, na.rm=TRUE)
 	
@@ -738,7 +761,8 @@ BioGeoBEARS_model_object_to_init_params <- function(BioGeoBEARS_model_object)
 #######################################################
 #' Extract estimated parameters from a BioGeoBEARS model object
 #' 
-#' What it says.
+#' This function returns the estimated values of the (free) parameters from
+#' a \code{BioGeoBEARS_model_object}.
 #' 
 #' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
 #' @return \code{params} parameter vector
@@ -748,12 +772,21 @@ BioGeoBEARS_model_object_to_init_params <- function(BioGeoBEARS_model_object)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+#' 
+#' BioGeoBEARS_model_object_to_est_params(BioGeoBEARS_model_object)
+#' 
+#' # [1] 0.01 0.01
 BioGeoBEARS_model_object_to_est_params <- function(BioGeoBEARS_model_object)
 	{
+	ex='
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+	BioGeoBEARS_model_object_to_est_params(BioGeoBEARS_model_object)
+	'
 	free_params_TF = BioGeoBEARS_model_object@params_table$type == "free"
 	num_free_params = sum(free_params_TF, na.rm=TRUE)
 	
@@ -772,7 +805,8 @@ BioGeoBEARS_model_object_to_est_params <- function(BioGeoBEARS_model_object)
 #######################################################
 #' Produce the lower limit on the parameters from a BioGeoBEARS model object
 #' 
-#' What it says.
+#' This function returns the lower limits of the (free) parameters from
+#' a \code{BioGeoBEARS_model_object}.
 #' 
 #' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
 #' @return \code{params} parameter vector
@@ -782,12 +816,21 @@ BioGeoBEARS_model_object_to_est_params <- function(BioGeoBEARS_model_object)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+#' 
+#' BioGeoBEARS_model_object_to_est_params(BioGeoBEARS_model_object)
+#' 
+#' # [1] 1e-12 1e-12
 BioGeoBEARS_model_object_to_params_lower <- function(BioGeoBEARS_model_object)
 	{
+	ex='
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+	BioGeoBEARS_model_object_to_params_lower(BioGeoBEARS_model_object)
+	'
 	free_params_TF = BioGeoBEARS_model_object@params_table$type == "free"
 	num_free_params = sum(free_params_TF, na.rm=TRUE)
 	
@@ -804,7 +847,8 @@ BioGeoBEARS_model_object_to_params_lower <- function(BioGeoBEARS_model_object)
 #######################################################
 #' Produce the upper limit on the parameters from a BioGeoBEARS model object
 #' 
-#' What it says.
+#' This function returns the upper limits of the (free) parameters from
+#' a \code{BioGeoBEARS_model_object}.
 #' 
 #' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
 #' @return \code{params} parameter vector
@@ -814,12 +858,21 @@ BioGeoBEARS_model_object_to_params_lower <- function(BioGeoBEARS_model_object)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+#' 
+#' BioGeoBEARS_model_object_to_params_upper(BioGeoBEARS_model_object)
+#' 
+#' # [1] 5 5
 BioGeoBEARS_model_object_to_params_upper <- function(BioGeoBEARS_model_object)
 	{
+	ex='
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+	BioGeoBEARS_model_object_to_params_upper(BioGeoBEARS_model_object)
+	'
 	free_params_TF = BioGeoBEARS_model_object@params_table$type == "free"
 	num_free_params = sum(free_params_TF, na.rm=TRUE)
 	
@@ -836,10 +889,15 @@ BioGeoBEARS_model_object_to_params_upper <- function(BioGeoBEARS_model_object)
 #######################################################
 #' Feed modified parameters back into a BioGeoBEARS model object
 #' 
-#' What it says.
+#' This function takes a list of parameter values (typically, the 
+#' current iteration of parameters in a Maximum Likelihood search)
+#' and inputs them, in order, into the free parameters specified
+#' in the \code{BioGeoBEARS_model_object@params_table}.
 #' 
 #' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
 #' @param params parameter vector
+#' @param initTF If \code{TRUE} (default), update the "init" (initial values) column with these parameters.
+#' @param estTF If \code{TRUE} (default), update the "est" (estimates) column with these parameters.
 #' @return \code{BioGeoBEARS_model_object} The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
 #' @export
 #' @seealso \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}
@@ -847,12 +905,24 @@ BioGeoBEARS_model_object_to_params_upper <- function(BioGeoBEARS_model_object)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+#' BioGeoBEARS_model_object
+#' BioGeoBEARS_model_object2 = params_into_BioGeoBEARS_model_object(BioGeoBEARS_model_object, params=c(0.34,0.21))
+#' BioGeoBEARS_model_object2
+#' 
 params_into_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object, params, initTF=TRUE, estTF=TRUE)
 	{
+	ex='
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object
+	BioGeoBEARS_model_object
+	BioGeoBEARS_model_object2 = params_into_BioGeoBEARS_model_object(BioGeoBEARS_model_object, params=c(0.34,0.21))
+	BioGeoBEARS_model_object2
+	'
+
 	free_params_TF = BioGeoBEARS_model_object@params_table$type == "free"
 	num_free_params = sum(free_params_TF, na.rm=TRUE)
 	
@@ -879,7 +949,9 @@ params_into_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object, param
 #######################################################
 #' Merge lists of words and nonwords (numbers) that may be of different length
 #' 
-#' Utility function.
+#' Utility function for printing BioGeoBEARS parameters to screen or
+#' text files. The list of \code{nonwords} might be 1 longer than
+#' the list of \code{words}. (Longer produces an error.)
 #' 
 #' @param words A list of words
 #' @param nonwords A list of nonwords
@@ -890,12 +962,31 @@ params_into_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object, param
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' words = c("A", "B", "C")
+#' nonwords = c(1,2,3,4)
+#' merge_words_nonwords(words, nonwords)
+#' 
+#' \dontrun{
+#' # Produces an error
+#' words = c("A", "B", "C")
+#' nonwords = c(1,2,3,4, 5)
+#' merge_words_nonwords(words, nonwords)
+#' }
 merge_words_nonwords <- function(words, nonwords)
 	{
+	ex='
+	words = c("A", "B", "C")
+	nonwords = c(1,2,3,4)
+	merge_words_nonwords(words, nonwords)
+	
+	# Produces an error
+	words = c("A", "B", "C")
+	nonwords = c(1,2,3,4, 5)
+	merge_words_nonwords(words, nonwords)
+	'
+	
 	if (length(nonwords) == ((length(words) + 1)))
 		{
 		words = c(words, "")
@@ -917,25 +1008,84 @@ merge_words_nonwords <- function(words, nonwords)
 
 
 # Get the parameter results from an optim search
-get_params_from_optim <- function(optimx_result)
+
+#' Get the parameter results from an optim search
+#'
+#' Extracts the parameters from the results object 
+#' produced by 
+#' the \code{\link[stats]{optim}} function for 
+#' Maximum Likelihood optimization.
+#'
+#' This is necessary, because, annoyingly, \code{optim}, \code{optimx} from pre-2013,
+#' \code{optimx} from post-2013, and \code{GenSA}, all return their
+#' parameter estimates in slightly different objects.
+#'
+#' @param optim_result The result produced by \code{\link[stats]{optim}}()
+#' @return optim_param_results A vector of the ML parameters
+#' @export
+#' @seealso \code{\link[stats]{optim}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+get_params_from_optim <- function(optim_result)
 	{
-	optimx_param_results = as.numeric(optimx_result$par)
+	optim_param_results = as.numeric(optim_result$par)
 	
-	return(optimx_param_results)
+	return(optim_param_results)
 	}
 
 
 # Get the parameter results from an optim search
-get_params_from_GenSA <- function(optimx_result)
+#' Get the parameter results from a GenSA search
+#'
+#' Extracts the parameters from the results object 
+#' produced by 
+#' the \code{\link[GenSA]{GenSA}} function for 
+#' Maximum Likelihood optimization (GenSA = Generalized
+#' Simulated Annealing, which seems to do a more thorough
+#' search when the number of parameters increases to 5+).
+#'
+#' This is necessary, because, annoyingly, \code{optim}, \code{optimx} from pre-2013,
+#' \code{optimx} from post-2013, and \code{GenSA}, all return their
+#' parameter estimates in slightly different objects.
+#'
+#' @param GenSA_result The result produced by \code{\link[stats]{optim}}()
+#' @return GenSA_param_results A vector of the ML parameters
+#' @export
+#' @seealso \code{\link[GenSA]{GenSA}} 
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+get_params_from_GenSA <- function(GenSA_result)
 	{
-	optimx_param_results = as.numeric(optimx_result$par)
+	GenSA_param_results = as.numeric(GenSA_result$par)
 	
-	return(optimx_param_results)
+	return(GenSA_param_results)
 	}
 
 
 
 # Get the parameter results from an optimx 2012 search
+
+
+#' Get the parameter results from an optimx 2012 search
+#'
+#' Extracts the parameters from the results object 
+#' produced by 
+#' the \code{\link[optimx]{optimx}} function for 
+#' Maximum Likelihood optimization (2012 and earlier).
+#'
+#' This is necessary, because, annoyingly, \code{optim}, \code{optimx} from pre-2013,
+#' \code{optimx} from post-2013, and \code{GenSA}, all return their
+#' parameter estimates in slightly different objects.
+#'
+#' @param optimx_result The result produced by \code{\link[optimx]{optimx}}()
+#' @return optimx_param_results A vector of the ML parameters
+#' @export
+#' @seealso \code{\link[optimx]{optimx}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_params_from_optimx2012 <- function(optimx_result)
 	{
 	optimx_param_results = as.numeric(optimx_result$par[[1]])
@@ -943,7 +1093,25 @@ get_params_from_optimx2012 <- function(optimx_result)
 	return(optimx_param_results)
 	}
 
-# Get the parameter results from an optimx 2013 search
+
+#' Get the parameter results from an optimx 2013 search
+#'
+#' Extracts the parameters from the results object 
+#' produced by 
+#' the \code{\link[optimx]{optimx}} function for 
+#' Maximum Likelihood optimization (2013 and later).
+#'
+#' This is necessary, because, annoyingly, \code{optim}, \code{optimx} from pre-2013,
+#' \code{optimx} from post-2013, and \code{GenSA}, all return their
+#' parameter estimates in slightly different objects.
+#'
+#' @param optimx_result The result produced by \code{\link[optimx]{optimx}}()
+#' @return optimx_param_results A vector of the ML parameters
+#' @export
+#' @seealso \code{\link[optimx]{optimx}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_params_from_optimx2013 <- function(optimx_result)
 	{
 	nparams = nparams_from_optimx2013(optimx_result)
@@ -952,6 +1120,19 @@ get_params_from_optimx2013 <- function(optimx_result)
 	return(optimx_param_results)
 	}
 
+
+#' Get the number of free parameters from an optimx 2013 search
+#'
+#' Utility function for \code{get_params_from_optimx2013}, which figures
+#' out the number of free parameters in the results object.
+#'
+#' @param optimx_result The result produced by \code{\link[optimx]{optimx}}()
+#' @return nparams The number of free parameters
+#' @export
+#' @seealso \code{\link[optimx]{optimx}}, \code{\link{get_params_from_optimx2013}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 nparams_from_optimx2013 <- function(optimx_result)
 	{
 	# Find the colnums and names of the free parameters
@@ -1231,8 +1412,6 @@ get_LnL_from_BioGeoBEARS_results_object <- function(res)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' # Define a BioGeoBEARS run object
 #' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
@@ -1399,8 +1578,6 @@ calc_linked_params_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 #' 
@@ -1489,8 +1666,6 @@ define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGe
 #' \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 #'
@@ -1548,8 +1723,6 @@ define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGe
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 read_dispersal_multipliers_fn <- function(inputs=NULL, dispersal_multipliers_fn=NULL)
@@ -1664,8 +1837,6 @@ read_dispersal_multipliers_fn <- function(inputs=NULL, dispersal_multipliers_fn=
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 read_times_fn <- function(inputs=NULL, timesfn=NULL)
@@ -1726,8 +1897,6 @@ read_times_fn <- function(inputs=NULL, timesfn=NULL)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 read_distances_fn <- function(inputs=NULL, distsfn=NULL)
@@ -1871,8 +2040,6 @@ read_distances_fn <- function(inputs=NULL, distsfn=NULL)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 read_envdistances_fn <- function(inputs=NULL, envdistsfn=NULL)
@@ -2014,8 +2181,6 @@ read_envdistances_fn <- function(inputs=NULL, envdistsfn=NULL)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 read_area_of_areas_fn <- function(inputs=NULL, area_of_areas_fn=NULL)
@@ -2129,8 +2294,6 @@ read_area_of_areas_fn <- function(inputs=NULL, area_of_areas_fn=NULL)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 read_areas_allowed_fn <- function(inputs=NULL, areas_allowed_fn=NULL)
@@ -2247,8 +2410,6 @@ read_areas_allowed_fn <- function(inputs=NULL, areas_allowed_fn=NULL)
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://groups.google.com/forum/#!searchin/biogeobears/areas_allowed/biogeobears/7e7U9NtPTBU/4MyxckASMksJ}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 read_areas_adjacency_fn <- function(inputs=NULL, areas_adjacency_fn=NULL)
@@ -2357,8 +2518,6 @@ read_areas_adjacency_fn <- function(inputs=NULL, areas_adjacency_fn=NULL)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 prune_states_list <- function(states_list_0based_index, areas_allowed_mat)
@@ -2476,8 +2635,6 @@ prune_states_list <- function(states_list_0based_index, areas_allowed_mat)
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://groups.google.com/forum/#!searchin/biogeobears/areas_allowed/biogeobears/7e7U9NtPTBU/4MyxckASMksJ}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 prune_states_list_by_adjacency <- function(states_list_0based_index, areas_adjacency_mat)
@@ -2600,8 +2757,6 @@ prune_states_list_by_adjacency <- function(states_list_0based_index, areas_adjac
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 readfiles_BioGeoBEARS_run <- function(inputs)
@@ -2778,8 +2933,6 @@ check_trfn <- function(trfn)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
 check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE, allow_null_range_tips=NULL)
@@ -3982,8 +4135,6 @@ fix_BioGeoBEARS_params_minmax <- function(BioGeoBEARS_run_object=NULL, BioGeoBEA
 #' \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' tipranges_object = define_tipranges_object()
 #' tipranges_object
@@ -4020,8 +4171,6 @@ setClass("tipranges", representation(df="data.frame"),
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' tipranges_object = define_tipranges_object()

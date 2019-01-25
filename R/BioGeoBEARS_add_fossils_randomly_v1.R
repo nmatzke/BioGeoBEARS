@@ -2,6 +2,22 @@
 # Error checks for dumb things in fossils xls file
 #######################################################
 
+#' Adding fossils to BioGeoBEARS (error check of fossils spreadsheet)
+#'
+#' When fossils are being added "manually" to a phylogenetic biogeography
+#' analysis, the fossil data are listed in a spreadsheet. This function 
+#' checks for common user errors (missing ages, duplicate taxon names, etc.)
+#'
+#' @param xls A data.frame, e.g. as read in by \code{XLConnect}'s \code{readWorksheetFromFile}.
+#'            The format of this spreadsheet will be given in example files when this
+#'            method is published (Saila & Matzke, in prep.).
+#' @param fix_duplicates If TRUE (default), any duplicate names are made unique by
+#'                       adding the taxon numbers.
+#' @return something
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 error_checks_for_fossils_xls <- function(xls, fix_duplicates=TRUE)
 	{
 	defaults='
@@ -367,6 +383,26 @@ add_fossils_to_many_trees <- function(nexfn, burnin, numtrees, xls, living_tipra
 # tipranges_df: just a table, e.g. tipranges@df
 # list_of_fossil_tips_added: a vector of names matching paste("fossil_", xls$Fossil_Taxon, sep="")
 # xls: e.g. xls_full = read.xls("/drives/Dropbox/_njm/__packages/BioGeoBEARS_setup/z_help/Ruud_Scharn/RuudScharn_fossilsLiving_for_biogeography_v3.xlsx", sheet="fossils", skip=5)
+#' Add fossil tips to BioGeoBEARS geography data 
+#'
+#' When fossils are being added "manually" to a phylogenetic biogeography
+#' analysis, the fossil data are listed in an Excel spreadsheet. This function 
+#' adds the desired fossils to the tipranges object, which is read in from
+#' a \code{BioGeoBEARS} geography data file.
+#'
+#' @param tipranges_df A \code{tipranges} \code{data.frame} from inside a \code{tipranges} object.
+#'                     The \code{df} slot can be accessed with e.g. \code{tipranges@df}.
+#' @param list_of_fossil_tips_added The list of fossil tipnames to add.
+#' @param xls A data.frame, e.g. as read in by \code{XLConnect}'s \code{readWorksheetFromFile}.
+#'            The format of this spreadsheet will be given in example files when this
+#'            method is published (Saila & Matzke, in prep.).
+#' @param numareas By default the number of columns in the \code{tipranges_df}.
+#' @return new_tipranges_df A new tipranges df, with the fossil tips and their ranges added.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#'
 add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_tips_added, xls, numareas=ncol(tipranges_df))
 	{
 	defaults='
@@ -507,6 +543,86 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 #
 # See example Excel file for what goes in each column.
 # 
+
+
+#' Add fossils, of uncertain position, to a BioGeoBEARS phylogenetic biogeography analysis
+#'
+#' When fossils are being added "manually" to a phylogenetic biogeography
+#' analysis, the fossil data are listed in an Excel spreadsheet. This function 
+#' adds the desired fossils to the tipranges object, which is read in from
+#' a \code{BioGeoBEARS} geography data file.
+#'
+#' Typically, the phylogenetic position of the fossils is highly uncertain. If you 
+#' have a morphological character matrix for the living and fossil specimens, then 
+#' probably the best method is to jointly estimate the dating and topology of the 
+#' phylogeny ("tip-dating" -- see e.g. Matzke & Wright 2016), and use that dated
+#' phylogeny in BioGeoBEARS directly.
+#'
+#' However, often such a morphological matrix doesn't exist, and instead the only
+#' information available is a taxonomy and/or expert opinion.  E.g., "this fossil
+#' is in the genus \emph{Araucaria}." There are various ways that such a statement
+#' might be interpreted, depending on the date of the publication and the training
+#' of the scientist who made it.  Often, scientists working in a pre-cladistic 
+#' framework make such statements based on overall similarity, or the presence of
+#' one or a few characters. In that case, membership in a genus might mean the 
+#' fossil is anywhere in the crown or stem.  Scientists working in a cladistic
+#' framework might mean that the fossil shares one or more characters thought to
+#' be synapomorphies (shared derived characters) with a clade inside the genus, 
+#' thus placing the fossil "securely" inside the crown group. (Of course, 
+#' phylogenetic placements relying on only one or a few characters will always 
+#' be only as reliable as those characters).
+#'
+#' Another source of uncertainty is the date of the fossil specimen, although,
+#' often, this is more secure than the taxonomic bracket.
+#'
+#' Obviously, running \code{add_fossils_from_xls_randomly} only once makes little
+#' sense. Instead, the idea would be to run e.g. ~100 times, and repeat the 
+#' biogeography analysis on each of the 100 semi-random trees.
+#'
+#' The Excel spreadsheet used for placing uncertain fossils in a BioGeoBEARS
+#' analysis allows the researcher to specify the various forms of uncertainty
+#' above for each fossil. Then, the BioGeoBEARS add_fossils functions can
+#' add in the fossils randomly within the constraints. Uncertainty in the 
+#' geographic data (e.g., fossil presence in region A does not necessarily
+#' mean absence from region B) can also be incorporated.
+#' 
+#' The full format of this spreadsheet will be given in example files when this
+#' method is published (Saila & Matzke, in prep.). The columns of the spreadsheet,
+#' which become fields in the data.frame \code{xls}, MUST have the following headings:
+#' 
+#' (draft fields, check spreadsheet)
+#' 
+#' Fossil_Taxon (no spaces, ".", "/", or any other punctuation except "_")
+#' stem_or_crown -- could the fossil be in the "stem" of the clade, the "crown", or 
+#'                  "both" (meaning, the fossil could be in either)
+#' min_age       -- the minimum age (youngest possible age) for the fossil specimen
+#' max_age       -- the maximum age (oldest possible age) for the fossil specimen
+#' range_coded   -- the geographic range, as coded with 1s and 0s for a BioGeoBEARS 
+#'                  geography file. In Excel, numbers should be forced to be text with
+#'                  a single-quote apostrophe, e.g. \code{'001101}.
+#' is_MRCA_of    -- A clade can be specified with any 2 tips. This is tip #1.
+#' and_MRCA_of   -- A clade can be specified with any 2 tips. This is tip #2.
+#' geog_constraint  -- Constraints on the geography (e.g. presence known, absence uncertain)
+#' constraint_type  -- Does the range_coded field indicate the assumed full range, 
+#'                     presence-only data, or absence-only data.
+#' taxon_specifiers -- The name of the species/genus/family etc., if a taxon specifier
+#'                     is being used.
+#' specifier_type  -- Is the clade constraint based on tip specifiers, a species 
+#'                     (e.g. if the fossil is claimed to be from a living species),
+#'                     a genus, family, etc.
+#' @param brlen_of_side_branch The length of the side-branch when a fossil is attached
+#'                             as a direct ancestor (not always the case).
+#' @param list_of_fossil_tips_added The list of fossil tipnames to add.
+#' @param plottree Should the updated tree be plotted? Default \code{TRUE}.
+#' @return tr_w_fossils_and_fossils_added_list, a list with 2 fields: \code{$tr_w_fossil} 
+#'         is the tree with the fossils added in their semi-random positions; 
+#'         \code{$list_of_fossil_tips_added} is the vector of fossil tips added.
+#' A new tipranges df, with the fossil tips and their ranges added.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#'
 add_fossils_from_xls_randomly <- function(tr, xls, brlen_of_side_branch=1e-07, plottree=TRUE)
 	{
 	list_of_fossil_tips_added = NULL
@@ -707,8 +823,42 @@ add_fossils_from_xls_randomly <- function(tr, xls, brlen_of_side_branch=1e-07, p
 
 
 
-
-
+#' Add fossil, of uncertain position, to a BioGeoBEARS phylogenetic biogeography analysis
+#'
+#' This function will mostly be run by \code{add_fossils_randomly}. 
+#'
+#' See documentation for \code{add_fossils_randomly}. 
+#'
+#' @param tr An ape \code{phylo} object.
+#' @param tip_specifiers A vector of 2 tipnames, specifying a clade
+#' @param fossil_name Name of the fossil tip
+#' @param max_age The maximum (oldest) age for the fossil's age range
+#' @param min_age The minimum (youngest) age for the fossil's age range 
+#' @param constraint_type Is the fossil a "side_branch", "direct_ancestor"/"ancestor", or "fixnode"
+#' @param stem_or_crown Could the fossil go in "stem", "crown", or "both"
+#' @param plottree Should the updated tree be plotted? Default \code{FALSE}.
+#' @param fixnode_clades NOT USED. (original intention follows, now done elsewhere)
+#'        The list of clades that will have the \code{fixnode} option (inputting
+#'                       range constraints at a node). List will be added to if 
+#'                       \code{constraint_type} is "fixnode". 
+#' @param fossil_age_within_constraints If TRUE (default), the min_age/max_age constraints
+#'        are combined with constraints imposed by the topology (a fossil in a crown
+#'        group cannot be older than the crown group, even if its max_age is older).
+#'        Conflicts of this sort (between an MCC tree's dates and the allowed age-ranges
+#'        of a fossil) are not rare -- this is one of the reasons a joint-estimation
+#'        approach to place the fossils in a tree is a preferable. However, the function
+#'        will do the best it can. If the min_age/max_age constraints totally exclude
+#'        the clade constraints, then the fossil is not added. If FALSE, just the
+#'        min_age/max_age constraints are used (ignoring clade constraints, if they
+#'        conflict; this may however cause errors downstream). 
+#' @param brlen_of_side_branch The length of the side-branch when a fossil is attached
+#'                             as a direct ancestor (not always the case).
+#' @return tr_w_fossil The tree, with the fossil added.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
 add_fossil_randomly <- function(tr, tip_specifiers, fossil_name, max_age, min_age, constraint_type="side_branch", stem_or_crown="both", plottree=FALSE, fixnode_clades=NULL, fossil_age_within_constraints=TRUE, brlen_of_side_branch=1e-07)
 	{
 	defaults='
@@ -838,7 +988,8 @@ add_fossil_randomly <- function(tr, tip_specifiers, fossil_name, max_age, min_ag
 	
 	
 	# Error check on constraint type
-	constraint_type_options = c("side_branch", "direct_ancestor", "ancestor", "fixnode", "specifiers")
+	#constraint_type_options = c("side_branch", "direct_ancestor", "ancestor", "fixnode", "specifiers")
+	constraint_type_options = c("side_branch", "direct_ancestor", "ancestor", "fixnode")
 	TF = constraint_type %in% constraint_type_options
 	
 	if (TF == FALSE)
@@ -881,9 +1032,22 @@ add_fossil_randomly <- function(tr, tip_specifiers, fossil_name, max_age, min_ag
 	} # end add_fossil_randomly()
 
 
-#' Get a list of branches that are possible 
-#' attachment points for a fossil with a phylogenetic
-#' position that is only approximately known
+
+#' Get possible branches to add a fossil to
+#'
+#' This function returns a list of branches that are possible attachment 
+#' points for a fossil with a phylogenetic position that is only 
+#' approximately known
+#'
+#' @param tr An ape \code{phylo} object.
+#' @param trtable A tree table data.frame, as produced by \code{prt}.
+#' @param tip_specifiers A vector of 1 or more tipnames, specifying a clade
+#' @param stem_or_crown Could the fossil go in "stem", "crown", or "both"
+#' @return branches Here, the full rows of the trtable that contain the necessary branches.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_possible_branches_to_add_fossils_to <- function(tr, trtable, tip_specifiers, stem_or_crown="both")
 	{
 	#######################################################
@@ -980,10 +1144,27 @@ get_possible_branches_to_add_fossils_to <- function(tr, trtable, tip_specifiers,
 
 
 
+
+#' Add a semi-random side branch to a tree
+#'
 #' Given a fossil time and a clade, randomly add a 
 #' side branch somewhere below the fossil to the clade
 #' (uniformly on available branches; not perfect, but 
 #'  workable)
+#'
+#' @param tr An ape \code{phylo} object.
+#' @param trtable A tree table data.frame, as produced by \code{prt}.
+#' @param branches The full rows of the trtable that contain the necessary branches, 
+#'                 returned by \code{get_possible_branches_to_add_fossils_to}.
+#' @param fossil_name Name of the fossil tip
+#' @param fossil_age The (sampled) age of the fossil
+#' @param plottree Should the updated tree be plotted? Default \code{FALSE}.
+#' @return tr_w_fossil The tree, with the fossil added.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#'
 add_random_side_branch <- function(tr, trtable, branches, fossil_name, fossil_age, plottree=FALSE)
 	{
 	# Get the branches that are possible attachment points
@@ -1106,8 +1287,32 @@ add_random_side_branch <- function(tr, trtable, branches, fossil_name, fossil_ag
 	} # end add_random_side_branch()
 
 
-#' Given a time and a clade, randomly add a
-#' direct ancestor (in the form of a hook)
+
+#' Add a direct ancestor as a hook
+#'
+#' Given a time and candidate branches of a clade, randomly add a direct 
+#' ancestor (in the form of a hook).
+#'
+#' In \code{BioGeoBEARS}, direct ancestors are coded as very-very short side 
+#' branches in the tree. This is an easy way to include direct ancestors, and 
+#' save/load the resulting trees in standard formats like Newick. (It does, 
+#' though, require that the program in question "knows" to read short 
+#' branches this way. BioGeoBEARS does this, but other programs might not.)
+#'
+#' @param tr An ape \code{phylo} object.
+#' @param trtable A tree table data.frame, as produced by \code{prt}.
+#' @param branches The full rows of the trtable that contain the necessary branches, 
+#'                 returned by \code{get_possible_branches_to_add_fossils_to}.
+#' @param fossil_name Name of the fossil tip
+#' @param fossil_age The (sampled) age of the fossil
+#' @param plottree Should the updated tree be plotted? Default \code{FALSE}.
+#' @param brlen_of_side_branch The branch length of the hook branch.
+#' @return tr_w_fossil The tree, with the fossil added.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#'
 add_random_direct_ancestor_hook <- function(tr, trtable, branches, fossil_name, fossil_age, plottree=FALSE, brlen_of_side_branch=1e-07)
 	{
 	# Get the branches that are possible hosts of the ancestor hook
@@ -1219,491 +1424,6 @@ add_random_direct_ancestor_hook <- function(tr, trtable, branches, fossil_name, 
 	
 	return(tr_w_fossil)	
 	} # end add_random_direct_ancestor_hook()
-
-
-
-
-
-get_daughter_tipnums <- function(nodenum, tr)
-	{
-	nodes = get_daughter_nodes(nodenum, tr, nodes=NULL)
-	tips_TF = nodes <= length(tr$tip.label)
-	tipnums = nodes[tips_TF]
-	return(tipnums)
-	}
-
-
-get_daughter_tipnames <- function(nodenum, tr)
-	{
-	tipnums = get_daughter_tipnums(nodenum, tr)
-	tipnames = tr$tip.label[tipnums]
-	return(tipnames)
-	}
-
-
-
-get_daughter_nodes <- function(nodenum, tr, nodes=NULL)
-	{
-	if(is.null(nodes))
-		{
-		nodes = vector()
-		}
-	daughter_nodes = tr$edge[which(tr$edge[,1]==nodenum),2]
-	
-	# Error check, in case the starting nodenum is a tip
-	if ((length(daughter_nodes) == 0) && (length(nodes)==0))
-		{
-		nodes = c(nodes, nodenum)
-		} else {
-		nodes = c(nodes, daughter_nodes)
-		}
-		
-	internal_nodes_indices = which(daughter_nodes > length(tr$tip.label))
-	if(length(internal_nodes_indices) > 0)
-		{
-		for (i in 1:length(internal_nodes_indices))
-			{
-			nodes = get_daughter_nodes(nodenum=daughter_nodes[internal_nodes_indices[i]], tr=tr, nodes=nodes)
-			}
-		}
-	return(nodes)
-	}
-
-
-
-
-trace_parents_up <- function(nodenum, t, depthtime)
-	{
-	# Trace from a node up to its parents etc., a specified distance
-	parent_node = get_parent_for_trace_parents_up(nodenum, t)
-	
-	# print nodenum
-	#print(nodenum)
-	#print(parent_node)
-	#print(depthtime)
-	
-	length_to_parent = t$edge.length[t$edge[,2] == nodenum]
-	#cat("length_to_parent: ", length_to_parent, ", length=", length(length_to_parent), "\n", sep="")
-	#cat("depthtime: ", depthtime, "\n", sep="")
-	if (length(length_to_parent) == 0)
-		{
-		print("ERROR: trace_parents_up() -- no length_to_parent returned, probably overshot bottom of tree")
-		return(NA)
-		}
-	if (length_to_parent == depthtime)
-		{
-		print("ERROR: trace_parents_up() doesn't want to find an EXACT match between depthtime and a node; this will lead to problems in hook addition!")
-		}
-	if (length_to_parent > depthtime)
-		{
-		# you're done!
-		return(nodenum)
-		}
-	else
-		{
-		# burrow up to parents
-		depthtime = depthtime - length_to_parent
-		parent_node = trace_parents_up(parent_node, t, depthtime)
-		return(parent_node)
-		}
-	return(nodenum)
-	}
-
-
-get_parent_for_trace_parents_up <- function(nodenum, t, printflag=FALSE)
-	{
-	matching_edges = findall(nodenum, t$edge[,2])
-	parent_nodenum = t$edge[,1][matching_edges][1]
-	
-	if (printflag)
-		{
-		print(paste("nodenum=", nodenum, " parent_nodenum=", parent_nodenum, sep=""))
-		}
-	if (is.na(parent_nodenum))
-		{
-		if (printflag)
-			{
-			print(paste("get_parent(): node ", nodenum, " has no parent, it's probably the root!\nAnd you missed whatever parent you were actually trying to find!", sep=""))
-			}
-		}
-	return(parent_nodenum)
-	}
-	
-
-dist_between_direct_ancestors <- function(ancestor_node, descendant_node, t, totaldist=0, printflag=FALSE)
-	{
-	# Recursive algorithm to get distance between descendent and ancestor
-	
-	# Error trap should operate before this
-	
-	if (ancestor_node == descendant_node)
-		{
-		if (printflag)
-			{
-			print("dist_between_direct_ancestors(): ancestor_node == descendant_node")
-			}
-		return(totaldist)
-		}
-	
-	parent_node = get_parent(descendant_node, t)
-	dist_to_parent = t$edge.length[t$edge[,2] == descendant_node]
-	
-	totaldist = dist_to_parent + totaldist
-	
-	#print(paste(parent_node, ancestor_node, sep=""))
-	if (parent_node == ancestor_node)
-		{
-		return(totaldist)
-		}
-	else
-		{
-		totaldist = dist_between_direct_ancestors(ancestor_node, parent_node, t, totaldist)
-		return(totaldist)
-		}
-	}
-
-#' t			= tree
-#' tipname		= tip to add hook below
-#' depthtime	= time_bp_attachment_point_relative_to_tip  This is the time RELATIVE to the tip
-add_hook <- function(t, tipname, depthtime, brlen_of_side_branch=0.0000001, plottree = FALSE, printflag=0, newtipname="default")
-	{
-	# Add a hook (a small side tip) to a phylogeny
-	#
-	# e.g.:
-	# Do spatial variogram by doing points from many different species
-	# add tips to tree
-	#cat("owls(((Strix_aluco:4.2,Asio_otus:4.2):3.1,Athene_noctua:7.3):6.3,Tyto_alba:13.5);", file = "ex.tre", sep = "\n")
-	#t <- read.tree("ex.tre")
-	#prt(t)
-	#newtree = add_hook(t, brlen_of_side_branch=0.0000001, plottree = TRUE)
-
-	if (printflag >= 2)
-		{
-		cat("add_hook(): Adding below tipname ",  tipname, "\n", sep="")
-		}
-
-	newtree = t
-	#daughter_nodenum_to_add_hook_below = 4
-	#height_below_daughter_at_which_to_add_it = 1.0
-	#brlen_of_side_branch=0.0000001
-	
-	# find the node, below this you will add the 
-	tip_nodenum = which(t$tip.label == tipname)
-	
-	if (printflag >= 2)
-		{
-		print(paste("addhook(): tip_nodenum = ", tip_nodenum, sep=""))
-		}
-
-	daughter_nodenum_to_add_hook_below = trace_parents_up(tip_nodenum, t, depthtime)
-	
-	# Error trap in case of e.g. overrun of bottom of tree
-	if (is.na(daughter_nodenum_to_add_hook_below))
-		{
-		cat("add_hook() error: daughter_nodenum_to_add_hook_below is NA, probably overshot bottom of tree (?); not adding hook\n")
-		return(t)
-		}
-	
-	if (printflag >= 2)
-		{
-		print(paste("addhook(): internal nodenum to add below = ", daughter_nodenum_to_add_hook_below, sep=""))
-		}
-	
-	tip_to_ancestor_node_dist = dist_between_direct_ancestors(daughter_nodenum_to_add_hook_below, tip_nodenum, t, totaldist=0)
-	
-	
-	
-	height_below_daughter_at_which_to_add_it = depthtime - tip_to_ancestor_node_dist
-	
-	
-	# add a new tip to the list of tips (this is the hook)
-	new_tip_nodenum = get_nodenum_structural_root(t)
-	
-	# bump up all of the nodenums above the node tip by 1
-	newtree$edge[t$edge >= new_tip_nodenum] = t$edge[t$edge >= new_tip_nodenum] + 1
-	
-	# add a new internal node at the end
-	new_inNode = max(newtree$edge) + 1
-	
-	# add two new edges, and replace the old edge
-	#print(t$edge[,2])
-	#print(daughter_nodenum_to_add_hook_below)
-	#print(t$edge[,2] == daughter_nodenum_to_add_hook_below)
-	old_edge_num = which(t$edge[,2] == daughter_nodenum_to_add_hook_below)
-	
-	# extract the edgenums before and after this insertion (exceptions for in case
-	# if the modified row is the first or last row)
-	if (old_edge_num == 1)
-		{
-		first_old_edges_rownums = NULL
-		} else {
-		first_old_edges_rownums = 1:(old_edge_num-1) #newtree$edge[1:(old_edge_num-1), ]
-		}
-	if (old_edge_num == nrow(t$edge))
-		{
-		second_old_edges_rownums = NULL
-		} else {
-		second_old_edges_rownums = (old_edge_num+1):nrow(t$edge) # newtree$edge[, ]
-		}
-	
-	
-	
-	# replace the edge, keeping the old parent (which may have increased by 1! use newtree!!), put the new internal node as the daughter)
-	replacement_edge_row = newtree$edge[old_edge_num, ]
-	replacement_edge_row[2] = new_inNode
-	
-	# subtract the distance below the daughter, from the top
-	replacement_edge_length = t$edge.length[old_edge_num] - height_below_daughter_at_which_to_add_it
-	
-	
-	# make the new edge, which goes below the old daughter node
-	# you have to bump the daughter_nodenum_to_add_hook_below if it is
-	# >= to the new_tip_nodenum
-	if (daughter_nodenum_to_add_hook_below >= new_tip_nodenum)
-		{
-		daughter_nodenum_to_add_hook_below = daughter_nodenum_to_add_hook_below + 1
-		}
-	new_edge_below_old_daughter_node = c(new_inNode, daughter_nodenum_to_add_hook_below)
-	new_edge_below_old_daughter_node_edge_length = height_below_daughter_at_which_to_add_it
-	
-	# make the new edge, which goes below the new tip: c(parent, daughter)
-	new_edge_below_new_tip = c(new_inNode, new_tip_nodenum)
-	new_edge_below_new_tip_edge_length = brlen_of_side_branch
-	
-	
-	# add the edge rows before the one that is replaced, then the replaced edge, then the other old edges, then the 2 new edges
-	new_edge_table = rbind(newtree$edge[first_old_edges_rownums, ], replacement_edge_row, newtree$edge[second_old_edges_rownums, ], new_edge_below_old_daughter_node, new_edge_below_new_tip)
-	
-	new_edgelength_list = c(t$edge.length[first_old_edges_rownums], replacement_edge_length, t$edge.length[second_old_edges_rownums], new_edge_below_old_daughter_node_edge_length, new_edge_below_new_tip_edge_length)
-	
-	# it MAY be important that the node numbers be INTEGER, not NUMERIC
-	newtree$edge = matrix(as.integer(new_edge_table), ncol=2, byrow=FALSE)
-	
-	#row.names(newtree$edge) = NULL
-	#newtree$edge[,1] = as.integer(newtree$edge[,1])
-	#newtree$edge[,2] = as.integer(newtree$edge[,2])
-	
-	newtree$edge.length = new_edgelength_list
-	#row.names(newtree$edge.length) = NULL
-	
-	# update number of internal nodes
-	newtree$Nnode = t$Nnode + 1
-	
-	# add the new tip to the end of the list of tips
-	if (newtipname == "default")
-		{
-		newtipname = paste("hook", new_tip_nodenum, sep="")
-		} else {
-		newtipname = newtipname
-		}
-	newtree$tip.label = c(t$tip.label, newtipname)
-	
-	if (printflag >= 2)
-		{
-		cat("\nAdding tip: ",  newtipname, sep="")
-		}	
-	
-	# some crap to fix the tree formatting somehow
-	# I mean, really, the tree was fucking logically correct, but
-	# hanging plot and dist.nodes and probably anything
-	# using reorder(phy, "pruningwise"), but I couldn't figure out why
-	# I guess the order of the tips is important for some reason?
-	# like maybe leftmost tip is leftmost in branching?
-	# wtf kind of data architecture is this?
-	# anyway, FUCK IT, writing to Newick and reading back fixes it.
-	newtree = reorder(newtree)
-	#tmpfn = "tmp_junktree.tree"
-	#write.tree(newtree, tmpfn)
-	newtree2 = read.tree(file="", text=write.tree(newtree, file=""))
-
-	
-	#cat("\nDone adding tips.\n")
-	
-	# plot, if desired:
-	if (plottree == TRUE)
-		{
-		cat("add_hook(): plotting/printing the resulting tree...\n", sep="")
-		prt(newtree)
-		plot(newtree)
-		}
-	
-	return(newtree2)
-	} # END add_hook <- function(t, tipname, depthtime, brlen_of_side_branch=0.0000001, plottree = FALSE, printflag=0, newtipname="default")
-
-
-
-
-
-################################################################################
-# TREE MODIFICATION FUNCTIONS (e.g. adding hooks, choosing certain branches)
-################################################################################
-# newtipname="default" means new tips get "hook" and then the node number, e.g. hook414
-# newtipname="tipnames" means new tips get either 
-#    tipname_age      (for hooks on tip branches), or 
-#    hook_tipname_age (for hooks on internal branches; just one of the tips is listed)
-add_hooks <- function(tr, list_of_times_before_present, brlen_of_side_branch=0.0000001, plottree=FALSE, printflag=0, newtipnames="default")
-	{
-	# Take a list of ages, add hooks to any branch existing at that age
-
-	# OK, RE-FUCKING DO
-	# Gather a list of tip labels, and then record the distance below those tips that
-	# you would go down to attach a hook
-	hooktree = tr
-	list_of_daughter_tipnames_to_add_hooks_below = c()
-	list_of_ages_below_daughter = c()   # assumes ultrametric
-	list_of_ages_absolute = c()
-	list_of_new_tipnames = c()
-	ntips = length(hooktree$tip.label)
-	
-	# Gather the list of tip labels, distance below each one, and new tip labels
-	for (i in 1:length(list_of_times_before_present))
-		{
-		
-		# Get the edges that exist at the time_slice in question
-		time_slice = as.numeric(list_of_times_before_present[i])
-		edge_times_bp = get_edge_times_before_present(hooktree)
-		edges_that_exist_in_the_right_time = edges_existing_at_correct_time_bp_TF(time_slice, edge_times_bp)
-		
-		# get the nodes daughter to the branches that match
-		nodenums_to_add_hooks_to = hooktree$edge[,2][edges_that_exist_in_the_right_time]
-
-		if (printflag >= 1.5)
-			{
-			txt = paste0("Adding ", length(nodenums_to_add_hooks_to), " hooks for time #", i, "/", length(list_of_times_before_present), ": ", time_slice, " m.y.a.")
-			cat("\n")
-			cat(txt)
-			}
-
-
-		# calculate the times parent to these daughters at which to insert the hooks		
-		#times_before_daughter_nodes = time_slice - edge_times_bp[edges_that_exist_in_the_right_time, 2]
-		
-		# trace these nodes to their tips in the (UNALTERED ORIGINAL) tree
-# 		if (printflag >= 1.5)
-# 			{
-# 			cat("\n\tj(nodenum): ")
-# 			}
-		for (j in 1:length(nodenums_to_add_hooks_to))
-			{
-			nodenum = nodenums_to_add_hooks_to[j]
-
-			if (printflag >= 2)
-				{
-				txt = paste0(j, ":", nodenum, " ")
-				cat(txt)
-				}
-
-			
-			# If the node is a tip
-			if (nodenum <= ntips)
-				{
-				daughter_tipname_to_add_hooks_below = hooktree$tip.label[nodenum]
-				
-				edgenums = 1:nrow(edge_times_bp)
-				edgenum = edgenums[tr$edge[,2] == nodenum]
-				node_time_of_daughter = edge_times_bp[edgenum, 2]
-				
-				time_before_daughter_nodes = time_slice - node_time_of_daughter
-				
-				list_of_daughter_tipnames_to_add_hooks_below = c(list_of_daughter_tipnames_to_add_hooks_below, daughter_tipname_to_add_hooks_below)
-				list_of_ages_below_daughter = c(list_of_ages_below_daughter, time_before_daughter_nodes)
-				list_of_ages_absolute = c(list_of_ages_absolute, time_slice)
-				list_of_new_tipnames = c(list_of_new_tipnames, daughter_tipname_to_add_hooks_below)
-				} else {
-				# Get *a* tip to compare time slice to
-				temp_tipnames = get_all_daughter_tips_of_a_node(nodenum, hooktree)
-				temp_tipname = temp_tipnames[1]
-				namenums = 1:length(hooktree$tip.label)
-				temp_tipnum = namenums[hooktree$tip.label == temp_tipname]
-				list_of_daughter_tipnames_to_add_hooks_below = c(list_of_daughter_tipnames_to_add_hooks_below, hooktree$tip.label[temp_tipnum])
-				
-				#if (newtipnames == "tipnames")
-				#	{
-				hook_name_base = paste0("nodeBelow_", hooktree$tip.label[temp_tipnum])
-				list_of_new_tipnames = c(list_of_new_tipnames, hook_name_base)
-				#	list_of_daughter_tipnames_to_add_hooks_below = c(list_of_daughter_tipnames_to_add_hooks_below, hook_name_base)
-				#	} # END if (newtipnames == "tipnames")
-
-
-				#
-				edgenums = 1:nrow(edge_times_bp)
-				edgenum = edgenums[tr$edge[,2] == temp_tipnum]
-				node_time_of_daughter = edge_times_bp[edgenum, 2]
-				
-				time_before_daughter_nodes = time_slice - node_time_of_daughter
-
-				list_of_ages_below_daughter = c(list_of_ages_below_daughter, time_before_daughter_nodes)
-				list_of_ages_absolute = c(list_of_ages_absolute, time_slice)
-				} # END if (nodenum <= ntips)
-			
-			if (printflag >= 3)
-				{
-				print("print(list_of_ages_below_daughter):")
-				print(list_of_ages_below_daughter)
-				}
-			}
-		}
-		
-
-	if (printflag >= 1.5)
-		{
-		txt = paste0("\nAdding ", length(list_of_daughter_tipnames_to_add_hooks_below), " hooks to tree: ")
-		cat(txt)
-		}
-
-	
-	# Now, attach the hooks
-	for (i in 1:length(list_of_daughter_tipnames_to_add_hooks_below))
-		{
-		#print(paste("i=", i, sep=""))
-		tipname = list_of_daughter_tipnames_to_add_hooks_below[i]
-		depthtime = as.numeric(list_of_ages_below_daughter[i])
-		
-		if (printflag >= 3)
-			{
-			print("print(depthtime):")
-			print(depthtime)
-			print("print(list_of_ages_below_daughter):")
-			print(list_of_ages_below_daughter)
-			}
-
-		if (printflag >= 1.5)
-			{
-			txt = paste0(i, " ")
-			cat(txt)
-			}
-			
-		if (newtipnames == "default")
-			{
-			hooktree = add_hook(hooktree, tipname, depthtime, plottree=plottree, printflag=printflag, newtipname=newtipnames)
-			}
-		if (newtipnames == "tipnames")
-			{
-			new_name = paste0(list_of_new_tipnames[i], "_", list_of_ages_absolute[i])
-			hooktree = add_hook(hooktree, tipname, depthtime, plottree=plottree, printflag=printflag, newtipname=new_name)
-			}
-		}
-	
-	return(hooktree)
-	}
-
-
-# Needed for add_hooks
-edges_existing_at_correct_time_bp_TF <- function(time_slice, edge_times_bp, roundto=5)
-	{
-	# find the edges that exist in the right time
-	
-	# (note: round to a default of 6 digits (a single year) with roundto; this is 
-	#  important for whether or not lineages exist at time=0 before present)
-
-	# timepoint is younger or equal to the oldest end of the branch
-	edges_that_start_below_time = round(edge_times_bp[, 1], digits=roundto) > time_slice
-	
-	# timepoint is older than the youngest end of the branch	
-	edges_that_end_after_time = round(edge_times_bp[, 2], digits=roundto) <= time_slice
-	edges_that_exist_in_the_right_time = edges_that_start_below_time + edges_that_end_after_time == 2
-	return(edges_that_exist_in_the_right_time)
-	}
 
 
 

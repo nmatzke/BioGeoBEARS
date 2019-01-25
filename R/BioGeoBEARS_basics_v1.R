@@ -14,7 +14,7 @@ require("cladoRcpp")
 #######################################################
 #' axisPhylo with more flexibility in labeling
 #' 
-#' Hacking APE's axisPhylo() to make it more flexible.
+#' Hacking \code{ape}'s \code{axisPhylo()} to make it more flexible.
 #' 
 #' Note: to have ages ending at, say, 2016 (for an analysis
 #' by calendar year), just set minage to "-2016".  
@@ -27,13 +27,10 @@ require("cladoRcpp")
 #' @param ... Additional arguments to standard functions
 #' @return nothing
 #' @export
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'	 @cite FosterIdiots
 #' @examples
 #' testval=1
 #' 
@@ -97,14 +94,11 @@ axisPhylo2 <- function (side = 1, roundlabels=TRUE, minage=0, ...)
 #' @param relative_matrix A square matrix giving the relative probabilities/weights of transitions.
 #' @return \code{m} A Q matrix, i.e. normalized transition matrix (Qmat)
 #' @export
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'	 @cite FosterIdiots
-
+#'
 #' @examples
 #' testval=1
 #' 
@@ -173,7 +167,6 @@ normat <- function(relative_matrix)
 #' @return The outputs are a \code{\link[base]{list}} with a pruned tree and, optionally, a tipranges object.
 #' @export
 #' @seealso \code{\link[ape]{drop.tip}}, \code{\link{define_tipranges_object}}, 
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' testval=1
@@ -601,7 +594,6 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 #' @export
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
 #' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' testval=1
@@ -633,7 +625,6 @@ getareas_from_tipranges_object <- function(tipranges)
 #' @export
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
 #' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' testval=1
@@ -702,12 +693,9 @@ get_tiplabel_ranges <- function(tipranges, tr, sep="")
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}}, 
 #' \code{\link{areas_list_to_states_list_new}}, 
 #' \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{binary_ranges_to_letter_codes}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite Felsenstein2004
 #' @examples
 #' testval=1
@@ -1104,7 +1092,8 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 #' This is the original R version of the function which converts a list of possible areas to
 #' a list of all possible states (geographic ranges).  This gets slow for large numbers of areas.
 #' 
-#' The function is mostly replaced by \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}} in optimized code, but is still used in some places
+#' The function is mostly replaced by \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}} 
+#' in optimized code, but is still used in some places
 #' for display purposes.
 #' 
 #' @param areas a list of areas (character or number; the function converts these to numbers, starting with 0)
@@ -1115,14 +1104,10 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 #' @return \code{states_list} A list of the states.
 #' @export
 #' @seealso \code{\link{numstates_from_numareas}}, \code{\link{rcpp_areas_list_to_states_list}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/cladoRcpp_setup/cladoRcpp_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #' @examples
 #' areas = c("A","B","C")
 #' areas_list_to_states_list_new(areas=areas, maxareas=length(areas), 
@@ -1226,35 +1211,57 @@ areas_list_to_states_list_new <- function(areas=c("A","B","C"), maxareas=length(
 #######################################################
 # states_list_0based_to_ranges_txt_list
 #######################################################
-# Convert a 0-based list of range lists 
-# to a list of collapsed text for ranges
+#' Convert a 0-based list of range lists to a list of collapsed text for ranges
+#' 
+#' Converts e.g. list(c(NA), c(0), c(1), c(0,1), c(1,2)) to
+#' c("_", "A", "AB", "BC")
+#' 
+#' @param state_indices_0based An R list object, where each list
+#'        item is a range consisting of a vector of numbers, counting from 0,
+#'        representing which areas are in the range. NA means null range. 
+#'        E.g. \code{list(c(NA), c(0), c(1), c(0,1), c(1,2))}. Typically this
+#'        list is produced by \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}}.
+#' @param areanames
+#' @return ranges_list The list of collapsed text representations of ranges 
+#'                     (e.g. "ABC").
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 #' areanames = c("K", "O", "M", "H")
 #' state_indices_0based = list(c(NA), c(0), c(1), c(2), c(3), c(0,1),
 #' c(0,2), c(0,3), c(1,2), c(1,3), c(2,3), c(0,1,2), c(0,1,3), c(1,2,3),
 #' c(0,1,2,3))
 #' ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based,
 #' areanames)
-#' 
+#' ranges_list
+#'
 #' # areas = getareas_from_tipranges_object(tipranges)
 #' max_range_size = 4
 #' state_indices_0based = rcpp_areas_list_to_states_list(areas=areas, 
 #' maxareas=max_range_size, include_null_range=TRUE)
 #' ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based,
 #' areanames)
+#' ranges_list
+#'
 states_list_0based_to_ranges_txt_list <- function(state_indices_0based, areanames)
 	{
 	examples_txt='
 	areanames = c("K", "O", "M", "H")
-	state_indices_0based = list(c(NA), c(0), c(1), c(2), c(3), c(0,1), c(0,2), c(0,3), c(1,2), c(1,3), c(2,3), c(0,1,2), c(0,1,3), c(1,2,3), c(0,1,2,3))
-	ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based, areanames)
+	state_indices_0based = list(c(NA), c(0), c(1), c(2), c(3), c(0,1),
+	c(0,2), c(0,3), c(1,2), c(1,3), c(2,3), c(0,1,2), c(0,1,3), c(1,2,3),
+	c(0,1,2,3))
+	ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based,
+	areanames)
 	ranges_list
-
 	# areas = getareas_from_tipranges_object(tipranges)
 	max_range_size = 4
-	state_indices_0based = rcpp_areas_list_to_states_list(areas=areas, 	maxareas=max_range_size, include_null_range=TRUE)
-	ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based, areanames)
+	state_indices_0based = rcpp_areas_list_to_states_list(areas=areas, 
+	maxareas=max_range_size, include_null_range=TRUE)
+	ranges_list = states_list_0based_to_ranges_txt_list(state_indices_0based,
+	areanames)
 	ranges_list
-	'#END examples_txt
+	' # END examples_txt
 	
 	
 	states_list = state_indices_0based
@@ -1296,13 +1303,10 @@ states_list_0based_to_ranges_txt_list <- function(state_indices_0based, areaname
 #' @return \code{statename} The corresponding name(s), collapsed into a string
 #' @export
 #' @seealso \code{\link{binary_range_to_letter_code_list}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' tipranges_row = c(1, 0, 1, 0)
@@ -1332,12 +1336,9 @@ binary_range_to_letter_code_txt <- function(tipranges_row, areanames)
 #' @return \code{list_of_areas_in_the_state} A list of the name(s) of the areas corresponding to the presence/absence coding in the row
 #' @export
 #' @seealso \code{\link{binary_ranges_to_letter_codes}}, \code{\link{letter_string_to_binary}}, \code{\link{letter_strings_to_tipranges_df}}, \code{\link{binary_range_to_letter_code_txt}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' tipranges_row = c(1, 0, 1, 0)
@@ -1369,13 +1370,10 @@ binary_range_to_letter_code_list <- function(tipranges_row, areanames)
 #' Each state will be a list of area names.
 #' @export
 #' @seealso \code{\link{binary_range_to_letter_code_list}}, \code{\link{letter_string_to_binary}}, \code{\link{letter_strings_to_tipranges_df}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' # Define a tipranges object
@@ -1419,12 +1417,9 @@ binary_ranges_to_letter_codes <- function(tipranges, areanames)
 #' @return \code{numcodes} A list with the binary codes.
 #' @export
 #' @seealso \code{\link{binary_ranges_to_letter_codes}}, \code{\link{binary_range_to_letter_code_list}}, \code{\link{letter_strings_to_tipranges_df}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' letter_string = "ABD"
@@ -1478,7 +1473,7 @@ letter_string_to_binary <- function(letter_string, letter_codes_in_desired_order
 #' Convert ranges in the form of letters (A, AB, BFG, etc.) to a \code{tipranges} object
 #' 
 #' This function converts ranges in the form of concatenated letters (A, AB, BFG, etc.) to binary state number codes. 
-#' Via \code{\link{apply}}, this is done to each member of the entire input vector of strings.  It outputs \code{\link{tipranges}} object.
+#' Via \code{\link[base]{apply}}, this is done to each member of the entire input vector of strings.  It outputs \code{\link{tipranges}} object.
 #' 
 #' @param letter_strings A list of ranges in concatenated letter form ("A", "AB", "BFG", etc.)
 #' @param letter_codes_in_desired_order The letter codes in the desired order. The default keyword, "alphabet", uses the standard 26 capital letters;
@@ -1487,12 +1482,9 @@ letter_string_to_binary <- function(letter_string, letter_codes_in_desired_order
 #' @return \code{tipranges} An object of class \code{tipranges}.
 #' @export
 #' @seealso \code{\link{letter_string_to_binary}}, \code{\link{binary_range_to_letter_code_list}}, \code{\link{binary_ranges_to_letter_codes}},  \code{\link{getranges_from_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' letter_strings = c("A", "B", "C", "AB", "AC", "BC", "ABC")
@@ -1536,59 +1528,10 @@ letter_strings_to_tipranges_df <- function(letter_strings, letter_codes_in_desir
 	# Use function to put in well-defined object
 	tipranges = define_tipranges_object(tmpdf=binary_ranges_df)
 	
-
-	
-	
 	return(tipranges)
 	}
 
 
-#######################################################
-# allQs
-#######################################################
-#' Checks a row/vector to see if it is all question marks ("?")
-#' 
-#' Rows with geography data consisting of all "?" (i.e., no information) 
-#' are NOT allowed in standard BioGeoBEARS analysis.  Presumably any 
-#' specimen/fossil was observed somewhere, whether or not the complete 
-#' range is known.  
-#'
-#' By changing symbol_to_check, you can search for other values, e.g., all 0s.
-#' 
-#' This function is used by check_tipranges_for_allQs(). 
-#' 
-#' @rowvals The values of a row in tipranges@df
-#' @symbol_to_check The symbol to check for uniformity in the row. Default "?".
-#' @return \code{TRUE} or \code{FALSE}
-#' @export
-#' @seealso \code{\link{check_tipranges_for_allQs}}, \code{\link{getranges_from_LagrangePHYLIP}}
-#' @note Go BEARS!
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
-#'	 @cite SmithRee2010_CPPversion
-#' @examples
-#' 
-#' x = c("?", "?", "?", "?")
-#' allQs(rowvals=x, symbol_to_check="?")
-#' 
-#' x = c("0", "0", "0", "0")
-#' allQs(rowvals=x, symbol_to_check="0")
-#' 
-allQs <- function(rowvals, symbol_to_check="?")
-	{
-	TF = rowvals == symbol_to_check
-	if (sum(TF) == length(rowvals))
-		{
-		return(TRUE)
-		} else {
-		return(FALSE)
-		}
-	}
 	
 
 #######################################################
@@ -1608,14 +1551,10 @@ allQs <- function(rowvals, symbol_to_check="?")
 #' @return \code{TRUE} or \code{FALSE}
 #' @export
 #' @seealso \code{\link{allQs}}, \code{\link{getranges_from_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite SmithRee2010_CPPversion
 #' @examples
 #' 
@@ -1658,14 +1597,10 @@ check_tipranges_for_allQs <- function(tipranges, symbol_to_check="?")
 #' @return \code{tipranges_object} An object of class \code{tipranges}
 #' @export
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite SmithRee2010_CPPversion
 #' @examples
 #' testval=1
@@ -1779,14 +1714,10 @@ getranges_from_LagrangePHYLIP <- function(lgdata_fn, block_allQs=TRUE)
 #' @return \code{tipranges} An object of class \code{tipranges}
 #' @export
 #' @seealso \code{\link{tipranges_to_area_strings}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite SmithRee2010_CPPversion
 #' @examples
 #' testval=1
@@ -1839,14 +1770,10 @@ order_tipranges_by_tree_tips <- function(tipranges, tr)
 #' @return \code{tiprange_names} A vector of strings.
 #' @export
 #' @seealso \code{\link{order_tipranges_by_tree_tips}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite SmithRee2010_CPPversion
 #' @examples
 #' 
@@ -1904,12 +1831,9 @@ tipranges_to_area_strings <- function(tipranges, areaabbr=NULL)
 #' @return \code{tiparea} A string.
 #' @export
 #' @seealso \code{\link{states_list_indexes_to_areastxt}}, \code{\link{order_tipranges_by_tree_tips}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' getname(TFrow=c(FALSE, TRUE, TRUE, FALSE), 
 #' tiparea_names=c("K", "O", "M", "H"), sep="")
@@ -1935,7 +1859,7 @@ getname <- function(TFrow, tiparea_names, concat=TRUE, sep="")
 #######################################################
 #' States (ranges) lists to txt string of the areas
 #' 
-#' This is a utility function.
+#' This is a utility function for converting are
 #'
 #' @param states_list A list of states, where each state consists of a list of areas.
 #' @param areanames A list of areanamess.
@@ -1945,14 +1869,17 @@ getname <- function(TFrow, tiparea_names, concat=TRUE, sep="")
 #' @return \code{tiparea} A string.
 #' @export
 #' @seealso \code{\link{getname}}, \code{\link{order_tipranges_by_tree_tips}}, \code{\link{define_tipranges_object}}, \code{\link{save_tipranges_to_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
+#' 
+#' areas = c("K", "O", "M", "H")
+#' states2 = rcpp_areas_list_to_states_list(areas=areas)
+#' areanames = c("K", "O", "M", "H")
+#' counting_base=0
+#' states_list_indexes_to_areastxt(states_list=states2, areanames, counting_base=0)
 #' 
 states_list_indexes_to_areastxt <- function(states_list, areanames, counting_base=0, concat=TRUE, sep="")
 	{
@@ -1961,7 +1888,7 @@ states_list_indexes_to_areastxt <- function(states_list, areanames, counting_bas
 	states2 = rcpp_areas_list_to_states_list(areas=areas)
 	areanames = c("K", "O", "M", "H")
 	counting_base=0
-	states_list_indexes_to_areanames(states_list=states2, areanames, counting_base=0)
+	states_list_indexes_to_areastxt(states_list=states2, areanames, counting_base=0)
 	'
 	# Increment by 1 if your state indexes are 0-based
 	if (counting_base == 0)
@@ -2006,14 +1933,10 @@ states_list_indexes_to_areastxt <- function(states_list, areanames, counting_bas
 #' @return \code{tipranges_object} An object of class \code{tipranges}
 #' @export
 #' @seealso \code{\link{define_tipranges_object}}, \code{\link{getranges_from_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite SmithRee2010_CPPversion
 #' @examples
 #' testval=1
@@ -2108,12 +2031,9 @@ save_tipranges_to_LagrangePHYLIP <- function(tipranges_object, lgdata_fn="lagran
 #' @return \code{tmpdf} A \code{\link[base]{data.frame}} containing the data.
 #' @export
 #' @seealso \code{\link{getranges_from_LagrangePHYLIP}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -2326,12 +2246,9 @@ read_PHYLIP_data <- function(lgdata_fn, regionnames=NULL)
 #' @return \code{max_number_of_areas} The maximum number of areas 
 #' @export
 #' @seealso \code{\link[base]{apply}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' areasizes_possible_01 = c(1,1,1,0,0)
@@ -2361,12 +2278,9 @@ maxsize <- function (areasizes_possible_01)
 #' @return \code{states_list} The list of states
 #' @export
 #' @seealso \code{\link{make_dispersal_multiplier_matrix}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' states_list = default_states_list()
 #' 
@@ -2412,12 +2326,9 @@ default_states_list <- function ()
 #' @return \code{dispersal_multiplier_matrix} A square matrix, with 1s for all cells.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_de}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite FosterIdiots
 #' @examples
 #' testval=1
@@ -2517,14 +2428,10 @@ make_dispersal_multiplier_matrix <- function(areas=NULL, states_list=default_sta
 #' actual text of the formulas by which the transition probability matrix would be calculated.
 #' @export
 #' @seealso \code{\link{make_dispersal_multiplier_matrix}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite FosterIdiots
 #' @examples
 #' testval=1
@@ -2727,14 +2634,10 @@ dispersal_multiplier_matrix=make_dispersal_multiplier_matrix(states_list))
 #' @return \code{spmat_dimensions} The dimensions of the cladogenesis matrix.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_de}}, \code{\link{make_spmat_row}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
 #' spmat_dimensions = size_species_matrix(
@@ -2783,12 +2686,9 @@ size_species_matrix <- function(states_list=default_states_list(), printwarn=1)
 #' @return \code{matrix_of_combinations} A matrix of all the possible combinations.
 #' @export
 #' @seealso \code{\link[stats]{convolve}}, \code{\link{expand.grid}}, \code{\link{expand.grid.jc}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' seq1 = c("A","B","C")
@@ -2817,12 +2717,9 @@ expand.grid.alt <- function(seq1,seq2)
 #' @return \code{matrix_of_combinations} A matrix of all the possible combinations.
 #' @export
 #' @seealso \code{\link[stats]{convolve}}, \code{\link{expand.grid}}, \code{\link{expand.grid.jc}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' seq1 = c("A","B","C")
@@ -2833,7 +2730,7 @@ expand.grid.alt <- function(seq1,seq2)
 #' 
 expand.grid.jc <- function(seq1,seq2)
 	{
-    matrix_of_combinations = cbind(Var1 = rep.int(seq1, length(seq2)), Var2 = rep.int(seq2, rep.int(length(seq1),length(seq2))))
+  matrix_of_combinations = cbind(Var1 = rep.int(seq1, length(seq2)), Var2 = rep.int(seq2, rep.int(length(seq1),length(seq2))))
 	return(matrix_of_combinations)
 	}
 
@@ -2870,14 +2767,10 @@ expand.grid.jc <- function(seq1,seq2)
 #' @return \code{returncell} The text specifying the type of transition.
 #' @export
 #' @seealso \code{\link{size_species_matrix}}, \code{\link{make_relprob_matrix_bi}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
 #' 
@@ -3062,14 +2955,10 @@ make_spmat_row = function(Lstates, Rstates, ancareas_txt_tmp, splitval="", code_
 #' @return \code{probmat} A matrix of strings, where each cell contains the parameters describing the conditional probability of that ancestor-->(Left descendant,Right descendant) range inheritance scenario.
 #' @export
 #' @seealso \code{\link{size_species_matrix}}, \code{\link{make_spmat_row}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
 #' probmat = make_relprob_matrix_bi(states_list=list("_", 
@@ -3209,12 +3098,9 @@ make_relprob_matrix_bi <- function(states_list=default_states_list(), split_ABC=
 #' that ancestor-->(Left descendant,Right descendant) range inheritance scenario.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_bi}}, \code{\link{divide_probs_by_number_of_options_nums}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' probmat = make_relprob_matrix_bi()
@@ -3297,12 +3183,9 @@ divide_probs_by_number_of_options_txt <- function(probmat)
 #' that ancestor-->(Left descendant,Right descendant) range inheritance scenario.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_bi}}, \code{\link{divide_probs_by_number_of_options_txt}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' spmat = make_relprob_matrix_bi()
@@ -3411,15 +3294,11 @@ divide_probs_by_number_of_options_nums <- function(spPmat, probmat)
 #' @return \code{newmat} A new square matrix.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_bi}}, \code{\link{make_relprob_nummatrix_sp1}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
 #' \url{http://tigger.uic.edu/~eeg/code/code.html}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite Goldberg_etal_2011_GeoSSE
 #'	 @cite Goldberg_Igic_2012_ClaSSE
 #' @examples
@@ -3504,15 +3383,11 @@ make_relprob_txtmatrix_sp1 <- function(probmat, split="\\|")
 #' @return \code{newmat} A new square matrix.
 #' @export
 #' @seealso \code{\link{make_relprob_matrix_bi}}, \code{\link{make_relprob_txtmatrix_sp1}}, \code{\link{paste_rows_without_zeros}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
 #' \url{http://tigger.uic.edu/~eeg/code/code.html}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #'	 @cite Goldberg_etal_2011_GeoSSE
 #'	 @cite Goldberg_Igic_2012_ClaSSE
 #' @examples
@@ -3599,12 +3474,9 @@ make_relprob_nummatrix_sp1 <- function(probmat, spPmat, split="\\|")
 #' @return \code{outval} The numeric result of \code{\link{eval}}.
 #' @export
 #' @seealso \code{\link[stats]{convolve}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' d = 0.1
@@ -3663,12 +3535,9 @@ meval <- function(equation_txt)
 #' @return \code{tmpcol} A list containing each row, concatenated
 #' @export
 #' @seealso \code{\link{make_relprob_txtmatrix_sp1}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -3706,14 +3575,10 @@ paste_rows_without_zeros <- function(tmpmat)
 #' @export
 #' @seealso \code{\link{areas_list_to_states_list_new}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
 #' \code{\link{make_relprob_matrix_de}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
 #' states_list = list("_", c("A"), c("B"), c("C"), c("A","B"), 
@@ -3778,12 +3643,9 @@ remove_null_rowcols_from_mat <- function(tmpmat, null_sym="()")
 #' @export
 #' @seealso \code{\link{areas_list_to_states_list_new}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
 #' \code{\link{make_relprob_matrix_de}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -3866,12 +3728,9 @@ symbolic_to_P_matrix <- function(dedf, cellsplit="\\+", mergesym="+", diags_sum_
 #' @return \code{cellval} The output cell value.
 #' @export
 #' @seealso \code{\link{symbolic_to_P_matrix}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -3931,12 +3790,9 @@ symbolic_cell_to_relprob_cell <- function(charcell, cellsplit="", mergesym="*", 
 #' @export
 #' @seealso \code{\link{areas_list_to_states_list_new}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
 #' \code{\link{make_relprob_matrix_de}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite FosterIdiots
 #' @examples
 #' testval=1
@@ -4022,12 +3878,9 @@ symbolic_to_Q_matrix <- function(dedf, cellsplit="\\+", mergesym="*", d=0.1, e=0
 #' @export
 #' @seealso \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{make_relprob_matrix_de}}
 #' \code{\link{areas_list_to_states_list_new}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite FosterIdiots
 #' @examples
 #' testval=1
@@ -4125,12 +3978,9 @@ symbolic_to_Q_matrix_exper <- function(dedf, cellsplit="\\+", mergesym="*", d=0.
 #' @return \code{cellval} The output cell value.
 #' @export
 #' @seealso \code{\link{symbolic_to_relprob_matrix_sp}}, \code{\link{make_relprob_matrix_de}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -4265,14 +4115,10 @@ symbolic_cell_to_relprob_cell_sp <- function(charcell, cellsplit="\\+", mergesym
 #' @return \code{cellval} The output cell value.
 #' @export
 #' @seealso \code{\link{symbolic_cell_to_relprob_cell_sp}}, \code{\link{make_relprob_matrix_de}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{https://code.google.com/p/lagrange/}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite ReeSmith2008
 #' @examples
 #' testval=1
 #' # Generate the text version of the speciation/cladogenesis probability matrix 
@@ -4407,14 +4253,11 @@ symbolic_to_relprob_matrix_sp <- function(spmat, cellsplit="\\+", mergesym="*", 
 #' @return \code{Z}, numeric value
 #' @export
 #' @seealso \code{\link{calcP_n}}, \code{\link[FD]{maxent}}, \code{\link{symbolic_to_relprob_matrix_sp}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Harte2011
+#' \cite{Harte2011}
 #' @examples
 #' testval=1
 #' n=6
@@ -4450,14 +4293,11 @@ calcZ_part <- function(n, lambda1)
 #' @return \code{Prob_n}, numeric value of the probability of state \code{n}.
 #' @export
 #' @seealso \code{\link{calcZ_part}}, \code{\link[FD]{maxent}}, \code{\link{symbolic_to_relprob_matrix_sp}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Harte2011
+#' \cite{Harte2011}
 #' @examples
 #' testval=1
 #' n = 6
@@ -4500,13 +4340,10 @@ calcP_n = function(n, lambda1, Z)
 #' @return \code{Prob_nvals}, numeric values of the probability of each state from \code{die_vals}.
 #' @export
 #' @seealso \code{\link{calcZ_part}}, \code{\link{calcP_n}}, \code{\link[FD]{maxent}}, \code{\link{symbolic_to_relprob_matrix_sp}}, \code{\link{relative_probabilities_of_subsets}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #'	 @cite Harte2011
 #' @examples
 #' testval=1
@@ -4717,19 +4554,15 @@ get_probvals <- function(die_vals, meanval)
 #' conditional on the ancestral rangesize.
 #' @export
 #' @seealso \code{\link{symbolic_to_relprob_matrix_sp}}, \code{\link{get_probvals}}, \code{\link[FD]{maxent}}, \code{\link{calcZ_part}}, \code{\link{calcP_n}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Harte2011
-#'	 @cite ReeSmith2008
-#'	 @cite Ronquist1996_DIVA
-#'	 @cite Ronquist_1997_DIVA
-#'	 @cite Ronquist_Sanmartin_2011
-#'	 @cite Landis_Matzke_etal_2013_BayArea
+#' \cite{Harte2011}
+#' \cite{Ronquist1996_DIVA}
+#' \cite{Ronquist_1997_DIVA}
+#' \cite{Ronquist_Sanmartin_2011}
+#' \cite{Landis_Matzke_etal_2013_BayArea}
 #' @examples
 #' testval=1
 #' # Examples
@@ -4887,19 +4720,15 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 #' conditional on the ancestral rangesize.
 #' @export
 #' @seealso \code{\link{relative_probabilities_of_subsets}}, \code{\link{symbolic_to_relprob_matrix_sp}}, \code{\link{get_probvals}}, \code{\link[FD]{maxent}}, \code{\link{calcZ_part}}, \code{\link{calcP_n}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Harte2011
-#'	 @cite ReeSmith2008
-#'	 @cite Ronquist1996_DIVA
-#'	 @cite Ronquist_1997_DIVA
-#'	 @cite Ronquist_Sanmartin_2011
-#'	 @cite Landis_Matzke_etal_2013_BayArea
+#' \cite{Harte2011}
+#' \cite{Ronquist1996_DIVA}
+#' \cite{Ronquist_1997_DIVA}
+#' \cite{Ronquist_Sanmartin_2011}
+#' \cite{Landis_Matzke_etal_2013_BayArea}
 #' @examples
 #' testval=1
 #' # Examples
@@ -5029,19 +4858,15 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 #' @return \code{prob_of_this_b}, a numeric value giving the relative probability of that descendent-ancestor rangesize pair.
 #' @export
 #' @seealso \code{\link{yfunc}}, \code{\link{vfunc}}, \code{\link{relative_probabilities_of_subsets}}, \code{\link{symbolic_to_relprob_matrix_sp}}, \code{\link{get_probvals}}, \code{\link[FD]{maxent}}, \code{\link{calcZ_part}}, \code{\link{calcP_n}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Harte2011
-#'	 @cite ReeSmith2008
-#'	 @cite Ronquist1996_DIVA
-#'	 @cite Ronquist_1997_DIVA
-#'	 @cite Ronquist_Sanmartin_2011
-#'	 @cite Landis_Matzke_etal_2013_BayArea
+#' \cite{Harte2011}
+#' \cite{Ronquist1996_DIVA}
+#' \cite{Ronquist_1997_DIVA}
+#' \cite{Ronquist_Sanmartin_2011}
+#' \cite{Landis_Matzke_etal_2013_BayArea}
 #' @examples
 #' testval=1
 #' # Examples
@@ -5181,19 +5006,15 @@ sfunc <- function(charcell, relprob_subsets_matrix)
 #' @return \code{prob_of_this_s}, a numeric value giving the relative probability of that descendent-ancestor rangesize pair.
 #' @export
 #' @seealso \code{\link{sfunc}}, \code{\link{vfunc}}, \code{\link{relative_probabilities_of_subsets}}, \code{\link{symbolic_to_relprob_matrix_sp}}, \code{\link{get_probvals}}, \code{\link[FD]{maxent}}, \code{\link{calcZ_part}}, \code{\link{calcP_n}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Harte2011
-#'	 @cite ReeSmith2008
-#'	 @cite Ronquist1996_DIVA
-#'	 @cite Ronquist_1997_DIVA
-#'	 @cite Ronquist_Sanmartin_2011
-#'	 @cite Landis_Matzke_etal_2013_BayArea
+#' \cite{Harte2011}
+#' \cite{Ronquist1996_DIVA}
+#' \cite{Ronquist_1997_DIVA}
+#' \cite{Ronquist_Sanmartin_2011}
+#' \cite{Landis_Matzke_etal_2013_BayArea}
 #' @examples
 #' testval=1
 #' # Examples
@@ -5361,19 +5182,15 @@ yfunc <- function(charcell, relprob_subsets_matrix)
 #' @return \code{prob_of_this_v}, a numeric value giving the relative probability of that descendent-ancestor rangesize pair.
 #' @export
 #' @seealso \code{\link{sfunc}}, \code{\link{vfunc}}, \code{\link{relative_probabilities_of_subsets}}, \code{\link{symbolic_to_relprob_matrix_sp}}, \code{\link{get_probvals}}, \code{\link[FD]{maxent}}, \code{\link{calcZ_part}}, \code{\link{calcP_n}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
 #' \url{http://en.wikipedia.org/wiki/Maximum_entropy_probability_distribution}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
-#'	 @cite Harte2011
-#'	 @cite ReeSmith2008
-#'	 @cite Ronquist1996_DIVA
-#'	 @cite Ronquist_1997_DIVA
-#'	 @cite Ronquist_Sanmartin_2011
-#'	 @cite Landis_Matzke_etal_2013_BayArea
+#' \cite{Harte2011}
+#' \cite{Ronquist1996_DIVA}
+#' \cite{Ronquist_1997_DIVA}
+#' \cite{Ronquist_Sanmartin_2011}
+#' \cite{Landis_Matzke_etal_2013_BayArea}
 #' @examples
 #' testval=1
 #' # Examples
@@ -5514,12 +5331,9 @@ vfunc <- function(charcell, relprob_vicar_matrix)
 #' @return \code{mat} The revised matrix
 #' @export
 #' @seealso \code{\link{remove_null_rowcols_from_mat}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' mat = matrix(c("-",1,1,1,"-",1,1,1,"-"), nrow=3)
@@ -5555,12 +5369,9 @@ nullsym_to_NA <- function(mat, nullsym="-")
 #' @return \code{tmprow3} A row holding the \code{\link[stats]{optim}} results, which can then be added to a table with \code{\link[base]{rbind}}.
 #' @export
 #' @seealso \code{\link[stats]{optim}}
-#' @note Go BEARS!
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' # Any optim() for a biogeography scenario would take too long to run for R CMD check.
@@ -5617,14 +5428,59 @@ process_optim <- function(optim_results, max_num_params=NULL)
 #######################################################
 # Scale BioGeoBEARS params table
 #######################################################
+#' Scale a BioGeoBEARS parameters table
+#'
+#' Rescales a BioGeoBEARS parameters table (in the example script,
+#' found at \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table})
+#' so that the min and max of each free parameter are \code{add_smin} and \code{add_smax}, 
+#' typically 0 and 1.
+#'
+#' This may be useful to avoid scaling warnings when certain optimization functions
+#' (e.g. optimx) complain about different free parameters having different numeric ranges.
+#' Theoretically, if parameters have radically different ranges, the optimizer may have 
+#' more difficulty correctly finding the actual optimum. However, I have yet to find
+#' a clear case of this. Nonetheless, the rescaling procedure (and un-rescaling for 
+#' screen display during each iteration of the optimization, and for calculating 
+#' ancestral range probabilities at the end) is simple & fast, so 
+#' users are free to experiment with it.
+#'
+#' @param orig_params_table The original, user-specified parameters table, e.g. 
+#'        from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table}
+#' @param add_smin The "substitute minimum" to add.
+#' @param add_smax The "substitute maximum" to add.
+#' @return params_table A revised parameters table, with these columns replacing
+#'         the default min/max columns: smin, smax, orig_min, orig_max
+#' @export
+#' @seealso \code{\link{unscale_BGB_params}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' orig_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
+#' add_smin=0
+#' add_smax=1
+#' scaled_params_table = scale_BGB_params(
+#' orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table)
+#' scaled_params_table
+#' unscaled_params_table = unscale_BGB_params(scaled_params_table)
+#' unscaled_params_table
+#' 
+#' unscaled_params_table$min == orig_params_table$min
+#' unscaled_params_table$max == orig_params_table$max
+#' unscaled_params_table$init == orig_params_table$init
+#' unscaled_params_table$est == orig_params_table$est
+#' 
+#'
 scale_BGB_params <- function(orig_params_table, add_smin=0, add_smax=1)
 	{
 	defaults='
 	orig_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
 	add_smin=0
 	add_smax=1
-	scaled_params_table = scale_BGB_params(orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table)
+	scaled_params_table = scale_BGB_params(
+	orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table, 
+	add_smin=add_smin, add_smax=add_smax)
 	scaled_params_table
+	
 	unscaled_params_table = unscale_BGB_params(scaled_params_table)
 	unscaled_params_table
 	
@@ -5685,14 +5541,62 @@ scale_BGB_params <- function(orig_params_table, add_smin=0, add_smax=1)
 	}
 
 
+
+
+#######################################################
+# Unscale a rescaled BioGeoBEARS params table
+#######################################################
+#' Unscale a rescaled BioGeoBEARS parameters table
+#'
+#' Un-rescales a BioGeoBEARS parameters table (in the example script,
+#' found at \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table})
+#' so that the min and max of each free parameter are no longer 
+#' \code{add_smin} and \code{add_smax} (typically 0 and 1), but instead the 
+#' original min and max originally specified by the user.
+#'
+#' Rescaling may be useful to avoid scaling warnings when certain optimization functions
+#' (e.g. optimx) complain about different free parameters having different numeric ranges.
+#' Theoretically, if parameters have radically different ranges, the optimizer may have 
+#' more difficulty correctly finding the actual optimum. However, I have yet to find
+#' a clear case of this. Nonetheless, the rescaling procedure (and un-rescaling for 
+#' screen display during each iteration of the optimization, and for calculating 
+#' ancestral range probabilities at the end) is simple & fast, so 
+#' users are free to experiment with it.
+#'
+#' @param scaled_params_table The rescaled version of the user-specified parameters 
+#'        table, e.g. from 
+#'        \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table}
+#' @return params_table A revised parameters table, the original, nonscaled parameters.
+#' @export
+#' @seealso \code{\link{scale_BGB_params}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' orig_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
+#' add_smin=0
+#' add_smax=1
+#' scaled_params_table = scale_BGB_params(
+#' orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table)
+#' scaled_params_table
+#' unscaled_params_table = unscale_BGB_params(scaled_params_table)
+#' unscaled_params_table
+#' 
+#' unscaled_params_table$min == orig_params_table$min
+#' unscaled_params_table$max == orig_params_table$max
+#' unscaled_params_table$init == orig_params_table$init
+#' unscaled_params_table$est == orig_params_table$est
+#' 
 unscale_BGB_params <- function(scaled_params_table)
 	{
 	defaults='
 	orig_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
 	add_smin=0
 	add_smax=1
-	scaled_params_table = scale_BGB_params(orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table)
+	scaled_params_table = scale_BGB_params(
+	orig_params_table=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table, 
+	add_smin=add_smin, add_smax=add_smax)
 	scaled_params_table
+	
 	unscaled_params_table = unscale_BGB_params(scaled_params_table)
 	unscaled_params_table
 	
@@ -5826,6 +5730,38 @@ unscale_BGB_params <- function(scaled_params_table)
 #' }
 order_tipranges_by_tr <- function(tipranges, tr)
 	{
+	ex='
+	# Load hard-coded tree and tipranges object:
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	plot(tr)
+
+	tipranges = new("tipranges", .Data = numeric(0), df = structure(list(A = c("1", 
+	"0", "0"), B = c("1", "0", "0"), C = c("0", "1", "1")), class = "data.frame", row.names = c("gorilla", 
+	"chimp", "human")))
+	tipranges
+
+	# An object of class "tipranges" (from the global environment)
+	# numeric(0)
+	# Slot "df":
+	#         A B C
+	# gorilla 1 1 0
+	# chimp   0 0 1
+	# human   0 0 1
+
+	tipranges_reorderd = order_tipranges_by_tr(tipranges, tr)
+	tipranges_reorderd
+
+	# An object of class "tipranges" (from the global environment)
+	# numeric(0)
+	# Slot "df":
+	#         A B C
+	# human   0 0 1
+	# chimp   0 0 1
+	# gorilla 1 1 0
+
+	tr$tip.label
+	'
+	
 	tipranges_names = rownames(tipranges@df)
 	tr_names = tr$tip.label
 	

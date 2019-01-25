@@ -4690,6 +4690,55 @@ compare_two_name_lists <- function(names1, names2, listdesc1="file1", listdesc2=
 
 
 
+#######################################################
+# allQs
+#######################################################
+#' Checks a row/vector to see if it is all question marks ("?")
+#' 
+#' Rows with geography data consisting of all "?" (i.e., no information) 
+#' are NOT allowed in standard BioGeoBEARS analysis.  Presumably any 
+#' specimen/fossil was observed somewhere, whether or not the complete 
+#' range is known.  
+#'
+#' By changing symbol_to_check, you can search for other values, e.g., all 0s.
+#' 
+#' This function is used by check_tipranges_for_allQs(). 
+#' 
+#' @rowvals The values of a row in tipranges@df
+#' @symbol_to_check The symbol to check for uniformity in the row. Default "?".
+#' @return \code{TRUE} or \code{FALSE}
+#' @export
+#' @seealso \code{\link{check_tipranges_for_allQs}}, \code{\link{getranges_from_LagrangePHYLIP}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' \url{https://code.google.com/p/lagrange/}
+#'	 @cite SmithRee2010_CPPversion
+#' @examples
+#' 
+#' x = c("?", "?", "?", "?")
+#' allQs(rowvals=x, symbol_to_check="?")
+#' 
+#' x = c("0", "0", "0", "0")
+#' allQs(rowvals=x, symbol_to_check="0")
+#' 
+allQs <- function(rowvals, symbol_to_check="?")
+	{
+	ex='
+	x = c("?", "?", "?", "?")
+	allQs(rowvals=x, symbol_to_check="?")
+
+	x = c("0", "0", "0", "0")
+	allQs(rowvals=x, symbol_to_check="0")
+	'
+	TF = rowvals == symbol_to_check
+	if (sum(TF) == length(rowvals))
+		{
+		return(TRUE)
+		} else {
+		return(FALSE)
+		}
+	}
 
 
 
