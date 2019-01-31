@@ -463,7 +463,8 @@ BioGeoBEARS_model_defaults <- function(minval_anagenesis=1e-12, minval_cladogene
 #' they are forced to sum to some value (default 4).  This ensures that they are
 #' identifiable (otherwise, j,v,y,s=1 and j,v,y,s=2 would be the same model).
 #' 
-#' @param params_table The \code{params_table} from a \code{BioGeoBEARS_model_object}.
+#' @param params_table The \code{params_table} from a \code{BioGeoBEARS_model_object}, e.g. 
+#' from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table}
 #' @param sumval Default=1.
 #' @param plotwhat Default "est", use "init" to get the initial starting values instead.
 #' @return \code{wts} Return the per-event weights
@@ -720,7 +721,8 @@ define_BioGeoBEARS_model_object <- function(minval_anagenesis=1e-12, minval_clad
 #' This function returns the initial values of the (free) parameters from
 #' a \code{BioGeoBEARS_model_object}.
 #' 
-#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
 #' @return \code{params} parameter vector
 #' @export
 #' @seealso \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}
@@ -764,7 +766,8 @@ BioGeoBEARS_model_object_to_init_params <- function(BioGeoBEARS_model_object)
 #' This function returns the estimated values of the (free) parameters from
 #' a \code{BioGeoBEARS_model_object}.
 #' 
-#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
 #' @return \code{params} parameter vector
 #' @export
 #' @seealso \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}
@@ -808,7 +811,8 @@ BioGeoBEARS_model_object_to_est_params <- function(BioGeoBEARS_model_object)
 #' This function returns the lower limits of the (free) parameters from
 #' a \code{BioGeoBEARS_model_object}.
 #' 
-#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
 #' @return \code{params} parameter vector
 #' @export
 #' @seealso \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}
@@ -850,7 +854,8 @@ BioGeoBEARS_model_object_to_params_lower <- function(BioGeoBEARS_model_object)
 #' This function returns the upper limits of the (free) parameters from
 #' a \code{BioGeoBEARS_model_object}.
 #' 
-#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
 #' @return \code{params} parameter vector
 #' @export
 #' @seealso \code{\link[BioGeoBEARS]{define_BioGeoBEARS_model_object}}
@@ -894,7 +899,8 @@ BioGeoBEARS_model_object_to_params_upper <- function(BioGeoBEARS_model_object)
 #' and inputs them, in order, into the free parameters specified
 #' in the \code{BioGeoBEARS_model_object@params_table}.
 #' 
-#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
 #' @param params parameter vector
 #' @param initTF If \code{TRUE} (default), update the "init" (initial values) column with these parameters.
 #' @param estTF If \code{TRUE} (default), update the "est" (estimates) column with these parameters.
@@ -1101,7 +1107,7 @@ get_params_from_optimx2012 <- function(optimx_result)
 #' the \code{\link[optimx]{optimx}} function for 
 #' Maximum Likelihood optimization (2013 and later).
 #'
-#' This is necessary, because, annoyingly, \code{optim}, \code{optimx} from pre-2013,
+#' This is necessary because, annoyingly, \code{optim}, \code{optimx} from pre-2013,
 #' \code{optimx} from post-2013, and \code{GenSA}, all return their
 #' parameter estimates in slightly different objects.
 #'
@@ -1121,10 +1127,14 @@ get_params_from_optimx2013 <- function(optimx_result)
 	}
 
 
-#' Get the number of free parameters from an optimx 2013 search
+#' Get the number of free parameters in an ML search result
 #'
 #' Utility function for \code{get_params_from_optimx2013}, which figures
 #' out the number of free parameters in the results object.
+#'
+#' This is necessary because, annoyingly, \code{optim}, \code{optimx} from pre-2013,
+#' \code{optimx} from post-2013, and \code{GenSA}, all return their
+#' parameter estimates in slightly different objects.
 #'
 #' @param optimx_result The result produced by \code{\link[optimx]{optimx}}()
 #' @return nparams The number of free parameters
@@ -1152,25 +1162,21 @@ nparams_from_optimx2013 <- function(optimx_result)
 # Put optim or optimx result into a BioGeoBEARS_model_object
 #######################################################
 
-update_BioGeoBEARS_model_object_w_optimx_result <- function(BioGeoBEARS_model_object, optimx_result, use_optimx=TRUE)
-	{
-	# Get the params from ML search to	
-	# set the dispersal and extinction rate (and j, etc)
-	# in the BioGeoBEARS_model_object
-	# (includes updating linked params)
-	
-	# Get ML params from each of the types of optim/optimx result:
-	params_from_ML = get_params_from_optim_or_optimx_result(optimx_result, use_optimx=use_optimx)
-	
-	
-	# Update the model object and linked parameters
-	BioGeoBEARS_model_object = params_into_BioGeoBEARS_model_object(BioGeoBEARS_model_object, params=params_from_ML)
-	BioGeoBEARS_model_object = calc_linked_params_BioGeoBEARS_model_object(BioGeoBEARS_model_object)
-	
-	return(BioGeoBEARS_model_object)
-	}
-
-
+#' Get the parameter estimate from a optim, optimx, or GenSA result
+#'
+#' This function runs the appropriate \code{get_} function to 
+#' extract the parameter inferences from ML searches with
+#' \code{optim}, \code{optimx}, or \code{GenSA}.
+#'
+#' @param optimx_result The result object returned by \code{optim}, 
+#' \code{optimx}, or \code{GenSA}
+#' @param use_optimx If \code{TRUE} (default) or \code{"optimx"}, use \code{\link[optimx]{optimx}} rather than \code{\link[stats]{optim}}. 
+#' If \code{FALSE} or \code{"optim"}, use \code{\link[stats]{optim}}. If \code{"GenSA"}, use \code{\link[GenSA]{GenSA}}.
+#' @return params_from_ML A vector of parameters from the ML search
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_params_from_optim_or_optimx_result <- function(optimx_result, use_optimx=TRUE)
 	{
 	# Get the params from ML search to	
@@ -1212,12 +1218,73 @@ get_params_from_optim_or_optimx_result <- function(optimx_result, use_optimx=TRU
 
 
 
+#######################################################
+# Put optim or optimx result into a BioGeoBEARS_model_object
+#######################################################
+
+#' Put the parameter estimate from a optim, optimx, or GenSA result into a BioGeoBEARS_model_object
+#'
+#' Updates the current estimates (column \code{est}) in a \code{BioGeoBEARS_model_object@params_table},
+#' with the parameter inferences from ML searches with
+#' \code{optim}, \code{optimx}, or \code{GenSA}.
+#'
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
+#' @param optimx_result The result object returned by \code{optim}, 
+#' \code{optimx}, or \code{GenSA}
+#' @param use_optimx If \code{TRUE} (default) or \code{"optimx"}, use \code{\link[optimx]{optimx}} rather than \code{\link[stats]{optim}}. 
+#' If \code{FALSE} or \code{"optim"}, use \code{\link[stats]{optim}}. If \code{"GenSA"}, use \code{\link[GenSA]{GenSA}}.
+#' @return BioGeoBEARS_model_object A BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+update_BioGeoBEARS_model_object_w_optimx_result <- function(BioGeoBEARS_model_object, optimx_result, use_optimx=TRUE)
+	{
+	# Get the params from ML search to	
+	# set the dispersal and extinction rate (and j, etc)
+	# in the BioGeoBEARS_model_object
+	# (includes updating linked params)
+	
+	# Get ML params from each of the types of optim/optimx result:
+	params_from_ML = get_params_from_optim_or_optimx_result(optimx_result, use_optimx=use_optimx)
+	
+	
+	# Update the model object and linked parameters
+	BioGeoBEARS_model_object = params_into_BioGeoBEARS_model_object(BioGeoBEARS_model_object, params=params_from_ML)
+	BioGeoBEARS_model_object = calc_linked_params_BioGeoBEARS_model_object(BioGeoBEARS_model_object)
+	
+	return(BioGeoBEARS_model_object)
+	}
 
 
-#' The function is called when, in bears_optim_run, skip_optim_option=="return_all".
+
+
+
+
+#' Put the initial parameters into the optim_results format
+#'
+#' If you wish to calculate the data likelihood under a certain set of pre-specified
+#' parameters, those initial parameters (in the init column of a \code{BioGeoBEARS_model_object@params_table},
+#' need to be input into a results object from \code{optim}, \code{optimx}, or \code{GenSA}. This function
+#' constructs the necessary object. 
+#'
+#' The function is called when, in bears_optim_run, skip_optim_option=="return_all". 
+#' The function converts the 'init' parameters into the optim_results format, for 
+#' further use in \code{bears_optim_run}.
 #' 
-#' The function converts the 'init' parameters into the optim_results format, for further use in bears_optim_run
-#' 
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
+#' @param total_loglikelihood The total_loglikelihood (one of the parts of an ML search result)
+#' @param use_optimx If \code{TRUE} (default) or \code{"optimx"}, use \code{\link[optimx]{optimx}} rather than \code{\link[stats]{optim}}. 
+#' If \code{FALSE} or \code{"optim"}, use \code{\link[stats]{optim}}. If \code{"GenSA"}, use \code{\link[GenSA]{GenSA}}.
+#' @return BioGeoBEARS_model_object A BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 put_params_into_optim_or_optimx_result <- function(BioGeoBEARS_model_object, total_loglikelihood, use_optimx)
 	{
 
@@ -1316,21 +1383,52 @@ put_params_into_optim_or_optimx_result <- function(BioGeoBEARS_model_object, tot
 
 
 
-# Get the parameter results from an optim search
+# 
+#' Get the log-likelihood from an optim search
+#'
+#' Extracts the log-likelihood value from an ML search with \code{\link[stats]{optim}}.
+#'
+#' @param optimx_result The result from an \code{\link[stats]{optim}} search
+#' @return LnL The log-likelihood
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_LnL_from_optim <- function(optimx_result)
 	{
 	LnL = as.numeric(optimx_result$value)
 	return(LnL)
 	}
 
-# Get the parameter results from a GenSA search
+# Get the log-likelihood from a GenSA search
+#' Get the log-likelihood from a GenSA search
+#'
+#' Extracts the log-likelihood value from an ML search with \code{\link[GenSA]{GenSA}}.
+#'
+#' @param optim_result The result from an \code{\link[GenSA]{GenSA}} search
+#' @return LnL The log-likelihood
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_LnL_from_GenSA <- function(optimx_result)
 	{
 	LnL = -1 * as.numeric(optimx_result$value)
 	return(LnL)
 	}
 
-# Get the parameter results from an optimx 2012 search
+# Get the log-likelihood result from an optimx pre-2012 search
+
+#' Get the log-likelihood from an optimx pre-2012 search
+#'
+#' Extracts the log-likelihood value from an ML search with the pre-2013 \code{\link[optimx]{optimx}}.
+#'
+#' @param optimx_result The result from an \code{\link[optimx]{optimx}} search
+#' @return LnL The log-likelihood
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_LnL_from_optimx2012 <- function(optimx_result)
 	{
 	LnL = as.numeric(optimx_result$fvalues)
@@ -1338,12 +1436,38 @@ get_LnL_from_optimx2012 <- function(optimx_result)
 	}
 
 # Get the parameter results from an optimx 2013 search
+#' Get the log-likelihood from an optimx post-2013 search
+#'
+#' Extracts the log-likelihood value from an ML search with the post-2013 \code{\link[optimx]{optimx}}.
+#'
+#' @param optimx_result The result from an \code{\link[optimx]{optimx}} search
+#' @return LnL The log-likelihood
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_LnL_from_optimx2013 <- function(optimx_result)
 	{
 	LnL = as.numeric(optimx_result$value)
 	return(LnL)
 	}
 
+
+#' Get the log-likelihood from a optim, optimx, or GenSA result
+#'
+#' This function runs the appropriate \code{get_LnL_} function to 
+#' extract the log-likelihood from ML searches with
+#' \code{optim}, \code{optimx}, or \code{GenSA}.
+#'
+#' @param optimx_result The result object returned by \code{optim}, 
+#' \code{optimx}, or \code{GenSA}
+#' @param use_optimx If \code{TRUE} (default) or \code{"optimx"}, use \code{\link[optimx]{optimx}} rather than \code{\link[stats]{optim}}. 
+#' If \code{FALSE} or \code{"optim"}, use \code{\link[stats]{optim}}. If \code{"GenSA"}, use \code{\link[GenSA]{GenSA}}.
+#' @return LnL The log-likelihood
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_LnL_from_optim_result <- function(optimx_result, use_optimx=TRUE)
 	{
 	# Optimx
@@ -1373,11 +1497,24 @@ get_LnL_from_optim_result <- function(optimx_result, use_optimx=TRUE)
 		LnL = get_LnL_from_GenSA(optimx_result)
 		} # end optim vs. optimx
 
-
 	return(LnL)
 	}
 
-
+#' Get the log-likelihood from a BioGeoBEARS_results_object
+#'
+#' This function takes a \code{BioGeoBEARS_results_object}, and runs 
+#' the appropriate \code{get_LnL_} function to 
+#' extract the log-likelihood from the embededded ML searche result with
+#' \code{optim}, \code{optimx}, or \code{GenSA}.
+#'
+#' @param res A \code{BioGeoBEARS_results_object} (typically \code{res}, \code{resDEC}, \code{resDECj}, etc.)
+#' @param use_optimx If \code{TRUE} (default) or \code{"optimx"}, use \code{\link[optimx]{optimx}} rather than \code{\link[stats]{optim}}. 
+#' If \code{FALSE} or \code{"optim"}, use \code{\link[stats]{optim}}. If \code{"GenSA"}, use \code{\link[GenSA]{GenSA}}.
+#' @return LnL The log-likelihood
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 get_LnL_from_BioGeoBEARS_results_object <- function(res)
 	{
 	BioGeoBEARS_run_object = res$inputs
@@ -1401,7 +1538,8 @@ get_LnL_from_BioGeoBEARS_results_object <- function(res)
 #'
 #' \code{params_table$type} is typically stored in: \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@@params_table}.
 #' 
-#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
 #' @param update_init If \code{TRUE}, put the estimates into the initial values in the \code{params_table}.
 #' Default: \code{FALSE}.
 #' @return \code{BioGeoBEARS_model_object} Updated version of the BioGeoBEARS_model
@@ -1545,7 +1683,8 @@ calc_linked_params_BioGeoBEARS_model_object <- function(BioGeoBEARS_model_object
 #' a cluster, specify the cluster here.  E.g. \code{cluster_already_open = makeCluster(rep("localhost",num_cores_to_use), type = "SOCK")}.  Note: this will work on 
 #' most platforms, including Macs running R from command line, but will NOT work on Macs running the R GUI \code{R.app}, because parallel processing functions like
 #' \code{MakeCluster} from e.g. \code{library(parallel)} for some reason crash R.app.  The program runs a check for R.app and will just run on 1 node if found. 
-#' @param use_optimx If TRUE, use \code{optimx} rather that \code{optim}.
+#' @param use_optimx If \code{TRUE} (default) or \code{"optimx"}, use \code{\link[optimx]{optimx}} rather than \code{\link[stats]{optim}}. 
+#' If \code{FALSE} or \code{"optim"}, use \code{\link[stats]{optim}}. If \code{"GenSA"}, use \code{\link[GenSA]{GenSA}}.
 #' @param rescale_params If FALSE (default), parameters are used as-is. If TRUE, they are re-scaled, 
 #' with the observed min (the min of "init", "est", and "min") in BioGeoBEARS_model_object@params_table 
 #' re-set to zero, and the observed max (the max of "init", "est", and "max") set to 1. See functions
@@ -1649,26 +1788,26 @@ define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGe
 #######################################################
 # BioGeoBEARS_run
 #######################################################
-#' An object of class BioGeoBEARS_run holding the model inputs
-#'
-#'
-#'@section Slots: 
-#'  \describe{
-#'    \item{\code{list}:}{List of class \code{"list"}, containing inputs list from define_BioGeoBEARS_run}
-#'  }
-#'
-#' @note Go BEARS!
-#' @name BioGeoBEARS_run 
-#' @rdname BioGeoBEARS_run-class
-#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
-#' @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}},
-#' \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{areas_list_to_states_list_new}},
-#' \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
-#' @references
-#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @examples
-#' test=1
-#'
+# An object of class BioGeoBEARS_run holding the model inputs
+#
+#
+#@section Slots: 
+#  \describe{
+#    \item{\code{list}:}{List of class \code{"list"}, containing inputs list from define_BioGeoBEARS_run}
+#  }
+#
+# @note Go BEARS!
+# @name BioGeoBEARS_run 
+# @rdname BioGeoBEARS_run-class
+# @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+# @seealso \code{\link{define_tipranges_object}}, \code{\link{getareas_from_tipranges_object}},
+# \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{areas_list_to_states_list_new}},
+# \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
+# @references
+# \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+# @examples
+# test=1
+#
 # setClass(Class="BioGeoBEARS_run", representation=representation(inputs="list"), prototype=define_BioGeoBEARS_run())
 
 # setClass(Class="BioGeoBEARS_run", contains="list", slots=list(abbr = "character", 
@@ -2169,8 +2308,13 @@ read_envdistances_fn <- function(inputs=NULL, envdistsfn=NULL)
 #######################################################
 #' Read in the area areas by time
 #' 
-#' area_areas file is just a list of distance matrices, separated by blank lines,
-#' from youngest to oldest.
+#' area_areas file is just a list of vectors of areas, separated by blank lines,
+#' from youngest to oldest. (e.g., like a distances file, but with
+#' only 2 lines per time period: (1) the area labels, (2) the areas of each area.
+#'
+#' The area-of-areas functionality was included for experimental purposes, but
+#' given the unreliability of estimating <i>e</i> in DEC-type models, it is 
+#' probably of dubious utility.
 #' 
 #' @param inputs The inputs list
 #' @param area_of_areas_fn The area-of-areas filename.
@@ -2284,6 +2428,9 @@ read_area_of_areas_fn <- function(inputs=NULL, area_of_areas_fn=NULL)
 #' Technically, we could specify areas-allowed with just a single row, rather than a 
 #' matrix, but it will be kept as a matrix for back-compatibility (just make sure the 
 #' matrix is symmetric about the diagonal).
+#'
+#' Except for simple cases, a better way to specify different areas allowed is to
+#' use a manual modification of the states_list; see instructions on PhyloWiki.
 #' 
 #' @param inputs The inputs list
 #' @param areas_allowed_fn The areas-allowed filename.
@@ -2400,6 +2547,10 @@ read_areas_allowed_fn <- function(inputs=NULL, areas_allowed_fn=NULL)
 #' constraint that users might want to put on the list of possible ranges/states. Users
 #' can always edit the states_list manually or with a function before analysis.
 #' 
+#' The areas_adjacency matrix strategy can only encode very simple cases; for more complex cases, 
+#' users should manually specify the states_list in each time stratum, excluding
+#' area combinations they think are impossible. See PhyloWiki for instructions.
+#'
 #' @param inputs The inputs list
 #' @param areas_adjacency_fn The areas-adjacency filename.
 #' @return \code{list_of_areas_adjacency_mats} A list object
@@ -3983,8 +4134,33 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE, allow_null_ra
 
 
 
-
-
+#' Ensure all parameters are inside the min/max limits
+#'
+#' This function checks for, and fixes, cases where the user has
+#' input parameter values that are outside of the minimum/maximum
+#' units.
+#'
+#' The function checks the \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table},
+#' comparing the \code{init} (initial values) and \code{est} (estimates) columns against the
+#' columns \code{min} and \code{max}. Any parameters below the min are reset to the min, any
+#' above the max are reset to the max.
+#'
+#' The function can take a \code{BioGeoBEARS_run_object}, \code{BioGeoBEARS_model_object}, 
+#' or \code{params_table}. The first non-NULL input in that ordering is used to 
+#' generate the output.
+#'
+#' @param BioGeoBEARS_run_object The inputs list (typically a BioGeoBEARS_run_object), 
+#' derived from e.g. \code{define_BioGeoBEARS_run()}.
+#' @param BioGeoBEARS_model_object The BioGeoBEARS_model object, of class 
+#' \code{BioGeoBEARS_model}. E.g. from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}
+#' @param params_table The \code{params_table} from a \code{BioGeoBEARS_model_object}, e.g. 
+#' from \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table}
+#' @return \code{BioGeoBEARS_run_object}, \code{BioGeoBEARS_model_object}, or \code{params_table}, depending
+#' on the first non-\code{NULL} input.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 fix_BioGeoBEARS_params_minmax <- function(BioGeoBEARS_run_object=NULL, BioGeoBEARS_model_object=NULL, params_table=NULL)
 	{
 	defaults='
@@ -4126,7 +4302,6 @@ fix_BioGeoBEARS_params_minmax <- function(BioGeoBEARS_run_object=NULL, BioGeoBEA
 #'    \item{\code{df}:}{Data.frame of class \code{"numeric"}, containing data from df}
 #'  }
 #'
-#' @note Go BEARS!
 #' @name tipranges 
 #' @rdname tipranges-class
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
