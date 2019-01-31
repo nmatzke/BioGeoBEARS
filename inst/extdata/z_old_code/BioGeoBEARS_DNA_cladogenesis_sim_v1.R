@@ -1,5 +1,13 @@
 
 
+#######################################################
+# This code set up a simple simulation/inference 
+# experiment with a cladogenetic model for DNA bases,
+# to prove to a stubborn reviewer that there was 
+# nothing particularly bizarre or impossible about
+# inferring the parameters of cladogenetic models.
+#######################################################
+
 
 # Set up the tip conditional likelihoods for DNA
 tip_simstate_nums_to_tip_condlikes_of_data_on_each_state <- function(simulated_states_by_node, numtips, numstates=NULL)

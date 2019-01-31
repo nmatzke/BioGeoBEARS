@@ -2719,8 +2719,8 @@ get_distribution_of_range_sizes_in_tipranges <- function(dtf, max_range_size, in
 	
 	return(res)
 	}
-	res$numareas_per_state = numareas_per_state
-	res$numstates_per_numareas = numstates_per_numareas
+#	res$numareas_per_state = numareas_per_state
+#	res$numstates_per_numareas = numstates_per_numareas
 
 
 #' Get the size distribution of range sizes in a states_list
