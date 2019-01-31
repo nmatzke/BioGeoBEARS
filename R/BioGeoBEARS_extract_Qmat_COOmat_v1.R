@@ -3,8 +3,101 @@
 
 # Get the dmat(s) and times (if stratified) from a 
 # BioGeoBEARS_results_object "res"
-get_dmat_times_from_res <- function(res, numstates=NULL)
+
+#' Get the dmats and times (if stratified) from a BioGeoBEARS results object
+#'
+#' The \code{dmat} is the final set of area-to-area multipliers, produced
+#' by multiplying the various modifiers to the base dispersal 
+#' rate (from the distances matrix, manual multipliers matrix,
+#' etc.).
+#' 
+#' This function returns the final \code{dmat} from a BioGeoBEARS
+#' results object (typically named \code{res}, \code{resDEC}, 
+#' or some such). The returned \code{dmat} contingent on the 
+#' run inputs in \code{res$inputs}, and the parameter estimates in
+#' the \code{BioGeoBEARS_model_object} in \code{res$outputs}.
+#'
+#' In a time-stratified setup, a \code{dmat} for each time stratum is
+#' returned.
+#'
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param numstates The number of states. If \code{NULL}, will be calculated 
+#'                  the inputs in res (but this might miss e.g. manual
+#'                  modifications to the states_list).
+#' @param max_range_size The maximum allowed number of areas per range.
+#'                       if \code{NULL}, will be taken from 
+#'                       \code{res$inputs$max_range_size},
+#'                       so one of these must be specified.
+#' @return dmat_times, a list containing (1) \code{dmat_times$dmat},
+#' the \code{dmat}(s), and (2) if time-stratified, \code{dmat_times$times},
+#' the list of time-bin borders.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' # Set up a fake results object
+#' res = NULL
+#' res$inputs = define_BioGeoBEARS_run()
+#' res$outputs = res$inputs$BioGeoBEARS_model_object
+#' res
+#' 
+#' \dontrun{
+#' # Produces stop error
+#' get_dmat_times_from_res(res, numstates=NULL, max_range_size=NULL)
+#' }
+#' 
+#' # Works:
+#' # Get the dmat (trivial case, non-stratified Psychotria example)
+#' get_dmat_times_from_res(res, numstates=NULL, max_range_size=4)
+#' 
+#' # Also works:
+#' res$inputs$max_range_size = 4
+#' get_dmat_times_from_res(res, numstates=NULL, max_range_size=NULL)
+#' 
+get_dmat_times_from_res <- function(res, numstates=NULL, max_range_size=NULL)
 	{
+	setup='
+	# Set up a fake results object
+	res = NULL
+	res$inputs = define_BioGeoBEARS_run()
+	res$outputs = res$inputs$BioGeoBEARS_model_object
+	res
+	
+	# Produces stop error
+	get_dmat_times_from_res(res, numstates=NULL, max_range_size=NULL)
+	
+	# Works:
+	# Get the dmat (trivial case, non-stratified Psychotria example)
+	get_dmat_times_from_res(res, numstates=NULL, max_range_size=4)
+	
+	# Also works:
+	res$inputs$max_range_size = 4
+	get_dmat_times_from_res(res, numstates=NULL, max_range_size=NULL)
+	'
+	
+	# Error check
+	if (isblank_TF(res$inputs$max_range_size) == FALSE)
+		{
+		max_range_size = res$inputs$max_range_size
+		} else {
+		if (isblank_TF(max_range_size) == FALSE)
+			{
+			res$inputs$max_range_size = max_range_size
+			}
+		}
+		
+	# You need either numstates or max_range_size for downstream functions
+	if (is.null(max_range_size))
+		{
+		txt = "STOP ERROR in get_dmat_times_from_res(): either max_range_size or res$inputs$max_range_size must be specified."
+		cat("\n\n")
+		cat(txt)
+		stop(txt)
+		cat("\n\n")
+		}
+	
 	#######################################################
 	# Load the model object
 	#######################################################
@@ -19,9 +112,87 @@ get_dmat_times_from_res <- function(res, numstates=NULL)
 	}
 
 
-# Get the dmat(s) and times (if stratified) from a BioGeoBEARS_run_object
-get_dmat_times_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL)
+#' Get the dmat(s) and times (if stratified) from a BioGeoBEARS_run_object
+#' 
+#' The \code{dmat} is the final set of area-to-area multipliers, produced
+#' by multiplying the various modifiers to the base dispersal 
+#' rate (from the distances matrix, manual multipliers matrix,
+#' etc.).
+#' 
+#' This function returns the final \code{dmat} from a \code{BioGeoBEARS_run_object}
+#' The returned \code{dmat} contingent on the 
+#' run inputs the parameter estimates in
+#' the \code{BioGeoBEARS_model_object} (usually in 
+#' \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}.
+#'
+#' In a time-stratified setup, a \code{dmat} for each time stratum is
+#' returned.
+#'
+#' @param BioGeoBEARS_run_object A \code{BioGeoBEARS_run_object} e.g. from 
+#' \code{\link{define_BioGeoBEARS_run}}()
+#' @param BioGeoBEARS_model_object A \code{BioGeoBEARS_model_object} e.g. from 
+#' \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}()
+#' @param numstates The number of states. If \code{NULL}, will be calculated 
+#'                  the inputs in res (but this might miss e.g. manual
+#'                  modifications to the states_list).
+#' @param max_range_size The maximum allowed number of areas per range.
+#'                       if \code{NULL}, will be taken from 
+#'                       \code{BioGeoBEARS_run_object$max_range_size},
+#'                       so one of these must be specified.
+#' @return dmat_times, a list containing (1) \code{dmat_times$dmat},
+#' the \code{dmat}(s), and (2) if time-stratified, \code{dmat_times$times},
+#' the list of time-bin borders.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' # Set up a BioGeoBEARS_run_object
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' 
+#' # Produces stop error
+#' get_dmat_times_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=NULL)
+#' 
+#' # Works:
+#' # Get the dmat (trivial case, non-stratified Psychotria example)
+#' get_dmat_times_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, numstates=NULL, max_range_size=4)
+#' 
+get_dmat_times_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=NULL)
 	{
+	setup='
+	# Set up a BioGeoBEARS_run_object
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+
+	# Produces stop error
+	get_dmat_times_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=NULL)
+	
+	# Works:
+	# Get the dmat (trivial case, non-stratified Psychotria example)
+	get_dmat_times_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, numstates=NULL, max_range_size=4)
+	'
+	
+	# Error check
+	if (isblank_TF(BioGeoBEARS_run_object$max_range_size) == FALSE)
+		{
+		max_range_size = BioGeoBEARS_run_object$max_range_size
+		} else {
+		if (isblank_TF(max_range_size) == FALSE)
+			{
+			BioGeoBEARS_run_object$max_range_size = max_range_size
+			}
+		}
+		
+	# You need either numstates or max_range_size for downstream functions
+	if (is.null(max_range_size))
+		{
+		txt = "STOP ERROR in get_dmat_times_from_BioGeoBEARS_run_object(): either max_range_size or BioGeoBEARS_run_object$max_range_size must be specified."
+		cat("\n\n")
+		cat(txt)
+		stop(txt)
+		cat("\n\n")
+		}
+
+
+
 	# Setup
 	include_null_range = BioGeoBEARS_run_object$include_null_range
 	
@@ -76,8 +247,102 @@ get_dmat_times_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, B
 
 # Get the Q matrix and cladogenesis mode from the
 # BioGeoBEARS_results_object "res"
-get_Qmat_COOmat_from_res <- function(res, numstates=NULL, include_null_range=TRUE, timeperiod_i=1)
+
+#' Get the Q matrix and cladogenesis matrix from a BioGeoBEARS_results_object
+#'
+#' Returns the Q matrix, and the cladogenesis matrix (in COO-like format), from
+#' a \code{BioGeoBEARS_results_object}, as well as other key items for a 
+#' BioGeoBEARS likelihood calculation.
+#'
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param numstates The number of states. If \code{NULL}, will be calculated 
+#'                  the inputs in res (but this might miss e.g. manual
+#'                  modifications to the states_list).
+#' @param include_null_range Should the null range be included in the 
+#'        state space? Default is \code{TRUE}.
+#' @param max_range_size The maximum allowed range size. If \code{NULL}, taken from
+#'                       \code{res$inputs$max_range_size}. (One must be specified.)
+#' @param timeperiod_i Which time stratum do you want the Qmat for? Default is 1 (the most
+#'                     recent timeperiod).
+#' @return returned_mats A list of key internal objects for a BioGeoBEARS likelihood calculation, 
+#'         namely: \code{states_list}, \code{spPmat_inputs}, \code{areas_list}, \code{dmat}, \code{Qmat}, 
+#'         \code{COO_weights_columnar}, \code{Rsp_rowsums}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' # Set up a fake results object
+#' res = NULL
+#' res$inputs = define_BioGeoBEARS_run()
+#' res$outputs = res$inputs$BioGeoBEARS_model_object
+#' res
+#' 
+#' \dontrun{
+#' # Produces stop error
+#' get_Qmat_COOmat_from_res(res, numstates=NULL, include_null_range=TRUE, max_range_size=NULL)
+#' }
+#' 
+#' # Works:
+#' # Get the matrices (trivial case, non-stratified Psychotria example)
+#' returned_mats = get_Qmat_COOmat_from_res(res, numstates=NULL, max_range_size=4)
+#' returned_mats
+#' names(returned_mats)
+#' 
+#' # Also works:
+#' res$inputs$max_range_size = 4
+#' returned_mats = get_Qmat_COOmat_from_res(res, numstates=NULL, max_range_size=NULL)
+#' returned_mats
+#' names(returned_mats)
+#' 
+get_Qmat_COOmat_from_res <- function(res, numstates=NULL, include_null_range=TRUE, max_range_size=NULL, timeperiod_i=1)
 	{
+	setup='
+	# Set up a fake results object
+	res = NULL
+	res$inputs = define_BioGeoBEARS_run()
+	res$outputs = res$inputs$BioGeoBEARS_model_object
+	res
+	
+	# Produces stop error
+	get_Qmat_COOmat_from_res(res, numstates=NULL, include_null_range=TRUE, max_range_size=NULL)
+	
+	# Works:
+	# Get the matrices (trivial case, non-stratified Psychotria example)
+	returned_mats = get_Qmat_COOmat_from_res(res, numstates=NULL, max_range_size=4)
+	returned_mats
+	names(returned_mats)
+	
+	# Also works:
+	res$inputs$max_range_size = 4
+	returned_mats = get_Qmat_COOmat_from_res(res, numstates=NULL, max_range_size=NULL)
+	returned_mats
+	names(returned_mats)
+	'
+
+	# Error check
+	if (isblank_TF(res$inputs$max_range_size) == FALSE)
+		{
+		max_range_size = res$inputs$max_range_size
+		} else {
+		if (isblank_TF(max_range_size) == FALSE)
+			{
+			res$inputs$max_range_size = max_range_size
+			}
+		}
+		
+	# You need either numstates or max_range_size for downstream functions
+	if (is.null(max_range_size))
+		{
+		txt = "STOP ERROR in get_Qmat_COOmat_from_res(): either max_range_size or res$inputs$max_range_size must be specified."
+		cat("\n\n")
+		cat(txt)
+		stop(txt)
+		cat("\n\n")
+		}
+
+
 	#######################################################
 	# Load the model object
 	#######################################################
@@ -92,15 +357,106 @@ get_Qmat_COOmat_from_res <- function(res, numstates=NULL, include_null_range=TRU
 	}
 
 
-# Get the Q matrix and cladogenesis mode from the
+# Get the Q matrix and cladogenesis matrix from the
 # BioGeoBEARS_run_object
-get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, include_null_range=TRUE, timeperiod_i=1)
+
+
+
+#' Get the Q matrix and cladogenesis matrix from a BioGeoBEARS_run_object
+#'
+#' Returns the Q matrix, and the cladogenesis matrix (in COO-like format), from
+#' a \code{BioGeoBEARS_run_object}, as well as other key items for a 
+#' BioGeoBEARS likelihood calculation.
+#'
+#' @param BioGeoBEARS_run_object A \code{BioGeoBEARS_run_object} e.g. from 
+#' \code{\link{define_BioGeoBEARS_run}}()
+#' @param BioGeoBEARS_model_object A \code{BioGeoBEARS_model_object} e.g. from 
+#' \code{BioGeoBEARS_run_object$BioGeoBEARS_model_object}()
+#' @param numstates The number of states. If \code{NULL}, will be calculated 
+#'                  the inputs in res (but this might miss e.g. manual
+#'                  modifications to the states_list).
+#' @param max_range_size The maximum allowed number of areas per range.
+#'                       if \code{NULL}, will be taken from 
+#'                       \code{BioGeoBEARS_run_object$max_range_size},
+#'                       so one of these must be specified.
+#' @param include_null_range Should the null range be included in the 
+#'        state space? Default is \code{TRUE}.
+#' @param timeperiod_i Which time stratum do you want the Qmat for? Default is 1 (the most
+#'                     recent timeperiod).
+#' @return returned_mats A list of key internal objects for a BioGeoBEARS likelihood calculation, 
+#'         namely: \code{states_list}, \code{spPmat_inputs}, \code{areas_list}, \code{dmat}, \code{Qmat}, 
+#'         \code{COO_weights_columnar}, \code{Rsp_rowsums}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' # Set up a BioGeoBEARS_run_object
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' 
+#' # Produces stop error
+#' get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, include_null_range=TRUE, max_range_size=NULL)
+#' 
+#' # Works:
+#' # Get the matrices (trivial case, non-stratified Psychotria example)
+#' returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=4)
+#' returned_mats
+#' names(returned_mats)
+#' 
+#' # Also works:
+#' BioGeoBEARS_run_object$max_range_size = 4
+#' returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=NULL)
+#' returned_mats
+#' names(returned_mats)
+#' 
+get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=NULL, include_null_range=TRUE, timeperiod_i=1)
 	{
+	setup='
+	# Set up a BioGeoBEARS_run_object
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+	
+	# Produces stop error
+	get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, include_null_range=TRUE, max_range_size=NULL)
+	
+	# Works:
+	# Get the matrices (trivial case, non-stratified Psychotria example)
+	returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=4)
+	returned_mats
+	names(returned_mats)
+	
+	# Also works:
+	BioGeoBEARS_run_object$max_range_size = 4
+	returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, max_range_size=NULL)
+	returned_mats
+	names(returned_mats)
+	'
+
 	#######################################################
 	# Load the model object
 	#######################################################
 	# These are the inputs for a run
 	inputs = BioGeoBEARS_run_object
+
+	# Error check
+	if (isblank_TF(inputs$max_range_size) == FALSE)
+		{
+		max_range_size = inputs$max_range_size
+		} else {
+		if (isblank_TF(max_range_size) == FALSE)
+			{
+			inputs$max_range_size = max_range_size
+			}
+		}
+		
+	# You need either numstates or max_range_size for downstream functions
+	if (is.null(max_range_size))
+		{
+		txt = "STOP ERROR in get_Qmat_COOmat_from_BioGeoBEARS_run_object(): either max_range_size or BioGeoBEARS_run_object$max_range_size must be specified."
+		cat("\n\n")
+		cat(txt)
+		stop(txt)
+		cat("\n\n")
+		}
+
 	
 	# IF the user specifies a set of model parameters from the 
 	# output, DON'T take the model parameters from the input
@@ -520,10 +876,53 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 
 
 
-
+#' Get spPmat_inputs from a BioGeoBEARS_run_object
+#'
+#' The \code{spPmat_inputs} is an internal object containing the
+#' key parameters and inputs for calculating a cladogenesis
+#' transition probabilities matrix in BioGeoBEARS.
+#'
+#' (spPmat = "speciation Pmat")
+#'
+#' @param BioGeoBEARS_run_object The inputs list (typically a BioGeoBEARS_run_object), 
+#' derived from e.g. \code{define_BioGeoBEARS_run()}.
+#' @param states_list_0based A list of states, where each
+#' list item is a vector of 0-based area numbers.
+#' @param dispersal_multipliers_matrix, a \code{dmat}. A \code{dmat} 
+#' is the final set of area-to-area multipliers, produced
+#' by multiplying the various modifiers to the base dispersal 
+#' rate (from the distances matrix, manual multipliers matrix,
+#' etc.).
+#' @return spPmat_inputs, a list of the inputs necessary for the cladogenesis
+#'         matrix calculation. Includes \code{dmat}, \code{l} (the 0-based states_list, 
+#'         without
+#'         the null range), \code{s}, \code{v}, \code{j}, \code{y}, and the 
+#'         \code{maxent01_params} for those 4 
+#'         parameters.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+#' areas = c("K", "O", "M", "H")
+#' max_range_size = length(areas)
+#' include_null_range = TRUE
+#' dispersal_multipliers_matrix = matrix(data=1, nrow=4, ncol=4)
+#' 
+#' states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=include_null_range)
+#' spPmat_inputs = get_spPmat_inputs_from_BGB(BioGeoBEARS_run_object=BioGeoBEARS_run_object, states_list=states_list, dispersal_multipliers_matrix=dispersal_multipliers_matrix)
+#' spPmat_inputs
+#' 
 get_spPmat_inputs_from_BGB <- function(BioGeoBEARS_run_object, states_list, dispersal_multipliers_matrix)
 	{
 	defaults='
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+	areas = c("K", "O", "M", "H")
+	max_range_size = length(areas)
+	include_null_range = TRUE
+	dispersal_multipliers_matrix = matrix(data=1, nrow=4, ncol=4)
+	
+	states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=include_null_range)
 	spPmat_inputs = get_spPmat_inputs_from_BGB(BioGeoBEARS_run_object=BioGeoBEARS_run_object, states_list=states_list, dispersal_multipliers_matrix=dispersal_multipliers_matrix)
 	spPmat_inputs
 	'
