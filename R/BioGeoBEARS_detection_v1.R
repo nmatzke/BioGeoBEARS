@@ -8,7 +8,81 @@
 #require("rexpokit")
 #require("cladoRcpp")
 
+
+
+
+
+
+
+# Get tipranges from a detection counts matrix
+# Get tipranges from a detection counts matrix
+
+#' Read a table of detection counts into a tipranges_object
+#'
+#' Reads a table of detection counts into a \code{tipranges_object}, coding any
+#' nonzero counts as present (1), and any zero counts as absent (0).
+#'
+#' The function can read the table either from a \code{BioGeoBEARS_run_object$detects_df}
+#' item, or from an input detections \code{data.frame} \code{detects_df} directly.
+#'
+#' @param BioGeoBEARS_run_object The inputs list (typically a BioGeoBEARS_run_object), 
+#' derived from e.g. \code{define_BioGeoBEARS_run()}. If used, needs to have a
+#' \code{BioGeoBEARS_run_object$detects_df} available.
+#' @param detects_df A \code{data.frame} for the counts of detections of OTUs of 
+#'        interest. This can be read from a text file with 
+#'        \code{\link{read_detections}}. The format of the text file is
+#'        similar to a geography file, but with counts instead of tab-delimited columns
+#'        instead of the collapsed 00110 format. See PhyloWiki.
+#' @return tipranges A \code{tipranges_object} with counts per taxon.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+get_tipranges_from_detects_df <- function(BioGeoBEARS_run_object=NULL, detects_df=NULL)
+	{
+	# Inputs check
+	if (is.null(BioGeoBEARS_run_object$detects_df))
+		{
+		if (is.null(detects_df))
+			{
+			stoptxt = "STOP ERROR in get_tipranges_from_detects_df(): either BioGeoBEARS_run_object$detects_df or detects_df must be non-null!"
+			cat("\n\n")
+			cat(stoptxt)
+			cat("\n\n")
+			stop(stoptxt)
+			} # END if (is.null(detects_df))
+		} else {
+		detects_df = BioGeoBEARS_run_object$detects_df
+		} # END if (is.null(BioGeoBEARS_run_object$detects_df))
+
+	tmp_blah = as.matrix(detects_df)
+	tmp_blah[isblank_TF(tmp_blah)] = 0
+	tmp_blah[tmp_blah > 0] = 1
+	tmp_input = adf2(tmp_blah)
+	tipranges_object = define_tipranges_object(tmpdf=tmp_input)
+	tipranges_object@df = adf2(tipranges_object@df)
+	rownames(tipranges_object@df) = rownames(tmp_blah)
+	tipranges = tipranges_object
+	return(tipranges)
+	} # END get_tipranges_from_detects_df <- function(BioGeoBEARS_run_object=NULL, detects_df=NULL)
+
+
+
 # Get geographic ranges at tips, from the detections file rather than a geog file
+
+#' Read a file of detection counts into a tipranges_object
+#'
+#' Reads a file of detection counts into a \code{tipranges_object}, coding any
+#' nonzero counts as present (1), and any zero counts as absent (0).
+#'
+#' @param detects_fn Filename for the counts of detections of OTUs of interest. This is 
+#'        similar to a geography file, but with counts instead of tab-delimited columns
+#'        instead of the collapsed 00110 format. See PhyloWiki.
+#' @return tipranges A \code{tipranges_object} with counts per taxon.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 tipranges_from_detects_fn <- function(detects_fn)
 	{
 	if (is.character(detects_fn))
@@ -33,6 +107,23 @@ tipranges_from_detects_fn <- function(detects_fn)
 	} # END tipranges_from_detects_fn <- function(detects_fn)
 
 
+#' Read a file of detection counts from a BioGeoBEARS_run_object into a tipranges_object
+#'
+#' Reads a file of detection counts from from a BioGeoBEARS_run_object into 
+#' a \code{tipranges_object}, coding any
+#' nonzero counts as present (1), and any zero counts as absent (0).
+#'
+#' @param BioGeoBEARS_run_object The inputs list (typically a \code{BioGeoBEARS_run_object}), 
+#' derived from e.g. \code{define_BioGeoBEARS_run()}. Here, a 
+#' \code{BioGeoBEARS_run_object$detects_fn} is needed, specifying the filename
+#'  for the counts of detections of OTUs of interest. This is 
+#'        similar to a geography file, but with counts instead of tab-delimited columns
+#'        instead of the collapsed 00110 format. See PhyloWiki.
+#' @return tipranges A \code{tipranges_object} with counts per taxon.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 tipranges_from_BGB_run_object <- function(BioGeoBEARS_run_object)
 	{
 	# Get geographic ranges at tips
@@ -48,6 +139,33 @@ tipranges_from_BGB_run_object <- function(BioGeoBEARS_run_object)
 	} # END tipranges_from_BGB_run_object <- function(BioGeoBEARS_run_object)
 
 
+
+#' Calculate geographic ancestral state probabilities from a traits+geography analysis
+#'
+#' This function takes the ancestral state probabilities from a traits+geography analysis
+#' and returns just the ancestral state probabilities of the geographic states.
+#' 
+#' In a trait-dependent dispersal model, the state space consists of all of the 
+#' geographic states, combined with all of the trait states. For example, if there 
+#' are 4 geographic areas, there are 16 possible geographic ranges (geographic states),
+#' and if there are 2 trait states, then there are a total of 16x2=32 trait+geography
+#' combined states.
+#' 
+#' The geography-only ancestral ststate probabilities can be calculated by 
+#' summing the trait+geography state probabilities across each trait state. The 
+#' trait-only ancestral state probabilities can be calculated by 
+#' summing the trait+geography state probabilities across each geographic range/state.
+#'
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param num_trait_states The number of trait states. Default: 2.
+#' @return newres, a new results object with ancestral state probabilities for just 
+#' the geographic ranges/states
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 geog_ancstates_from_both <- function(res, num_trait_states=2)
 	{
 	newres = res
@@ -76,7 +194,32 @@ geog_ancstates_from_both <- function(res, num_trait_states=2)
 	} # END geog_ancstates_from_both <- function(res, num_trait_states=2)
 
 
-
+#' Calculate trait ancestral state probabilities from a traits+geography analysis
+#'
+#' This function takes the ancestral state probabilities from a traits+geography analysis
+#' and returns just the ancestral state probabilities of the trait states.
+#' 
+#' In a trait-dependent dispersal model, the state space consists of all of the 
+#' geographic states, combined with all of the trait states. For example, if there 
+#' are 4 geographic areas, there are 16 possible geographic ranges (geographic states),
+#' and if there are 2 trait states, then there are a total of 16x2=32 trait+geography
+#' combined states.
+#' 
+#' The geography-only ancestral ststate probabilities can be calculated by 
+#' summing the trait+geography state probabilities across each trait state. The 
+#' trait-only ancestral state probabilities can be calculated by 
+#' summing the trait+geography state probabilities across each geographic range/state.
+#'
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param num_trait_states The number of trait states. Default: 2.
+#' @return newres, a new results object with ancestral state probabilities for just 
+#' the geographic ranges/states
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 trait_ancstates_from_both <- function(res, num_trait_states=2)
 	{
 	newres = res
@@ -116,38 +259,7 @@ trait_ancstates_from_both <- function(res, num_trait_states=2)
 
 
 
-# Get tipranges from a detection counts matrix
-get_tipranges_from_detects_df <- function(BioGeoBEARS_run_object=NULL, detects_df=NULL)
-	{
-	# Inputs check
-	if (is.null(BioGeoBEARS_run_object$detects_df))
-		{
-		if (is.null(detects_df))
-			{
-			stoptxt = "STOP ERROR in get_tipranges_from_detects_df(): either BioGeoBEARS_run_object$detects_df or detects_df must be non-null!"
-			cat("\n\n")
-			cat(stoptxt)
-			cat("\n\n")
-			stop(stoptxt)
-			} # END if (is.null(detects_df))
-		} else {
-		detects_df = BioGeoBEARS_run_object$detects_df
-		} # END if (is.null(BioGeoBEARS_run_object$detects_df))
 
-	tmp_blah = as.matrix(detects_df)
-	tmp_blah[isblank_TF(tmp_blah)] = 0
-	tmp_blah[tmp_blah > 0] = 1
-	tmp_input = adf2(tmp_blah)
-	tipranges_object = define_tipranges_object(tmpdf=tmp_input)
-	tipranges_object@df = adf2(tipranges_object@df)
-	rownames(tipranges_object@df) = rownames(tmp_blah)
-	tipranges = tipranges_object
-	return(tipranges)
-	} # END get_tipranges_from_detects_df <- function(BioGeoBEARS_run_object=NULL, detects_df=NULL)
-
-
-# Qmat contains the d & e probs
-# COO_probs_columnar contains the simulation probs
 #######################################################
 # read_detections
 #######################################################
@@ -2428,15 +2540,73 @@ post_prob_states_matrix <- function(prob_of_each_range, tip_condlikes_of_data_on
 
 
 
-
-
-# Get the size distribution of range sizes
-# from tipranges
-#'  put in 1s for null_range (0 areas), and unobserved sizes; 
-#' copy value above for intermediate range sizes
+#' Get the size distribution of range sizes from tipranges
 #'
+#' This function gets the size distribution of range sizes
+#' from a tipranges \code{data.frame}, e.g. from \code{tipranges@df}.
+#' 
+#' Some range sizes will be unobserved. If include_null_range=TRUE, the 
+#' function will put in 1s for null_range (0 areas). Other unobserved sizes
+#' will copy the count value above for intermediate range sizes, or will 
+#' get a count of 1 for range sizes with no larger observed range sizes.
 #'
-#' dtf A data.frame, e.g. from tipranges@df
+#' This function can be used to set up a rough prior on
+#' range sizes, in cases where the frequency of different range
+#' sizes in the state space is substantially different from the
+#' observed distribution of range sizes. (This is very frequently
+#' the case, and can cause a major bias towards inferring
+#' widespread tips and ancestors in imperfect detection models.)
+#' 
+#' @param dtf A data.frame, e.g. from tipranges@df
+#' @param max_range_size The maximum allowed range size.
+#' @param include_null_range Should the null range be included in the 
+#'        state space? Default is \code{TRUE}.
+#' @return res, a list object containing \code{res$observed_range_sizes}, 
+#' the observed counts in each allowed range size (the result of 
+#' \code{table(rowSums(dfnums_to_numeric(dtf)))}); and \code{res$new_weighting_by_range_size}
+#' the modified list of counts by range size, modified as described above.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' living_tipranges = structure(list(N = c("0", "0", "0", "0", "1", "1", "0", "1", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "1", "1", "1", "0", "0", "1", "1", "1", "1", "0", "0", "0", 
+#' "0", "0", "0"), S = c("1", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "1", "1", "0", "1", "1", "0", "0", "0", "1", "1", "1", "1", 
+#' "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0"), R = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "1", "0", "0", "0", "1", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "1", "1", "1", "0", "0", "1", "0", "0", "0", 
+#' "0", "0", "0"), E = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "1", "0", "0", "1", "0", "0", "0", 
+#' "1", "0", "1"), M = c("0", "0", "0", "1", "0", "0", "1", "0", 
+#' "1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0", 
+#' "1", "0", "1"), F = c("0", "1", "1", "1", "0", "0", "1", "0", 
+#' "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", 
+#' "0", "1", "0"), I = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "1", "1", "0", "0", "0", "1", "0", "0", "1", 
+#' "1", "0", "1")), row.names = c("Atelocynus_microtis", "Lupulella_adustus", 
+#' "Canis_anthus", "Canis_aureus", "Canis_latrans", "Canis_lupus", 
+#' "Lupulella_mesomelas", "Canis_rufus", "Canis_simensis", "Cerdocyon_thous", 
+#' "Chrysocyon_brachyurus", "Cuon_alpinus", "Dusicyon_australis", 
+#' "Lycalopex_fulvipes", "Lycaon_pictus", "Nyctereutes_procyonoides", 
+#' "Otocyon_megalotis", "Lycalopex_culpaeus", "Lycalopex_griseus", 
+#' "Lycalopex_gymnocercus", "Lycalopex_sechurae", "Pseudalopex_vetulus", 
+#' "Speothos_venaticus", "Urocyon_cinereoargenteus", "Urocyon_littoralis", 
+#' "Vulpes_corsac", "Vulpes_ferrilata", "Vulpes_lagopus", "Vulpes_macrotis", 
+#' "Vulpes_velox", "Vulpes_vulpes", "Vulpes_zerda", "Vulpes_pallida", 
+#' "Vulpes_bengalensis", "Vulpes_cana", "Vulpes_chama", "Vulpes_rueppellii"
+#' ), class = "data.frame")
+#' dtf = living_tipranges
+#' max_range_size = 7
+#' include_null_range=TRUE
+#' get_distribution_of_range_sizes_in_tipranges(dtf=living_tipranges, max_range_size=max_range_size, include_null_range=TRUE)
+#' 
 get_distribution_of_range_sizes_in_tipranges <- function(dtf, max_range_size, include_null_range=TRUE)
 	{
 	junk='
@@ -2549,9 +2719,76 @@ get_distribution_of_range_sizes_in_tipranges <- function(dtf, max_range_size, in
 	
 	return(res)
 	}
+	res$numareas_per_state = numareas_per_state
+	res$numstates_per_numareas = numstates_per_numareas
 
 
-
+#' Get the size distribution of range sizes in a states_list
+#'
+#' This function gets the size distribution of range sizes
+#' from a \code{states_list}, e.g. from 
+#' \code{\link[cladoRcpp]{rcpp_areas_list_to_states_list}}.
+#' 
+#' This function can be used to help set up a rough prior on
+#' range sizes, in cases where the frequency of different range
+#' sizes in the state space is substantially different from the
+#' observed distribution of range sizes. (This is very frequently
+#' the case, and can cause a major bias towards inferring
+#' widespread tips and ancestors in imperfect detection models.)
+#' 
+#' @param states_list_0based A list of states, where each
+#' list item is a vector of 0-based area numbers.
+#' @return res, a list object containing (2) \code{res$numareas_per_state}, 
+#' the number of areas (the range size) of each state/range; and 
+#' (2) \code{res$numstates_per_numareas}, the observed counts in 
+#' each range size in the states_list
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' living_tipranges = structure(list(N = c("0", "0", "0", "0", "1", "1", "0", "1", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "1", "1", "1", "0", "0", "1", "1", "1", "1", "0", "0", "0", 
+#' "0", "0", "0"), S = c("1", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "1", "1", "0", "1", "1", "0", "0", "0", "1", "1", "1", "1", 
+#' "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0"), R = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "1", "0", "0", "0", "1", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "1", "1", "1", "0", "0", "1", "0", "0", "0", 
+#' "0", "0", "0"), E = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "1", "0", "0", "1", "0", "0", "0", 
+#' "1", "0", "1"), M = c("0", "0", "0", "1", "0", "0", "1", "0", 
+#' "1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0", 
+#' "1", "0", "1"), F = c("0", "1", "1", "1", "0", "0", "1", "0", 
+#' "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", 
+#' "0", "1", "0"), I = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "1", "1", "0", "0", "0", "1", "0", "0", "1", 
+#' "1", "0", "1")), row.names = c("Atelocynus_microtis", "Lupulella_adustus", 
+#' "Canis_anthus", "Canis_aureus", "Canis_latrans", "Canis_lupus", 
+#' "Lupulella_mesomelas", "Canis_rufus", "Canis_simensis", "Cerdocyon_thous", 
+#' "Chrysocyon_brachyurus", "Cuon_alpinus", "Dusicyon_australis", 
+#' "Lycalopex_fulvipes", "Lycaon_pictus", "Nyctereutes_procyonoides", 
+#' "Otocyon_megalotis", "Lycalopex_culpaeus", "Lycalopex_griseus", 
+#' "Lycalopex_gymnocercus", "Lycalopex_sechurae", "Pseudalopex_vetulus", 
+#' "Speothos_venaticus", "Urocyon_cinereoargenteus", "Urocyon_littoralis", 
+#' "Vulpes_corsac", "Vulpes_ferrilata", "Vulpes_lagopus", "Vulpes_macrotis", 
+#' "Vulpes_velox", "Vulpes_vulpes", "Vulpes_zerda", "Vulpes_pallida", 
+#' "Vulpes_bengalensis", "Vulpes_cana", "Vulpes_chama", "Vulpes_rueppellii"
+#' ), class = "data.frame")
+#' dtf = living_tipranges
+#' max_range_size = 7
+#' include_null_range=TRUE
+#' #areas = getareas_from_tipranges_object(tipranges)
+#' areas = names(dtf)
+#' states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+#' tmpres = get_distribution_of_range_sizes_in_states_list(states_list_0based)
+#' tmpres
+#' names(tmpres)
+#' 
 get_distribution_of_range_sizes_in_states_list <- function(states_list_0based)
 	{
 	junk='
@@ -2594,6 +2831,9 @@ get_distribution_of_range_sizes_in_states_list <- function(states_list_0based)
 	#areas = getareas_from_tipranges_object(tipranges)
 	areas = names(dtf)
 	states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+	tmpres = get_distribution_of_range_sizes_in_states_list(states_list_0based)
+	tmpres
+	names(tmpres)
 	'
 	
 	numareas_per_state = sapply(X=states_list_0based, FUN=length)
@@ -2624,7 +2864,96 @@ get_distribution_of_range_sizes_in_states_list <- function(states_list_0based)
 	} # END get_distribution_of_range_sizes_in_states_list <- function(states_list_0based)
 
 
-
+#' Calculate a prior based on the distribution of range sizes
+#'
+#' This function sets up a rough prior on
+#' range sizes, for use in cases where the frequency of different range
+#' sizes in the state space is substantially different from the
+#' observed distribution of range sizes. This is very frequently
+#' the case, and can cause a major bias towards inferring
+#' widespread tips and ancestors in imperfect detection models. This 
+#' prior should correct that bias.
+#' 
+#' To demonstrate how this works:
+#' 
+#' new_weighting_by_range_size: \cr
+#'
+#' range_size:                      0  1  2  3  4  5  6  7  \cr
+#' observed_range_size:             1 23  9  3  2  2  1  1  \cr
+#' num_allowed_ranges_of_this_size: 1  7 21 ............ 1
+#' 
+#' This suggests that the tip likelihoods, for tips with uncertain ranges, should be 
+#' multiplied by this prior:
+#' 
+#' default: 1/numranges for all tips, total=1
+#' 
+#' Based on the observed range size counts, the weight or prior on each range: 
+#' 
+#' 0: 1  range possible, so it gets prior prob. 1/43, divided among the 1 ranges \cr
+#' 1: 7  ranges possible, so they get prior prob. 23/43, divided among the 7 ranges \cr
+#' 2: 21 ranges possible, so they get prior prob. 9/43, divided among the 21 ranges \cr
+#' ...etc... \cr
+#' 
+#' @param observed_rangesizes_dtf A \code{data.frame} with counts
+#' of observed range sizes, e.g. from res$new_weighting_by_range_size
+#' returned by \code{\link{get_distribution_of_range_sizes_in_tipranges}}.
+#' @param max_range_size The maximum allowed range size.
+#' @param include_null_range Should the null range be included in the 
+#'        state space? Default is \code{TRUE}.
+#' @param states_list_0based A list of states, where each
+#' list item is a vector of 0-based area numbers.
+#' @return prior_by_range_size_of_each_state, a vector giving the prior
+#' probability of each range size, assuming that the range sizes
+#' are distributed roughly like \code{observed_rangesizes_dtf}. The 
+#' probability is divided up by the range size class (number of 
+#' ranges in each size class). For example:
+#' 
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' living_tipranges = structure(list(N = c("0", "0", "0", "0", "1", "1", "0", "1", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "1", "1", "1", "0", "0", "1", "1", "1", "1", "0", "0", "0", 
+#' "0", "0", "0"), S = c("1", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "1", "1", "0", "1", "1", "0", "0", "0", "1", "1", "1", "1", 
+#' "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0"), R = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "1", "0", "0", "0", "1", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "1", "1", "1", "0", "0", "1", "0", "0", "0", 
+#' "0", "0", "0"), E = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "1", "0", "0", "1", "0", "0", "0", 
+#' "1", "0", "1"), M = c("0", "0", "0", "1", "0", "0", "1", "0", 
+#' "1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0", 
+#' "1", "0", "1"), F = c("0", "1", "1", "1", "0", "0", "1", "0", 
+#' "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", 
+#' "0", "1", "0"), I = c("0", "0", "0", "1", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", 
+#' "0", "0", "0", "0", "1", "1", "0", "0", "0", "1", "0", "0", "1", 
+#' "1", "0", "1")), row.names = c("Atelocynus_microtis", "Lupulella_adustus", 
+#' "Canis_anthus", "Canis_aureus", "Canis_latrans", "Canis_lupus", 
+#' "Lupulella_mesomelas", "Canis_rufus", "Canis_simensis", "Cerdocyon_thous", 
+#' "Chrysocyon_brachyurus", "Cuon_alpinus", "Dusicyon_australis", 
+#' "Lycalopex_fulvipes", "Lycaon_pictus", "Nyctereutes_procyonoides", 
+#' "Otocyon_megalotis", "Lycalopex_culpaeus", "Lycalopex_griseus", 
+#' "Lycalopex_gymnocercus", "Lycalopex_sechurae", "Pseudalopex_vetulus", 
+#' "Speothos_venaticus", "Urocyon_cinereoargenteus", "Urocyon_littoralis", 
+#' "Vulpes_corsac", "Vulpes_ferrilata", "Vulpes_lagopus", "Vulpes_macrotis", 
+#' "Vulpes_velox", "Vulpes_vulpes", "Vulpes_zerda", "Vulpes_pallida", 
+#' "Vulpes_bengalensis", "Vulpes_cana", "Vulpes_chama", "Vulpes_rueppellii"
+#' ), class = "data.frame")
+#' dtf = living_tipranges
+#' observed_rangesizes_dtf = dtf
+#' max_range_size = 7
+#' include_null_range=TRUE
+#' states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+#' prior_by_range_size_of_each_state = get_rangesize_prior_by_observed_rangesize(observed_rangesizes_dtf=observed_rangesizes_dtf, max_range_size=max_range_size, #' include_null_range=include_null_range, states_list_0based=states_list_0based)
+#' prior_by_range_size_of_each_state
+#' sum(prior_by_range_size_of_each_state)
+#' 
 get_rangesize_prior_by_observed_rangesize <- function(observed_rangesizes_dtf, max_range_size, include_null_range=TRUE, states_list_0based=NULL)
 	{
 	junk='
@@ -2666,6 +2995,9 @@ get_rangesize_prior_by_observed_rangesize <- function(observed_rangesizes_dtf, m
 	max_range_size = 7
 	include_null_range=TRUE
 	states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+	prior_by_range_size_of_each_state = get_rangesize_prior_by_observed_rangesize(observed_rangesizes_dtf=observed_rangesizes_dtf, max_range_size=max_range_size, include_null_range=include_null_range, states_list_0based=states_list_0based)
+	prior_by_range_size_of_each_state
+	sum(prior_by_range_size_of_each_state)
 	'
 
 	# To take a tipranges object directly
@@ -2696,23 +3028,24 @@ get_rangesize_prior_by_observed_rangesize <- function(observed_rangesizes_dtf, m
 	
 	
 	# new_weighting_by_range_size: 
-	# 0  1  2  3  4  5  6  7 
-	# 1 23  9  3  2  2  1  1 
-	# 
+	# range_size:                      0  1  2  3  4  5  6  7 
+	# observed_range_size:             1 23  9  3  2  2  1  1 
+	# num_allowed_ranges_of_this_size: 1  7 21 ............ 1
+	#
 	# This suggests that the tip likelihoods, for tips with uncertain ranges, should be 
 	# 	
 	# multiplied by this prior:
 	# default: 1/numranges for all tips, total=1
 	# size_wt: 
-	# 0:
-	# 1: 7  ranges possible, so they get (23/43), divided among the 7 ranges
-	# 2: 21 ranges possible, so they get (9/43), divided among the 21 ranges
+	# 0: 1  range possible, so it gets prior prob. 1/43, divided among the 1 ranges
+	# 1: 7  ranges possible, so they get prior prob. (23/43), divided among the 7 ranges
+	# 2: 21 ranges possible, so they get prior prob. (9/43), divided among the 21 ranges
 	# ...etc...
 
 	# Character vector	
 	list_of_numareas_in_state_space = names(numstates_per_numareas)
 	
-	prior_by_range_size = rep(0, times=length(states_list_0based))
+	prior_by_range_size_of_each_state = rep(0, times=length(states_list_0based))
 	statenums_start = 0
 	statenums_end = 0
 	tmp_numstates = 0
@@ -2725,12 +3058,12 @@ get_rangesize_prior_by_observed_rangesize <- function(observed_rangesizes_dtf, m
 		statenums_start = statenums_start + 1
 		statenums_end = statenums_end + numstates_in_this_numareas
 	
-		prior_by_range_size[statenums_start:statenums_end] = (new_weighting_by_range_size[tmp_numareas] / sum(new_weighting_by_range_size)) * (1/numstates_in_this_numareas) 
+		prior_by_range_size_of_each_state[statenums_start:statenums_end] = (new_weighting_by_range_size[tmp_numareas] / sum(new_weighting_by_range_size)) * (1/numstates_in_this_numareas) 
 		}
-	prior_by_range_size
-	sum(prior_by_range_size)
+	prior_by_range_size_of_each_state
+	sum(prior_by_range_size_of_each_state)
 	# 1
 	
-	return(prior_by_range_size)	
+	return(prior_by_range_size_of_each_state)	
 	} # END get_rangesize_prior_by_observed_rangesize(observed_rangesizes_dtf, max_range_size, include_null_range=TRUE, states_list_0based=NULL)
 

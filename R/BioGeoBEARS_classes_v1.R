@@ -536,6 +536,26 @@ get_clado_perEvent_weights <- function(params_table, sumval=1, plotwhat="est")
 # a string or a table
 #######################################################
 
+
+#' Extract ML search results from a BioGeoBEARS_results_object
+#'
+#' Takes a \code{results_object}, and gets the LnL,
+#' numparams, and ML parameter estimates either as 
+#' a string or a table.
+#'
+#' @param results_object A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. Typically named \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param returnwhat One of "table" (default), "string", or "param_names". 
+#' @param addl_params The names of any additional (non-free) parameters that you 
+#' want to extract, in addition to the free parameters.
+#' @param paramsstr_digits The number of digits to return for the lnL and parameters, in string output.
+#' @return Output is a \code{param_ests} table, a \code{paramstr} string, 
+#' or \code{param_names} parameter names, depending on input \code{return_what}.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 extract_params_from_BioGeoBEARS_results_object <- function(results_object, returnwhat="table", addl_params=NULL, paramsstr_digits=4)
 	{
 	defaults='
@@ -562,7 +582,7 @@ extract_params_from_BioGeoBEARS_results_object <- function(results_object, retur
 	params_table = results_object$outputs@params_table
 	params_table
 
-	get_clado_perEvent_weights(params_table)
+	#get_clado_perEvent_weights(params_table)
 
 
 	# PLOT TITLE
@@ -642,7 +662,6 @@ extract_params_from_BioGeoBEARS_results_object <- function(results_object, retur
 #'    \item{\code{df}:}{Data.frame of class \code{"numeric"}, containing data from df}
 #'  }
 #'
-#' @note Go BEARS!
 #' @name BioGeoBEARS_model 
 #' @rdname BioGeoBEARS_model-class
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
@@ -682,9 +701,9 @@ setClass(Class="BioGeoBEARS_model", representation=representation(params_table="
 #' columns = area names\cr
 #' cells = 0/1 representing empty/occupied\cr
 #' 
-#' @param minval_anagenesis Minimum value above zero for d, e, a, b parameters.
-#' @param minval_cladogenesis Minimum value above zero for j, v, etc.
-#' @param maxval Maximum value for d, e, a
+#' @param minval_anagenesis Minimum value above zero for d, e, a, b parameters. Default is 1e-12.
+#' @param minval_cladogenesis Minimum value above zero for j, v, etc. Default is 1e-5.
+#' @param maxval Maximum value for d, e, a. Default is 5.
 #' @return \code{BioGeoBEARS_model_object} The BioGeoBEARS_model object, of class \code{BioGeoBEARS_model}
 #' @export
 #' @seealso \code{\link[cladoRcpp]{areas_list_to_states_list_old}}, \code{\link{areas_list_to_states_list_new}}
@@ -806,7 +825,7 @@ BioGeoBEARS_model_object_to_est_params <- function(BioGeoBEARS_model_object)
 #######################################################
 # BioGeoBEARS_model_object_to_params_lower
 #######################################################
-#' Produce the lower limit on the parameters from a BioGeoBEARS model object
+#' Extract the lower limit on the parameters from a BioGeoBEARS model object
 #' 
 #' This function returns the lower limits of the (free) parameters from
 #' a \code{BioGeoBEARS_model_object}.
@@ -849,7 +868,7 @@ BioGeoBEARS_model_object_to_params_lower <- function(BioGeoBEARS_model_object)
 #######################################################
 # BioGeoBEARS_model_object_to_params_upper
 #######################################################
-#' Produce the upper limit on the parameters from a BioGeoBEARS model object
+#' Extract the upper limit on the parameters from a BioGeoBEARS model object
 #' 
 #' This function returns the upper limits of the (free) parameters from
 #' a \code{BioGeoBEARS_model_object}.
@@ -1507,7 +1526,9 @@ get_LnL_from_optim_result <- function(optimx_result, use_optimx=TRUE)
 #' extract the log-likelihood from the embededded ML searche result with
 #' \code{optim}, \code{optimx}, or \code{GenSA}.
 #'
-#' @param res A \code{BioGeoBEARS_results_object} (typically \code{res}, \code{resDEC}, \code{resDECj}, etc.)
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
 #' @param use_optimx If \code{TRUE} (default) or \code{"optimx"}, use \code{\link[optimx]{optimx}} rather than \code{\link[stats]{optim}}. 
 #' If \code{FALSE} or \code{"optim"}, use \code{\link[stats]{optim}}. If \code{"GenSA"}, use \code{\link[GenSA]{GenSA}}.
 #' @return LnL The log-likelihood
