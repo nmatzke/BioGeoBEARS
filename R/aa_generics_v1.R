@@ -4741,4 +4741,122 @@ allQs <- function(rowvals, symbol_to_check="?")
 	}
 
 
+#' Remove strings of commas from lists of text strings
+#'
+#' When pruning lists of OTUs, you can end up with lots of ",,,," 
+#' strings of various lengths. This function attempts to remove
+#' these with multiple \code{\link[base]{gsub}} calls.
+#'
+#' There is probably a better way, but regex strings with 
+#' special characters are annoyingly hard to figure out.
+#'
+#' @param list_of_strings A list of strings
+#' @return OTUs_list_of_lists_reduced A list of strings, with all multiple,
+#' starting, and ending commas removed.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
+#' list_of_strings = NULL
+#' list_of_strings[[1]] = c("A,,B", "B,C,,D,,,E,,,,F")
+#' list_of_strings[[2]] = c(",A,,B", "B,C,,D,,,E,,,,F")
+#' list_of_strings[[3]] = c(",,,A,,B", "B,C,,D,,,E,,,,F")
+#' list_of_strings[[4]] = c(",,,A,,B", "B,C,,D,,,E,,,,F,")
+#' list_of_strings[[5]] = c(",,,A,,B", "B,C,,D,,,E,,,,F,,,")
+#' list_of_strings
+#' 
+#' OTUs_list_of_lists_reduced = remove_multiple_commas_from_strings_in_list(list_of_strings)
+#' OTUs_list_of_lists_reduced
+#' 
+remove_multiple_commas_from_strings_in_list <- function(list_of_strings)
+	{
+	setup='
+	list_of_strings = NULL
+	list_of_strings[[1]] = c("A,,B", "B,C,,D,,,E,,,,F")
+	list_of_strings[[2]] = c(",A,,B", "B,C,,D,,,E,,,,F")
+	list_of_strings[[3]] = c(",,,A,,B", "B,C,,D,,,E,,,,F")
+	list_of_strings[[4]] = c(",,,A,,B", "B,C,,D,,,E,,,,F,")
+	list_of_strings[[5]] = c(",,,A,,B", "B,C,,D,,,E,,,,F,,,")
+	list_of_strings
+	
+	OTUs_list_of_lists_reduced = remove_multiple_commas_from_strings_in_list(list_of_strings)
+	OTUs_list_of_lists_reduced
+	'
+	
+	# Convert variable name
+	OTUs_list_of_lists_reduced = list_of_strings
+	
+	# Remove all resulting extraneous commas
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,,", replacement=",", x=OTUs_list_of_lists_reduced)
+	OTUs_list_of_lists_reduced = gsub(pattern=",,", replacement=",", x=OTUs_list_of_lists_reduced)
+
+	# Remove commas at the end of strings
+	lengths = sapply(X=OTUs_list_of_lists_reduced, FUN=nchar)
+	names(lengths) = NULL
+	last_chars = mapply(FUN=substr, OTUs_list_of_lists_reduced, start=lengths, stop=lengths)
+	names(last_chars) = NULL
+	ending_comma_TF = last_chars == ","
+
+	stops = -1 + lengths[ending_comma_TF]
+	starts = rep(1, times=length(stops))
+
+	no_ending_commas = mapply(FUN=substr, OTUs_list_of_lists_reduced[ending_comma_TF], start=starts, stop=stops)
+	names(no_ending_commas) = NULL
+	no_ending_commas
+	OTUs_list_of_lists_reduced[ending_comma_TF] = no_ending_commas
+
+
+	# Remove commas at the beginning of strings
+	first_chars = sapply(X=OTUs_list_of_lists_reduced, FUN=substr, start=1, stop=1)
+	names(first_chars) = NULL
+	starting_comma_TF = first_chars == ","
+	sum(starting_comma_TF)
+	#cbind(first_chars, starting_comma_TF)[500:750,]
+
+	starts = rep(2, times=sum(starting_comma_TF))
+	stops = sapply(X=OTUs_list_of_lists_reduced[starting_comma_TF], FUN=nchar)
+
+	no_starting_commas = mapply(FUN=substr, OTUs_list_of_lists_reduced[starting_comma_TF], start=starts, stop=stops)
+	names(no_starting_commas) = NULL
+	OTUs_list_of_lists_reduced[starting_comma_TF] = no_starting_commas
+
+	#OTUs_list_of_lists_reduced[500:750]
+
+	#sum(string::str_count(string=OTUs_list_of_lists_reduced, pattern="fossil"))
+	
+	return(OTUs_list_of_lists_reduced)
+	}
 

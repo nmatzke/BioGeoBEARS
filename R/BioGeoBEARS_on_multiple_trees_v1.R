@@ -3,22 +3,65 @@
 # Run BioGeoBEARS on multiple trees
 #######################################################
 
-#' @BioGeoBEARS_run_object Set up the inference model you want to run on 
-#' each tree, like you would for a normal single-tree run.
-#' @newick_fns A list of the Newick files (e.g., you should extract some trees
-#' from a BEAST NEXUS MCMC output)
-#' @model_name The name you would like added to output filenames
-#' @geog_fns A list of corresponding geography files (by default, these are just .geog instead of .newick)
-#' @resfns A list of results filenames for .Rdata files, either for saving BioGeoBEARS analyses on each tree, or 
-#' for loading previously-saved runs (by default, these are just _model_name.Rdata instead of .newick)
-#' @run_or_collect If you want to run BioGeoBEARS on each tree (slow), use "run". If you just want to 
-#' collect the results over all the trees, use "collect".  For both, pick "both".
-#' @start_treenum Default 1. Change if you want to skip some trees
-#' @end_treenum Default is length(newick_fns). Change if you want to run a subset of trees.
-#' @runslow If FALSE, old, saved .Rdata results are loaded via load(). Default TRUE generates new .Rdata files and 
-#' saves them via save()
+#' Run BioGeoBEARS on multiple trees
+#'
+#' This function will run a particular ML model inference (specified in
+#' \code{BioGeoBEARS_run_object} on a list of tree files 
+#' (given in \code{newick_fns}).
 #' 
-
+#' The run-over-multiple-trees strategy is often recommended 
+#' by reviewers to account for
+#' the uncertainty in tree topology and dating. I am not wildly 
+#' opposed to this in general, but in my experience the cost-benefit
+#' of this procedure in biogeography is usually pretty dubious -- especially since 
+#' researchers (and reviewers!) almost always want to see 
+#' average results over the many trees and/or summarize on the 
+#' MCC tree anyway. This averaging removes most of the point of running 
+#' over multiple trees. Of course, reviewers rarely consider the
+#' cost-benefit ratio of their recommendations, since it is easier 
+#' to recommend someone else do work, when you have little idea
+#' how long it will take, or if there are conceptual problems with
+#' what you are recommending.
+#' 
+#' For further comments on the run-over-multiple-trees method, which
+#' I call "pseudo-Bayesian" rather than actually Bayesian (another 
+#' common mistake), see: https://groups.google.com/forum/#!topic/biogeobears/M8zw8Kidseo
+#'
+#' The bottom of the post contains some detailed discussions of the 
+#' kinds of pretty major technical/philosophical issues involved in averaging over
+#' geographic reconstructions on trees of different topologies. It also mentions
+#' a few situations where running over multiple trees makes more sense.
+#' 
+#' I have not extensively tested this method, but it is provided as
+#' it is occasionally requested.
+#'
+#' @param BioGeoBEARS_run_object Set up the inference model you want to run on 
+#' each tree, like you would for a normal single-tree run.
+#' @param newick_fns A list of the Newick files (e.g., you should extract some trees
+#' from a BEAST NEXUS MCMC output)
+#' @param model_name The name you would like added to output filenames
+#' @param geog_fns A list of corresponding geography files (by default, these are just .geog instead of .newick)
+#' @param resfns A list of results filenames for .Rdata files, either for saving BioGeoBEARS analyses on each tree, or 
+#' for loading previously-saved runs (by default, these are just _model_name.Rdata instead of .newick)
+#' @param run_or_collect If you want to run BioGeoBEARS on each tree (slow), use "run". If you just want to 
+#' collect the results over all the trees, use "collect".  For both, pick "both".
+#' @param start_treenum Default 1. Change if you want to skip some trees
+#' @param end_treenum Default is length(newick_fns). Change if you want to run a subset of trees.
+#' @param runslow If FALSE, old, saved .Rdata results are loaded via load(). Default TRUE generates new .Rdata files and 
+#' saves them via save()
+#' @return results_on_multiple_trees A large list object, containing sublists or matrices 
+#'         of the outputs across multiple trees.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' \dontrun{
+#' # See https://groups.google.com/forum/#!topic/biogeobears/M8zw8Kidseo 
+#' # for hints on how to do these analyses -- they will take some decent R 
+#' # skills to set up and process a multiple-trees run (for-loops, 
+#' # file management, etc.)
+#' }
+#' 
 run_bears_optim_on_multiple_trees <- function(BioGeoBEARS_run_object, newick_fns, model_name="", geog_fns=NULL, resfns=NULL, run_or_collect="collect", start_treenum=1, end_treenum=length(newick_fns), runslow=TRUE, plot_params=FALSE, startvals=NULL)
 	{
 	defaults='
@@ -37,11 +80,11 @@ run_bears_optim_on_multiple_trees <- function(BioGeoBEARS_run_object, newick_fns
 # 	require(stringr)
 	
 	# Check the input newick_fns to make sure they end in .newick
-	num_newick_strings = str_count(string=newick_fns, pattern="\\.newick")
+	num_newick_strings = stringr::str_count(string=newick_fns, pattern="\\.newick")
 	num_newick_strings_equals_1_TF = num_newick_strings == 1
 	if (sum(num_newick_strings_equals_1_TF) != length(num_newick_strings_equals_1_TF))
 		{
-		error_txt = paste("\n\nERROR in run_bears_optim_on_multiple_trees(): All filenames in 'newick_fns' must have one and only one '.newick'.\nViolators in your 'newick_fns':\n\n", sep="")
+		error_txt = paste("\n\nERROR in run_bears_optim_on_multiple_trees(): All filenames in 'newick_fns' must end with one and only one '.newick'.\nViolators in your 'newick_fns':\n\n", sep="")
 		cat(error_txt)
 		cat(newick_fns[num_newick_strings_equals_1_TF=FALSE], sep="\n")
 		
@@ -379,7 +422,29 @@ run_bears_optim_on_multiple_trees <- function(BioGeoBEARS_run_object, newick_fns
 	}
 
 
-
+#' Does a scatterplot of each parameter against the others
+#'
+#' Once you have run an ML model inference on many different trees, you
+#' might want to plot the ML parameter estimates and how they co-vary.
+#' This function does that. It assumes an \code{optim_results_table} 
+#' as produced by e.g. \code{\link{run_bears_optim_on_multiple_trees}}.
+#'
+#' I believe this function is assuming the optimizer was optimx; it would
+#' have to be modified to use e.g. \code{GenSA} results.
+#'
+#' @param optim_results_table A table from \code{\link{run_bears_optim_on_multiple_trees}}
+#' @param BioGeoBEARS_run_object The inputs list (typically a BioGeoBEARS_run_object)
+#' for a specific inference run setup (e.g. DEC, or DEC+J, or DIVALIKE, etc.), 
+#' derived from e.g. \code{define_BioGeoBEARS_run()}.
+#' @param optimx2012 If \code{FALSE} (default), assume the post-2013 
+#' \code{optimx} results. If \code{TRUE},
+#' pre-2013 optimx results assumed.
+#' @return Nothing; plots are returned.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
 plot_params_from_multiple_trees <- function(optim_results_table, BioGeoBEARS_run_object, optimx2012=FALSE)
 	{
 	if (optimx2012 == TRUE)
@@ -420,10 +485,41 @@ plot_params_from_multiple_trees <- function(optim_results_table, BioGeoBEARS_run
 			plot(x=optim_results_table[,i], y=optim_results_table[,j], xlim=c(minval, maxx), ylim=c(minval, maxx), xlab=param_names[i], ylab=param_names[j], main="")
 			}
 		}
-	}
+	} # END plot_params_from_multiple_trees
 
 
 # Summarize the range/state probabilities on a master tree
+
+#' Summarize the range/state probabilities on a master tree
+#'
+#' This function takes a master tree (typically an MCC tree from BEAST), and
+#' the ancestral state/range probability estimates from each of a 
+#' number of BioGeoBEARS runs on different sampled trees (e.g. from
+#' \code{\link{run_bears_optim_on_multiple_trees}}, and "averages"
+#' them. The averages could be put into a standard results object 
+#' for the master tree (for plotting, etc.).
+#' 
+#' While often requested by reviewers, the run-over-multiple-trees
+#' and-then-average procedure is, in my opinion, pretty dubious. See
+#' further comments at the help for \code{\link{run_bears_optim_on_multiple_trees}} 
+#' and https://groups.google.com/forum/#!topic/biogeobears/M8zw8Kidseo .
+#'
+#' It is provided here as it is sometimes requested, but I have not
+#' used/tested it extensively.
+#'
+#' @param master_tree_fn The filename (\code{fn}) of the master tree. It should be
+#' in Newick format.
+#' @param state_probs_at_nodes_across_all_trees As produced by 
+#' \code{\link{run_bears_optim_on_multiple_trees}}
+#' @param state_probs_at_corners_across_all_trees As produced by 
+#' \code{\link{run_bears_optim_on_multiple_trees}}
+#' @param If TRUE, the master tree is plotted to screen. Default \code{FALSE}.
+#' @return stateprobs_list A list of state probabilities at each master
+#' tree node, and other information.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 summarize_stateprobs_on_master_tree <- function(master_tree_fn, state_probs_at_nodes_across_all_trees, state_probs_at_corners_across_all_trees, plotflag=FALSE)
 	{
 	defaults='
@@ -522,7 +618,7 @@ summarize_stateprobs_on_master_tree <- function(master_tree_fn, state_probs_at_n
 	#print(OTUs_list_of_lists_reduced)
 
 	# Count the remaining commas
-	numcommas_reduced_OTUs = str_count(string=OTUs_list_of_lists_reduced, pattern=",")
+	numcommas_reduced_OTUs = stringr::str_count(string=OTUs_list_of_lists_reduced, pattern=",")
 	numOTUs_reduced_OTUs = numcommas_reduced_OTUs + 1
 
 	# Check that the OTU numbers match in your nodes list vs
@@ -655,85 +751,42 @@ summarize_stateprobs_on_master_tree <- function(master_tree_fn, state_probs_at_n
 	}
 
 
-remove_multiple_commas_from_strings_in_list <- function(list_of_strings)
-	{
-	# Convert variable name
-	OTUs_list_of_lists_reduced = list_of_strings
-	
-	# Remove all resulting extraneous commas
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,,", replacement=",", x=OTUs_list_of_lists_reduced)
-	OTUs_list_of_lists_reduced = gsub(pattern=",,", replacement=",", x=OTUs_list_of_lists_reduced)
 
-	# Remove commas at the end of strings
-	lengths = sapply(X=OTUs_list_of_lists_reduced, FUN=nchar)
-	names(lengths) = NULL
-	last_chars = mapply(FUN=substr, OTUs_list_of_lists_reduced, start=lengths, stop=lengths)
-	names(last_chars) = NULL
-	ending_comma_TF = last_chars == ","
-
-	stops = -1 + lengths[ending_comma_TF]
-	starts = rep(1, times=length(stops))
-
-	no_ending_commas = mapply(FUN=substr, OTUs_list_of_lists_reduced[ending_comma_TF], start=starts, stop=stops)
-	names(no_ending_commas) = NULL
-	no_ending_commas
-	OTUs_list_of_lists_reduced[ending_comma_TF] = no_ending_commas
-
-
-	# Remove commas at the beginning of strings
-	first_chars = sapply(X=OTUs_list_of_lists_reduced, FUN=substr, start=1, stop=1)
-	names(first_chars) = NULL
-	starting_comma_TF = first_chars == ","
-	sum(starting_comma_TF)
-	#cbind(first_chars, starting_comma_TF)[500:750,]
-
-	starts = rep(2, times=sum(starting_comma_TF))
-	stops = sapply(X=OTUs_list_of_lists_reduced[starting_comma_TF], FUN=nchar)
-
-	no_starting_commas = mapply(FUN=substr, OTUs_list_of_lists_reduced[starting_comma_TF], start=starts, stop=stops)
-	names(no_starting_commas) = NULL
-	OTUs_list_of_lists_reduced[starting_comma_TF] = no_starting_commas
-
-	#OTUs_list_of_lists_reduced[500:750]
-
-	sum(str_count(string=OTUs_list_of_lists_reduced, pattern="fossil"))
-	
-	return(OTUs_list_of_lists_reduced)
-	}
-
-
+#' Make a BioGeoBEARS_results_object from multiple-tree-averaging inputs
+#'
+#' This function takes a master tree (typically an MCC tree from BEAST), and
+#' the ancestral state/range probabilities averaged over a 
+#' number of BioGeoBEARS runs (by \code{\link{summarize_stateprobs_on_master_tree}}) 
+#' on different sampled trees (e.g. from
+#' \code{\link{run_bears_optim_on_multiple_trees}}. The resulting standard results 
+#' object can be used for plotting, etc.
+#' 
+#' While often requested by reviewers, the run-over-multiple-trees
+#' and-then-average procedure is, in my opinion, pretty dubious. See
+#' further comments at the help for \code{\link{run_bears_optim_on_multiple_trees}} 
+#' and https://groups.google.com/forum/#!topic/biogeobears/M8zw8Kidseo .
+#'
+#' It is provided here as it is sometimes requested, but I have not
+#' used/tested it extensively.
+#'
+#' @param BioGeoBEARS_run_object The inputs list (typically a BioGeoBEARS_run_object), 
+#' derived from e.g. \code{define_BioGeoBEARS_run()}.
+#' @param master_tree_fn The filename (\code{fn}) of the master tree. It should be
+#' in Newick format.
+#' @param geogfn A PHYLIP-style file with geographic range data (see \code{\link{getranges_from_LagrangePHYLIP}}) for each tipname. 
+#' @param stateprobs_list The list of outputs from \code{\link{summarize_stateprobs_on_master_tree}}
+#' @param optim_results_mean The mean parameter estimates, e.g. 
+#' \code{results_on_multiple_trees$optim_results_mean} from 
+#' \code{\link{run_bears_optim_on_multiple_trees}}
+#' @return bears_output_manytrees A \code{BioGeoBEARS_results_object}. Usually this would
+#' be the result of a \code{\link{bears_optim_run}}, and typically named \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.). Here, of course, we are generating it
+#' via averaging multiple individual ML runs.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
 make_BioGeoBEARS_manytrees_results_object <- function(BioGeoBEARS_run_object, master_tree_fn, geogfn, stateprobs_list, optim_results_mean)
 	{
 	BioGeoBEARS_results_object_manytrees = BioGeoBEARS_run_object
