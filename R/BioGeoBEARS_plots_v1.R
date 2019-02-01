@@ -165,6 +165,7 @@ add_statum_boundaries_to_phylo_plot <- function(tr, timeperiods=1, lty="dashed",
 #' shown in e.g. pie charts, of course); (2) "asterisk", which 
 #' returns returns the first tied state, but marks it with an 
 #' asterisk ("*").
+#' @param pie_tip_statecex  \code{cex} value for pies at the tips (scaling factor, i.e. 0.5 is half size).
 #' @param juststats If \code{FALSE} (default), plots are plotted. If \code{TRUE}, 
 #' no plots are done, 
 #' the function just returns the summary statistics.
@@ -175,32 +176,33 @@ add_statum_boundaries_to_phylo_plot <- function(tr, timeperiods=1, lty="dashed",
 #' each state (remember that e.g. 4 areas can mean 2^4=16 states).
 #' @param skiptree Skip the plotting of the tree -- useful for plotting the state labels
 #' e.g. on top of a stochastic map. Default \code{FALSE}.
-#' @show.tip.label Same as for APE's \code{plot.phylo}.
-#' @tipcol The tip text color. Default "black".
-#' @dej_params_row Parameters used to generate an SSE simulation. dej_params_row can be 
+#' @param show.tip.label Same as for APE's \code{plot.phylo}.
+#' @param tipcol The tip text color. Default "black".
+#' @param dej_params_row Parameters used to generate an SSE simulation. dej_params_row can be 
 #' obtained from \code{get_dej_params_row_from_SSEsim_results_processed}.
-#' @plot_max_age The maximum age of the plot (age below the tips). Default
+#' @param plot_max_age The maximum age of the plot (age below the tips). Default
 #' is tree height
-#' @skiplabels If \code{TRUE}, skip the nodelabels command, resulting in plotting just the 
+#' @param skiplabels If \code{TRUE}, skip the nodelabels command, resulting in plotting just the 
 #' tree. (Yes, you could have just used \code{FALSE}).  Default \code{FALSE}.
-#' @plot_stratum_lines If \code{TRUE} (default), plot dotted lines at the stratum 
+#' @param plot_stratum_lines If \code{TRUE} (default), plot dotted lines at the stratum 
 #' boundaries, *if* it's a time-stratified results object.
-#' @simplify_piecharts If \code{TRUE}, just plot one slice for the maximum probability, 
+#' @param simplify_piecharts If \code{TRUE}, just plot one slice for the maximum probability, 
 #' and white for "other". This should help with large plots with many ranges, 
 #' which can overwhelm some graphics programs (imagine 1000 slices per piechart,
 #' times 1000+nodes). Default \code{FALSE}.
-#' @tipboxes_TF Plot the tip boxes (tip states)?  Default \code{TRUE}.
-#' @tiplabel_adj Justification for tiplabel boxes (same as "adj" parameter 
+#' @param tipboxes_TF Plot the tip boxes (tip states)?  Default \code{TRUE}.
+#' @param tiplabel_adj Justification for tiplabel boxes (same as "adj" parameter 
 #' of text()). Default is c(0.5). Left justification: c(0). Right: c(1). 
 #' Justification top left: c(0,0), etc.
-#' @no.margin Same as in plot.phylo. Default is FALSE (meaning yes, 
+#' @param no.margin Same as in plot.phylo. Default is FALSE (meaning yes, 
 #' there will be margins).
-#' @xlims Same as in plot.phylo x.lim. Default is basically c(0,treeheight), so
+#' @param xlims Same as in plot.phylo x.lim. Default is basically c(0,treeheight), so
 #' if tiplabels are getting cut off, try e.g. xlims=c(0,1.5*treeheight).
-#' @ylims Same as in plot.phylo y.lim. Default is basically c(0,numtips), so
+#' @param ylims Same as in plot.phylo y.lim. Default is basically c(0,numtips), so
 #' if the spacing between the title and time axis and the tree are too big,
 #' try e.g. ylims=c(0+10,numtips-10). Trial and error will get you there. 
 #' See: https://stat.ethz.ch/pipermail/r-sig-phylo/2013-March/002540.html
+#' @return NULL
 #' @export
 #' @seealso \code{\link{get_leftright_nodes_matrix_from_results}}, \code{\link{corner_coords}}, \code{\link[ape]{plot.phylo}}, \code{\link[ape]{plot.phylo}}, \code{\link[ape]{tiplabels}}, \code{\link[graphics]{legend}}, \code{\link[base]{floor}}, \code{\link[base]{ceiling}}, \code{\link[base]{floor}}, \code{\link[cladoRcpp]{numstates_from_numareas}}, \code{\link[base]{system.file}}, \code{\link[base]{list.files}}
 #' @note Go (BioGeo)BEARS!
@@ -209,7 +211,7 @@ add_statum_boundaries_to_phylo_plot <- function(tr, timeperiods=1, lty="dashed",
 #' \url{https://code.google.com/p/lagrange/}
 #' @examples
 #' test=1
-#' 
+#' # See example script at PhyloWiki for example
 plot_BioGeoBEARS_results <- function(results_object, analysis_titletxt=NULL, addl_params=list(), plotwhat="text", label.offset=NULL, tipcex=0.8, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, plotlegend=FALSE, legend_ncol=NULL, legend_cex=1, cornercoords_loc="manual", tr=NULL, tipranges=NULL, if_ties="takefirst", pie_tip_statecex=0.7, juststats=FALSE, xlab="Millions of years ago", root.edge=TRUE, colors_list_for_states=NULL, skiptree=FALSE, show.tip.label=TRUE, tipcol="black", dej_params_row=NULL, plot_max_age=NULL, skiplabels=FALSE, plot_stratum_lines=TRUE, include_null_range=NULL, plot_null_range=FALSE, simplify_piecharts=FALSE, tipboxes_TF=TRUE, tiplabel_adj=c(0.5), no.margin=FALSE, xlims=NULL, ylims=NULL)
 	{
 	
@@ -820,7 +822,8 @@ plot_stratum_lines=TRUE
 #######################################################
 #' Get colors for a certain number of single areas
 #' 
-#' Like it says.
+#' Get colors for a given number of single areas. I have
+#' chosen default colors that are very bright/primary.
 #' 
 #' @param numareas The number of areas
 #' @param use_rainbow If TRUE, force use of \code{rainbow()}
@@ -831,8 +834,6 @@ plot_stratum_lines=TRUE
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -869,10 +870,6 @@ get_colors_for_numareas = function(numareas, use_rainbow=FALSE)
 		{
 		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")
 		}
-	if (numareas == 7)
-		{
-		area_colors = c("blue", "cyan", "green3", "yellow", "orange", "red", "violet")
-		}
 	if (numareas > 7)
 		{
 		area_colors = col2rgb(rainbow(numareas))
@@ -892,7 +889,22 @@ get_colors_for_numareas = function(numareas, use_rainbow=FALSE)
 #######################################################
 #' Mix colors logically to produce colors for multi-area ranges
 #' 
-#' Like it says.
+#' Mixex colors logically to produce colors for multi-area ranges. 
+#' Because there are so many possible ranges/states in most analyses,
+#' and because the human eye can only easily read <10 colors on a
+#' map (particularly if you are anomalous trichromatic, like me!)
+#' devising a reasonable color setup is nontrivial. The idea here
+#' is that, when a range occupies multiple colors, the colors of
+#' the individual areas will be mixed. If a range contains all
+#' areas, it is colored white. 
+#'
+#' Sometimes people try to make legends listing all of the dozens
+#' of colors used, even for the multi-area "mixed" colors. However,
+#' as a graphical matter, I would recommend just giving the colors
+#' of the single areas, and any particularly common/important
+#' multi-area ranges. If the ancestral ranges are labeled with e.g.
+#' "A", "ABC", etc. (as is typical), there is limited 
+#' value in a separate legend for the colors anyway.
 #' 
 #' @param colors_matrix A column with a color for each single area
 #' @param states_list_0based_index States list giving areas, 0-based
@@ -905,8 +917,6 @@ get_colors_for_numareas = function(numareas, use_rainbow=FALSE)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -992,9 +1002,9 @@ mix_colors_for_states <- function(colors_matrix, states_list_0based_index, plot_
 #######################################################
 # rangestxt_to_colors
 #######################################################
-#' Convert a list of ranges text (KOM, MH, KOMIH, etc.) 
+#' Convert a list of ranges texts (KOM, MH, KOMIH, etc.) to colors
 #' 
-#' Like it says.
+#' Converts a list of ranges texts (KOM, MH, KOMIH, etc.) to colors.
 #' 
 #' @param possible_ranges_list_txt A list of the allowed ranges/states
 #' @param colors_list_for_states The corresponding colors
@@ -1006,13 +1016,23 @@ mix_colors_for_states <- function(colors_matrix, states_list_0based_index, plot_
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
+#' possible_ranges_list_txt = c("A", "AB", "ABC")
+#' colors_list_for_states = c("red", "orange", "white")
+#' MLstates = c("ABC", "AB", "AB", "A", "A", "A", "ABC")
+#' rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates)
+#' 
 rangestxt_to_colors <- function(possible_ranges_list_txt, colors_list_for_states, MLstates)
 	{
+	setup='
+	possible_ranges_list_txt = c("A", "AB", "ABC")
+	colors_list_for_states = c("red", "orange", "white")
+	MLstates = c("ABC", "AB", "AB", "A", "A", "A", "ABC")
+	rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates)
+	'
+	
 	if (length(possible_ranges_list_txt) != length(colors_list_for_states))
 		{
 		cat("\nlength(possible_ranges_list_txt) = ", length(possible_ranges_list_txt))
@@ -1043,7 +1063,7 @@ rangestxt_to_colors <- function(possible_ranges_list_txt, colors_list_for_states
 #######################################################
 #' Plot a colors legend for geographic ranges
 #' 
-#' Like it says.
+#' Plots a colors legend for geographic ranges.
 #' 
 #' @param possible_ranges_list_txt A list of the allowed ranges/states
 #' @param colors_list_for_states The corresponding colors
@@ -1063,8 +1083,6 @@ rangestxt_to_colors <- function(possible_ranges_list_txt, colors_list_for_states
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' testval=1
 #' 
@@ -1277,7 +1295,14 @@ get_statesColors_table <- function(areanames=c("K","O","M","H"), plot_null_range
 #######################################################
 #' Map splits to the corners on a phylogeny
 #' 
-#' What it says.
+#' Map splits to the "corners" on a phylogeny. Normally, the corners are meaningless,
+#' but in a biogeographical analysis with discrete cladogenesis events at splits on 
+#' the tree, the provide a convenient place to plot the state probabilities just
+#' after speciation. These will not be the same as the state probabilities at the 
+#' nodes (unlike most phylogenetic ancestral state estimations), because of the 
+#' "instantaneous" changes in the geographic ranges that can occur at speciation. (The
+#' exception is models that assume ranges do not change at speciation, like the 
+#' Markov-<i>k</i> model of Lewis 2001, or the \code{BAYAREALIKE} model.
 #' 
 #' @param MLsplits A data.frame containing the node numbers, splits, and split probabilities.
 #' @param tr An ape phylo object
@@ -1364,7 +1389,11 @@ map_LG_MLsplits_to_tree_corners <- function(MLsplits, tr, tipranges, removechar=
 #######################################################
 #' Map states to the nodes on a phylogeny
 #' 
-#' What it says.
+#' Map the most-probable ancestral states to the nodes on a phylogeny. Note that
+#' the most-probable ancestral state may still have a probability less than
+#' 50%, if the inference for that node is highly uncertain. It is always 
+#' necessary to look at, and interpret, the pie charts in addition to plot of
+#' most-probable states. See "mistakes not to make" on PhyloWiki.
 #' 
 #' @param MLstates_LGcpp A data.frame containing the node numbers, states, and states probabilities.
 #' @param tr An ape phylo object
@@ -1449,12 +1478,16 @@ map_LG_MLstates_to_tree <- function(MLstates_LGcpp, tr, tipranges, removechar=NU
 #######################################################
 #' Order LAGRANGE-numbered nodes so that they can be plotted in R
 #' 
-#' What it says.
+#' Node numbers between ancestral states are different for ape's \code{phylo}
+#' objects, C++ Lagrange,
+#' Python Lagrange, and DIVA. This function reorders the Lagrange
+#' splits table, for plotting in R. 
 #' 
 #' @param MLsplits_LGcpp A data.frame containing the node numbers, splits, and split probabilities.
 #' @param tr An ape phylo object
 #' @param removechar The character to remove, if needed.
-#' @param type The type of LAGRANGE input (default C++)
+#' @param type The type of LAGRANGE input (default C++). Inputs other than C++ assume
+#' the Python lagrange ordering.
 #' @param type2 "splits" or "states"
 #' @return \code{MLsplits} The splits table, ordered appropriately.
 #' @export
@@ -1677,8 +1710,6 @@ cornerpies <- function(pievals, coords, piecol, adj=c(0.5,0.5), ...)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' blah=1
 #' 
@@ -1768,8 +1799,6 @@ add_corners <- function(startnode, tr, nodecoords, corners_list)
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' 
 #' # Set location like this if you don't have plot_phylo3_nodecoords
@@ -1912,8 +1941,6 @@ corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' 
 #' # Set location like this if you don't have plot_phylo3_nodecoords
@@ -2003,17 +2030,60 @@ node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="ma
 #######################################################
 # PLOT PROBABILITIES ON A PER-AREA BASIS
 #######################################################
+
+#' Plot per-area occupation probabilities in a barchart at each node
+#'
+#' Although it is traditional to plot the most-probable ancestral 
+#' states at each node, or plot the piechart of all state probabilities
+#' at each node, there are other imaginable options. This function plots
+#' a barplot at each node, where the probability of each area being
+#' occupied has been calculated by summing across all of the state/range
+#' probabilities. The bar heights represent the integrated probability of
+#' each individual area being occupied. Particularly for complex analyses
+#' with high uncertainty, this may be a useful plot.
+#'
+#' @param tr An ape phylo object.
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param areas The list of area abbreviations, e.g. from 
+#'              \code{getareas_from_tipranges_object(tipranges)}
+#' @param states_list_0based A list of states, where each
+#' list item is a vector of 0-based area numbers.
+#' @param titletxt A title for the plot. Default \code{""}.
+#' @param cols_each_area The color for each indvidual area. Auto-determined if 
+#'                       \code{NULL} (default).
+#' @param barwidth_proportion The proportional width of the bars (with 
+#'        respect to total plot width, I think). Default 0.02.
+#' @param barheight_proportion The proportional width of the bars (with 
+#'        respect to total plot height, I think). Default 0.025.
+#' @param offset_nodenums Node numbers on which to offset the barplot
+#'        (for improved readability).
+#' @param offset_xvals A multiplier on barwidth to move the offset_nodenums 
+#'        left or right. Each xval corresponds to a value in offset_nodenums.
+#' @param offset_yvals A multiplier on barheight to move the offset_nodenums 
+#'        up or down. Each yval corresponds to a value in offset_nodenums.
+#' @param root.edge An input for \code{node_coords}, which is passed to 
+#'        \code{plot_phylo3_nodecoords}. Default \code{TRUE}.
 #' @param border The color of the border of the boxes holding areas. Default is
 #' the string "default", which means that the borders will be "gray50" if 
 #' there is no color specified (that is, cols_each_area=NULL, which means bars 
 #' will be "gray70"), and borders will be "black" if color is 
 #' specified.  By changing the box borders and the tree color (see 
-#' parameter \code{plot_per_area_probs} in \code{plot_per_area_probs}, or \code{edge.color} in \code{ape::plot.phylo}).
+#' parameter \code{plot_per_area_probs} in \code{plot_per_area_probs}, 
+#' or \code{edge.color} in \code{ape::plot.phylo}).
 #' the user can emphasize or de-emphasize one or the other.
 #' @param trcol The color of the lines in the phylogeny when plotted.  
 #' Default is "black", but "gray60" looks good if you want to 
 #' de-emphasize the tree with respect to e.g. node areas.
-
+#' @param plot_rangesizes If \code{FALSE} (default), plot the barplot with each area 
+#'        probability. If \code{TRUE}, collapse to the probabilities of each range size and
+#'        plot that.
+#' @return probs_each_area The probabilities of each area being occupied, at each node.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="", cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default", trcol="black", plot_rangesizes=FALSE)
 	{
 	defaults='
@@ -2116,6 +2186,27 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 # add_per_area_probs_to_nodes
 #######################################################
 
+#' Plot per-area occupation probabilities to nodes.
+#'
+#' Used by \code{\link{plot_per_area_probs}} to plot barcharts of
+#' per-area probabilities to each node.
+#'
+#' @param tr An ape phylo object.
+#' @param probs_each_area The probabilities of each area being occupied, at each node.
+#' @param cols_each_area The color for each indvidual area. Auto-determined if 
+#'                       \code{NULL} (default).
+#' @param barwidth_proportion The proportional width of the bars (with 
+#'        respect to total plot width, I think). Default 0.02.
+#' @param barheight_proportion The proportional width of the bars (with 
+#'        respect to total plot height, I think). Default 0.025.
+#' @param offset_nodenums Node numbers on which to offset the barplot
+#'        (for improved readability).
+#' @param offset_xvals A multiplier on barwidth to move the offset_nodenums 
+#'        left or right. Each xval corresponds to a value in offset_nodenums.
+#' @param offset_yvals A multiplier on barheight to move the offset_nodenums 
+#'        up or down. Each yval corresponds to a value in offset_nodenums.
+#' @param root.edge An input for \code{node_coords}, which is passed to 
+#'        \code{plot_phylo3_nodecoords}. Default \code{TRUE}.
 #' @param border The color of the border of the boxes holding areas. Default is
 #' the string "default", which means that the borders will be "gray50" if 
 #' there is no color specified (that is, cols_each_area=NULL, which means bars 
@@ -2123,7 +2214,13 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 #' specified.  By changing the box borders and the tree color (see 
 #' parameter \code{plot_per_area_probs} in \code{plot_per_area_probs}, 
 #' or \code{edge.color} in \code{ape::plot.phylo}).
-
+#' the user can emphasize or de-emphasize one or the other.
+#' @return \code{NULL}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#'
 add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default")
 	{
 	defaults='
@@ -2289,7 +2386,29 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 #######################################################
 # add_per_area_probs_to_corners
 #######################################################
-
+#' Plot per-area occupation probabilities to corners.
+#'
+#' Used by \code{\link{plot_per_area_probs}} to plot barcharts of
+#' per-area probabilities to each left or right corner.
+#'
+#' @param tr An ape phylo object.
+#' @param probs_each_area The probabilities of each area being occupied, at each node.
+#' @param left_or_right Are the "left" or "right" corners to be plotted (run twice to
+#'                      do both).
+#' @param cols_each_area The color for each indvidual area. Auto-determined if 
+#'                       \code{NULL} (default).
+#' @param barwidth_proportion The proportional width of the bars (with 
+#'        respect to total plot width, I think). Default 0.02.
+#' @param barheight_proportion The proportional width of the bars (with 
+#'        respect to total plot height, I think). Default 0.025.
+#' @param offset_nodenums Node numbers on which to offset the barplot
+#'        (for improved readability).
+#' @param offset_xvals A multiplier on barwidth to move the offset_nodenums 
+#'        left or right. Each xval corresponds to a value in offset_nodenums.
+#' @param offset_yvals A multiplier on barheight to move the offset_nodenums 
+#'        up or down. Each yval corresponds to a value in offset_nodenums.
+#' @param root.edge An input for \code{node_coords}, which is passed to 
+#'        \code{plot_phylo3_nodecoords}. Default \code{TRUE}.
 #' @param border The color of the border of the boxes holding areas. Default is
 #' the string "default", which means that the borders will be "gray50" if 
 #' there is no color specified (that is, cols_each_area=NULL, which means bars 
@@ -2297,8 +2416,14 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 #' specified.  By changing the box borders and the tree color (see 
 #' parameter \code{plot_per_area_probs} in \code{plot_per_area_probs}, 
 #' or \code{edge.color} in \code{ape::plot.phylo}).
-
-add_per_area_probs_to_corners <- function(tr, probs_each_area, left_or_right, cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default", trcol)
+#' the user can emphasize or de-emphasize one or the other.
+#' @return \code{NULL}
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#'
+add_per_area_probs_to_corners <- function(tr, probs_each_area, left_or_right, cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default")
 	{
 	defaults='
 	cols_each_area=NULL
@@ -2499,6 +2624,8 @@ add_per_area_probs_to_corners <- function(tr, probs_each_area, left_or_right, co
 #' difficulty of displaying the models the computer is using.  This function is one attempt to 
 #' improve the situation, by plotting the relative weights of the various parameters.
 #'
+#' Experimental at the moment.
+#'
 #' @param obj The input object, either a \code{BioGeoBEARS_run_object} (if so, set 
 #' \code{obj_is_run_or_results="run"} or an output object from \code{\link{bears_optim_run}} 
 #' (if so, specify \code{obj_is_run_or_results="results"}.
@@ -2517,8 +2644,6 @@ add_per_area_probs_to_corners <- function(tr, probs_each_area, left_or_right, co
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' blah=1
 #' 
@@ -2857,6 +2982,8 @@ plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results=NULL, plotwhat="in
 #' Several additional plots relating to the cladogenesis model are also produced.  Best used via
 #' \code{\link{plot_BioGeoBEARS_model}}.
 #'
+#' Experimental at the moment.
+#'
 #' @param BioGeoBEARS_run_object The input run object.
 #' @param plotwhat Default is "input", which means plotting the starting model.
 #' @param statenames State names to pass to \code{\link{plot_cladogenesis_size_probabilities}}. 
@@ -2869,8 +2996,6 @@ plot_BioGeoBEARS_model <- function(obj, obj_is_run_or_results=NULL, plotwhat="in
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @references
 #' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
-#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
-#'   @cite Matzke_2012_IBS
 #' @examples
 #' blah=1
 #' 
@@ -3372,6 +3497,27 @@ plot_cladogenesis_size_probabilities <- function(BioGeoBEARS_run_object, plotwha
 # Convert stochastic map to state probabilities for 
 # plotting with plot_BioGeoBEARS_results()
 #######################################################
+
+
+#' Convert stochastic map to state probabilities
+#'
+#' Converts a stochastic map to state probabilities for 
+#' plotting with \code{\link{plot_BioGeoBEARS_results}}().
+#'
+#' See stochastic mapping example script at PhyloWiki.
+#'
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param master_table_cladogenetic_events The master table of cladogenetic
+#' events (see stochastic mapping example script at PhyloWiki).
+#' @param stratified Is the analysis time-stratified? Default is FALSE.
+#' @return something
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
 stochastic_map_states_into_res <- function(res, master_table_cladogenetic_events, stratified=FALSE)
 	{
 	defaults='
@@ -3533,13 +3679,35 @@ stochastic_map_states_into_res <- function(res, master_table_cladogenetic_events
 
 
 
+#' Get default colors for a states_list
+#'
+#' Gets default BioGeoBEARS color scheme for a states_list.
+#'
+#' @param areanames The vector of area abbreviations (single letters)
+#' @param states_list_0based A list of states, where each
+#' list item is a vector of 0-based area numbers.
+#' @param max_range_size The maximum allowed range size.
+#' @param plot_null_range Should the null range be included in the list of colors? Default \code{FALSE}.
+#' @return colors_list_for_states A vector of colors (hex color codes) for each input state.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
+#' areanames = c("K", "O", "M", "H")
+#' max_range_size = 4
+#' plot_null_range = TRUE
+#' states_list_0based=rcpp_areas_list_to_states_list(areas=areanames, maxareas=max_range_size, include_null_range=plot_null_range)
+#' get_colors_for_states_list_0based(areanames, states_list_0based=NULL, max_range_size=NA, plot_null_range=FALSE)
+#' 
 get_colors_for_states_list_0based <- function(areanames, states_list_0based=NULL, max_range_size=NA, plot_null_range=FALSE)
 	{
 	defaults='
-	areanames=c("K", "O", "M", "H")
-	states_list_0based=NULL
-	max_range_size=NA
-	include_null_range=TRUE
+	areanames = c("K", "O", "M", "H")
+	max_range_size = 4
+	plot_null_range = TRUE
+	states_list_0based=rcpp_areas_list_to_states_list(areas=areanames, maxareas=max_range_size, include_null_range=plot_null_range)
+	get_colors_for_states_list_0based(areanames, states_list_0based=NULL, max_range_size=NA, plot_null_range=FALSE)
 	'
 	
 	numareas = length(areanames)
@@ -3573,6 +3741,44 @@ get_colors_for_states_list_0based <- function(areanames, states_list_0based=NULL
 
 # tr is required input (since users could change it in a variety of ways)...
 
+#' Paint branches according to stochastic map
+#'
+#' This function paints branches according to a BioGeoBEARS stochastic map. 
+#'
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param master_table_cladogenetic_events The master table of cladogenetic
+#' events (see stochastic mapping example script at PhyloWiki).
+#' @param tr An ape \code{phylo} object.
+#' @param lwd line width, see \code{\link[graphics]{par}}
+#' @param lty line type, see \code{\link[graphics]{par}}
+#' @param root.edge An input for \code{node_coords}, which is passed to 
+#'        \code{plot_phylo3_nodecoords}. Default \code{TRUE}.
+#' @param cornercoords_loc The location of the extdata/scripts directory,
+#'        necessary for complex reasons involving CRAN guidelines. Keep on 
+#'        default.
+#' @param stratified Is the analysis time-stratified? Default is \code{FALSE}.
+#' @param plot_clado_1desc If \code{TRUE}, skip a branch if there are no anagenetic events.
+#'        Default \code{FALSE}.
+#' @param plot_clado_1desc_points If \code{TRUE}, plot symbols for each event, at the point
+#'        at which they happened. Experimental. Default \code{FALSE}.
+#' @param thickness_by_area When painting, make the thickness of the branch dependent
+#'        on the number of areas occupied by the current range. This can help greatly
+#'        in helping readers grasp the important issue of residence times in 
+#'        different range sizes. Works well. Default \code{FALSE}.
+#' @param states_list_0based A list of states, where each
+#' list item is a vector of 0-based area numbers.
+#' @param include_null_range Should the null range be included in the 
+#'        state space? Default is \code{TRUE}.
+#' @return times_in_each_state The total time spent in each state in the stochastic
+#'         map. This can help greatly in helping readers grasp the important issue 
+#'         of residence times in different range sizes.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
 paint_stochastic_map_branches <- function(res, master_table_cladogenetic_events, colors_list_for_states, tr=NULL, lwd=5, lty=par("lty"), root.edge=TRUE, cornercoords_loc=np(system.file("extdata/a_scripts", package="BioGeoBEARS")), stratified=FALSE, plot_clado_1desc=FALSE, plot_clado_1desc_points=FALSE, thickness_by_area=FALSE, states_list_0based=NULL, include_null_range=TRUE)
 	{
 	defaults='
@@ -4152,6 +4358,84 @@ paint_stochastic_map_branches <- function(res, master_table_cladogenetic_events,
 # Plot stochastic maps
 #######################################################
 
+
+#' Plot stochastic maps
+#' 
+#' This function is copied and modified from \code{\link{plot_BioGeoBEARS_results}} to 
+#' plot biogeographical stochastic maps. Many of the inputs are used only to 
+#' plot the background tree. See PhyloWiki for example scripts.
+#' 
+#' @param results_object The results object from \code{\link{bears_optim_run}} (with ancestral states on).
+#' @param clado_events_table The table of cladogenetic events (see stochastic mapping example script at PhyloWiki).
+#' @param stratified Is the analysis time-stratified? Default is \code{FALSE}.
+#' @param analysis_titletxt The main title of the plot. If NULL, \code{results_object$inputs$description} is checked.
+#' @param addl_params The function will plot the log-likelihood (LnL) and the ML values of the free parameters. If you want additional parameters plotted, list them here.
+#' @param plotwhat To plot the ML discrete states, "text".  To plot a piechart of the relative probability of all the states, "pie".
+#' @param label.offset Offset for the tree tip labels. If \code{NULL}, program chooses 0.05 x tree height.
+#' @param tipcex \code{cex} value for the tiplabels (scaling factor, i.e. 0.5 is half size)
+#' @param statecex \code{cex} value for the states (scaling factor, i.e. 0.5 is half size). Used on piecharts if plotwhat="pie".
+#' @param splitcex \code{cex} value for the splits (scaling factor, i.e. 0.5 is half size). Used on piecharts if plotwhat="pie".
+#' @param titlecex \code{cex} value for the title (scaling factor, i.e. 0.5 is half size). 
+#' @param plotsplits If \code{TRUE}, plot states on the corners -- text or pie charts, depending on \code{plotwhat}.
+#' @param plotlegend If \code{TRUE}, make a (separate) plot with a legend giving the colors for each state/range, using \code{\link{colors_legend}}.
+#' @param legend_ncol The number of columns in the legend.  If \code{NULL} (default), the function calculates \code{floor(sqrt(length(possible_ranges_list_txt) / 2))} 
+#' when the number of states is <=64, and \code{sqrt(ceiling(length(possible_ranges_list_txt)))} when > 64. Note that when you have hundreds of states, there is probably 
+#' no good way to have a readable legend, and it is easier to just rely upon printing the 
+#' character codes for the ML states in the plots, with the colors, and users can then see and trace the common colors/states by eye.
+#' @param legend_cex The cex (character expansion size) for the legend.  Defaults to 1, which means the \code{\link[graphics]{legend}} function determines the 
+#' size.  The value 2.5 works well for 15 or 16 states/ranges.
+#' @param cornercoords_loc The directory location containing the R script \code{plot_phylo3_nodecoords.R}. This function, modified from the APE function
+#' \code{\link[ape]{plot.phylo}}, cannot be included directly in the R package as it contains C code that does not pass CRAN's R CMD check. The default, 
+#' cornercoords_loc="manual", will not allow split states to be plot.  The R script \code{plot_phylo3_nodecoords.R} is located in the BioGeoBEARS extension data 
+#' directory, \code{extdata/a_scripts}.  You should be able to get the full path with \code{list.files(system.file("extdata/a_scripts", package="BioGeoBEARS"), full.names=TRUE)}.
+#' @param include_null_range If \code{TRUE} (default), the null range is included in calculation of colors. (Safest for now.)
+#' @param tr Tree to plot on. Default \code{NULL}, which means the tree will be read from the file at \code{results_object$inputs$trfn}.
+#' @param tipranges Tip geography data. Default \code{NULL}, which means the tree will be read from the file at \code{results_object$inputs$geogfn}.
+#' @param if_ties What to do with ties in probability. Currently, 
+#' the options are:
+#' (1) "takefirst", which takes the first tied state in the 
+#' probabilities column (The full probabilities of all states will be
+#' shown in e.g. pie charts, of course); (2) "asterisk", which 
+#' returns returns the first tied state, but marks it with an 
+#' asterisk ("*").
+#' @param pie_tip_statecex  \code{cex} value for pies at the tips (scaling factor, i.e. 0.5 is half size). 
+#' @param juststats If \code{FALSE} (default), plots are plotted. If \code{TRUE}, 
+#' no plots are done, the function just returns the summary statistics.
+#' @param root.edge Should the root edge be plotted, if it exists in the tree?  Passed to
+#' plot.phylo().  This can be handy if the root state display is getting cut off.
+#' @param colors_list_for_states Default \code{NULL} auto-generates colors with 
+#' \code{get_colors_for_states_list_0based}. Otherwise, users can specify colors for 
+#' each state (remember that e.g. 4 areas can mean 2^4=16 states).
+#' @param skiptree Skip the plotting of the tree -- useful for plotting the state labels
+#' e.g. on top of a stochastic map. Default \code{FALSE}.
+#' @param show.tip.label Same as for APE's \code{plot.phylo}.
+#' @param tipcol The tip text color. Default "black".
+#' @param dej_params_row Parameters used to generate an SSE simulation. dej_params_row can be 
+#' obtained from \code{get_dej_params_row_from_SSEsim_results_processed}.
+#' @param plot_max_age The maximum age of the plot (age below the tips). Default
+#' is tree height
+#' @param skiplabels If \code{TRUE}, skip the nodelabels command, resulting in plotting just the 
+#' tree. (Yes, you could have just used \code{FALSE}).  Default \code{FALSE}.
+#' @param plot_stratum_lines If \code{TRUE} (default), plot dotted lines at the stratum 
+#' boundaries, *if* it's a time-stratified results object.
+#' @param simplify_piecharts If \code{TRUE}, just plot one slice for the maximum probability, 
+#' and white for "other". This should help with large plots with many ranges, 
+#' which can overwhelm some graphics programs (imagine 1000 slices per piechart,
+#' times 1000+nodes). Default \code{FALSE}.
+#' @param include_null_range Should the null range be included in the 
+#'        state space? Default is \code{NULL} (inferred from objects).
+#' @param plot_null_range Should the null range be plotted? Default is \code{FALSE}.
+#' @return NULL
+#' @export
+#' @seealso \code{\link{get_leftright_nodes_matrix_from_results}}, \code{\link{corner_coords}}, \code{\link[ape]{plot.phylo}}, \code{\link[ape]{plot.phylo}}, \code{\link[ape]{tiplabels}}, \code{\link[graphics]{legend}}, \code{\link[base]{floor}}, \code{\link[base]{ceiling}}, \code{\link[base]{floor}}, \code{\link[cladoRcpp]{numstates_from_numareas}}, \code{\link[base]{system.file}}, \code{\link[base]{list.files}}
+#' @note Go (BioGeo)BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{https://code.google.com/p/lagrange/}
+#' @examples
+#' test=1
+#' # See example scripts at PhyloWiki. 
+#' 
 plot_BSM <- function(results_object, clado_events_table, stratified, analysis_titletxt="Stochastic map", addl_params=list(), plotwhat="text", label.offset=NULL, tipcex=0.8, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, plotlegend=FALSE, legend_ncol=NULL, legend_cex=1, cornercoords_loc="manual", tr=NULL, tipranges=NULL, if_ties="takefirst", pie_tip_statecex=0.7, juststats=FALSE, xlab="Millions of years ago", root.edge=TRUE, colors_list_for_states, skiptree=FALSE, show.tip.label=TRUE, tipcol="black", dej_params_row=NULL, plot_max_age=NULL, skiplabels=FALSE, plot_stratum_lines=TRUE, include_null_range=NULL, plot_null_range=FALSE)
 	{
 	scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
@@ -4177,11 +4461,53 @@ plot_BSM <- function(results_object, clado_events_table, stratified, analysis_ti
 
 # Various problems emerge from "ladderize" in some versions
 # https://www.mail-archive.com/r-sig-phylo@r-project.org/msg04176.html
+
+#' Ladderize nodes, ensuring that resulting tree is appropriately ordered.
+#'
+#' This function avoids some potential problems with \code{\link[ape]{ladderize}}
+#' by writing the ladderized tree to a newick string, and reading back
+#' in.
+#'
+#' For discussion of the issues, see: 
+#' https://www.mail-archive.com/r-sig-phylo@r-project.org/msg04176.html
+#'
+#' @param phy An ape phylo object
+#' @param right TRUE for right-ordering, FALSE for left-ordering.
+#' @return ltr A ladderized tree
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
+#' # You can see the issues here
+#' tr = ape::read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' ltr = ladderize(tr, right=TRUE)
+#' ltr$edge
+#' ltr = ladderize(tr, right=FALSE)
+#' ltr$edge
+#' ltr = ladderize_and_reorder(tr, right=TRUE)
+#' ltr$edge
+#' ltr = ladderize_and_reorder(tr, right=FALSE)
+#' ltr$edge
+#' 
 ladderize_and_reorder <- function(phy, right=TRUE)
 	{
-	ltr = ladderize(phy, right=right)
+	ex='
+	# You can see the issues here
+	tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	ltr = ape::ladderize(tr, right=TRUE)
+	ltr$edge
+	ltr = ape::ladderize(tr, right=FALSE)
+	ltr$edge
+	ltr = ladderize_and_reorder(tr, right=TRUE)
+	ltr$edge
+	ltr = ladderize_and_reorder(tr, right=FALSE)
+	ltr$edge
+	'
+
+	ltr = ape::ladderize(phy, right=right)
 	# MAKE FREAKING SURE that this tree has the right node order etc.
-	ltr = read.tree(file="", text=write.tree(phy=ltr, file="") )
+	ltr = ape::read.tree(file="", text=write.tree(phy=ltr, file="") )
 	return(ltr)
 	} # END ladderize_and_reorder <- function(tr, right=TRUE)
 
@@ -4193,8 +4519,89 @@ ladderize_and_reorder <- function(phy, right=TRUE)
 # E.g. 
 # tr1 = new tree
 # tr2 = original tree, used the BioGeoBEARS analysis
+
+#' Get the indexes to match tree2 nodes to tree1
+#'
+#' Given 2 trees with different rotations etc., this function
+#' returns, for each tree2 node, the index of that tree2 node 
+#' in the tree1 nodes list.
+#'
+#' (Basically, this is \code{\link[base]{match}} for tree nodes.)
+#'
+#' @param tr1 An ape \code{phylo} object
+#' @param tr2 An ape \code{phylo} object
+#' @return indexes_to_convert_tr2nodes_to_tr1 The vector of indices
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
+#' 
+#' tr = ape::read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' ltr1 = ladderize_and_reorder(tr, right=TRUE)
+#' ltr2 = ladderize_and_reorder(tr, right=FALSE)
+#' 
+#' # Compare the tree tables
+#' prt(ltr1, printflag=FALSE, get_tipnames=TRUE)
+#' prt(ltr2, printflag=FALSE, get_tipnames=TRUE)
+#' 
+#' # Get the matching
+#' indexes_to_convert_tr2nodes_to_tr1 = ordernodes(tr1=ltr1, tr2=ltr2)
+#' indexes_to_convert_tr2nodes_to_tr1
+#' 
+#' # What if 1 tree is missing a taxon?
+#' tr1 = ape::read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' tr2 = ape::read.tree(file="", text="(((human:1,chimp:1):1,gorilla:2):1,orang:3);")
+#' 
+#' # Compare the tree tables
+#' prt(tr1, printflag=FALSE, get_tipnames=TRUE)
+#' prt(tr2, printflag=FALSE, get_tipnames=TRUE)
+#' 
+#' # Get the matching
+#' indexes_to_convert_tr2nodes_to_tr1 = ordernodes(tr1=tr1, tr2=tr2)
+#' indexes_to_convert_tr2nodes_to_tr1
+#' 
+#' # Reverse matching
+#' \dontrun{
+#' # (Works, but throws a warning)
+#' indexes_to_convert_tr1nodes_to_tr2 = ordernodes(tr1=tr2, tr2=tr1)
+#' indexes_to_convert_tr1nodes_to_tr2
+#' }
+#' 
 ordernodes <- function(tr1, tr2)
 	{
+	ex='
+	# Make 2 differently-rotated trees
+	tr = ape::read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	ltr1 = ladderize_and_reorder(tr, right=TRUE)
+	ltr2 = ladderize_and_reorder(tr, right=FALSE)
+
+	# Compare the tree tables
+	prt(ltr1, printflag=FALSE, get_tipnames=TRUE)
+	prt(ltr2, printflag=FALSE, get_tipnames=TRUE)
+	
+	# Get the matching
+	indexes_to_convert_tr2nodes_to_tr1 = ordernodes(tr1=ltr1, tr2=ltr2)
+	indexes_to_convert_tr2nodes_to_tr1
+	
+	# What if 1 tree is missing a taxon?
+	tr1 = ape::read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+	tr2 = ape::read.tree(file="", text="(((human:1,chimp:1):1,gorilla:2):1,orang:3);")
+
+	# Compare the tree tables
+	prt(tr1, printflag=FALSE, get_tipnames=TRUE)
+	prt(tr2, printflag=FALSE, get_tipnames=TRUE)
+	
+	# Get the matching
+	indexes_to_convert_tr2nodes_to_tr1 = ordernodes(tr1=tr1, tr2=tr2)
+	indexes_to_convert_tr2nodes_to_tr1
+	
+	# Reverse matching
+	# (Works, but throws a warning)
+	indexes_to_convert_tr1nodes_to_tr2 = ordernodes(tr1=tr2, tr2=tr1)
+	indexes_to_convert_tr1nodes_to_tr2
+	
+	'
+
 	tr1_table = prt(tr1, printflag=FALSE, get_tipnames=TRUE)
 	tr2_table = prt(tr2, printflag=FALSE, get_tipnames=TRUE)
 	indexes_to_convert_tr2nodes_to_tr1 = match(x=tr1_table$tipnames, table=tr2_table$tipnames)
@@ -4216,6 +4623,31 @@ ordernodes <- function(tr1, tr2)
 # Convert BioGeoBEARS object from one tree to another
 # tr1 = new tree
 # tr2 = original tree, used the BioGeoBEARS analysis
+
+#' Convert BioGeoBEARS results object from one tree to another
+#'
+#' Converts a BioGeoBEARS results object from one tree to another. This can be 
+#' useful if you ran a long, slow analysis on a particular tree, but then
+#' decide that you want to plot the analysis on a different tree. If you just
+#' switch the tree files, you will get nonsense, as the ancestral state/range
+#' probabilities are tied to the node numbers of the original tree.
+#' 
+#' This function reorders the rows of all of the ancestral states/ranges tables
+#' (and likelihoods etc.) to match a new input tree.
+#'
+#' @param res A \code{BioGeoBEARS_results_object} that is the result of a 
+#' \code{\link{bears_optim_run}}. (typically \code{res}, 
+#' \code{resDEC}, \code{resDECj}, etc.)
+#' @param tr1 The new tree. An ape \code{phylo} object
+#' @param tr2 The original tree used the BioGeoBEARS analysis. An ape \code{phylo} object
+#' @param trfn_for_BGB_inputs The filename of the new tree, if you want to update the
+#' the \code{res} object. (You probably should, as some other functions will need to 
+#' read in the tree.)
+#' @return res2 The results object with the probabilities reordered for the new tree.
+#' @export
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
+#' @examples
+#' test=1
 BioGeoBEARS_reorder <- function(res, tr1, tr2, trfn_for_BGB_inputs=NULL)
 	{
 	indexes_to_convert_tr2nodes_to_tr1 = ordernodes(tr1, tr2)
@@ -4256,7 +4688,7 @@ BioGeoBEARS_reorder <- function(res, tr1, tr2, trfn_for_BGB_inputs=NULL)
 
 
 
-
+# Not exported
 
 #######################################################
 # These functions fix graphics issues that arise in APE 5.0
@@ -4307,6 +4739,7 @@ BioGeoBEARS_reorder <- function(res, tr1, tr2, trfn_for_BGB_inputs=NULL)
 
 # Access par (graphics parameters) without opening a &%$@ plot!
 # https://stackoverflow.com/questions/20363266/how-can-i-suppress-the-creation-of-a-plot-while-calling-a-function-in-r
+# Internal function
 par_invisible <- function(parname)
 	{
 	setup='
@@ -4323,7 +4756,7 @@ par_invisible <- function(parname)
 	}
 
 
-
+# Internal function
 plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length = TRUE, node.pos = NULL, 
     show.tip.label = TRUE, show.node.label = FALSE, edge.color = "black", 
     edge.width = 1, edge.lty = 1, font = 3, 
@@ -4858,6 +5291,7 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
 
 
 # From: ape:::floating.pie.asp
+# Internal function
 ape_floating_pie_asp <- function (xpos, ypos, x, edges = 200, radius = 1, col = NULL, 
     startpos = 0, ...) 
 {
@@ -4892,6 +5326,7 @@ ape_floating_pie_asp <- function (xpos, ypos, x, edges = 200, radius = 1, col = 
 }
 
 # From ape:::unrooted.xy
+# Internal function
 ape_unrooted_xy <- function (Ntip, Nnode, edge, edge.length, nb.sp, rotate.tree) 
 {
     foo <- function(node, ANGLE, AXIS) {
@@ -4922,6 +5357,7 @@ ape_unrooted_xy <- function (Ntip, Nnode, edge, edge.length, nb.sp, rotate.tree)
 
 
 # From ape:::phylogram.plot
+# Internal function
 ape_phylogram_plot <- function (edge, Ntip, Nnode, xx, yy, horizontal, edge.color, 
     edge.width, edge.lty) 
 {
@@ -5023,6 +5459,7 @@ ape_phylogram_plot <- function (edge, Ntip, Nnode, xx, yy, horizontal, edge.colo
 
 
 # From ape:::circular.plot
+# Internal function
 ape_circular_plot <- function (edge, Ntip, Nnode, xx, yy, theta, r, edge.color, edge.width, 
     edge.lty) 
 {
@@ -5082,18 +5519,21 @@ ape_circular_plot <- function (edge, Ntip, Nnode, xx, yy, theta, r, edge.color, 
 
 
 # From ape::cladogram.plot
+# Internal function
 ape_cladogram_plot <- function (edge, xx, yy, edge.color, edge.width, edge.lty) 
 	{
 	segments(xx[edge[, 1]], yy[edge[, 1]], xx[edge[, 2]], yy[edge[, 2]], col = edge.color, lwd = edge.width, lty = edge.lty)
 	}
 
 # From ape:::polar2rect
+# Internal function
 ape_polar2rect <- function (r, angle) 
 	{
 	list(x = r * cos(angle), y = r * sin(angle))
 	}
 
 # From ape:::rect2polar
+# Internal function
 ape_rect2polar <- function (x, y)
 	{
 	list(r = sqrt(x^2 + y^2), angle = atan2(y, x))
