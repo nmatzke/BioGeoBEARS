@@ -581,6 +581,8 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 
 
 
+
+
 #######################################################
 # getareas_from_tipranges_object
 #######################################################
@@ -588,11 +590,13 @@ prune_specimens_to_species <- function(original_tr, xls, group_name="default", t
 #' 
 #' This function extracts the names of the areas in a \code{tipranges} object.  Just a shortcut for 
 #' \code{names(tipranges@@df)}.
+#'
+#' Duplicates \code{getareanames_from_tipranges_object} for back-compatibility.
 #' 
 #' @param tipranges An object of class \code{tipranges}.
 #' @return \code{areanames}, a list of the names of the areas
 #' @export
-#' @seealso \code{\link{define_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' @seealso \code{\link{getareanames_from_tipranges_object}}, \code{\link{define_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
 #' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
@@ -608,6 +612,39 @@ getareas_from_tipranges_object <- function(tipranges)
 	areanames = as.character(names(tipranges@df))
 	return(areanames)
 	}
+
+
+#######################################################
+# getareanames_from_tipranges_object
+#######################################################
+#' Get the names of the areas in a tipranges object
+#' 
+#' This function extracts the names of the areas in a \code{tipranges} object.  Just a shortcut for 
+#' \code{names(tipranges@@df)}.
+#' 
+#' Duplicates \code{getareas_from_tipranges_object} which has a less clear name, but is
+#' kept for back-compatibility.
+#' 
+#' @param tipranges An object of class \code{tipranges}.
+#' @return \code{areanames}, a list of the names of the areas
+#' @export
+#' @seealso \code{\link{getareas_from_tipranges_object}}, \code{\link{define_tipranges_object}}, \code{\link[cladoRcpp]{areas_list_to_states_list_old}},
+#' \code{\link{areas_list_to_states_list_new}}, \code{\link{tipranges_to_tip_condlikes_of_data_on_each_state}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @examples
+#' testval=1
+#' tipranges_object = define_tipranges_object()
+#' tipranges_object
+#'
+#' areanames = getareas_from_tipranges_object(tipranges_object)
+#' areanames
+#'
+getareanames_from_tipranges_object <- function(tipranges)
+	{
+	areanames = as.character(names(tipranges@df))
+	return(areanames)
+	}
+
 
 
 #######################################################

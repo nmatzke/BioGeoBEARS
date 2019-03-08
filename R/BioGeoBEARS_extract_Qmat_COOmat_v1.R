@@ -488,13 +488,14 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 	
 
 	# Get the list of geographic areas
-	areas = getareas_from_tipranges_object(tipranges)
-	areas_list = seq(0, length(areas)-1, 1)		# 0-base indexes
+	areanames = getareas_from_tipranges_object(tipranges)
+	areas = areanames
+	areas_list = seq(0, length(areanames)-1, 1)		# 0-base indexes
 
 	# Calculate the number of states, if needed
 	if (is.null(numstates))
 		{
-		numstates = numstates_from_numareas(numareas=length(areas), maxareas=inputs$max_range_size, include_null_range=include_null_range)
+		numstates = numstates_from_numareas(numareas=length(areanames), maxareas=inputs$max_range_size, include_null_range=include_null_range)
 		}
 
 	# Change the names to tipranges@df:
@@ -577,6 +578,31 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 			}
 		} # END if ((is.null(inputs$lists_of_states_lists_0based) == TRUE) || (newstrat == FALSE))
 		
+	
+	
+	
+	#######################################################
+	# Get the list of ranges, from the list of states (0-based)
+	# http://phylo.wikidot.com/example-biogeobears-scripts#list_of_ranges
+	#######################################################
+	# Make the list of ranges
+	states_list_0based = states_list
+	ranges_list = NULL
+	for (i in 1:length(states_list_0based))
+			{    
+			if ( (length(states_list_0based[[i]]) == 1) && (is.na(states_list_0based[[i]])) )
+					{
+					tmprange = "_"
+					} else {
+					tmprange = paste(areas[states_list_0based[[i]]+1], collapse="")
+					}
+			ranges_list = c(ranges_list, tmprange)
+			}
+
+	
+	
+	
+	
 	
 	if (is.na(BioGeoBEARS_run_object$force_sparse))
 		{
@@ -852,7 +878,11 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 	
 	# This gives 15 states
 	Rsp_rowsums = rcpp_calc_rowsums_for_COOweights_columnar(COO_weights_columnar=COO_weights_columnar)
-
+	
+	
+	
+	
+	
 
 	Qmat
 	rowSums(Qmat)	# yep, they sum to 0
@@ -863,8 +893,10 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 	
 	returned_mats = NULL
 	returned_mats$states_list = states_list
+	returned_mats$ranges_list = ranges_list
 	returned_mats$spPmat_inputs = spPmat_inputs
 	returned_mats$areas_list = areas_list
+	returned_mats$areanames = areanames
 	returned_mats$dmat = dmat
 	returned_mats$Qmat = Qmat
 	returned_mats$COO_weights_columnar = COO_weights_columnar

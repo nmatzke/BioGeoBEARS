@@ -2010,3 +2010,226 @@ linear_regression_plot_OLD <- function(x, y, xlabel="x", ylabel="y", tmppch=".",
 	return(model1)
 	} # END linear_regression_plot
 
+
+
+BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
+	{
+	returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=res$inputs)
+	returned_mats
+	areanames = returned_mats$areanames
+	ranges_list = returned_mats$ranges_list
+
+	# Get list of edges:
+	trtable = prt(tr, printflag=FALSE)
+	trtable
+
+	# Get the edgenums, exclude the "NA" for the root branch
+	# Order edgenums from smallest to largest
+	nonroot_TF = trtable$node.type != "root"
+	edgenums = trtable$parent_br[nonroot_TF]
+	edgenums_order = order(edgenums)
+	edgenums = edgenums[edgenums_order]
+
+	# Get the "ancestor node, descendant node"
+	ancnodenums = trtable$ancestor[nonroot_TF][edgenums_order]
+	decnodenums = trtable$node[nonroot_TF][edgenums_order]
+
+	# rownames for mapped.edge
+	rownames_for_mapped_edge = paste0(ancnodenums, ",", decnodenums)
+	rownames_for_mapped_edge
+
+	# instantiate "maps" for phytools (a list, with array of state residence times
+	maps = list()
+
+	# Loop through the edges, record any anagenetic events on the branches
+	# fill in "maps"
+	for (i in 1:length(edgenums))
+		{
+		edgenum = edgenums[i]
+	
+		# Trap for if ana_events_table is NA (common, if there are no anagenetic events in
+		# the tree at all)
+		if ( (length(ana_events_table) == 1) && (is.na(ana_events_table)) )
+			{
+			edgefound_TF = FALSE
+			} else {
+			edgefound_TF = ana_events_table$parent_br == edgenum
+			}
+	
+		# If no anagenetic events are found, the whole branchlength is in the 
+		# starting state, as specified in "clado_events_table"
+		if (sum(edgefound_TF) == 0)
+			{
+			# The states should be the same at the branch bottom and top:
+			clado_row_TF = clado_events_table$parent_br == edgenum
+			clado_row_TF[is.na(clado_row_TF)] = FALSE
+		
+			# Error check
+			if (sum(clado_row_TF) != 1)
+				{
+				txt = paste0("STOP ERROR #1 in BSM_to_phytools_SM(): either 0 or 2+ rows in clado_events_table match edge number/branch number (parent_br==", edgenum, ").")
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				stop(txt)
+				}
+		
+			bottom_state_num_1based = clado_events_table$sampled_states_AT_brbots[clado_row_TF]
+			top_state_num_1based = clado_events_table$sampled_states_AT_nodes[clado_row_TF]
+		
+			# Error check
+			if (bottom_state_num_1based != top_state_num_1based)
+				{
+				txt = paste0("STOP ERROR #2 in BSM_to_phytools_SM(): the top_state_num_1based (", top_state_num_1based, "), and bottom_state_num_1based (", bottom_state_num_1based, ") have to match at edge number/branch number (parent_br==", edgenum, "), because no anagenetic events were recorded on this branch.")
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				stop(txt)
+				}
+		
+			# No events detected, so put in the states_array just one state
+			names_of_states_array = c(ranges_list[bottom_state_num_1based])
+			times_in_each_state_array = c(clado_events_table$edge.length[clado_row_TF])
+			names(times_in_each_state_array) = names_of_states_array
+			times_in_each_state_array
+			} # END if (sum(edgefound_TF) == 0)
+
+		# If no anagenetic events are found, the whole branchlength is in the 
+		# starting state, as specified in "clado_events_table"
+		if (sum(edgefound_TF) > 0)
+			{
+			# The states will be listed in the ana_events_table
+			rows_matching_edgenum_TF = ana_events_table$parent_br == edgenum
+			tmp_ana_events_table = ana_events_table[rows_matching_edgenum_TF,]
+		
+			# Make sure the tmp_ana_events_table is sorted by event_time (along branch)
+			tmp_ana_events_table = tmp_ana_events_table[order(tmp_ana_events_table$event_time),]
+			tmp_ana_events_table
+		
+			numevents = sum(rows_matching_edgenum_TF)
+		
+			# 1 event, 2 states on branch
+			if (numevents == 1)
+				{
+				first_state_name = c(tmp_ana_events_table$current_rangetxt[1])
+				first_state_time = c(tmp_ana_events_table$event_time[1])
+
+				further_state_name = c(tmp_ana_events_table$new_rangetxt[1])
+				further_state_time = c(tmp_ana_events_table$edge.length[1] - first_state_time)
+
+				times_in_each_state_array = c(first_state_time, further_state_time)
+				names_of_states_array = c(first_state_name, further_state_name)
+				} # END if (numevents == 1)
+		
+			# 2+ events, 3+ states on branch
+			if (numevents >= 2)
+				{
+				first_state_name = c(tmp_ana_events_table$current_rangetxt[1])
+				first_state_time = c(tmp_ana_events_table$event_time[1])
+			
+				nonfirst_rows = 2:numevents
+				nonlast_rows = 1:(numevents-1)
+
+				further_state_names = c(tmp_ana_events_table$new_rangetxt)
+				further_state_times = tmp_ana_events_table$event_time[nonfirst_rows] - tmp_ana_events_table$event_time[nonlast_rows]
+				last_time = c(tmp_ana_events_table$edge.length[numevents] - tmp_ana_events_table$event_time[numevents])
+
+				times_in_each_state_array = c(first_state_time, further_state_times, last_time)
+				names_of_states_array = c(first_state_name, further_state_names)
+				} # END if (numevents >= 2)
+
+			names(times_in_each_state_array) = names_of_states_array
+			} # END if (sum(edgefound_TF) > 0)
+	
+		# Store
+		maps[[i]] = times_in_each_state_array
+		} # END for (i in 1:length(edgenums))
+
+	maps
+
+
+	# Check that the sums of state residence times add up to the branch lengths
+	lapply(X=maps, FUN=sum)
+	tr$edge.length
+	all(c(lapply(X=maps, FUN=sum)) == tr$edge.length)
+
+
+
+	# Make the mapped.edge output
+	mapped.edge = matrix(data=0.0, nrow=length(edgenums), ncol=length(ranges_list))
+	row.names(mapped.edge) = rownames_for_mapped_edge
+	colnames(mapped.edge) = ranges_list
+	mapped.edge
+
+
+	# For each branch, 
+	# 1. Get the list of observed states
+	i = 3
+	observed_states = sort(unique(names(maps[[i]])))
+	observed_states
+
+	# Get the sum of one state
+	get_sum_statetime_on_branch <- function(statename_to_sum, branch_history_map)
+		{
+		TF = names(branch_history_map) == statename_to_sum
+		total_residence_time = sum(branch_history_map[TF])
+		return(total_residence_time)
+		}
+
+	# sapply to get the sum of each
+	sapply(X=observed_states, FUN=get_sum_statetime_on_branch, branch_history_map=maps[[i]])
+
+	# Fill in the table for each branch
+	for (i in 1:nrow(mapped.edge))
+		{
+		observed_states = sort(unique(names(maps[[i]])))
+		total_residence_times = sapply(X=observed_states, FUN=get_sum_statetime_on_branch, branch_history_map=maps[[i]])
+		names_observed_states = names(total_residence_times)
+		mapped.edge[i,names_observed_states] = unname(total_residence_times)
+		}
+	mapped.edge
+
+
+	# Get the transition matrix and logL
+	Q = returned_mats$Qmat
+	row.names(Q) = ranges_list
+	colnames(Q) = ranges_list
+	logL = res$total_loglikelihood
+
+	tr_wSimmap = tr
+	tr_wSimmap$maps = maps
+	tr_wSimmap$mapped.edge = mapped.edge
+	tr_wSimmap$Q = Q
+	tr_wSimmap$logL = logL
+	class(tr_wSimmap) = c("simmap", "phylo")
+	tr_wSimmap
+
+	tr_wSimmap$maps
+	tr_wSimmap$mapped.edge
+
+	return(tr_wSimmap)
+	} # END BSM_to_phytools_SM
+
+
+BSMs_to_phytools_SMs <- function(res, clado_events_tables, ana_events_tables)
+	{
+	simmaps_list = list()
+	
+	if (class(clado_events_tables) != "list")
+		{
+		txt = "WARNING from BSMs_to_phytools_SMs(): Input 'clado_events_tables' was not a list, so we will assume it is instead a single Biogeographical Stochastic Map (BSM) table in data.frame format. Therefore, BSM_to_phytools_SM() is being run instead."
+		warning(txt)
+		tr_wSimmap = BSM_to_phytools_SM(res=res, clado_events_table=clado_events_tables, ana_events_table=ana_events_tables)
+		return(tr_wSimmap)
+		} # END if (class(clado_events_tables) != "list")
+	
+	for (i in 1:length(clado_events_tables))
+		{
+		simmaps_list[[i]] = BSM_to_phytools_SM(res=res, clado_events_table=clado_events_tables[[i]], ana_events_table=ana_events_tables[[i]])
+		}
+		
+	class(simmaps_list) = c("multiSimmap", "multiPhylo")
+	return(simmaps_list)
+	} # END BSMs_to_phytools_SMs
+
+
