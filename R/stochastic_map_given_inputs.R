@@ -1907,7 +1907,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 	# Get the anagenetic events in a nice text form
 	#print("print(master_table_w_stochastic_maps$anagenetic_events_txt_below_node):")
 	#print(master_table_w_stochastic_maps$anagenetic_events_txt_below_node)
-	events_table = events_txt_list_into_events_table(events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node, trtable=master_table_w_stochastic_maps)
+	ana_events_table = events_txt_list_into_events_table(events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node, trtable=master_table_w_stochastic_maps)
 	#print(events_table)
 
 	stochastic_mapping_results = NULL
@@ -1915,7 +1915,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 
 #print(master_table_w_stochastic_maps)
 
-	stochastic_mapping_results$table_w_anagenetic_events = events_table
+	stochastic_mapping_results$table_w_anagenetic_events = ana_events_table
 
 	return(stochastic_mapping_results)
 	} # END stochastic_mapping_on_stratified()

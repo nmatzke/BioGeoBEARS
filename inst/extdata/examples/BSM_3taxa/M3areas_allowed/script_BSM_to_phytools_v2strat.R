@@ -34,8 +34,11 @@ library(BioGeoBEARS)
 # Set your working directory for output files
 # default here is your home directory ("~")
 # Change this as you like
-# wd = "/drives/GDrive/z_help/Furnariidae_Bio_Geo/BSM_small/M3areas_allowed/"
+# wd = slashslash(paste0(addslash(extdata_dir), "/examples/BSM_3taxa/M3areas_allowed/"))
 # setwd(wd)
+
+wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/BSM_3taxa/M3areas_allowed/"
+setwd(wd)
 
 # Double-check your working directory with getwd()
 getwd()
@@ -55,12 +58,6 @@ getwd()
 extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
 extdata_dir
 list.files(extdata_dir)
-
-# wd = slashslash(paste0(addslash(extdata_dir), "/examples/BSM_3taxa/M3areas_allowed/"))
-# setwd(wd)
-
-wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/BSM_3taxa/M3areas_allowed/"
-setwd(wd)
 
 
 # "system.file" looks in the directory of a specified package (in this case BioGeoBEARS)
@@ -1228,14 +1225,14 @@ names(stochastic_mapping_inputs_list)
 stochastic_mapping_inputs_list$phy2
 stochastic_mapping_inputs_list$COO_weights_columnar
 stochastic_mapping_inputs_list$unconstr
-set.seed(seed=as.numeric(Sys.time()))
+set.seed(seed=as.numeric(54321))
 
 BSM_runslow = TRUE
 if (BSM_runslow == TRUE)
     {
     # Saves to: RES_clado_events_tables.Rdata
     # Saves to: RES_ana_events_tables.Rdata
-    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=100, nummaps_goal=50, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01)
+    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nummaps_goal=1, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01)
 
     RES_clado_events_tables = BSM_output$RES_clado_events_tables
     RES_ana_events_tables = BSM_output$RES_ana_events_tables
@@ -1333,7 +1330,7 @@ stratified = stratified
 pdffn = paste0(model_name, "_", length(clado_events_tables), "BSMs_v1.pdf")
 pdf(file=pdffn, width=6, height=6)
 
-nummaps_goal = 50
+nummaps_goal = 1
 for (i in 1:nummaps_goal)
     {
     clado_events_table = clado_events_tables[[i]]
