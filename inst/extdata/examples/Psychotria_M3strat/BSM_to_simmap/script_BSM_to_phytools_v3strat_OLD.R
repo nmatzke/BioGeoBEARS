@@ -34,10 +34,10 @@ library(BioGeoBEARS)
 # Set your working directory for output files
 # default here is your home directory ("~")
 # Change this as you like
-# wd = slashslash(paste0(addslash(extdata_dir), "/examples/BSM_Psychotria/M3areas_allowed/"))
+# wd = slashslash(paste0(addslash(extdata_dir), "/examples/BSM_3taxa/M3areas_allowed/"))
 # setwd(wd)
 
-wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/Psychotria_M3strat/BSM_to_simmap/"
+wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/Psychotria_M0_BSM_to_simmap/BSM_to_simmap/"
 setwd(wd)
 
 # Double-check your working directory with getwd()
@@ -94,7 +94,7 @@ list.files(extdata_dir)
 #    your branchlengths to get them into reasonable units.
 # 6. DON'T USE SPACES IN SPECIES NAMES, USE E.G. "_"
 #######################################################
-# This is the example Newick file for Hawaiian Psychotria
+# This is the example Newick file for Hawaiian 3taxa
 # (from Ree & Smith 2008)
 # "trfn" = "tree file name"
 trfn = "tree.newick"
@@ -161,7 +161,7 @@ system(cmdstr)
 #    data indicates they are the same genetic population.
 ######################################################
 
-# This is the example geography file for Hawaiian Psychotria
+# This is the example geography file for Hawaiian 3taxa
 # (from Ree & Smith 2008)
 geogfn = "geog.data"
 
@@ -177,7 +177,7 @@ max(rowSums(dfnums_to_numeric(tipranges@df)))
 
 # Set the maximum number of areas any species may occupy; this cannot be larger 
 # than the number of areas you set up, but it can be smaller.
-max_range_size = 4
+max_range_size = 3
 
 ####################################################
 ####################################################
@@ -264,8 +264,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 #
 # Uncomment files you wish to use in time-stratified analyses:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -323,8 +323,8 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # For a slow analysis, run once, then set runslow=FALSE to just 
 # load the saved result.
-runslow = FALSE
-resfn = "Psychotria_DEC_M3areas_allowed_v1.Rdata"
+runslow = TRUE
+resfn = "3taxa_DEC_M3areas_allowed_v1.Rdata"
 if (runslow)
     {
     res = bears_optim_run(BioGeoBEARS_run_object)
@@ -355,8 +355,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -402,8 +402,8 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart
 
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-resfn = "Psychotria_DEC+J_M3areas_allowed_v1.Rdata"
-runslow = FALSE
+resfn = "3taxa_DEC+J_M3areas_allowed_v1.Rdata"
+runslow = TRUE
 if (runslow)
     {
     #sourceall("/Dropbox/_njm/__packages/BioGeoBEARS_setup/")
@@ -423,13 +423,13 @@ if (runslow)
 #######################################################
 # PDF plots
 #######################################################
-pdffn = "Psychotria_DEC_vs_DEC+J_M3areas_allowed_v1.pdf"
+pdffn = "3taxa_DEC_vs_DEC+J_M3areas_allowed_v1.pdf"
 pdf(pdffn, width=6, height=6)
 
 #######################################################
 # Plot ancestral states - DEC
 #######################################################
-analysis_titletxt ="BioGeoBEARS DEC on Psychotria M3areas_allowed_unconstrained"
+analysis_titletxt ="BioGeoBEARS DEC on 3taxa M3areas_allowed_unconstrained"
 
 # Setup
 results_object = resDEC
@@ -444,7 +444,7 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 #######################################################
 # Plot ancestral states - DECJ
 #######################################################
-analysis_titletxt ="BioGeoBEARS DEC+J on Psychotria M3areas_allowed_unconstrained"
+analysis_titletxt ="BioGeoBEARS DEC+J on 3taxa M3areas_allowed_unconstrained"
 
 # Setup
 results_object = resDECj
@@ -497,8 +497,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -547,8 +547,8 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","est"] = 0.
 
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-runslow = FALSE
-resfn = "Psychotria_DIVALIKE_M3areas_allowed_v1.Rdata"
+runslow = TRUE
+resfn = "3taxa_DIVALIKE_M3areas_allowed_v1.Rdata"
 if (runslow)
     {
     res = bears_optim_run(BioGeoBEARS_run_object)
@@ -579,8 +579,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -645,8 +645,8 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","max"] = 1.9999
 
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-resfn = "Psychotria_DIVALIKE+J_M3areas_allowed_v1.Rdata"
-runslow = FALSE
+resfn = "3taxa_DIVALIKE+J_M3areas_allowed_v1.Rdata"
+runslow = TRUE
 if (runslow)
     {
     #sourceall("/Dropbox/_njm/__packages/BioGeoBEARS_setup/")
@@ -663,13 +663,13 @@ if (runslow)
     resDIVALIKEj = res
     }
 
-pdffn = "Psychotria_DIVALIKE_vs_DIVALIKE+J_M3areas_allowed_v1.pdf"
+pdffn = "3taxa_DIVALIKE_vs_DIVALIKE+J_M3areas_allowed_v1.pdf"
 pdf(pdffn, width=6, height=6)
 
 #######################################################
 # Plot ancestral states - DIVALIKE
 #######################################################
-analysis_titletxt ="BioGeoBEARS DIVALIKE on Psychotria M3areas_allowed_unconstrained"
+analysis_titletxt ="BioGeoBEARS DIVALIKE on 3taxa M3areas_allowed_unconstrained"
 
 # Setup
 results_object = resDIVALIKE
@@ -684,7 +684,7 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 #######################################################
 # Plot ancestral states - DIVALIKE+J
 #######################################################
-analysis_titletxt ="BioGeoBEARS DIVALIKE+J on Psychotria M3areas_allowed_unconstrained"
+analysis_titletxt ="BioGeoBEARS DIVALIKE+J on 3taxa M3areas_allowed_unconstrained"
 
 # Setup
 results_object = resDIVALIKEj
@@ -753,8 +753,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -810,8 +810,8 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","est"] = 0.
 # Check the inputs
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-runslow = FALSE
-resfn = "Psychotria_BAYAREALIKE_M3areas_allowed_v1.Rdata"
+runslow = TRUE
+resfn = "3taxa_BAYAREALIKE_M3areas_allowed_v1.Rdata"
 if (runslow)
     {
     res = bears_optim_run(BioGeoBEARS_run_object)
@@ -842,8 +842,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -929,8 +929,8 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","max"] = 0.9999
 
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-resfn = "Psychotria_BAYAREALIKE+J_M3areas_allowed_v1.Rdata"
-runslow = FALSE
+resfn = "3taxa_BAYAREALIKE+J_M3areas_allowed_v1.Rdata"
+runslow = TRUE
 if (runslow)
     {
     res = bears_optim_run(BioGeoBEARS_run_object)
@@ -945,13 +945,13 @@ if (runslow)
     resBAYAREALIKEj = res
     }
 
-pdffn = "Psychotria_BAYAREALIKE_vs_BAYAREALIKE+J_M3areas_allowed_v1.pdf"
+pdffn = "3taxa_BAYAREALIKE_vs_BAYAREALIKE+J_M3areas_allowed_v1.pdf"
 pdf(pdffn, width=6, height=6)
 
 #######################################################
 # Plot ancestral states - BAYAREALIKE
 #######################################################
-analysis_titletxt ="BioGeoBEARS BAYAREALIKE on Psychotria M3areas_allowed_unconstrained"
+analysis_titletxt ="BioGeoBEARS BAYAREALIKE on 3taxa M3areas_allowed_unconstrained"
 
 # Setup
 results_object = resBAYAREALIKE
@@ -966,7 +966,7 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 #######################################################
 # Plot ancestral states - BAYAREALIKE+J
 #######################################################
-analysis_titletxt ="BioGeoBEARS BAYAREALIKE+J on Psychotria M3areas_allowed_unconstrained"
+analysis_titletxt ="BioGeoBEARS BAYAREALIKE+J on 3taxa M3areas_allowed_unconstrained"
 
 # Setup
 results_object = resBAYAREALIKEj
@@ -1157,7 +1157,6 @@ write.table(conditional_format_table(restable_AIC_rellike), file="restable_AIC_r
 
 
 
-#source('/GitHub/BioGeoBEARS/R/BioGeoBEARS_stochastic_mapping_v1.R', chdir = TRUE)
 
 
 
@@ -1166,18 +1165,18 @@ library(MultinomialCI)
 ###########################################
 # Pick your model name:
 ###########################################
-model_name = "DEC"
-res = resDEC
+model_name = "BAYAREALIKE"
+res = resBAYAREALIKE
 # model_name = "DEC"
 # res = resDEC
 
 #######################################################
 # Plot ancestral states - DEC
 #######################################################
-pdffn = paste0("Psychotria_", model_name, "_v1.pdf")
+pdffn = paste0("3taxa_", model_name, "_v1.pdf")
 pdf(pdffn, width=6, height=6)
 
-analysis_titletxt = paste0(model_name, " on Psychotria")
+analysis_titletxt = paste0(model_name, " on 3taxa")
 
 # Setup
 results_object = res
@@ -1211,7 +1210,7 @@ lnum = 0
 # the same settings will be used for get_inputs_for_stochastic_mapping().
 #######################################################
 BSM_inputs_fn = "BSM_inputs_file.Rdata"
-BSMinputs_runslow = FALSE
+BSMinputs_runslow = TRUE
 if (BSMinputs_runslow == TRUE)
     {
     stochastic_mapping_inputs_list = get_inputs_for_stochastic_mapping(res=res)
@@ -1233,7 +1232,7 @@ if (BSM_runslow == TRUE)
     {
     # Saves to: RES_clado_events_tables.Rdata
     # Saves to: RES_ana_events_tables.Rdata
-    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=100, nummaps_goal=50, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01, master_nodenum_toPrint=0)
+    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=100, nummaps_goal=50, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01)
 
     RES_clado_events_tables = BSM_output$RES_clado_events_tables
     RES_ana_events_tables = BSM_output$RES_ana_events_tables
@@ -1464,22 +1463,17 @@ system(cmdstr)
 
 
 
-#######################################################
-# Get the ranges_list (useful for colors)
-#######################################################
-returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=resDEC$inputs)
-ranges_list = returned_mats$ranges_list
 
 
 #######################################################
 # Convert a time-stratified BSM to a phytools BSM
 #######################################################
 
-res = resDEC
+res = resBAYAREALIKE
 clado_events_table = clado_events_tables[[1]]
 ana_events_table = ana_events_tables[[1]]
 
-tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_tables[[6]], ana_events_table=ana_events_tables[[6]])
+tr_wSimmap = BSM_to_phytools_SM(res=resBAYAREALIKE, clado_events_table=clado_events_table, ana_events_table=ana_events_table)
 summary(tr_wSimmap)
 print(tr_wSimmap)
 countSimmap(tr_wSimmap)
@@ -1490,8 +1484,7 @@ countSimmap(tr_wSimmap)
 pdffn = "BSM_in_phytools_simmap_format.pdf"
 pdf(file=pdffn, width=6, height=6)
 
-cols = setNames(colors_list_for_states, ranges_list) 
-plotSimmap(tr_wSimmap, lwd=3, colors=cols)
+plotSimmap(tr_wSimmap, lwd=3)
 
 dev.off()
 cmdstr = paste0("open ", pdffn)
@@ -1509,7 +1502,7 @@ system(cmdstr)
 # Convert a list of time-stratified BSMs to a phytools list of BSMs
 #######################################################
 
-simmaps_list = BSMs_to_phytools_SMs(res=resDEC, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)
+simmaps_list = BSMs_to_phytools_SMs(res=resBAYAREALIKE, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)
 
 summary(simmaps_list)
 print(simmaps_list)
@@ -1521,7 +1514,9 @@ pdffn = "50BSMs_in_phytools_simmap_format.pdf"
 pdf(file=pdffn, width=6, height=6)
 
 cols = setNames(colors_list_for_states, ranges_list) 
+par(ask=F)
 plotSimmap(simmaps_list, colors=cols, lwd=3, hold=FALSE, add=FALSE, plot=TRUE)
+par(ask=T)
 
 dev.off()
 cmdstr = paste0("open ", pdffn)
