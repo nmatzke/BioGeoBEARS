@@ -2064,6 +2064,9 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 			clado_row_TF = clado_events_table$parent_br == edgenum
 			clado_row_TF[is.na(clado_row_TF)] = FALSE
 		
+		
+		## NJM 2019-03-12_ fix: doubles can be found in time-strat, FIX
+		
 			# Error check
 			if (sum(clado_row_TF) != 1)
 				{

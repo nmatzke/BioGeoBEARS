@@ -1324,7 +1324,17 @@ events_table_into_txt <- function(events_table_for_branch)
 	return(branch_events_txt)
 	}
 
-events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, recalc_abs_ages=TRUE)
+
+
+
+
+
+
+
+
+
+
+events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, recalc_abs_ages=TRUE, trtable_rownums_of_events_txt=NULL)
 	{
 	defaults='
 	events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node
@@ -1369,6 +1379,8 @@ events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, rec
 	noneTF = events_txt_list == "none"
 	keepTF = (noneTF == FALSE)
 	events_txt_list = events_txt_list[keepTF]
+	# Irrelevant if NULL (but just returns NULL)
+	trtable_rownums_of_events_txt = trtable_rownums_of_events_txt[keepTF]
 	
 	#print(events_txt_list)
 	
@@ -1398,6 +1410,15 @@ events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, rec
 	# Get the strata time borders, if needed
 	if (stratTF == TRUE)
 		{
+		if (is.null(trtable_rownums_of_events_txt))
+			{
+			txt = "STOP ERROR in events_txt_list_into_events_table(): You have input a time-stratified 'trtable', so you must also input 'trtable_rownums_of_events_txt', the rownums of the events_txt_list in the trtable."
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			}
+		
+		
 		strata_nums = sort(unique(trtable$stratum))
 		time_tops = sort(unique(trtable$time_top))
 		time_bots = sort(unique(trtable$time_bot))
@@ -1417,6 +1438,11 @@ events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, rec
 		} # END if (stratTF == TRUE)
 					
 
+	# trtable_rownums
+	if (trtable_was_input_TF == TRUE)
+		{
+		trtable_rownums = 1:nrow(trtable)
+		}
 	
 	
 	
@@ -1426,6 +1452,7 @@ events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, rec
 		{
 		#print(events_txt_list)
 		tmptable_rows = events_txt_into_events_table(events_txt_list[i])
+		trtable_rownum = trtable_rownums_of_events_txt[i]
 		# NJM 2015-06-08
 		# NJM 2016-05-05 bug fix: add "as.numeric"
 		#rownums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)
@@ -1440,7 +1467,7 @@ events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, rec
 		#print(tmptable_rows)
 		num_newrows = nrow(tmptable_rows)
 		tmptable = rbind(tmptable, tmptable_rows)
-
+		
 		# Include the trtable, if that is input
 		if (trtable_was_input_TF == TRUE)
 		#if ( (is.null(trtable) == FALSE) && (trtable != list()) )
@@ -1464,31 +1491,52 @@ events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, rec
 				# 2019-03-11 match 				original_tree_nodenums_in_trtable
 				if (stratTF == TRUE)
 					{
-					original_tree_nodenum = original_tree_nodenums_in_trtable[nnr]
-					match_nodecol_TF = trtable$node == original_tree_nodenum
+					# The events_txt_list has SUBnode, not the master tree node
+					#original_tree_nodenum = original_tree_nodenums_in_trtable[nnr]
+					#match_nodecol_TF = trtable$node == original_tree_nodenum
+					
+					match_trtable_TF = trtable_rownum == trtable_rownums
+					#match_SUBnode_TF = as.numeric(tmptable_rows$nodenum_at_top_of_branch[nnr]) >= as.numeric(trtable$SUBnode)
+					#match_brlen_TF = as.numeric(tmptable_rows$brlen[nnr]) >= as.numeric(trtable$SUBedge.length)
 					match_time_tops_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) >= as.numeric(trtable$time_top)
 					match_time_bots_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) < as.numeric(trtable$time_bot)
-					sumTFs = (match_nodecol_TF + match_time_tops_TF + match_time_bots_TF) == 3
+					#sumTFs = (match_nodecol_TF + match_time_tops_TF + match_time_bots_TF) == 3
+					
+					#match_SUBnode_TF[is.na(match_SUBnode_TF)] = FALSE
+					#match_brlen_TF[is.na(match_brlen_TF)] = FALSE
+					match_trtable_TF[is.na(match_trtable_TF)] = FALSE
+					match_time_tops_TF[is.na(match_time_tops_TF)] = FALSE
+					match_time_bots_TF[is.na(match_time_bots_TF)] = FALSE
+					
+					sumTFs = (match_trtable_TF + match_time_tops_TF + match_time_bots_TF) == 3
+					
+					
+					#b cbind(match_nodecol_TF, match_time_tops_TF, match_time_bots_TF)
+					TFcols = cbind(match_trtable_TF, match_time_tops_TF, match_time_bots_TF, sumTFs)
+					#event_time_matches_TF = (match_time_tops_TF + match_time_bots_TF) == 2
+					#trtable[event_time_matches_TF,]
 					
 					# There should only be 1 combination of master tree nodes, and time-stratum
 					if (sum(sumTFs) != 1)
 						{
-						txt = paste0("STOP ERROR in events_txt_list_into_events_table(): ", sumTFs, " rows of input 'trtable' match the branchtop nodenum and stratum specified for this anagenetic event:")
+						txt = paste0("STOP ERROR in events_txt_list_into_events_table(): ", sum(sumTFs), " rows of input 'trtable' match the SUBnode nodenum, SUBedge.length, and stratum specified for this anagenetic event:")
 						cat("\n\n")
 						cat(txt)
+						print("input 'trtable', matching rows:")
+						print(trtable[sumTFs,])
+						print("TFcols:")
+						print(TFcols)
+
 						cat("\n\n")
 						print("i=")
 						print(i)
 						print("nnr=")
 						print(nnr)
+
 						print("tmptable_rows:")
 						print(tmptable_rows)
 						print("tmptable_rows[nnr,]:")
 						print(tmptable_rows[nnr,])
-						print("input 'trtable', matching rows:")
-						print(trtable[sumTFs,])
-						print("sumTFs:")
-						print(sumTFs)
 						
 						stop(txt)
 						} # END if (sumTFs != 1)

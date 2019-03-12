@@ -1,0 +1,2076 @@
+# Load the package (after installation, see above).#
+library(GenSA)    # GenSA is better than optimx (although somewhat slower)#
+library(optimx)    # GenSA is better than optimx (although somewhat slower)#
+library(FD)       # for FD::maxent() (make sure this is up-to-date)#
+library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)#
+library(parallel)#
+#
+########################################################
+# 2018-10-10 update: I have been putting the #
+# updates on CRAN/GitHub#
+# You should use:#
+# rexpokit version 0.26.6 from CRAN#
+# cladoRcpp version 0.15 from CRAN#
+# BioGeoBEARS version 1.1 from GitHub, install with:#
+# library(devtools)#
+# devtools::install_github(repo="nmatzke/BioGeoBEARS")#
+########################################################
+library(rexpokit)#
+library(cladoRcpp)#
+library(BioGeoBEARS)#
+########################################################
+# SETUP: YOUR WORKING DIRECTORY#
+########################################################
+# You will need to set your working directory to match your local system#
+#
+# Note these very handy functions!#
+# Command "setwd(x)" sets your working directory#
+# Command "getwd()" gets your working directory and tells you what it is.#
+# Command "list.files()" lists the files in your working directory#
+# To get help on any command, use "?".  E.g., "?list.files"#
+#
+# Set your working directory for output files#
+# default here is your home directory ("~")#
+# Change this as you like#
+# wd = slashslash(paste0(addslash(extdata_dir), "/examples/BSM_Psychotria/M3areas_allowed/"))#
+# setwd(wd)#
+#
+wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/Psychotria_M3strat/BSM_to_simmap/"#
+setwd(wd)#
+#
+# Double-check your working directory with getwd()#
+getwd()#
+#
+########################################################
+# SETUP: Extension data directory#
+########################################################
+# When R packages contain extra files, they are stored in the "extdata" directory #
+# inside the installed package.#
+##
+# BioGeoBEARS contains various example files and scripts in its extdata directory.#
+# #
+# Each computer operating system might install BioGeoBEARS in a different place, #
+# depending on your OS and settings. #
+# #
+# However, you can find the extdata directory like this:#
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))#
+extdata_dir#
+list.files(extdata_dir)#
+# "system.file" looks in the directory of a specified package (in this case BioGeoBEARS)#
+# The function "np" is just a shortcut for normalizePath(), which converts the #
+# path to the format appropriate for your system (e.g., Mac/Linux use "/", but #
+# Windows uses "\\", if memory serves).#
+#
+# Even when using your own data files, you should KEEP these commands in your #
+# script, since the plot_BioGeoBEARS_results function needs a script from the #
+# extdata directory to calculate the positions of "corners" on the plot. This cannot#
+# be made into a straight up BioGeoBEARS function because it uses C routines #
+# from the package APE which do not pass R CMD check for some reason.#
+#
+########################################################
+# SETUP: YOUR TREE FILE AND GEOGRAPHY FILE#
+########################################################
+# Example files are given below. To run your own data,#
+# make the below lines point to your own files, e.g.#
+# trfn = "/mydata/frogs/frogBGB/tree.newick"#
+# geogfn = "/mydata/frogs/frogBGB/geog.data"#
+#
+########################################################
+# Phylogeny file#
+# Notes: #
+# 1. Must be binary/bifurcating: no polytomies#
+# 2. No negative branchlengths (e.g. BEAST MCC consensus trees sometimes have negative branchlengths)#
+# 3. Be careful of very short branches, as BioGeoBEARS will interpret ultrashort branches as direct ancestors#
+# 4. You can use non-ultrametric trees, but BioGeoBEARS will interpret any tips significantly below the #
+#    top of the tree as fossils!  This is only a good idea if you actually do have fossils in your tree,#
+#    as in e.g. Wood, Matzke et al. (2013), Systematic Biology.#
+# 5. The default settings of BioGeoBEARS make sense for trees where the branchlengths are in units of #
+#    millions of years, and the tree is 1-1000 units tall. If you have a tree with a total height of#
+#    e.g. 0.00001, you will need to adjust e.g. the max values of d and e, or (simpler) multiply all#
+#    your branchlengths to get them into reasonable units.#
+# 6. DON'T USE SPACES IN SPECIES NAMES, USE E.G. "_"#
+########################################################
+# This is the example Newick file for Hawaiian Psychotria#
+# (from Ree & Smith 2008)#
+# "trfn" = "tree file name"#
+trfn = "tree.newick"#
+#
+# Look at the raw Newick file:#
+moref(trfn)#
+pdffn = "tree.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+# Look at your phylogeny:#
+tr = read.tree(trfn)#
+tr#
+plot(tr)#
+title("Example tree")#
+axisPhylo() # plots timescale#
+dev.off()#
+#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)#
+########################################################
+# Geography file#
+# Notes:#
+# 1. This is a PHYLIP-formatted file. This means that in the #
+#    first line, #
+#    - the 1st number equals the number of rows (species)#
+#    - the 2nd number equals the number of columns (number of areas)#
+#    - after a tab, put the areas in parentheses, with spaces: (A B C D)#
+##
+# 1.5. Example first line:#
+#    10    4    (A B C D)#
+# #
+# 2. The second line, and subsequent lines:#
+#    speciesA    0110#
+#    speciesB    0111#
+#    speciesC    0001#
+#         ...#
+# #
+# 2.5a. This means a TAB between the species name and the area 0/1s#
+# 2.5b. This also means NO SPACE AND NO TAB between the area 0/1s.#
+# #
+# 3. See example files at:#
+#    http://phylo.wikidot.com/biogeobears#files#
+# #
+# 4. Make you understand what a PLAIN-TEXT EDITOR is:#
+#    http://phylo.wikidot.com/biogeobears#texteditors#
+##
+# 3. The PHYLIP format is the same format used for C++ LAGRANGE geography files.#
+##
+# 4. All names in the geography file must match names in the phylogeny file.#
+##
+# 5. DON'T USE SPACES IN SPECIES NAMES, USE E.G. "_"#
+##
+# 6. Operational taxonomic units (OTUs) should ideally be phylogenetic lineages, #
+#    i.e. genetically isolated populations.  These may or may not be identical #
+#    with species.  You would NOT want to just use specimens, as each specimen #
+#    automatically can only live in 1 area, which will typically favor DEC+J #
+#    models.  This is fine if the species/lineages really do live in single areas,#
+#    but you wouldn't want to assume this without thinking about it at least. #
+#    In summary, you should collapse multiple specimens into species/lineages if #
+#    data indicates they are the same genetic population.#
+#######################################################
+#
+# This is the example geography file for Hawaiian Psychotria#
+# (from Ree & Smith 2008)#
+geogfn = "geog.data"#
+#
+# Look at the raw geography text file:#
+moref(geogfn)#
+#
+# Look at your geographic range data:#
+tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)#
+tipranges#
+#
+# Maximum range size observed:#
+max(rowSums(dfnums_to_numeric(tipranges@df)))#
+#
+# Set the maximum number of areas any species may occupy; this cannot be larger #
+# than the number of areas you set up, but it can be smaller.#
+max_range_size = 4#
+#
+#####################################################
+#####################################################
+# KEY HINT: The number of states (= number of different possible geographic ranges)#
+# depends on (a) the number of areas and (b) max_range_size.#
+# If you have more than about 500-600 states, the calculations will get REALLY slow,#
+# since the program has to exponentiate a matrix of e.g. 600x600.  Often the computer#
+# will just sit there and crunch, and never get through the calculation of the first#
+# likelihood.#
+# #
+# (this is also what is usually happening when LAGRANGE hangs: you have too many states!)#
+##
+# To check the number of states for a given number of ranges, try:#
+numstates_from_numareas(numareas=4, maxareas=4, include_null_range=TRUE)#
+numstates_from_numareas(numareas=4, maxareas=4, include_null_range=FALSE)#
+numstates_from_numareas(numareas=4, maxareas=3, include_null_range=TRUE)#
+numstates_from_numareas(numareas=4, maxareas=2, include_null_range=TRUE)#
+#
+# Large numbers of areas have problems:#
+numstates_from_numareas(numareas=10, maxareas=10, include_null_range=TRUE)#
+#
+# ...unless you limit the max_range_size:#
+numstates_from_numareas(numareas=10, maxareas=2, include_null_range=TRUE)#
+#####################################################
+#####################################################
+#
+########################################################
+########################################################
+# DEC AND DEC+J ANALYSIS#
+########################################################
+########################################################
+# NOTE: The BioGeoBEARS "DEC" model is identical with #
+# the Lagrange DEC model, and should return identical#
+# ML estimates of parameters, and the same #
+# log-likelihoods, for the same datasets.#
+##
+# Ancestral state probabilities at nodes will be slightly #
+# different, since BioGeoBEARS is reporting the #
+# ancestral state probabilities under the global ML#
+# model, and Lagrange is reporting ancestral state#
+# probabilities after re-optimizing the likelihood#
+# after fixing the state at each node. These will #
+# be similar, but not identical. See Matzke (2014),#
+# Systematic Biology, for discussion.#
+##
+# Also see Matzke (2014) for presentation of the #
+# DEC+J model.#
+########################################################
+########################################################
+#
+########################################################
+########################################################
+#
+########################################################
+# Run DEC#
+########################################################
+#
+# Intitialize a default model (DEC model)#
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+#
+# Give BioGeoBEARS the location of the phylogeny Newick file#
+BioGeoBEARS_run_object$trfn = trfn#
+#
+# Give BioGeoBEARS the location of the geography text file#
+BioGeoBEARS_run_object$geogfn = geogfn#
+#
+# Input the maximum range size#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+# 1. Here, un-comment ONLY the files you want to use.#
+# 2. Also un-comment "BioGeoBEARS_run_object = section_the_tree(...", below.#
+# 3. For example files see (a) extdata_dir, #
+#  or (b) http://phylo.wikidot.com/biogeobears#files#
+#  and BioGeoBEARS Google Group posts for further hints)#
+##
+# Uncomment files you wish to use in time-stratified analyses:#
+BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"#
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+# (use more cores to speed it up; this requires#
+# library(parallel) and/or library(snow). The package "parallel" #
+# is now default on Macs in R 3.0+, but apparently still #
+# has to be typed on some Windows machines. Note: apparently #
+# parallel works on Mac command-line R, but not R.app.#
+# BioGeoBEARS checks for this and resets to 1#
+# core with R.app)#
+#
+# Sparse matrix exponentiation is an option for huge numbers of ranges/states (600+)#
+# I have experimented with sparse matrix exponentiation in EXPOKIT/rexpokit,#
+# but the results are imprecise and so I haven't explored it further.#
+# In a Bayesian analysis, it might work OK, but the ML point estimates are#
+# not identical.#
+# Also, I have not implemented all functions to work with force_sparse=TRUE.#
+# Volunteers are welcome to work on it!!#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up DEC model#
+# (nothing to do; defaults)#
+#
+# Look at the BioGeoBEARS_run_object; it's just a list of settings etc.#
+BioGeoBEARS_run_object#
+#
+# This contains the model object#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object#
+#
+# This table contains the parameters of the model #
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table#
+#
+# Run this to check inputs. Read the error messages if you get them!#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# For a slow analysis, run once, then set runslow=FALSE to just #
+# load the saved result.#
+runslow = FALSE#
+resfn = "Psychotria_DEC_M3areas_allowed_v1.Rdata"#
+if (runslow)#
+    {#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+    resDEC = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resDEC = res#
+    }#
+#
+########################################################
+# Run DEC+J#
+########################################################
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+BioGeoBEARS_run_object$trfn = trfn#
+BioGeoBEARS_run_object$geogfn = geogfn#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"#
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up DEC+J model#
+# Get the ML parameter values from the 2-parameter nested model#
+# (this will ensure that the 3-parameter model always does at least as good)#
+dstart = resDEC$outputs@params_table["d","est"]#
+estart = resDEC$outputs@params_table["e","est"]#
+jstart = 0.0001#
+#
+# Input starting values for d, e#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","init"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","est"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","init"] = estart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","est"] = estart#
+#
+# Add j as a free parameter#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = jstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart#
+#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+resfn = "Psychotria_DEC+J_M3areas_allowed_v1.Rdata"#
+runslow = FALSE#
+if (runslow)#
+    {#
+    #sourceall("/Dropbox/_njm/__packages/BioGeoBEARS_setup/")#
+#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+#
+    resDECj = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resDECj = res#
+    }#
+#
+########################################################
+# PDF plots#
+########################################################
+pdffn = "Psychotria_DEC_vs_DEC+J_M3areas_allowed_v1.pdf"#
+pdf(pdffn, width=6, height=6)#
+#
+########################################################
+# Plot ancestral states - DEC#
+########################################################
+analysis_titletxt ="BioGeoBEARS DEC on Psychotria M3areas_allowed_unconstrained"#
+#
+# Setup#
+results_object = resDEC#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+########################################################
+# Plot ancestral states - DECJ#
+########################################################
+analysis_titletxt ="BioGeoBEARS DEC+J on Psychotria M3areas_allowed_unconstrained"#
+#
+# Setup#
+results_object = resDECj#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res1 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+dev.off()  # Turn off PDF#
+cmdstr = paste("open ", pdffn, sep="")#
+system(cmdstr) # Plot it#
+#
+########################################################
+########################################################
+# DIVALIKE AND DIVALIKE+J ANALYSIS#
+########################################################
+########################################################
+# NOTE: The BioGeoBEARS "DIVALIKE" model is not identical with #
+# Ronquist (1997)'s parsimony DIVA. It is a likelihood#
+# interpretation of DIVA, constructed by modelling DIVA's#
+# processes the way DEC does, but only allowing the #
+# processes DIVA allows (widespread vicariance: yes; subset#
+# sympatry: no; see Ronquist & Sanmartin 2011, Figure 4).#
+##
+# DIVALIKE is a likelihood interpretation of parsimony#
+# DIVA, and it is "like DIVA" -- similar to, but not#
+# identical to, parsimony DIVA.#
+##
+# I thus now call the model "DIVALIKE", and you should also. ;-)#
+########################################################
+########################################################
+#
+########################################################
+# Run DIVALIKE#
+########################################################
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+BioGeoBEARS_run_object$trfn = trfn#
+BioGeoBEARS_run_object$geogfn = geogfn#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"#
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up DIVALIKE model#
+# Remove subset-sympatry#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","init"] = 0.0#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","est"] = 0.0#
+#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ysv","type"] = "2-j"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ys","type"] = "ysv*1/2"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["y","type"] = "ysv*1/2"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","type"] = "ysv*1/2"#
+#
+# Allow classic, widespread vicariance; all events equiprobable#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","init"] = 0.5#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","est"] = 0.5#
+#
+# No jump dispersal/founder-event speciation#
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"#
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = 0.01#
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = 0.01#
+#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+runslow = FALSE#
+resfn = "Psychotria_DIVALIKE_M3areas_allowed_v1.Rdata"#
+if (runslow)#
+    {#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+    resDIVALIKE = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resDIVALIKE = res#
+    }#
+#
+########################################################
+# Run DIVALIKE+J#
+########################################################
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+BioGeoBEARS_run_object$trfn = trfn#
+BioGeoBEARS_run_object$geogfn = geogfn#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"#
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up DIVALIKE+J model#
+# Get the ML parameter values from the 2-parameter nested model#
+# (this will ensure that the 3-parameter model always does at least as good)#
+dstart = resDIVALIKE$outputs@params_table["d","est"]#
+estart = resDIVALIKE$outputs@params_table["e","est"]#
+jstart = 0.0001#
+#
+# Input starting values for d, e#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","init"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","est"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","init"] = estart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","est"] = estart#
+#
+# Remove subset-sympatry#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","init"] = 0.0#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","est"] = 0.0#
+#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ysv","type"] = "2-j"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ys","type"] = "ysv*1/2"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["y","type"] = "ysv*1/2"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","type"] = "ysv*1/2"#
+#
+# Allow classic, widespread vicariance; all events equiprobable#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","init"] = 0.5#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","est"] = 0.5#
+#
+# Add jump dispersal/founder-event speciation#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = jstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart#
+#
+# Under DIVALIKE+J, the max of "j" should be 2, not 3 (as is default in DEC+J)#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","min"] = 0.00001#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","max"] = 1.99999#
+#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+resfn = "Psychotria_DIVALIKE+J_M3areas_allowed_v1.Rdata"#
+runslow = FALSE#
+if (runslow)#
+    {#
+    #sourceall("/Dropbox/_njm/__packages/BioGeoBEARS_setup/")#
+#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+#
+    resDIVALIKEj = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resDIVALIKEj = res#
+    }#
+#
+pdffn = "Psychotria_DIVALIKE_vs_DIVALIKE+J_M3areas_allowed_v1.pdf"#
+pdf(pdffn, width=6, height=6)#
+#
+########################################################
+# Plot ancestral states - DIVALIKE#
+########################################################
+analysis_titletxt ="BioGeoBEARS DIVALIKE on Psychotria M3areas_allowed_unconstrained"#
+#
+# Setup#
+results_object = resDIVALIKE#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+########################################################
+# Plot ancestral states - DIVALIKE+J#
+########################################################
+analysis_titletxt ="BioGeoBEARS DIVALIKE+J on Psychotria M3areas_allowed_unconstrained"#
+#
+# Setup#
+results_object = resDIVALIKEj#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res1 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+dev.off()#
+cmdstr = paste("open ", pdffn, sep="")#
+system(cmdstr)#
+#
+########################################################
+########################################################
+# BAYAREALIKE AND BAYAREALIKE+J ANALYSIS#
+########################################################
+########################################################
+# NOTE: As with DIVA, the BioGeoBEARS BayArea-like model is #
+# not identical with the full Bayesian model implemented #
+# in the "BayArea" program of Landis et al. (2013). #
+##
+# Instead, this is a simplified likelihood interpretation#
+# of the model.  Basically, in BayArea and BioGeoBEARS-BAYAREALIKE, #
+# "d" and "e" work like they do in the DEC model of Lagrange #
+# (and BioGeoBEARS), and then BayArea's cladogenesis assumption#
+# (which is that nothing in particular happens at cladogenesis) is #
+# replicated by BioGeoBEARS.#
+##
+# This leaves out 3 important things that are in BayArea:#
+# 1. Distance dependence (you can add this with a distances #
+#    matrix + the "x" parameter in BioGeoBEARS, however)#
+# 2. A correction for disallowing "e" events that drive#
+#    a species extinct (a null geographic range)#
+# 3. The neat Bayesian sampling of histories, which allows#
+#    analyses on large numbers of areas.#
+##
+# The main purpose of having a "BAYAREALIKE" model is #
+# to test the importance of the cladogenesis model on #
+# particular datasets. Does it help or hurt the data #
+# likelihood if there is no special cladogenesis process?#
+# #
+# BAYAREALIKE is a likelihood interpretation of BayArea,#
+# and it is "like BayArea" -- similar to, but not#
+# identical to, Bayesian BayArea.#
+# I thus now call the model "BAYAREALIKE", and you should also. ;-)#
+########################################################
+########################################################
+#
+########################################################
+# Run BAYAREALIKE#
+########################################################
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+BioGeoBEARS_run_object$trfn = trfn#
+BioGeoBEARS_run_object$geogfn = geogfn#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"#
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up BAYAREALIKE model#
+# No subset sympatry#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","init"] = 0.0#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","est"] = 0.0#
+#
+# No vicariance#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","init"] = 0.0#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","est"] = 0.0#
+#
+# No jump dispersal/founder-event speciation#
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"#
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = 0.01#
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = 0.01#
+#
+# Adjust linkage between parameters#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ysv","type"] = "1-j"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ys","type"] = "ysv*1/1"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["y","type"] = "1-j"#
+#
+# Only sympatric/range-copying (y) events allowed, and with #
+# exact copying (both descendants always the same size as the ancestor)#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","init"] = 0.9999#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","est"] = 0.9999#
+#
+# Check the inputs#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+runslow = FALSE#
+resfn = "Psychotria_BAYAREALIKE_M3areas_allowed_v1.Rdata"#
+if (runslow)#
+    {#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+    resBAYAREALIKE = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resBAYAREALIKE = res#
+    }#
+#
+########################################################
+# Run BAYAREALIKE+J#
+########################################################
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+BioGeoBEARS_run_object$trfn = trfn#
+BioGeoBEARS_run_object$geogfn = geogfn#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+BioGeoBEARS_run_object$dispersal_multipliers_fn = "dispersal_multipliers.txt"#
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up BAYAREALIKE+J model#
+# Get the ML parameter values from the 2-parameter nested model#
+# (this will ensure that the 3-parameter model always does at least as good)#
+dstart = resBAYAREALIKE$outputs@params_table["d","est"]#
+estart = resBAYAREALIKE$outputs@params_table["e","est"]#
+jstart = 0.0001#
+#
+# Input starting values for d, e#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","init"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","est"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","init"] = estart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","est"] = estart#
+#
+# No subset sympatry#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","init"] = 0.0#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["s","est"] = 0.0#
+#
+# No vicariance#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","init"] = 0.0#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["v","est"] = 0.0#
+#
+# *DO* allow jump dispersal/founder-event speciation (set the starting value close to 0)#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = jstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart#
+#
+# Under BAYAREALIKE+J, the max of "j" should be 1, not 3 (as is default in DEC+J) or 2 (as in DIVALIKE+J)#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","max"] = 0.99999#
+#
+# Adjust linkage between parameters#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ysv","type"] = "1-j"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["ys","type"] = "ysv*1/1"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["y","type"] = "1-j"#
+#
+# Only sympatric/range-copying (y) events allowed, and with #
+# exact copying (both descendants always the same size as the ancestor)#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","type"] = "fixed"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","init"] = 0.9999#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","est"] = 0.9999#
+#
+# NOTE (NJM, 2014-04): BAYAREALIKE+J seems to crash on some computers, usually Windows #
+# machines. I can't replicate this on my Mac machines, but it is almost certainly#
+# just some precision under-run issue, when optim/optimx tries some parameter value #
+# just below zero.  The "min" and "max" options on each parameter are supposed to#
+# prevent this, but apparently optim/optimx sometimes go slightly beyond #
+# these limits.  Anyway, if you get a crash, try raising "min" and lowering "max" #
+# slightly for each parameter:#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","min"] = 0.0000001#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","max"] = 4.9999999#
+#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"] = 0.0000001#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","max"] = 4.9999999#
+#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","min"] = 0.00001#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","max"] = 0.99999#
+#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+resfn = "Psychotria_BAYAREALIKE+J_M3areas_allowed_v1.Rdata"#
+runslow = FALSE#
+if (runslow)#
+    {#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+#
+    resBAYAREALIKEj = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resBAYAREALIKEj = res#
+    }#
+#
+pdffn = "Psychotria_BAYAREALIKE_vs_BAYAREALIKE+J_M3areas_allowed_v1.pdf"#
+pdf(pdffn, width=6, height=6)#
+#
+########################################################
+# Plot ancestral states - BAYAREALIKE#
+########################################################
+analysis_titletxt ="BioGeoBEARS BAYAREALIKE on Psychotria M3areas_allowed_unconstrained"#
+#
+# Setup#
+results_object = resBAYAREALIKE#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+########################################################
+# Plot ancestral states - BAYAREALIKE+J#
+########################################################
+analysis_titletxt ="BioGeoBEARS BAYAREALIKE+J on Psychotria M3areas_allowed_unconstrained"#
+#
+# Setup#
+results_object = resBAYAREALIKEj#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res1 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+dev.off()#
+cmdstr = paste("open ", pdffn, sep="")#
+system(cmdstr)#
+#
+##########################################################################
+##########################################################################
+##########################################################################
+##########################################################################
+# #
+# CALCULATE SUMMARY STATISTICS TO COMPARE#
+# DEC, DEC+J, DIVALIKE, DIVALIKE+J, BAYAREALIKE, BAYAREALIKE+J#
+# #
+##########################################################################
+##########################################################################
+##########################################################################
+##########################################################################
+#
+##########################################################################
+##########################################################################
+# REQUIRED READING:#
+##
+# Practical advice / notes / basic principles on statistical model #
+#    comparison in general, and in BioGeoBEARS:#
+# http://phylo.wikidot.com/advice-on-statistical-model-comparison-in-biogeobears#
+##########################################################################
+##########################################################################
+#
+# Set up empty tables to hold the statistical results#
+restable = NULL#
+teststable = NULL#
+#
+########################################################
+# Statistics -- DEC vs. DEC+J#
+########################################################
+# We have to extract the log-likelihood differently, depending on the #
+# version of optim/optimx#
+LnL_2 = get_LnL_from_BioGeoBEARS_results_object(resDEC)#
+LnL_1 = get_LnL_from_BioGeoBEARS_results_object(resDECj)#
+#
+numparams1 = 3#
+numparams2 = 2#
+stats = AICstats_2models(LnL_1, LnL_2, numparams1, numparams2)#
+stats#
+#
+# DEC, null model for Likelihood Ratio Test (LRT)#
+res2 = extract_params_from_BioGeoBEARS_results_object(results_object=resDEC, returnwhat="table", addl_params=c("j"), paramsstr_digits=4)#
+# DEC+J, alternative model for Likelihood Ratio Test (LRT)#
+res1 = extract_params_from_BioGeoBEARS_results_object(results_object=resDECj, returnwhat="table", addl_params=c("j"), paramsstr_digits=4)#
+#
+# The null hypothesis for a Likelihood Ratio Test (LRT) is that two models#
+# confer the same likelihood on the data. See: Brian O'Meara's webpage:#
+# http://www.brianomeara.info/tutorials/aic#
+# ...for an intro to LRT, AIC, and AICc#
+#
+rbind(res2, res1)#
+tmp_tests = conditional_format_table(stats)#
+#
+restable = rbind(restable, res2, res1)#
+teststable = rbind(teststable, tmp_tests)#
+#
+########################################################
+# Statistics -- DIVALIKE vs. DIVALIKE+J#
+########################################################
+# We have to extract the log-likelihood differently, depending on the #
+# version of optim/optimx#
+LnL_2 = get_LnL_from_BioGeoBEARS_results_object(resDIVALIKE)#
+LnL_1 = get_LnL_from_BioGeoBEARS_results_object(resDIVALIKEj)#
+#
+numparams1 = 3#
+numparams2 = 2#
+stats = AICstats_2models(LnL_1, LnL_2, numparams1, numparams2)#
+stats#
+#
+# DIVALIKE, null model for Likelihood Ratio Test (LRT)#
+res2 = extract_params_from_BioGeoBEARS_results_object(results_object=resDIVALIKE, returnwhat="table", addl_params=c("j"), paramsstr_digits=4)#
+# DIVALIKE+J, alternative model for Likelihood Ratio Test (LRT)#
+res1 = extract_params_from_BioGeoBEARS_results_object(results_object=resDIVALIKEj, returnwhat="table", addl_params=c("j"), paramsstr_digits=4)#
+#
+rbind(res2, res1)#
+conditional_format_table(stats)#
+#
+tmp_tests = conditional_format_table(stats)#
+#
+restable = rbind(restable, res2, res1)#
+teststable = rbind(teststable, tmp_tests)#
+#
+########################################################
+# Statistics -- BAYAREALIKE vs. BAYAREALIKE+J#
+########################################################
+# We have to extract the log-likelihood differently, depending on the #
+# version of optim/optimx#
+LnL_2 = get_LnL_from_BioGeoBEARS_results_object(resBAYAREALIKE)#
+LnL_1 = get_LnL_from_BioGeoBEARS_results_object(resBAYAREALIKEj)#
+#
+numparams1 = 3#
+numparams2 = 2#
+stats = AICstats_2models(LnL_1, LnL_2, numparams1, numparams2)#
+stats#
+#
+# BAYAREALIKE, null model for Likelihood Ratio Test (LRT)#
+res2 = extract_params_from_BioGeoBEARS_results_object(results_object=resBAYAREALIKE, returnwhat="table", addl_params=c("j"), paramsstr_digits=4)#
+# BAYAREALIKE+J, alternative model for Likelihood Ratio Test (LRT)#
+res1 = extract_params_from_BioGeoBEARS_results_object(results_object=resBAYAREALIKEj, returnwhat="table", addl_params=c("j"), paramsstr_digits=4)#
+#
+rbind(res2, res1)#
+conditional_format_table(stats)#
+#
+tmp_tests = conditional_format_table(stats)#
+#
+restable = rbind(restable, res2, res1)#
+teststable = rbind(teststable, tmp_tests)#
+#
+##########################################################################
+# ASSEMBLE RESULTS TABLES: DEC, DEC+J, DIVALIKE, DIVALIKE+J, BAYAREALIKE, BAYAREALIKE+J#
+##########################################################################
+teststable$alt = c("DEC+J", "DIVALIKE+J", "BAYAREALIKE+J")#
+teststable$null = c("DEC", "DIVALIKE", "BAYAREALIKE")#
+row.names(restable) = c("DEC", "DEC+J", "DIVALIKE", "DIVALIKE+J", "BAYAREALIKE", "BAYAREALIKE+J")#
+restable = put_jcol_after_ecol(restable)#
+restable#
+#
+# Look at the results!!#
+restable#
+teststable#
+#
+########################################################
+# Save the results tables for later -- check for e.g.#
+# convergence issues#
+########################################################
+#
+# Loads to "restable"#
+save(restable, file="restable_v1.Rdata")#
+load(file="restable_v1.Rdata")#
+#
+# Loads to "teststable"#
+save(teststable, file="teststable_v1.Rdata")#
+load(file="teststable_v1.Rdata")#
+#
+# Also save to text files#
+write.table(restable, file="restable.txt", quote=FALSE, sep="\t")#
+write.table(unlist_df(teststable), file="teststable.txt", quote=FALSE, sep="\t")#
+#
+########################################################
+# Model weights of all six models#
+########################################################
+restable2 = restable#
+#
+# With AICs:#
+AICtable = calc_AIC_column(LnL_vals=restable$LnL, nparam_vals=restable$numparams)#
+restable = cbind(restable, AICtable)#
+restable_AIC_rellike = AkaikeWeights_on_summary_table(restable=restable, colname_to_use="AIC")#
+restable_AIC_rellike = put_jcol_after_ecol(restable_AIC_rellike)#
+restable_AIC_rellike#
+#
+# With AICcs -- factors in sample size#
+# samplesize = length(tr$tip.label)#
+# AICtable = calc_AICc_column(LnL_vals=restable$LnL, nparam_vals=restable$numparams, samplesize=samplesize)#
+# restable2 = cbind(restable2, AICtable)#
+# restable_AICc_rellike = AkaikeWeights_on_summary_table(restable=restable2, colname_to_use="AICc")#
+# restable_AICc_rellike = put_jcol_after_ecol(restable_AICc_rellike)#
+# restable_AICc_rellike#
+#
+# Also save to text files#
+write.table(restable_AIC_rellike, file="restable_AIC_rellike.txt", quote=FALSE, sep="\t")#
+#write.table(restable_AICc_rellike, file="restable_AICc_rellike.txt", quote=FALSE, sep="\t")#
+#
+# Save with nice conditional formatting#
+write.table(conditional_format_table(restable_AIC_rellike), file="restable_AIC_rellike_formatted.txt", quote=FALSE, sep="\t")#
+#write.table(conditional_format_table(restable_AICc_rellike), file="restable_AICc_rellike_formatted.txt", quote=FALSE, sep="\t")#
+#source('/GitHub/BioGeoBEARS/R/BioGeoBEARS_stochastic_mapping_v1.R', chdir = TRUE)#
+library(MultinomialCI)#
+#
+############################################
+# Pick your model name:#
+############################################
+model_name = "DEC"#
+res = resDEC#
+# model_name = "DEC"#
+# res = resDEC#
+#
+########################################################
+# Plot ancestral states - DEC#
+########################################################
+pdffn = paste0("Psychotria_", model_name, "_v1.pdf")#
+pdf(pdffn, width=6, height=6)#
+#
+analysis_titletxt = paste0(model_name, " on Psychotria")#
+#
+# Setup#
+results_object = res#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+dev.off()  # Turn off PDF#
+cmdstr = paste("open ", pdffn, sep="")#
+system(cmdstr) # Plot it#
+#
+########################################################
+# Stochastic mapping on DEC M3b stratified with islands coming up#
+########################################################
+clado_events_tables = NULL#
+ana_events_tables = NULL#
+lnum = 0#
+#
+########################################################
+# Get the inputs for Biogeographical Stochastic Mapping#
+# Note: this can be slow for large state spaces and trees, since #
+# the independent likelihoods for each branch are being pre-calculated#
+# E.g., for 10 areas, this requires calculation of a 1024x1024 matrix#
+# for each branch.  On a tree with ~800 tips and thus ~1600 branches, this was about 1.6 gigs#
+# for storage of "BSM_inputs_file.Rdata".#
+# Update: 2015-09-23 -- now, if you used multicore functionality for the ML analysis,#
+# the same settings will be used for get_inputs_for_stochastic_mapping().#
+########################################################
+BSM_inputs_fn = "BSM_inputs_file.Rdata"#
+BSMinputs_runslow = FALSE#
+if (BSMinputs_runslow == TRUE)#
+    {#
+    stochastic_mapping_inputs_list = get_inputs_for_stochastic_mapping(res=res)#
+    save(stochastic_mapping_inputs_list, file=BSM_inputs_fn)#
+    } else {#
+    # Loads to "stochastic_mapping_inputs_list"#
+    load(BSM_inputs_fn)#
+    } # END if (runInputsSlow)#
+#
+# Check inputs (doesn't work the same on unconstr)#
+names(stochastic_mapping_inputs_list)#
+stochastic_mapping_inputs_list$phy2#
+stochastic_mapping_inputs_list$COO_weights_columnar#
+stochastic_mapping_inputs_list$unconstr#
+set.seed(seed=as.numeric(54321))#
+#
+BSM_runslow = TRUE
+stochastic_mapping_inputs_list=stochastic_mapping_inputs_list; maxnum_maps_to_try=1; nummaps_goal=1; maxtries_per_branch=40000; save_after_every_try=TRUE; savedir=getwd(); seedval=12345; wait_before_save=0.01;master_nodenum_toPrint=0
+options(stringsAsFactors=FALSE)#
+	# Starter#
+	clado_events_tables = list()#
+	ana_events_tables = list()#
+	# 2016-05-05_bug fix#
+	lnum = 0#
+	# Reconcile # of maps to try with nummaps goal#
+	if (nummaps_goal > maxnum_maps_to_try)#
+		{#
+		maxnum_maps_to_try = 2 * nummaps_goal#
+		} # END if (nummaps_goal > maxnum_maps_to_try)#
+	# Set time-stratification#
+	stratified = FALSE#
+	if ((is.numeric(res$inputs$timeperiods))) #&& (length(inputs$timeperiods) > 1))#
+		{#
+		stratified = TRUE#
+		strat_TF = TRUE#
+		} else {#
+		stratified = FALSE#
+		strat_TF = FALSE		#
+		}#
+	# Loop through the number of attempts#
+	m=1
+# Initialize#
+		stochastic_mapping_results = NA#
+		clado_events_table = NA#
+		ana_events_table = NA#
+		# Skip loop once you get to nummaps_goal#
+		# (the desired number of successes)#
+		if (lnum >= nummaps_goal)#
+			{#
+			next()#
+			}#
+		startseed = seedval + m#
+#
+		#print(paste0("runBSM startseed = ", startseed))#
+		# Run stratified or non-stratified stochastic mapping
+cmdstr = paste0("stochastic_mapping_results = stochastic_mapping_on_stratified(res=res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxtries=", maxtries_per_branch, ", seedval=", startseed, ", master_nodenum_toPrint=master_nodenum_toPrint)")
+cmdstr
+try_result = try(expr=eval(parse(text=cmdstr)))
+cmdstr
+maxtries=40000; seedval=12346; master_nodenum_toPrint=master_nodenum_toPrint
+options(stringsAsFactors=FALSE)#
+#
+	# Set the seed#
+	#print(paste0("stochastic_mapping_on_stratified seedval=", seedval, sep=""))#
+	if (seedval > 2147483647)#
+		{#
+		seedval = seedval %% 2147483647#
+		}#
+	set.seed(seedval)#
+	# Seed increment counter for tree pieces#
+	treepiece_seed_counter_increment = 90127 # (large prime number)#
+	treepiece_seed_counter = 1#
+	# Set stratified=TRUE, obviously -- put in error catch for non-stratified analysis.#
+	if (is.na(res$inputs$timesfn) == TRUE)#
+		{#
+		stratified=FALSE#
+		errortxt = "STOP ERROR in stochastic_mapping_on_stratified().\n\nThe 'res' object that you input to this function has no input times filename.\n\nSpecifically, res$inputs$timesfn equals NA.  This suggests that the 'res' input\n\nwas generated by a non-stratified analysis.  In that case, you should use\n\nstochastic_map_given_inputs() instead of stochastic_mapping_on_stratified() for \n\nBiogeographical Stochastic Mapping (BSM) in BioGeoBEARS\n\n."#
+		cat(errortxt)#
+		stop(errortxt)		#
+		} else {#
+		stratified=TRUE#
+		}#
+	# Get results from the likelihood analysis#
+	# (for input to:#
+	#  get_tip_likelihoods_of_subbranch_from_resCondlikes_given_master_table )#
+	master_table = res$inputs$master_table#
+	condlikes = res$condlikes_table#
+	relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE = res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE#
+	# Error check#
+	if (is.null(relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE))#
+		{#
+		errortxt = "STOP ERROR in stochastic_mapping_on_stratified():\n\nres$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE is NULL.\n\nThis will occur on results_objects (res) that were made by bears_optim_run()\n before about May 2014. Please re-run the ML inference with updated package/sourcefiles before\nrunning Biogeographic Stochastic Mapping.\n\nOr, perhaps you are accidentally using stochastic_mapping_on_stratified() when your input ML analysis was non-stratified. In that case, you should use stochastic_map_given_inputs() instead.\n\nHave a nice day.\n\n"#
+		cat(errortxt)#
+		stop(errortxt)#
+		} # END if (is.null(relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE))#
+	# Get the root state#
+	num_timeperiods = length(res$inputs$timeperiods)#
+	stochastic_mapping_inputs = stochastic_mapping_inputs_list[[num_timeperiods]]#
+	subtable = stochastic_mapping_inputs$master_table_timeperiod_i#
+	rootTF = subtable$node.type == "root"#
+	if (sum(rootTF) != 1)#
+		{#
+		errortxt = paste("\n\nERROR: Your bottom tree section, timeperiod_i=", num_timeperiods, ", does not contain a node of node.type 'root'\nin $master_table_timeperiod_i:\n\n", sep="")#
+		cat(errortxt)#
+		} else {#
+		rootnode = subtable$node[rootTF]#
+		}#
+	rootnode#
+#
+	numstates = ncol(res$ML_marginal_prob_each_state_at_branch_top_AT_node)#
+	node_stateprobs = res$ML_marginal_prob_each_state_at_branch_top_AT_node[rootnode,]#
+	statenums = 1:numstates#
+	statenum_1based = sample(x=statenums, size=1, replace=TRUE, prob=node_stateprobs)#
+	statenum_1based#
+#
+	if (is.na(statenum_1based) == TRUE)#
+		{#
+		txt = paste0("STOP ERROR_line1013 in stochastic_map_given_inputs(): statenum_1based is NA.")#
+		cat("\n\n")#
+		cat(txt)#
+		cat("\n\n")#
+#
+		print("node_stateprobs:")#
+		print(node_stateprobs)#
+		stop(txt)#
+		}#
+	# Store the root state in the master table#
+	stochastic_mapping_inputs_list[[num_timeperiods]]$master_table_timeperiod_i$sampled_states_AT_nodes[rootTF] = statenum_1based#
+	# The treepiece in the BOTTOM stratum should ALWAYS be a subtree and #
+	# NEVER a root branch#
+#
+	# Now, you have to walk up the time pieces (including root branches)#
+	timeperiod_i = num_timeperiods#
+	for (timeperiod_i in num_timeperiods:1)#
+		{#
+		stratum = timeperiod_i#
+		timeperiod_i_up = timeperiod_i - 1#
+		stochastic_mapping_inputs = stochastic_mapping_inputs_list[[timeperiod_i]]#
+		master_table_timeperiod_i = stochastic_mapping_inputs$master_table_timeperiod_i#
+# 		if (any(is.na(master_table_timeperiod_i$sampled_states_AT_nodes)))#
+# 			{#
+# 			txt = paste0("STOP ERROR_line1085 in (): Some of master_table_timeperiod_i$sampled_states_AT_nodes are NA. Specifically, these:")#
+# 			cat("\n\n")#
+# 			cat(txt)#
+# 			print("print( (1:length(master_table_timeperiod_i$sampled_states_AT_nodes))[is.na(master_table_timeperiod_i$sampled_states_AT_nodes)] )")#
+# 		#
+# 			print( (1:length(master_table_timeperiod_i$sampled_states_AT_nodes))[is.na(master_table_timeperiod_i$sampled_states_AT_nodes)] )#
+# 			print("timeperiod_i")#
+# 			print(timeperiod_i)#
+# #
+# 			print("piecenum")#
+# 			print(piecenum)#
+# 		#
+# 			cat("\n\n")#
+# 			stop(txt)#
+# 			}#
+		tree_sections = stochastic_mapping_inputs$tree_sections_list#
+		tree_pieces = tree_sections$return_pieces_list#
+		num_pieces = length(tree_pieces)#
+		# Get the independent likelihoods#
+		independent_likelihoods_by_tree_piece_for_timeperiod_i = stochastic_mapping_inputs$independent_likelihoods_by_tree_piece_for_timeperiod_i#
+		# Get the transition rate parameters#
+		Qmat = stochastic_mapping_inputs$Qmat#
+		COO_weights_columnar = stochastic_mapping_inputs$COO_weights_columnar#
+		Rsp_rowsums = stochastic_mapping_inputs$Rsp_rowsums#
+		state_indices_0based = stochastic_mapping_inputs$state_indices_0based#
+		ranges_list = stochastic_mapping_inputs$ranges_list#
+		areas = stochastic_mapping_inputs$areas#
+		piecenum = 1#
+		for (piecenum in 1:num_pieces)#
+			{#
+			# 2016-05-07_bugfix#
+# 			seedval = 24785446#
+# 			timeperiod_i =1#
+# 			piecenum = 10#
+			#print("Apiecenum:")#
+			tree_piece = tree_pieces[[piecenum]]#
+#
+			error_check_Psychotria_all_tips_size1 = FALSE#
+			if (error_check_Psychotria_all_tips_size1)#
+				{#
+				cat("\n\n\n\n")#
+				print("timeperiod_i")#
+				print(timeperiod_i)#
+				print("stratum")#
+				print(stratum)#
+#
+				print("piecenum")#
+				print(piecenum)#
+				} # END if (error_check_Psychotria_all_tips_size1)#
+			if (is.numeric(tree_piece))#
+				{#
+				#print("Apiecenum:")#
+				#print(tree_piece)#
+				# Piece is a single branch; stochastically map on just that branch#
+				single_branch = TRUE#
+				########################################################
+				# NOTE: For SINGLE BRANCHES, let's use:#
+				# sampled_states_AT_brbots = state at the bottom of the branch#
+				# 							 (previously sampled)#
+				# sampled_states_AT_nodes  = state at the top of the branch#
+				# 							 (sampled at the end of this step)#
+				########################################################
+				# Simulate up from the (pre-determined) bottom of the branch#
+				#master_table_timeperiod_i$sampled_states_AT_brbots[subtable_rownum] = 2#
+				# Get the pre-determined starting state#
+				rowTF = master_table_timeperiod_i$piecenum == piecenum#
+				subtable_rownum = (1:nrow(master_table_timeperiod_i))[rowTF]#
+				starting_state_1based = master_table_timeperiod_i$sampled_states_AT_brbots[subtable_rownum]#
+				starting_state_1based#
+				#print("print(timeperiod_i):")#
+				#print(timeperiod_i)#
+#
+				#print("print(subtable_rownum):")#
+				#print(subtable_rownum)#
+				#print("print(master_table_timeperiod_i[subtable_rownum, ]):")#
+				#print(master_table_timeperiod_i[subtable_rownum, ])#
+				if (isblank_TF(starting_state_1based) == TRUE)#
+					{#
+					stop("STOP_line_1086")#
+					}#
+				# Find the downpass conditional likelihoods (normalized) that have#
+				# been pre-calculated#
+				# #
+				# Inputs:#
+				# res$condlikes -- contains downpass branch-top likelihoods for#
+				# nodes at the tops of branches in subtrees, and for the #
+				# bottoms of subbranches #
+#
+				# res$condlikes -- contains downpass branch-top likelihoods for#
+				# nodes at the tops of branches in subtrees, and for the #
+				# bottoms of subbranches #
+				# Contains all of the tree pieces and their references to the master tree#
+				# res$inputs$master_table#
+				# START CHECK IF THERE IS ONLY ONE ROW (redundant)#
+				TF1 = res$inputs$master_table$node == master_table_timeperiod_i$node[subtable_rownum]#
+				TF2 = res$inputs$master_table$stratum == master_table_timeperiod_i$stratum[subtable_rownum]#
+				TF3 = res$inputs$master_table$piecenum == master_table_timeperiod_i$piecenum[subtable_rownum]#
+				TF4 = res$inputs$master_table$piececlass != "subtree"#
+				TF = (TF1 + TF2 + TF3 + TF4) == 4#
+				rownums = 1:nrow(res$inputs$master_table)#
+				rownum_master_table = rownums[TF]#
+				rownum = rownum_master_table#
+				#master_nodenum = res$inputs$master_table$node[rownum_master_table]#
+				#print(master_nodenum)#
+				if (length(rownum) != 1)#
+					{#
+					errortxt = paste("\n\nERROR in identifying corresponding subbranch in res$inputs$master_table.\nlength(rownum) should be 1, but is actually: ", length(rownum), "\n\n", sep="")#
+					cat(errortxt)#
+					cat("\n\n")#
+					cat("timeperiod_i=", timeperiod_i, sep="")#
+					cat("\n")#
+					cat("piecenum=", piecenum, sep="")#
+					cat("\n\n")#
+					cat("master_table_timeperiod_i:")#
+					cat("\n\n")#
+					printall(master_table_timeperiod_i)#
+					stop("\n\nStopping on error.")#
+					} # END check if there is only 1 row#
+				# Inputs#
+				condlikes = res$condlikes#
+				relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE = res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE#
+				# Get the tip likelihoods, including subbranches in the#
+				# top stratum (#1) corresponding to master_tree tips, and#
+				# fossil tips which will also be in the master_tree_tips#
+				#print("print(AC_rowsums_condlikes):")#
+				#print(sum(rowSums(condlikes) == 0))#
+#
+				#print("print(AC_relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE):")#
+				#print(sum(rowSums(relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE) == 0))#
+				downpass_condlikes_at_branch_top = get_tip_likelihoods_of_subbranch_from_resCondlikes_given_master_table(stratum=stratum, piecenum=piecenum, master_table=master_table, condlikes=condlikes, relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE=relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS_TABLE)#
+				# really these are downpass relprobs, but whatever#
+				# Normalize just to make sure#
+				#print("print(AC_downpass_condlikes_at_branch_top):")#
+				#print(downpass_condlikes_at_branch_top)#
+#
+				downpass_relprobs_at_branch_top = downpass_condlikes_at_branch_top / sum(downpass_condlikes_at_branch_top)#
+#
+# 				if (master_nodenum == 36)#
+# 					{#
+# 					print(downpass_relprobs_at_branch_top)#
+# 					}#
+				# Now you just need to exponentiate up, given the previous-done #
+				# independent likelihoods#
+				condprobs_branch_top = rep(0, times=numstates)#
+				condprobs_branch_bot = rep(0, times=numstates)#
+				condprobs_branch_bot[starting_state_1based] = 1#
+				# 2017-04-06_error check#
+				if (sum(condprobs_branch_bot) == 0)#
+					{#
+					txt = "STOP ERROR BB1: sum(condprobs_branch_bot) == 0.  Printing starting_state_1based of condprobs_branch_bot[starting_state_1based] = 1:"#
+					cat("\n\n")#
+					print(txt)#
+					print("print(starting_state_1based):")#
+					print(starting_state_1based)#
+					cat("\n\n")#
+					stop(txt)#
+					}#
+				# HERE#
+				if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)#
+					{#
+					# Exponentiate up (well, sorta, exponential pre-calculated)#
+					condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_by_tree_piece_for_timeperiod_i[[piecenum]]#
+					}#
+				if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)#
+					{#
+					indlikes_subset = independent_likelihoods_by_tree_piece_for_timeperiod_i[[piecenum]]#
+					subset_nums = (1:length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))[stochastic_mapping_inputs$states_allowed_this_timeperiod_TF]#
+					condprobs_branch_top_subset = condprobs_branch_bot[subset_nums]#
+					condprobs_branch_top_subset = condprobs_branch_top_subset %*% indlikes_subset#
+					condprobs_branch_top = rep(0, times=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))#
+					condprobs_branch_top[subset_nums] = condprobs_branch_top_subset#
+					# Expand the subset Qmat to be full-size#
+					Qmat_big = matrix(data=0, nrow=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF), ncol=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))#
+					Qmat_big[subset_nums,subset_nums] = Qmat#
+					}#
+				if (res$inputs$include_null_range == TRUE)#
+					{#
+					condprobs_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor#
+					} # END if (res$inputs$include_null_range == TRUE)#
+				# State probabilities at the top of the branch#
+				#print("print(AD_condprobs_branch_top):")#
+				#print(condprobs_branch_top)#
+				#print("print(AD_downpass_relprobs_at_branch_top):")#
+				#print(downpass_relprobs_at_branch_top)#
+#
+				probs_branch_top = condprobs_branch_top * downpass_relprobs_at_branch_top#
+				probs_branch_top = probs_branch_top / sum(probs_branch_top)#
+				# Sample the state#
+				treepiece_seed_counter = treepiece_seed_counter + 1#
+				seedval = seedval + (treepiece_seed_counter * treepiece_seed_counter_increment)#
+				if (seedval > 2147483647)#
+					{#
+					seedval = seedval %% 2147483647#
+					}				#
+				set.seed(seed=seedval)#
+				#print("print(AD_probs_branch_top):")#
+				#print(probs_branch_top)#
+				sampled_state_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_branch_top)#
+				sampled_state_branch_top_1based#
+				# ERROR CHECK#
+				print_big_error_check = FALSE#
+				if (isblank_TF(sampled_state_branch_top_1based) == TRUE)#
+					{#
+					print_big_error_check = TRUE#
+					}#
+				if (print_big_error_check == TRUE)#
+					{#
+					txt = paste0("\n\nSTOP ERROR123 AFTER 'sampled_state_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_branch_top)'\n\n")#
+					cat(txt)#
+					print("timeperiod_i")#
+					print(timeperiod_i)#
+					print("stratum")#
+					print(stratum)#
+#
+					print("piecenum")#
+					print(piecenum)#
+#
+					print("rownum")#
+					print(rownum)#
+					print("master_table_timeperiod_i")#
+					printall(master_table_timeperiod_i)#
+					print("master_table_timeperiod_i[subtable_rownum,]")#
+					print(master_table_timeperiod_i[subtable_rownum,])#
+					print("subtable_rownum")#
+					print(subtable_rownum)#
+#
+					print("dim(master_table_timeperiod_i)")#
+					print(dim(master_table_timeperiod_i))#
+					print("rownum")#
+					print(rownum)#
+#
+					print("condprobs_branch_top")#
+					print(condprobs_branch_top)#
+					print("downpass_relprobs_at_branch_top")#
+					print(downpass_relprobs_at_branch_top)#
+#
+					print("probs_branch_top")#
+					print(probs_branch_top)#
+					print("sampled_state_branch_top_1based")#
+					print(sampled_state_branch_top_1based)#
+					stop(txt)#
+					} # END if (print_big_error_check) == TRUE#
+				# Store the state#
+				master_table_timeperiod_i$sampled_states_AT_nodes[subtable_rownum] = sampled_state_branch_top_1based#
+				# Also, put the state at the branch bottom of the next stratum up#
+				# (as long as you're not in the top stratum)#
+				if (timeperiod_i != 1)#
+					{#
+					# 1 stratum up:#
+					timeperiod_i_up = timeperiod_i - 1#
+					stochastic_mapping_inputs_up = stochastic_mapping_inputs_list[[timeperiod_i_up]]#
+					master_table_timeperiod_i_up = stochastic_mapping_inputs_up$master_table_timeperiod_i#
+					tree_sections_up = stochastic_mapping_inputs_up$tree_sections_list#
+					# Current stratum#
+					node_at_top_of_branch = master_table_timeperiod_i$node[subtable_rownum]#
+					# Find the node at the branch top (which could be in the stratum above, #
+					# or even higher, no worries, they all have the same node at the top)#
+					node_above_TF = master_table_timeperiod_i_up$node == node_at_top_of_branch#
+					rownum_above = (1:nrow(master_table_timeperiod_i_up))[node_above_TF]#
+					rownum_above#
+					# This is the row for the node at the top of the branch#
+					# (or equivalent branch section in the stratum above)#
+					# master_table_timeperiod_i_up[rownum_above,]#
+					# Store the (now known) ancestral state at the bottom of the branch#
+					master_table_timeperiod_i_up$sampled_states_AT_brbots[rownum_above] = sampled_state_branch_top_1based#
+					# Put these back into the master tables#
+					# Store the node in the stratum above#
+					stochastic_mapping_inputs_list[[timeperiod_i_up]]$master_table_timeperiod_i = master_table_timeperiod_i_up#
+#
+					} # END if (timeperiod_i != 1)#
+				# Simulate a history along the branch, given the starting and#
+				# ending states#
+				# Stochastic map on a sub-branch#
+				treepiece_seed_counter = treepiece_seed_counter + 1#
+				seedval = seedval + (treepiece_seed_counter * treepiece_seed_counter_increment)#
+				# Correction for seeds over the integer max#
+				if (seedval > 2147483647)#
+					{#
+					seedval = seedval %% 2147483647#
+					}#
+				set.seed(seed=seedval)#
+				########################################################
+				# 2016-05-07_bugfix#
+				########################################################
+				#print(seedval)#
+				#print(timeperiod_i)#
+				#print(piecenum)#
+# 				seedval = 27579383#
+# 				timeperiod_i = 1#
+# 				piecenum = 10#
+# 				print(seedval)#
+# 				print(timeperiod_i)#
+# 				print(piecenum)#
+# #
+# 				nodenum_at_top_of_branch=subtable_rownum; #
+# 				trtable=master_table_timeperiod_i; #
+# 				Qmat; #
+# 				state_indices_0based; #
+# 				ranges_list; #
+# 				areas; #
+# 				single_branch=single_branch; #
+# 				stratified=stratified; #
+# 				maxtries=maxtries#
+# 				manual_history_for_difficult_branches=TRUE#
+				# Check for branches where the tips are BELOW the time-bin!#
+				branch_top_full_tree = master_table_timeperiod_i$time_bp[subtable_rownum]#
+				branch_bot_full_tree = master_table_timeperiod_i$time_bp[subtable_rownum] - master_table_timeperiod_i$edge.length[subtable_rownum]#
+				branch_length_full_tree = master_table_timeperiod_i$edge.length[subtable_rownum]#
+				# The SUBedge.length produced by tree sectioning; MAY INCLUDE FAKE BRANCH LENGTH!!#
+				branch_length_subsection = master_table_timeperiod_i$SUBedge.length[subtable_rownum]#
+#
+				#cat("\nABC1_stochastic_map_given_inputs():\n")#
+				if (branch_length_subsection > branch_length_full_tree)#
+					{#
+					events_table_for_branch = NULL#
+					} else {#
+					if (stochastic_mapping_inputs$store_stratum_states_list_TF == FALSE)#
+						{#
+						events_table_for_branch = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=master_table_timeperiod_i, Qmat, state_indices_0based, ranges_list, areas, single_branch=single_branch, stratified=stratified, maxtries=maxtries, manual_history_for_difficult_branches=TRUE)#
+						}#
+					if (stochastic_mapping_inputs$store_stratum_states_list_TF == TRUE)#
+						{#
+						events_table_for_branch = stochastic_map_branch(nodenum_at_top_of_branch=subtable_rownum, trtable=master_table_timeperiod_i, Qmat=Qmat_big, state_indices_0based, ranges_list, areas, single_branch=single_branch, stratified=stratified, maxtries=maxtries, manual_history_for_difficult_branches=TRUE)#
+						}#
+					} # END if (branch_length_subsection > branch_length_full_tree)#
+				#cat("\nABC2_stochastic_map_given_inputs():\n")#
+				# Convert the events to text#
+				branch_events_txt = events_table_into_txt(events_table_for_branch)#
+				branch_events_txt#
+				#cat("\nABC3_stochastic_map_given_inputs():\n")#
+#
+				# Store the node history in the current stratum#
+				master_table_timeperiod_i$anagenetic_events_txt_below_node[subtable_rownum] = branch_events_txt#
+				# Store the updated subtable#
+				stochastic_mapping_inputs$master_table_timeperiod_i = master_table_timeperiod_i#
+				# Make sure it's in the global data structure#
+				stochastic_mapping_inputs_list[[timeperiod_i]]$master_table_timeperiod_i = master_table_timeperiod_i#
+				#cat("\nABC4_stochastic_map_given_inputs():\n")#
+				#print("print(piecenum):")#
+				#print(piecenum)#
+				#print("print(timeperiod_i):")#
+				#print(timeperiod_i)#
+				# End stochastic mapping on a branch#
+				} else {#
+				########################################################
+				########################################################
+				# Stochastically map on sub-tree (not a single branch)#
+				########################################################
+				########################################################
+				# Piece is a subtree; stochastically map on that subtree, #
+				# STARTING FROM THE ROOT BRANCH#
+				# timeperiod_i = 5#
+				# piecenum = 1#
+				# stochastic_mapping_inputs = stochastic_mapping_inputs_list[[timeperiod_i]]#
+				# master_table_timeperiod_i = stochastic_mapping_inputs$master_table_timeperiod_i#
+				# tree_sections_list = stochastic_mapping_inputs$tree_sections_list#
+				# tree_pieces = tree_sections_list$return_pieces_list#
+				# num_pieces = length(tree_pieces)#
+				# tree_piece = tree_pieces[[piecenum]]#
+				txt = paste("timeperiod_i= ", timeperiod_i, ", piecenum=", piecenum, sep="")#
+				#("\n")#
+				#cat(txt)#
+				# Find the root node of the subtree#
+				contains_rootTF = master_table_timeperiod_i$SUBnode.type == "root"#
+				sub_piecenumTF = master_table_timeperiod_i$piecenum == piecenum#
+				sub_rootTF = (contains_rootTF + sub_piecenumTF) == 2#
+				# Error check#
+				if (sum(sub_rootTF) != 1)#
+					{#
+					errortxt = paste("\n\nERROR: subtree table must have a single node of SUBnode.type=='root'.\nPrinting subtree table:\n\n", sep="")#
+					cat(errortxt)#
+					print(master_table_timeperiod_i)#
+					stop("\nStopping on error.\n")#
+					}#
+				# Get the row number in the subtable#
+				subtable_rownum = (1:nrow(master_table_timeperiod_i))[sub_rootTF]#
+				# Check if there is a branch below the root node#
+				# (unless it's the global root, in which case, ignore)#
+				rootedge = FALSE#
+				if (master_table_timeperiod_i$node.type[subtable_rownum] == "root")#
+					{#
+					# It's the root of the full tree, so *NO* root edge below#
+					rootedge = FALSE#
+					} else {#
+					if ( (!is.na(master_table_timeperiod_i$edge.length[subtable_rownum])) && (!is.na(master_table_timeperiod_i$sampled_states_AT_brbots[subtable_rownum])) )#
+						{#
+						rootedge = TRUE#
+						}#
+					}#
+				#print(rootedge)#
+				stochastic_mapping_inputs$rootedge = rootedge#
+				# Stochastically map #
+				stochastic_mapping_inputs$master_table_timeperiod_i = master_table_timeperiod_i#
+				#cat("\n\nTrying stochastic mapping on subtree:\n\n")#
+				treepiece_seed_counter = treepiece_seed_counter + 1#
+				seedval = seedval + (treepiece_seed_counter * treepiece_seed_counter_increment)#
+#
+				if (seedval > 2147483647)#
+					{#
+					seedval = seedval %% 2147483647#
+					}#
+				set.seed(seed=seedval)#
+				# Here, we can just use res$condlikes, since for subtrees, the node downpass likelihoods are#
+				# for branch tops#
+#
+# 				if (any(is.na(master_table_timeperiod_i$sampled_states_AT_nodes)))#
+# 					{#
+# 					txt = paste0("STOP ERROR_line1469 in (): Some of master_table_timeperiod_i$sampled_states_AT_nodes are NA. Specifically, these:")#
+# 					cat("\n\n")#
+# 					cat(txt)#
+# 					print("print( (1:length(master_table_timeperiod_i$sampled_states_AT_nodes))[is.na(master_table_timeperiod_i$sampled_states_AT_nodes)] )")#
+# 					#
+# 					print( (1:length(master_table_timeperiod_i$sampled_states_AT_nodes))[is.na(master_table_timeperiod_i$sampled_states_AT_nodes)] )#
+# 					print("timeperiod_i")#
+# 					print(timeperiod_i)#
+# #
+# 					print("piecenum")#
+# 					print(piecenum)#
+# 					#
+# 					cat("\n\n")#
+# 					stop(txt)#
+# 					}#
+#
+				#cat("\nA_stochastic_map_given_inputs():\n")#
+				master_table_timeperiod_i = stochastic_map_given_inputs(stochastic_mapping_inputs, piecenum=piecenum, maxtries=maxtries, seedval=seedval, include_null_range=res$inputs$include_null_range, master_nodenum_toPrint=master_nodenum_toPrint)#
+				#cat("\nB_stochastic_map_given_inputs():\n")#
+# 				if (any(is.na(master_table_timeperiod_i$sampled_states_AT_nodes)))#
+# 					{#
+# 					txt = paste0("STOP ERROR_line1490 in (): Some of master_table_timeperiod_i$sampled_states_AT_nodes are NA. Specifically, these:")#
+# 					cat("\n\n")#
+# 					cat(txt)#
+# 					print("print( (1:length(master_table_timeperiod_i$sampled_states_AT_nodes))[is.na(master_table_timeperiod_i$sampled_states_AT_nodes)] )")#
+# 					#
+# 					print( (1:length(master_table_timeperiod_i$sampled_states_AT_nodes))[is.na(master_table_timeperiod_i$sampled_states_AT_nodes)] )#
+# 					print("timeperiod_i")#
+# 					print(timeperiod_i)#
+# #
+# 					print("piecenum")#
+# 					print(piecenum)#
+# 					#
+# 					cat("\n\n")#
+# 					stop(txt)#
+# 					}#
+				#cat("\n\nEnding stochastic mapping on subtree:\n\n")#
+#
+				# Store the subtable back in inputs#
+				stochastic_mapping_inputs$master_table_timeperiod_i = master_table_timeperiod_i#
+				# Save the result in the list of inputs#
+				stochastic_mapping_inputs_list[[timeperiod_i]] = stochastic_mapping_inputs#
+				########################################################
+				# AND, we HAVE to copy up the simulated states to the timeperiod_i above#
+				########################################################
+				if (timeperiod_i != 1)#
+					{#
+					# 1 stratum up:#
+					timeperiod_i_up = timeperiod_i - 1#
+					stochastic_mapping_inputs_up = stochastic_mapping_inputs_list[[timeperiod_i_up]]#
+					master_table_timeperiod_i_up = stochastic_mapping_inputs_up$master_table_timeperiod_i#
+					# Find the nodes at the branch tops of the left and right branches#
+					# (which could be in the stratum above, #
+					# or even higher, no worries, they all have the same node at the top)#
+					rows_w_correct_piecenum_TF = master_table_timeperiod_i$piecenum == piecenum#
+					rows_w_tips_TF = master_table_timeperiod_i$SUBnode.type == "tip"#
+					rows_w_subtree_tips_TF = (rows_w_correct_piecenum_TF + rows_w_tips_TF) == 2#
+					rownums_subtree_tips = (1:nrow(master_table_timeperiod_i))[rows_w_subtree_tips_TF]#
+					for (subtree_tipnum in rownums_subtree_tips)#
+						{#
+						#print(subtree_tipnum)#
+						# Get the global node number of this subtree tip#
+						desc_node_node_master_tree = master_table_timeperiod_i$node[subtree_tipnum]#
+						# Get the rownum of this global node number in the #
+						# stratum up#
+						row_timeperiod_i_up_TF = master_table_timeperiod_i_up$node == desc_node_node_master_tree#
+						rownum_timeperiod_i_up = (1:nrow(master_table_timeperiod_i_up))[row_timeperiod_i_up_TF]#
+						# Store the known descendant state at the branch bottom #
+						# in the next stratum up#
+						sampled_state_AT_brbot = master_table_timeperiod_i$sampled_states_AT_nodes[subtree_tipnum]#
+						if (isblank_TF(sampled_state_AT_brbot))#
+							{#
+							txt = paste0("STOP ERROR_line1514 in (): sampled_state_AT_brbot is blank: '", sampled_state_AT_brbot,  "'\n\nrownum_timeperiod_i_up=", rownum_timeperiod_i_up, ".\n\nsubtree_tipnum=", subtree_tipnum, ".")#
+							stop(txt)#
+							}#
+						master_table_timeperiod_i_up$sampled_states_AT_brbots[rownum_timeperiod_i_up] = sampled_state_AT_brbot#
+						if (isblank_TF(sampled_state_AT_brbot))#
+							{#
+							txt = paste0("STOP ERROR_line1520 in (): master_table_timeperiod_i_up$sampled_states_AT_brbots[rownum_timeperiod_i_up] is blank: '", master_table_timeperiod_i_up$sampled_states_AT_brbots[rownum_timeperiod_i_up], "'\n\nrownum_timeperiod_i_up=", rownum_timeperiod_i_up, ".\n\nsubtree_tipnum=", subtree_tipnum, ".")#
+							stop(txt)#
+							}#
+						} # END for (subtree_tipnum in rownums_subtree_tips)#
+					# This is the row for the node at the top of the branch#
+					# (or equivalent branch section in the stratum above)#
+					# master_table_timeperiod_i_up[rownum_above,]#
+					# Store the (now known) ancestral state at the bottom of the branches#
+					# in the stratum above#
+					# Store the node in the stratum above#
+					stochastic_mapping_inputs_list[[timeperiod_i_up]]$master_table_timeperiod_i = master_table_timeperiod_i_up #
+#
+					} # END if (timeperiod_i != 1)	#
+				} # END if (is.numeric(tree_piece))#
+			} # END for (piecenum in 1:num_pieces)#
+		} # END for (timeperiod_i in num_timeperiods:1)#
+	cat("\nFINISHED_stochastic_mapping_on_stratified()\n")
+master_table_w_stochastic_maps = NULL#
+	for (i in 1:length(stochastic_mapping_inputs_list))#
+		{#
+		master_table_w_stochastic_maps = rbind(master_table_w_stochastic_maps, stochastic_mapping_inputs_list[[i]]$master_table_timeperiod_i)#
+		}#
+	#printall(master_table_w_stochastic_maps[,-ncol(master_table_w_stochastic_maps)])#
+	dim(master_table_w_stochastic_maps)
+ana_events_table = events_txt_list_into_events_table(events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node, trtable=master_table_w_stochastic_maps)
+events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node; trtable=master_table_w_stochastic_maps
+events_txt_list
+trtable
+trtable$parent_br
+sort(trtable$parent_br)
+sort(unique(trtable$parent_br))
+length(sort(unique(trtable$parent_br)))
+events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node; trtable=master_table_w_stochastic_maps#
+recalc_abs_ages=TRUE
+if ((length(trtable) > 0) && (class(trtable) == "list"))#
+		{#
+		txt = "STOP ERROR in events_txt_list_into_events_table(). Input 'trtable' was a list, but should be a data.frame table, or empty. Printing 'trtable':"#
+		cat("\n\n")#
+		cat(txt)#
+		cat("\n\n")#
+		print(trtable)#
+		cat("\n\n")#
+		stop(txt)		#
+		}#
+	# 2014-05-27_NJM: Note that if you have NO events in the WHOLE TREE, you will#
+	# have a "NULL" in events_txt_list.#
+	# #
+	# Solution: test for NULL. Really, you should pre-allocate this so that #
+	# it's never NULL.#
+	##
+	# Actually, this wasn't the problem since I already did pre-allocation. The problem#
+	# was looking for BioGeoBEARS_run_object$states_list when it should have been #
+	# looking for res$inputs$states_list#
+	if (is.null(events_txt_list))#
+		{#
+		errortxt = paste("\nWARNING in events_txt_list_into_events_table(): your events_txt_list has NO events!\n\nThis means your tree has NO d/e/a events across the whole tree.\nThis is *expected* e.g. if you inferred d=e=0 under DEC+J. Input a list of '' or NA to avoid this error.\n\n", sep="")#
+		cat(errortxt)#
+		errortxt2 = paste("events_txt_list_into_events_table() is returning NULL which will might cause issues later.\n\n", sep="")#
+		cat(errortxt2)#
+		return(NULL)#
+		}#
+	# Convert NAs to "none"#
+	events_txt_list[is.na(events_txt_list)] = "none"
+events_txt_list
+# Remove lines with no events or NA:#
+	noneTF = events_txt_list == "none"#
+	keepTF = (noneTF == FALSE)#
+	events_txt_list = events_txt_list[keepTF]
+events_txt_list
+# If no anagenetic events, return NULL#
+	if (length(events_txt_list) == 0)#
+		{#
+		events_table = NULL#
+		return(events_table)#
+		}#
+#
+	#print("here3")	#
+#
+	# Include the trtable, if that is input#
+	if (length(trtable) > 0)#
+		{#
+		trtable_subset = NULL#
+		trtable_was_input_TF = TRUE#
+		} else {#
+		trtable_was_input_TF = FALSE#
+		}#
+#
+	#print("here4")	#
+	# If a trtable was input, if (trtable_was_input_TF == TRUE),#
+	# test for stratified, if so get the strata#
+	stratTF = "stratum" %in% names(trtable)#
+	# Get the strata time borders, if needed#
+	if (stratTF == TRUE)#
+		{#
+		strata_nums = sort(unique(trtable$stratum))#
+		time_tops = sort(unique(trtable$time_top))#
+		time_bots = sort(unique(trtable$time_bot))#
+		# Error check#
+		TF1 = length(strata_nums) == length(time_tops)#
+		TF2 = length(time_bots) == length(time_tops)#
+		TF3 = (TF1 + TF2) == 2#
+		if (TF3 == FALSE)#
+			{#
+			txt = "STOP ERROR in events_txt_list_into_events_table(): lengths of strata_nums, time_tops, time_bots from input 'trtable' don't match."#
+			cat("\n\n")#
+			cat(txt)#
+			cat("\n\n")#
+			stop(txt)#
+			} # END if (TF3 == FALSE)#
+		} # END if (stratTF == TRUE)
+tmptable = NULL
+for (i in 1:length(events_txt_list))#
+		{#
+		#print(events_txt_list)#
+		tmptable_rows = events_txt_into_events_table(events_txt_list[i])#
+		# NJM 2015-06-08#
+		# NJM 2016-05-05 bug fix: add "as.numeric"#
+		#rownums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)#
+		original_tree_nodenums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)#
+		# NJM 2019-03-11#
+		# For time-stratified analyses, we need a more thorough match for the correct#
+		# row of trtable -- match on column "node"#
+		# rownums_in_trtable#
+		#print(tmptable_rows)#
+		num_newrows = nrow(tmptable_rows)#
+		tmptable = rbind(tmptable, tmptable_rows)#
+#
+		# Include the trtable, if that is input#
+		if (trtable_was_input_TF == TRUE)#
+		#if ( (is.null(trtable) == FALSE) && (trtable != list()) )#
+			{#
+			for (nnr in 1:num_newrows)#
+				{#
+				#print(trtable)#
+				#print(keepTF)#
+				#print(trtable)#
+				# NJM 2015-04-05#
+				#trtable_subset = rbind(trtable_subset, trtable[keepTF,][nnr,])#
+#
+				# NJM 2015-06-08#
+				if (stratTF == FALSE)#
+					{#
+					# NJM 2015-06-08#
+					rownums_in_trtable = original_tree_nodenums_in_trtable#
+					trtable_subset = rbind(trtable_subset, trtable[rownums_in_trtable[nnr],])#
+					} # END if (stratTF == FALSE)#
+				# 2019-03-11 match 				original_tree_nodenums_in_trtable#
+				if (stratTF == TRUE)#
+					{#
+					original_tree_nodenum = original_tree_nodenums_in_trtable[nnr]#
+					match_nodecol_TF = trtable$node == original_tree_nodenum#
+					match_time_tops_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) >= as.numeric(trtable$time_top)#
+					match_time_bots_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) < as.numeric(trtable$time_bot)#
+					sumTFs = (match_nodecol_TF + match_time_tops_TF + match_time_bots_TF) == 3#
+					# There should only be 1 combination of master tree nodes, and time-stratum#
+					if (sum(sumTFs) != 1)#
+						{#
+						txt = paste0("STOP ERROR in events_txt_list_into_events_table(): ", sum(sumTFs), " rows of input 'trtable' match the branchtop nodenum and stratum specified for this anagenetic event:")#
+						cat("\n\n")#
+						cat(txt)#
+						cat("\n\n")#
+						print("i=")#
+						print(i)#
+						print("nnr=")#
+						print(nnr)#
+						print("tmptable_rows:")#
+						print(tmptable_rows)#
+						print("tmptable_rows[nnr,]:")#
+						print(tmptable_rows[nnr,])#
+						print("input 'trtable', matching rows:")#
+						print(trtable[sumTFs,])#
+						print("sumTFs:")#
+						print(sumTFs)#
+						stop(txt)#
+						} # END if (sumTFs != 1)#
+					# Otherwise, only one match, good!#
+					rownum_in_trtable = (1:nrow(trtable))[sumTFs]#
+					trtable_subset = rbind(trtable_subset, trtable[rownum_in_trtable,])#
+					} # END if (stratTF == TRUE)#
+				} # END for (nnr in 1:num_newrows)#
+			} # END if (trtable_was_input_TF == TRUE)#
+		} # END for (i in 1:length(events_txt_list))
+i
+length(events_txt_list)
+events_txt_list[8]
+tmptable_rows = events_txt_into_events_table(events_txt_list[i])#
+		# NJM 2015-06-08#
+		# NJM 2016-05-05 bug fix: add "as.numeric"#
+		#rownums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)#
+		original_tree_nodenums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)#
+		# NJM 2019-03-11#
+		# For time-stratified analyses, we need a more thorough match for the correct#
+		# row of trtable -- match on column "node"#
+		# rownums_in_trtable#
+		#print(tmptable_rows)#
+		num_newrows = nrow(tmptable_rows)#
+		tmptable = rbind(tmptable, tmptable_rows)
+original_tree_nodenums_in_trtable
+trtable_was_input_TF
+nnr=1
+stratTF
+original_tree_nodenum = original_tree_nodenums_in_trtable[nnr]#
+					match_nodecol_TF = trtable$node == original_tree_nodenum#
+					match_time_tops_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) >= as.numeric(trtable$time_top)#
+					match_time_bots_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) < as.numeric(trtable$time_bot)#
+					sumTFs = (match_nodecol_TF + match_time_tops_TF + match_time_bots_TF) == 3
+match_nodecol_TF
+(match_nodecol_TF + match_time_tops_TF + match_time_bots_TF)
+cbind(match_nodecol_TF, match_time_tops_TF, match_time_bots_TF)
+time_tops
+time_bots
+tmptable_rows
+event_time_matches_TF = (match_time_tops_TF + match_time_bots_TF) == 2
+trtable[event_time_matches_TF,]
+tr
+plot(tr); nodelabels()
+tiplabels(1:19)
+tmptable_rows
+prt(tr)
+tr$edge.length - 1.2110008
+trtable[event_time_matches_TF,]
+tmptable_rows
+source('/GitHub/BioGeoBEARS/R/BioGeoBEARS_stochastic_mapping_v1.R', chdir = TRUE)
+ana_events_table = events_txt_list_into_events_table(events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node, trtable=master_table_w_stochastic_maps)
+source('/GitHub/BioGeoBEARS/R/BioGeoBEARS_stochastic_mapping_v1.R', chdir = TRUE)
+ana_events_table = events_txt_list_into_events_table(events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node, trtable=master_table_w_stochastic_maps)
+tmptable_rows
+i
+events_txt_into_events_table(events_txt_list[i])
+events_txt_list
+master_table_w_stochastic_maps$anagenetic_events_txt_below_node
+master_table_w_stochastic_maps
+dim(master_table_w_stochastic_maps)
+head(master_table_w_stochastic_maps)
+row.names(master_table_w_stochastic_maps)
+x=NULL
+x[c(T,T,T)]
+x[c(T,F,F)]
+source('/GitHub/BioGeoBEARS/R/BioGeoBEARS_stochastic_mapping_v1.R', chdir = TRUE)
+cmdstr
+trtable_rownums_of_events_txt = 1:nrow(master_table_w_stochastic_maps)#
+	ana_events_table = events_txt_list_into_events_table(events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node, trtable=master_table_w_stochastic_maps, trtable_rownums_of_events_txt=trtable_rownums_of_events_txt)
+source('/GitHub/BioGeoBEARS/R/BioGeoBEARS_stochastic_mapping_v1.R', chdir = TRUE)events_txt_into_events_table()
+source('/GitHub/BioGeoBEARS/R/BioGeoBEARS_stochastic_mapping_v1.R', chdir = TRUE)
+trtable_rownums_of_events_txt = 1:nrow(master_table_w_stochastic_maps)#
+	ana_events_table = events_txt_list_into_events_table(events_txt_list=master_table_w_stochastic_maps$anagenetic_events_txt_below_node, trtable=master_table_w_stochastic_maps, trtable_rownums_of_events_txt=trtable_rownums_of_events_txt)
+ana_events_table
+library(BioGeoBEARS)#
+remove.packages("BioGeoBEARS")#
+detach("package:BioGeoBEARS")#
+library(BioGeoBEARS)#
+#
+remove.packages("BioGeoBEARS")#
+detach("package:BioGeoBEARS")#
+library(devtools)#
+devtools::install_local(path="/GitHub/BioGeoBEARS", dependencies=FALSE)#
+library(BioGeoBEARS)

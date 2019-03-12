@@ -1,0 +1,2 @@
+KO->K,KO	KO->O,KO	OM->M,OM
+1	1	1	1
