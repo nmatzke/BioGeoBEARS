@@ -1233,7 +1233,7 @@ if (BSM_runslow == TRUE)
     {
     # Saves to: RES_clado_events_tables.Rdata
     # Saves to: RES_ana_events_tables.Rdata
-    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nummaps_goal=1, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01, master_nodenum_toPrint=0)
+    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=100, nummaps_goal=50, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01, master_nodenum_toPrint=0)
 
     RES_clado_events_tables = BSM_output$RES_clado_events_tables
     RES_ana_events_tables = BSM_output$RES_ana_events_tables
@@ -1331,7 +1331,7 @@ stratified = stratified
 pdffn = paste0(model_name, "_", length(clado_events_tables), "BSMs_v1.pdf")
 pdf(file=pdffn, width=6, height=6)
 
-nummaps_goal = 1
+nummaps_goal = 50
 for (i in 1:nummaps_goal)
     {
     clado_events_table = clado_events_tables[[i]]
@@ -1464,6 +1464,11 @@ system(cmdstr)
 
 
 
+#######################################################
+# Get the ranges_list (useful for colors)
+#######################################################
+returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=resDEC$inputs)
+ranges_list = returned_mats$ranges_list
 
 
 #######################################################
@@ -1474,7 +1479,7 @@ res = resDEC
 clado_events_table = clado_events_tables[[1]]
 ana_events_table = ana_events_tables[[1]]
 
-tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_table, ana_events_table=ana_events_table)
+tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_tables[[6]], ana_events_table=ana_events_tables[[6]])
 summary(tr_wSimmap)
 print(tr_wSimmap)
 countSimmap(tr_wSimmap)
@@ -1485,7 +1490,8 @@ countSimmap(tr_wSimmap)
 pdffn = "BSM_in_phytools_simmap_format.pdf"
 pdf(file=pdffn, width=6, height=6)
 
-plotSimmap(tr_wSimmap, lwd=3)
+cols = setNames(colors_list_for_states, ranges_list) 
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)
 
 dev.off()
 cmdstr = paste0("open ", pdffn)
@@ -1515,9 +1521,7 @@ pdffn = "50BSMs_in_phytools_simmap_format.pdf"
 pdf(file=pdffn, width=6, height=6)
 
 cols = setNames(colors_list_for_states, ranges_list) 
-par(ask=F)
 plotSimmap(simmaps_list, colors=cols, lwd=3, hold=FALSE, add=FALSE, plot=TRUE)
-par(ask=T)
 
 dev.off()
 cmdstr = paste0("open ", pdffn)

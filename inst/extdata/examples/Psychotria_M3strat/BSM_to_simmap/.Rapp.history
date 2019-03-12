@@ -1207,12 +1207,12 @@ stochastic_mapping_inputs_list$COO_weights_columnar#
 stochastic_mapping_inputs_list$unconstr#
 set.seed(seed=as.numeric(54321))#
 #
-BSM_runslow = TRUE
+BSM_runslow = TRUE#
 if (BSM_runslow == TRUE)#
     {#
     # Saves to: RES_clado_events_tables.Rdata#
     # Saves to: RES_ana_events_tables.Rdata#
-    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nummaps_goal=1, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01, master_nodenum_toPrint=0)#
+    BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=100, nummaps_goal=50, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01, master_nodenum_toPrint=0)#
 #
     RES_clado_events_tables = BSM_output$RES_clado_events_tables#
     RES_ana_events_tables = BSM_output$RES_ana_events_tables#
@@ -1226,7 +1226,8 @@ if (BSM_runslow == TRUE)#
     BSM_output = NULL#
     BSM_output$RES_clado_events_tables = RES_clado_events_tables#
     BSM_output$RES_ana_events_tables = RES_ana_events_tables#
-    } # END if (runBSMslow == TRUE)
+    } # END if (runBSMslow == TRUE)#
+#
 # Extract BSM output#
 clado_events_tables = BSM_output$RES_clado_events_tables#
 ana_events_tables = BSM_output$RES_ana_events_tables#
@@ -1238,7 +1239,10 @@ length(ana_events_tables)#
 include_null_range = TRUE#
 areanames = names(tipranges@df)#
 areas = areanames#
-max_range_size = 4
+max_range_size = 4#
+#
+# Note: If you did something to change the states_list from the default given the number of areas, you would#
+# have to manually make that change here as well! (e.g., areas_allowed matrix, or manual reduction of the states_list)#
 states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=include_null_range)#
 #
 colors_list_for_states = get_colors_for_states_list_0based(areanames=areanames, states_list_0based=states_list_0based, max_range_size=max_range_size, plot_null_range=TRUE)#
@@ -1283,7 +1287,12 @@ plot_BioGeoBEARS_results(results_object=resmod, analysis_titletxt="Stochastic ma
 #############################################
 dev.off()#
 cmdstr = paste("open ", pdffn, sep="")#
-system(cmdstr)
+system(cmdstr)#
+#
+########################################################
+# Plot all 50 stochastic maps to PDF#
+########################################################
+# Setup#
 include_null_range = include_null_range#
 areanames = areanames#
 areas = areanames#
@@ -1299,7 +1308,7 @@ stratified = stratified#
 pdffn = paste0(model_name, "_", length(clado_events_tables), "BSMs_v1.pdf")#
 pdf(file=pdffn, width=6, height=6)#
 #
-nummaps_goal = 1#
+nummaps_goal = 50#
 for (i in 1:nummaps_goal)#
     {#
     clado_events_table = clado_events_tables[[i]]#
@@ -1309,7 +1318,11 @@ for (i in 1:nummaps_goal)#
 #
 dev.off()#
 cmdstr = paste("open ", pdffn, sep="")#
-system(cmdstr)
+system(cmdstr)#
+#
+########################################################
+# Summarize stochastic map tables#
+########################################################
 length(clado_events_tables)#
 length(ana_events_tables)#
 #
@@ -1414,7 +1427,16 @@ plotSimmap(tr2,lwd=3)#
 #
 dev.off()#
 cmdstr = paste0("open ", pdffn)#
-system(cmdstr)
+system(cmdstr)#
+########################################################
+# Get the ranges_list (useful for colors)#
+########################################################
+returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=resDEC$inputs)#
+ranges_list = returned_mats$ranges_list#
+########################################################
+# Convert a time-stratified BSM to a phytools BSM#
+########################################################
+#
 res = resDEC#
 clado_events_table = clado_events_tables[[1]]#
 ana_events_table = ana_events_tables[[1]]#
@@ -1427,136 +1449,40 @@ countSimmap(tr_wSimmap)#
 pdffn = "BSM_in_phytools_simmap_format.pdf"#
 pdf(file=pdffn, width=6, height=6)#
 #
-plotSimmap(tr_wSimmap, lwd=3)
-ana_events_table
-clado_events_table
-res=resDEC
-returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=res$inputs)#
-	returned_mats#
-	areanames = returned_mats$areanames#
-	ranges_list = returned_mats$ranges_list#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)#
 #
-	# Get list of edges:#
-	trtable = prt(tr, printflag=FALSE)#
-	trtable#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)#
+########################################################
+# Convert a list of time-stratified BSMs to a phytools list of BSMs#
+########################################################
 #
-	# Get the edgenums, exclude the "NA" for the root branch#
-	# Order edgenums from smallest to largest#
-	nonroot_TF = trtable$node.type != "root"#
-	edgenums = trtable$parent_br[nonroot_TF]#
-	edgenums_order = order(edgenums)#
-	edgenums = edgenums[edgenums_order]#
+simmaps_list = BSMs_to_phytools_SMs(res=resDEC, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)#
 #
-	# Get the "ancestor node, descendant node"#
-	ancnodenums = trtable$ancestor[nonroot_TF][edgenums_order]#
-	decnodenums = trtable$node[nonroot_TF][edgenums_order]#
+summary(simmaps_list)#
+print(simmaps_list)#
+countSimmap(simmaps_list) # Gets big fast, for large states lists
+dev.off()
+pdffn = "50BSMs_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
 #
-	# rownames for mapped.edge#
-	rownames_for_mapped_edge = paste0(ancnodenums, ",", decnodenums)#
-	rownames_for_mapped_edge#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(simmaps_list, colors=cols, lwd=3, hold=FALSE, add=FALSE, plot=TRUE)
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+x=c("a","c","b")
+order(x)
+x[order(x)]
+library(BioGeoBEARS)#
+remove.packages("BioGeoBEARS")#
+detach("package:BioGeoBEARS")#
+library(BioGeoBEARS)#
 #
-	# instantiate "maps" for phytools (a list, with array of state residence times#
-	maps = list()
-edgenums
-for (i in 1:length(edgenums))#
-		{#
-		edgenum = edgenums[i]#
-		# Trap for if ana_events_table is NA (common, if there are no anagenetic events in#
-		# the tree at all)#
-		if ( (length(ana_events_table) == 1) && (is.na(ana_events_table)) )#
-			{#
-			edgefound_TF = FALSE#
-			} else {#
-			edgefound_TF = ana_events_table$parent_br == edgenum#
-			}#
-		# If no anagenetic events are found, the whole branchlength is in the #
-		# starting state, as specified in "clado_events_table"#
-		if (sum(edgefound_TF) == 0)#
-			{#
-			# The states should be the same at the branch bottom and top:#
-			clado_row_TF = clado_events_table$parent_br == edgenum#
-			clado_row_TF[is.na(clado_row_TF)] = FALSE#
-			# Error check#
-			if (sum(clado_row_TF) != 1)#
-				{#
-				txt = paste0("STOP ERROR #1 in BSM_to_phytools_SM(): either 0 or 2+ rows in clado_events_table match edge number/branch number (parent_br==", edgenum, ").")#
-				cat("\n\n")#
-				cat(txt)#
-				cat("\n\n")#
-				stop(txt)#
-				}#
-			bottom_state_num_1based = clado_events_table$sampled_states_AT_brbots[clado_row_TF]#
-			top_state_num_1based = clado_events_table$sampled_states_AT_nodes[clado_row_TF]#
-			# Error check#
-			if (bottom_state_num_1based != top_state_num_1based)#
-				{#
-				txt = paste0("STOP ERROR #2 in BSM_to_phytools_SM(): the top_state_num_1based (", top_state_num_1based, "), and bottom_state_num_1based (", bottom_state_num_1based, ") have to match at edge number/branch number (parent_br==", edgenum, "), because no anagenetic events were recorded on this branch.")#
-				cat("\n\n")#
-				cat(txt)#
-				cat("\n\n")#
-				stop(txt)#
-				}#
-			# No events detected, so put in the states_array just one state#
-			names_of_states_array = c(ranges_list[bottom_state_num_1based])#
-			times_in_each_state_array = c(clado_events_table$edge.length[clado_row_TF])#
-			names(times_in_each_state_array) = names_of_states_array#
-			times_in_each_state_array#
-			} # END if (sum(edgefound_TF) == 0)#
-#
-		# If no anagenetic events are found, the whole branchlength is in the #
-		# starting state, as specified in "clado_events_table"#
-		if (sum(edgefound_TF) > 0)#
-			{#
-			# The states will be listed in the ana_events_table#
-			rows_matching_edgenum_TF = ana_events_table$parent_br == edgenum#
-			tmp_ana_events_table = ana_events_table[rows_matching_edgenum_TF,]#
-			# Make sure the tmp_ana_events_table is sorted by event_time (along branch)#
-			tmp_ana_events_table = tmp_ana_events_table[order(tmp_ana_events_table$event_time),]#
-			tmp_ana_events_table#
-			numevents = sum(rows_matching_edgenum_TF)#
-			# 1 event, 2 states on branch#
-			if (numevents == 1)#
-				{#
-				first_state_name = c(tmp_ana_events_table$current_rangetxt[1])#
-				first_state_time = c(tmp_ana_events_table$event_time[1])#
-#
-				further_state_name = c(tmp_ana_events_table$new_rangetxt[1])#
-				further_state_time = c(tmp_ana_events_table$edge.length[1] - first_state_time)#
-#
-				times_in_each_state_array = c(first_state_time, further_state_time)#
-				names_of_states_array = c(first_state_name, further_state_name)#
-				} # END if (numevents == 1)#
-			# 2+ events, 3+ states on branch#
-			if (numevents >= 2)#
-				{#
-				first_state_name = c(tmp_ana_events_table$current_rangetxt[1])#
-				first_state_time = c(tmp_ana_events_table$event_time[1])#
-				nonfirst_rows = 2:numevents#
-				nonlast_rows = 1:(numevents-1)#
-#
-				further_state_names = c(tmp_ana_events_table$new_rangetxt)#
-				further_state_times = tmp_ana_events_table$event_time[nonfirst_rows] - tmp_ana_events_table$event_time[nonlast_rows]#
-				last_time = c(tmp_ana_events_table$edge.length[numevents] - tmp_ana_events_table$event_time[numevents])#
-#
-				times_in_each_state_array = c(first_state_time, further_state_times, last_time)#
-				names_of_states_array = c(first_state_name, further_state_names)#
-				} # END if (numevents >= 2)#
-#
-			names(times_in_each_state_array) = names_of_states_array#
-			} # END if (sum(edgefound_TF) > 0)#
-		# Store#
-		maps[[i]] = times_in_each_state_array#
-		} # END for (i in 1:length(edgenums))
-edgenum
-i
-if ( (length(ana_events_table) == 1) && (is.na(ana_events_table)) )#
-			{#
-			edgefound_TF = FALSE#
-			} else {#
-			edgefound_TF = ana_events_table$parent_br == edgenum#
-			}
-edgefound_TF
-clado_row_TF = clado_events_table$parent_br == edgenum#
-			clado_row_TF[is.na(clado_row_TF)] = FALSE
-clado_row_TF
-clado_events_table[clado_row_TF,]
+remove.packages("BioGeoBEARS")#
+detach("package:BioGeoBEARS")#
+library(devtools)#
+devtools::install_local(path="/GitHub/BioGeoBEARS", dependencies=FALSE)#
+library(BioGeoBEARS)

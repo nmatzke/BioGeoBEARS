@@ -2190,8 +2190,9 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 			rows_matching_edgenum_TF = ana_events_table$parent_br == edgenum
 			tmp_ana_events_table = ana_events_table[rows_matching_edgenum_TF,]
 		
-			# Make sure the tmp_ana_events_table is sorted by event_time (along branch)
-			tmp_ana_events_table = tmp_ana_events_table[order(tmp_ana_events_table$event_time),]
+			# Make sure the tmp_ana_events_table is sorted by REVERSE event_time (along branch)
+			# (Do REVERSE, because older events have larger event ages)
+			tmp_ana_events_table = tmp_ana_events_table[rev(order(tmp_ana_events_table$abs_event_time)),]
 			tmp_ana_events_table
 		
 			numevents = sum(rows_matching_edgenum_TF)
@@ -2200,12 +2201,15 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 			if (numevents == 1)
 				{
 				first_state_name = c(tmp_ana_events_table$current_rangetxt[1])
-				first_state_time = c(tmp_ana_events_table$event_time[1])
+				abs_time_bp_at_branch_top = tmp_ana_events_table$time_bp[1]
+				abs_time_bp_at_branch_bot = abs_time_bp_at_branch_top + tmp_ana_events_table$edge.length[1]
+				first_state_timelength = c(abs_time_bp_at_branch_bot - tmp_ana_events_table$abs_event_time[1])
 
+				# The rest of the branch is the 2nd state
 				further_state_name = c(tmp_ana_events_table$new_rangetxt[1])
-				further_state_time = c(tmp_ana_events_table$edge.length[1] - first_state_time)
+				further_state_time = c(tmp_ana_events_table$edge.length[1] - first_state_timelength)
 
-				times_in_each_state_array = c(first_state_time, further_state_time)
+				times_in_each_state_array = c(first_state_timelength, further_state_time)
 				names_of_states_array = c(first_state_name, further_state_name)
 				} # END if (numevents == 1)
 		
@@ -2213,16 +2217,21 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 			if (numevents >= 2)
 				{
 				first_state_name = c(tmp_ana_events_table$current_rangetxt[1])
-				first_state_time = c(tmp_ana_events_table$event_time[1])
+				#first_state_time = c(tmp_ana_events_table$event_time[1])
+				abs_time_bp_at_branch_top = tmp_ana_events_table$time_bp[1]
+				abs_time_bp_at_branch_bot = abs_time_bp_at_branch_top + tmp_ana_events_table$edge.length[1]
+				first_state_timelength = c(abs_time_bp_at_branch_bot - tmp_ana_events_table$abs_event_time[1])
 			
 				nonfirst_rows = 2:numevents
 				nonlast_rows = 1:(numevents-1)
 
 				further_state_names = c(tmp_ana_events_table$new_rangetxt)
-				further_state_times = tmp_ana_events_table$event_time[nonfirst_rows] - tmp_ana_events_table$event_time[nonlast_rows]
-				last_time = c(tmp_ana_events_table$edge.length[numevents] - tmp_ana_events_table$event_time[numevents])
+				further_state_times = tmp_ana_events_table$abs_event_time[nonlast_rows] - tmp_ana_events_table$abs_event_time[nonfirst_rows]
+				
+				# How much of the branch is left
+				last_time = c(tmp_ana_events_table$edge.length[numevents] - sum(c(first_state_timelength,further_state_times)))
 
-				times_in_each_state_array = c(first_state_time, further_state_times, last_time)
+				times_in_each_state_array = c(first_state_timelength, further_state_times, last_time)
 				names_of_states_array = c(first_state_name, further_state_names)
 				} # END if (numevents >= 2)
 
