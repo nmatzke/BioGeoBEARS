@@ -1503,7 +1503,7 @@ system(cmdstr)
 # Convert a list of time-stratified BSMs to a phytools list of BSMs
 #######################################################
 
-simmaps_list = BSMs_to_phytools_SMs(res=resBAYAREALIKE, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)
+simmaps_list = BSMs_to_phytools_SMs(res=resDEC, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)
 
 summary(simmaps_list)
 print(simmaps_list)

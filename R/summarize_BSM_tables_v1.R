@@ -2014,6 +2014,10 @@ linear_regression_plot_OLD <- function(x, y, xlabel="x", ylabel="y", tmppch=".",
 
 BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	{
+	
+	# Is it time-stratified?
+	stratTF = (length(res$inputs$timeperiods) > 0)
+	
 	returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=res$inputs)
 	returned_mats
 	areanames = returned_mats$areanames
@@ -2040,7 +2044,14 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 
 	# instantiate "maps" for phytools (a list, with array of state residence times
 	maps = list()
-
+	
+	if (stratTF == TRUE)
+		{
+		time_tops = sort(unique(clado_events_table$time_top))
+		time_bots = sort(unique(clado_events_table$time_bot))
+		}
+	
+	
 	# Loop through the edges, record any anagenetic events on the branches
 	# fill in "maps"
 	for (i in 1:length(edgenums))
@@ -2064,21 +2075,74 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 			clado_row_TF = clado_events_table$parent_br == edgenum
 			clado_row_TF[is.na(clado_row_TF)] = FALSE
 		
-		
-		## NJM 2019-03-12_ fix: doubles can be found in time-strat, FIX
-		
+# 			if (stratTF == TRUE)
+# 				{
+# 				match_time_tops_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) >= as.numeric(trtable$time_top)
+# 				match_time_bots_TF = as.numeric(tmptable_rows$abs_event_time[nnr]) < as.numeric(trtable$time_bot)
+# 				}
+			
+			
+			## NJM 2019-03-12_ fix: doubles can be found in time-strat, FIX
+			clado_events_table[clado_row_TF,]
+			
+			
 			# Error check
-			if (sum(clado_row_TF) != 1)
+			if (sum(clado_row_TF) < 1)
 				{
-				txt = paste0("STOP ERROR #1 in BSM_to_phytools_SM(): either 0 or 2+ rows in clado_events_table match edge number/branch number (parent_br==", edgenum, ").")
+				txt = paste0("STOP ERROR #1 in BSM_to_phytools_SM(): 0 rows in clado_events_table match edge number/branch number (parent_br==", edgenum, ").")
 				cat("\n\n")
 				cat(txt)
 				cat("\n\n")
 				stop(txt)
 				}
 		
-			bottom_state_num_1based = clado_events_table$sampled_states_AT_brbots[clado_row_TF]
-			top_state_num_1based = clado_events_table$sampled_states_AT_nodes[clado_row_TF]
+			if (sum(clado_row_TF) == 1)
+				{
+				bottom_state_num_1based = clado_events_table$sampled_states_AT_brbots[clado_row_TF]
+				top_state_num_1based = clado_events_table$sampled_states_AT_nodes[clado_row_TF]
+				}
+
+			if (sum(clado_row_TF) > 1)
+				{
+				bottom_state_num_1based = unique(clado_events_table$sampled_states_AT_brbots[clado_row_TF])
+				top_state_num_1based = unique(clado_events_table$sampled_states_AT_nodes[clado_row_TF])
+				
+				# Error check: there should be only 1 unique state corresponding to this
+				# node (because we are in the section where no anagenetic histories were
+				# found on the branch).
+				if (length(top_state_num_1based) != 1)
+					{
+					txt = "STOP ERROR in BSM_to_phytools_SM(): more than one 'top_state_num_1based' corresponding to the node specified. Printing the matching rows of 'clado_events_table'."
+					cat("\n\n")
+					cat(txt)
+					cat("\n\n")
+					
+					print("clado_events_table[clado_row_TF,]")
+					print(clado_events_table[clado_row_TF,])
+					
+					print("top_state_num_1based")
+					print(top_state_num_1based)
+					
+					stop(txt)
+					} # END if (length(top_state_num_1based) != 1)
+
+				if (length(bottom_state_num_1based) != 1)
+					{
+					txt = "STOP ERROR in BSM_to_phytools_SM(): more than one 'bottom_state_num_1based' corresponding to the node specified. Printing the matching rows of 'clado_events_table'."
+					cat("\n\n")
+					cat(txt)
+					cat("\n\n")
+					
+					print("clado_events_table[clado_row_TF,]")
+					print(clado_events_table[clado_row_TF,])
+					
+					print("bottom_state_num_1based")
+					print(bottom_state_num_1based)
+					
+					stop(txt)
+					} # END if (length(bottom_state_num_1based) != 1)
+				} # END if (sum(clado_row_TF) > 1)
+			
 		
 			# Error check
 			if (bottom_state_num_1based != top_state_num_1based)
@@ -2091,13 +2155,34 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 				}
 		
 			# No events detected, so put in the states_array just one state
+			# But, since there are NO events on this branch, don't add to it if
+			# there is already something there (e.g. don't add the same branch for
+			# multiple branch segments)
 			names_of_states_array = c(ranges_list[bottom_state_num_1based])
-			times_in_each_state_array = c(clado_events_table$edge.length[clado_row_TF])
+			times_in_each_state_array = unique(c(clado_events_table$edge.length[clado_row_TF]))
+
+			if (length(times_in_each_state_array) != 1)
+				{
+				txt = "STOP ERROR in BSM_to_phytools_SM(): more than one 'times_in_each_state_array' corresponding to the node specified. There should only be one time, because no anagenetic events were detected on this branch. Printing the matching rows of 'clado_events_table'."
+				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+				
+				print("clado_events_table[clado_row_TF,]")
+				print(clado_events_table[clado_row_TF,])
+				
+				print("times_in_each_state_array")
+				print(times_in_each_state_array)
+				
+				stop(txt)
+				} # END if (length(times_in_each_state_array) != 1)
+			
+			
 			names(times_in_each_state_array) = names_of_states_array
 			times_in_each_state_array
 			} # END if (sum(edgefound_TF) == 0)
 
-		# If no anagenetic events are found, the whole branchlength is in the 
+		# If some anagenetic events are found, the whole branchlength is in the 
 		# starting state, as specified in "clado_events_table"
 		if (sum(edgefound_TF) > 0)
 			{
