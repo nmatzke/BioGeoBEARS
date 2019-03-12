@@ -1331,7 +1331,7 @@ stratified = stratified
 pdffn = paste0(model_name, "_", length(clado_events_tables), "BSMs_v1.pdf")
 pdf(file=pdffn, width=6, height=6)
 
-nummaps_goal = 50
+nummaps_goal = 1
 for (i in 1:nummaps_goal)
     {
     clado_events_table = clado_events_tables[[i]]
@@ -1470,11 +1470,11 @@ system(cmdstr)
 # Convert a time-stratified BSM to a phytools BSM
 #######################################################
 
-res = resBAYAREALIKE
+res = resDEC
 clado_events_table = clado_events_tables[[1]]
 ana_events_table = ana_events_tables[[1]]
 
-tr_wSimmap = BSM_to_phytools_SM(res=resBAYAREALIKE, clado_events_table=clado_events_table, ana_events_table=ana_events_table)
+tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_table, ana_events_table=ana_events_table)
 summary(tr_wSimmap)
 print(tr_wSimmap)
 countSimmap(tr_wSimmap)
