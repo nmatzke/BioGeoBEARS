@@ -4436,7 +4436,7 @@ paint_stochastic_map_branches <- function(res, master_table_cladogenetic_events,
 #' test=1
 #' # See example scripts at PhyloWiki. 
 #' 
-plot_BSM <- function(results_object, clado_events_table, stratified, analysis_titletxt="Stochastic map", addl_params=list(), plotwhat="text", label.offset=NULL, tipcex=0.8, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, plotlegend=FALSE, legend_ncol=NULL, legend_cex=1, cornercoords_loc="manual", tr=NULL, tipranges=NULL, if_ties="takefirst", pie_tip_statecex=0.7, juststats=FALSE, xlab="Millions of years ago", root.edge=TRUE, colors_list_for_states, skiptree=FALSE, show.tip.label=TRUE, tipcol="black", dej_params_row=NULL, plot_max_age=NULL, skiplabels=FALSE, plot_stratum_lines=TRUE, include_null_range=NULL, plot_null_range=FALSE)
+plot_BSM <- function(results_object, clado_events_table, stratified, analysis_titletxt="Stochastic map", addl_params=list(), plotwhat="text", label.offset=NULL, tipcex=0.8, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, plotlegend=FALSE, legend_ncol=NULL, legend_cex=1, cornercoords_loc="manual", tr=NULL, tipranges=NULL, if_ties="takefirst", pie_tip_statecex=0.7, juststats=FALSE, xlab="Millions of years ago", root.edge=TRUE, colors_list_for_states, lwd=5, skiptree=FALSE, show.tip.label=TRUE, tipcol="black", dej_params_row=NULL, plot_max_age=NULL, skiplabels=FALSE, plot_stratum_lines=TRUE, include_null_range=NULL, plot_null_range=FALSE)
 	{
 	scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
 	
@@ -4449,7 +4449,7 @@ plot_BSM <- function(results_object, clado_events_table, stratified, analysis_ti
 	plot_BioGeoBEARS_results(results_object=resmod, analysis_titletxt=analysis_titletxt, addl_params=addl_params, plotwhat=plotwhat, label.offset=label.offset, tipcex=tipcex, statecex=statecex, splitcex=splitcex, titlecex=titlecex, plotsplits=plotsplits, plotlegend=plotlegend, legend_ncol=legend_ncol, legend_cex=legend_cex, cornercoords_loc=cornercoords_loc, tr=tr, tipranges=tipranges, if_ties=if_ties, pie_tip_statecex=pie_tip_statecex, juststats=juststats, xlab=xlab, root.edge=root.edge, colors_list_for_states=colors_list_for_states, skiptree=FALSE, show.tip.label=show.tip.label, tipcol=tipcol, dej_params_row=dej_params_row, plot_max_age=plot_max_age, skiplabels=skiplabels, plot_stratum_lines=plot_stratum_lines, include_null_range=include_null_range, plot_null_range=plot_null_range)
 	
 	# Paint on the branch states
-	paint_stochastic_map_branches(res=resmod, master_table_cladogenetic_events=clado_events_table, colors_list_for_states=colors_list_for_states, lwd=5, lty=par("lty"), root.edge=TRUE, stratified=stratified)
+	paint_stochastic_map_branches(res=resmod, master_table_cladogenetic_events=clado_events_table, colors_list_for_states=colors_list_for_states, lwd=lwd, lty=par("lty"), root.edge=TRUE, stratified=stratified)
 
 	# Re-plot the tree to get the states on top
 	# (skiptree=TRUE this time)
