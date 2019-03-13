@@ -2015,6 +2015,7 @@ linear_regression_plot_OLD <- function(x, y, xlabel="x", ylabel="y", tmppch=".",
 BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	{
 	
+	
 	# Is it time-stratified?
 	stratTF = (length(res$inputs$timeperiods) > 0)
 	
@@ -2026,6 +2027,23 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	# Get list of edges:
 	trtable = prt(tr, printflag=FALSE)
 	trtable
+
+	# Convert pruningwise edge numbers to cladewise edgenums
+	# The clado_events_table (non-stratified) has the edge numbers in
+	# pruningwise order
+	if (stratTF == FALSE)
+		{
+		pruningwise_edgenums = clado_events_table$parent_br
+		cladewise_edgenums = trtable$parent_br
+		translation_pruning_to_clade_edgenums = as.data.frame(cbind(pruningwise_edgenums, cladewise_edgenums), stringsAsFactors=FALSE)
+		translation_pruning_to_clade_edgenums
+		
+	
+		ana_events_edgenums_indexes_in_clado_events_table = match(x=ana_events_table$parent_br, table=clado_events_table$parent_br)
+		ana_events_table$parent_br = translation_pruning_to_clade_edgenums$cladewise_edgenums[ana_events_edgenums_indexes_in_clado_events_table]
+		clado_events_table$parent_br = trtable$parent_br
+		}
+	
 
 	# Get the edgenums, exclude the "NA" for the root branch
 	# Order edgenums from smallest to largest
@@ -2250,6 +2268,7 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	tr$edge.length
 	all(c(lapply(X=maps, FUN=sum)) == tr$edge.length)
 
+	cbind(tr$edge.length, c(lapply(X=maps, FUN=sum)))
 
 
 	# Make the mapped.edge output
