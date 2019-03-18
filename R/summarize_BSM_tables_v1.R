@@ -2106,6 +2106,12 @@ linear_regression_plot_OLD <- function(x, y, xlabel="x", ylabel="y", tmppch=".",
 #' 
 BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	{
+	# Error check
+	if (is.null(ana_events_table) == TRUE)
+		{
+		ana_events_table = NA
+		}
+	
 	# Is it time-stratified?
 	stratTF = (length(res$inputs$timeperiods) > 0)
 	
@@ -2128,9 +2134,12 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 		translation_pruning_to_clade_edgenums = as.data.frame(cbind(pruningwise_edgenums, cladewise_edgenums), stringsAsFactors=FALSE)
 		translation_pruning_to_clade_edgenums
 		
-	
-		ana_events_edgenums_indexes_in_clado_events_table = match(x=ana_events_table$parent_br, table=clado_events_table$parent_br)
-		ana_events_table$parent_br = translation_pruning_to_clade_edgenums$cladewise_edgenums[ana_events_edgenums_indexes_in_clado_events_table]
+		# Error trap for when there are no anagenetic events
+		if (is.na(ana_events_table) == FALSE)
+			{
+			ana_events_edgenums_indexes_in_clado_events_table = match(x=ana_events_table$parent_br, table=clado_events_table$parent_br)
+			ana_events_table$parent_br = translation_pruning_to_clade_edgenums$cladewise_edgenums[ana_events_edgenums_indexes_in_clado_events_table]
+			}
 		clado_events_table$parent_br = trtable$parent_br
 		}
 	
@@ -2374,13 +2383,6 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	observed_states = sort(unique(names(maps[[i]])))
 	observed_states
 
-	# Get the sum of one state
-	get_sum_statetime_on_branch <- function(statename_to_sum, branch_history_map)
-		{
-		TF = names(branch_history_map) == statename_to_sum
-		total_residence_time = sum(branch_history_map[TF])
-		return(total_residence_time)
-		}
 
 	# sapply to get the sum of each
 	sapply(X=observed_states, FUN=get_sum_statetime_on_branch, branch_history_map=maps[[i]])
@@ -2415,6 +2417,16 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 
 	return(tr_wSimmap)
 	} # END BSM_to_phytools_SM
+
+
+	# Get the sum of one state
+	get_sum_statetime_on_branch <- function(statename_to_sum, branch_history_map)
+		{
+		TF = names(branch_history_map) == statename_to_sum
+		total_residence_time = sum(branch_history_map[TF])
+		return(total_residence_time)
+		}
+
 
 
 BSMs_to_phytools_SMs <- function(res, clado_events_tables, ana_events_tables)
