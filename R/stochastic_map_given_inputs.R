@@ -329,10 +329,10 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# NJMtest: reversing, no effect
 		# NJMtest: transpose, no effect
 		
-		print("condprobs_branch_bot")
-		print(condprobs_branch_bot)
-		print("independent_likelihoods_on_root_branch_of_subtree")
-		print(independent_likelihoods_on_root_branch_of_subtree)
+# 		print("condprobs_branch_bot")
+# 		print(condprobs_branch_bot)
+# 		print("independent_likelihoods_on_root_branch_of_subtree")
+# 		print(independent_likelihoods_on_root_branch_of_subtree)
 		
 		condprobs_branch_bot %*% independent_likelihoods_on_root_branch_of_subtree
 		
