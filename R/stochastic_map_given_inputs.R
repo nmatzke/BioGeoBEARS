@@ -328,6 +328,14 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		
 		# NJMtest: reversing, no effect
 		# NJMtest: transpose, no effect
+		
+		print("condprobs_branch_bot")
+		print(condprobs_branch_bot)
+		print("independent_likelihoods_on_root_branch_of_subtree")
+		print(independent_likelihoods_on_root_branch_of_subtree)
+		
+		condprobs_branch_bot %*% independent_likelihoods_on_root_branch_of_subtree
+		
 		condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_on_root_branch_of_subtree
 		
 		if (include_null_range == TRUE)
@@ -833,6 +841,20 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			right_desc_nodenum_global = (1:nrow(res$condlikes))[right_desc_nodenum_global_TF]
 
 			# OK, now multiply the UPPASS and DOWNPASS probabilities
+# 			print("condprobs_Left_branch_top")
+# 			print(condprobs_Left_branch_top)
+# 			
+# 			print("res$condlikes[left_desc_nodenum_global,]")
+# 			print(res$condlikes[left_desc_nodenum_global,])
+# 			
+# 			
+# 			print("condprobs_Right_branch_top")
+# 			print(condprobs_Right_branch_top)
+# 
+# 			print("res$condlikes[right_desc_nodenum_global,]")
+# 			print(res$condlikes[right_desc_nodenum_global,])
+
+			
 			probs_Left_branch_top = condprobs_Left_branch_top * res$condlikes[left_desc_nodenum_global,]
 			probs_Right_branch_top = condprobs_Right_branch_top * res$condlikes[right_desc_nodenum_global,]
 			} # END if (stratified == FALSE)

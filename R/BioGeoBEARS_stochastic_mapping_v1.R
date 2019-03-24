@@ -1928,20 +1928,47 @@ get_inputs_for_stochastic_mapping_from_results_object <- function(res, cluster_a
 
 	# Get the letter codes for aras
 	areas = getareas_from_tipranges_object(tipranges)
-
-
+	
+	# Error check
+	numchars_for_each_area = nchar(areas)
+	if (any(numchars_for_each_area > 1) == TRUE)
+		{
+		txt = "STOP ERROR in get_inputs_for_stochastic_mapping_from_results_object(): For Biogeographical Stochastic Mapping (BSM) in BioGeoBEARS, each area name in your areas/geography file has to be a SINGLE LETTER. This is because various internal code in the BSM algorithm splits strings by letter to figure out what events are occuring. Your areanames are being printed, so you can see which are failing to be single letters. See: Note: Only *single*-letter codes for areas! at: http://phylo.wikidot.com/biogeographical-stochastic-mapping-example-script#BSMsingle_letter"
+		
+		row1 = areas
+		row2 = numchars_for_each_area
+		row3 = any(numchars_for_each_area > 1)
+		tmp_table = rbind(row1, row2, row3)
+		tmp_table = as.data.frame(tmp_table, stringsAsFactors=FALSE)
+		row.names(tmp_table) = c("area_names", "number_of_letters", "is_it_too_long")
+		names(tmp_table) = paste0("area", 1:length(areas))
+		tmp_table
+		
+		cat("\n\n")
+		cat(txt)
+		print(tmp_table)
+		cat("\n\n")
+		stop(txt)
+		} # END if (any(numchars_for_each_area > 1) == TRUE)
 
 	# Get the areas and states list from time-stratified list
 	store_stratum_states_list_TF = FALSE
 	newstrat = TRUE
 	if ((is.null(res$inputs$lists_of_states_lists_0based) == FALSE) && (newstrat == TRUE))
 		{
-		area_nums = sort(unique(unlist(res$inputs$lists_of_states_lists_0based)))
-		area_nums
+		# NJM 2019-03-25: use the saved master states list, rather than trying to 
+		# infer it from the stratum-specific lists
+		#area_nums = sort(unique(unlist(res$inputs$lists_of_states_lists_0based)))
+		area_nums = sort(unique(unlist(res$inputs$all_geog_states_list_usually_inferred_from_areas_maxareas)))
+		#area_nums
 		
-		state_indices_0based_all_timeperiods = unique(unlist(res$inputs$lists_of_states_lists_0based, recursive=FALSE))
+		#state_indices_0based_all_timeperiods = unique(unlist(res$inputs$lists_of_states_lists_0based, recursive=FALSE))
+		state_indices_0based_all_timeperiods = res$inputs$all_geog_states_list_usually_inferred_from_areas_maxareas
+		print("state_indices_0based_all_timeperiods")
+		print(state_indices_0based_all_timeperiods)
+
 		# Get the numbers as collapsed characters, to be sure sorting into correct order
-		state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
+		#state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
 		state_indices_0based = state_indices_0based_all_timeperiods
 		
 		states_list_this_timeperiod = res$inputs$lists_of_states_lists_0based[[timeperiod_i]]
