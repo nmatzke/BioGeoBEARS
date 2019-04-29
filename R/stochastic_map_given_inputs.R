@@ -1539,13 +1539,13 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 				
 				if (timebin_TF == TRUE)
 					{
-					print(TRUE)
+					#print(TRUE)
 					probs_branch_top = condprobs_branch_top * downpass_relprobs_at_branch_top
 					probs_branch_top = probs_branch_top / sum(probs_branch_top)
 					}
 				if (timebin_TF == FALSE)
 					{
-					print(FALSE)
+					#print(FALSE)
 					probs_branch_top = downpass_relprobs_at_branch_top
 					}
 			
