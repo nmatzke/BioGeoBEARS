@@ -102,7 +102,7 @@ BioGeoBEARS allows probabilistic inference of both historical biogeography (ance
 
 # UNIT TESTS
 
-Current build status (excluding all slow tests): [![Build Status](https://travis-ci.org/nmatzke/BioGeoBEARS.svg?branch=master)](https://travis-ci.org/nmatzke/BioGeoBEARS)
+Current build status (excluding all slow tests): [![Build Status](https://travis-ci.org/nmatzke/BioGeoBEARS.svg?branch=master)](https://travis-ci.org/nmatzke/BioGeoBEARS) (2019-04-29 build error due to R package quadprog, a dependency of some dependency that won't install on Travis-CI's current version of R.)
 
 BioGeoBEARS version 1.1.1 also includes 156+ unit-tests in the "tests" directory, using the R package "testthat". These check the likelihood calculations, ancestral state probabilities, and ML optimizations for regular, time-stratified, and trait-dependent models.
 
