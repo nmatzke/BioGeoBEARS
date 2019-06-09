@@ -36,6 +36,14 @@ library(devtools)
 devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
 ```
 
+If step #2 keeps trying to reinstall rexpokit and cladoRcpp from scratch (including demanding a compiler like gcc or gfortran) even though they are already installed, try adding "dependencies=FALSE":
+
+```
+devtools::install_github(repo="nmatzke/BioGeoBEARS", dependencies=FALSE)
+```
+
+...if you hit other needed dependencies, install them individually from CRAN, then re-run the command above.
+
 **3. NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. Instructions for removing old versions:
 
 ```
