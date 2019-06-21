@@ -207,10 +207,11 @@ section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, 
 			'
 			} else {
 			# The simplest approach to INCLUDING fossils is to artificially extend the branchlengths
-			warntxt = cat("\n\nWARNING: Your tree has ", numfossils, " fossil tips older than ", fossils_older_than, " my!\n",
+			warntxt = cat("\n\nWARNING: Your tree has ", numfossils, " fossil tips older than fossils_older_than=", fossils_older_than, " my!\n",
 							"If you actually have that many fossil tips, then everything is fine, and you can ignore this warning. If not, make sure that all fossils are older than whatever you set 'fossils_older_than' to be. If you do *not* have any fossils, then you are probably using an undated tree. This is a Very Bad Idea in general, please see 'BioGeoBEARS Mistakes To Avoid' at PhyloWiki.\n", 
 							"(default: fossils_older_than=0.6)\n", 
 							"Fossil tipnames listed below:\n", sep="")
+			warning(warntxt)
 			cat(warntxt)
 			cat(paste(fossil_names, collapse="\n", sep=""))
 			cat("\n\n")
@@ -1599,7 +1600,31 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 				tip_TF = phy_as_it_is_chopped_down$tip.label == tipname
 				
 				# 22 rather than 17
+				# 2019-06-21_NJM error:
+				# Error in current_tip_relative_probs_of_each_state[tip_TF, states_to_use_TF] : 
+        # (subscript) logical subscript too long
+        
+        # This error was due to tips with age of 0.07019192 or 0.02674141 time_bp, with 
+        # time-slices of 0.01, 0.012
+        
+#         print("2019-06-21_NJM error:")
+#         print(tip_TF)
+#         print(length(tip_TF))
+#         print(states_to_use_TF)
+#         print(length(states_to_use_TF))
+#         print(current_tip_relative_probs_of_each_state)
+#         print(dim(current_tip_relative_probs_of_each_state))
+        
 				relative_probs_of_each_state_at_the_tip_of_this_branch = current_tip_relative_probs_of_each_state[tip_TF, states_to_use_TF]
+				
+# 				if (sum(tip_TF) > 2)
+# 					{
+# 					relative_probs_of_each_state_at_the_tip_of_this_branch = current_tip_relative_probs_of_each_state[tip_TF, states_to_use_TF]
+# 					} else {
+# 					relative_probs_of_each_state_at_the_tip_of_this_branch_tmp = current_tip_relative_probs_of_each_state
+# 					relative_probs_of_each_state_at_the_tip_of_this_branch = relative_probs_of_each_state_at_the_tip_of_this_branch_tmp[states_to_use_TF]
+# 					relative_probs_of_each_state_at_the_tip_of_this_branch = matrix(data=relative_probs_of_each_state_at_the_tip_of_this_branch, nrow=1)
+# 					}
 	
 	
 				if (do_exponentiation == TRUE)
