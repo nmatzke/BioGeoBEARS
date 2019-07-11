@@ -9,8 +9,15 @@ simulate_source_areas_ana_clado <- function(res, clado_events_tables, ana_events
 	{
 	# Get the dmat and times
 	dmat_times = get_dmat_times_from_res(res=res, numstates=NULL)
+		
 	dmat = dmat_times$dmat
 	times = dmat_times$times
+	
+	# 2019-07-11 update to fix Mathias issue with dmat length 1
+# 	print("dmat_times$dmat")
+# 	print(dmat_times$dmat)
+# 	print("dmat")
+# 	print(dmat)
 	
 	# Error check
 	if (length(clado_events_tables) != length(ana_events_tables))
@@ -90,7 +97,7 @@ simulate_source_area_ana <- function(ana_events_table, areanames, dmat=NULL, tim
 	
 	# Check for times (different dmats through time)
 	strat_TF = FALSE
-	if (is.list(dmat) && is.null(times))
+	if (is_list_not_dataframe(dmat) && is.null(times))
 		{
 		txt = "STOP ERROR in simulate_source_area_ana(): if 'dmat' is a list of dmats, 'times' cannot be NULL."
 		cat("\n\n")
@@ -98,7 +105,7 @@ simulate_source_area_ana <- function(ana_events_table, areanames, dmat=NULL, tim
 		cat("\n\n")
 		stop(txt)
 		}
-	if (is.list(dmat) && !is.null(times))
+	if (is_list_not_dataframe(dmat) && !is.null(times))
 		{
 		strat_TF = TRUE
 		
@@ -123,7 +130,7 @@ simulate_source_area_ana <- function(ana_events_table, areanames, dmat=NULL, tim
 			cat("\n\n")
 			stop(txt)
 			} # END if ( all( times == sort(times) ) )
-		} # END if (is.list(dmat) && is.null(times))
+		} # END if (is_list_not_dataframe(dmat) && is.null(times))
 	
 	# If dmat is NULL, set to all 1s
 	# This is the dispersal_multipliers_matrix, which includes the influence 
@@ -231,15 +238,15 @@ simulate_source_area_clado <- function(clado_events_table, areanames, dmat=NULL,
 
 	# Check for times (different dmats through time)
 	strat_TF = FALSE
-	if (is.list(dmat) && is.null(times))
+	if (is_list_not_dataframe(dmat) && is.null(times))
 		{
-		txt = "STOP ERROR in simulate_source_area_ana(): if 'dmat' is a list of dmats, 'times' cannot be NULL."
+		txt = "STOP ERROR in simulate_source_area_clado(): if 'dmat' is a list of dmats, 'times' cannot be NULL."
 		cat("\n\n")
 		cat(txt)
 		cat("\n\n")
 		stop(txt)
 		}
-	if (is.list(dmat) && !is.null(times))
+	if (is_list_not_dataframe(dmat) && !is.null(times))
 		{
 		strat_TF = TRUE
 		
@@ -249,7 +256,7 @@ simulate_source_area_clado <- function(clado_events_table, areanames, dmat=NULL,
 		
 		if (length(dmat) != length(times))
 			{
-			txt = "STOP ERROR in simulate_source_area_ana(): the length of the 'dmat' list must equal the length of 'times' in a time-stratified analysis."
+			txt = "STOP ERROR in simulate_source_area_clado(): the length of the 'dmat' list must equal the length of 'times' in a time-stratified analysis."
 			cat("\n\n")
 			cat(txt)
 			cat("\n\n")
@@ -258,13 +265,13 @@ simulate_source_area_clado <- function(clado_events_table, areanames, dmat=NULL,
 		
 		if ( all(times == sort(times))==FALSE || (0 %in% times) == TRUE )
 			{
-			txt = "STOP ERROR in simulate_source_area_ana(): 'times' in a time-stratified analysis must be sorted from youngest to oldest. Also, time '0' should *not* be included."
+			txt = "STOP ERROR in simulate_source_area_clado(): 'times' in a time-stratified analysis must be sorted from youngest to oldest. Also, time '0' should *not* be included."
 			cat("\n\n")
 			cat(txt)
 			cat("\n\n")
 			stop(txt)
 			} # END if ( all( times == sort(times) ) )
-		} # END if (is.list(dmat) && is.null(times))
+		} # END if (is_list_not_dataframe(dmat) && is.null(times))
 	
 	
 	# If dmat is NULL, set to all 1s

@@ -185,6 +185,10 @@ error_checks_for_fossils_xls <- function(xls, fix_duplicates=TRUE)
 		cat("\n\n")
 		stop(stoptxt)	
 		}
+
+
+
+
 	
 	# Fix repeated names
 	if (length(uniq_fossil_taxa) != length(fossil_taxa_names))
@@ -224,6 +228,42 @@ error_checks_for_fossils_xls <- function(xls, fix_duplicates=TRUE)
 		cat("\n\n")
 		stop(stoptxt)
 		}
+
+
+
+	# Fix repeated names - Fossil_Taxon_orig
+	Fossil_Taxon_orig = xls$Fossil_Taxon_orig
+	uniq_Fossil_Taxon_orig = unique(Fossil_Taxon_orig)
+	
+	if (uniq_Fossil_Taxon_orig != length(xls$Fossil_Taxon_orig))
+		{
+		counts = table(Fossil_Taxon_orig)
+		duplicate_names = names(counts)[counts > 1]
+		duplicate_names
+		
+		# Fix the duplicates
+		for (i in 1:length(duplicate_names))
+			{
+			name_to_add_numbers_to = duplicate_names[i]
+			TF = Fossil_Taxon_orig == name_to_add_numbers_to
+			nums_to_add = 1:sum(TF)
+			nums_as_strings = sprintf(fmt="%04.0f", (nums_to_add))
+			nums_as_strings = paste("_specimen", nums_as_strings, sep="")
+			new_names = paste(Fossil_Taxon_orig[TF], nums_as_strings, sep="")
+			
+			# Insert new names
+			Fossil_Taxon_orig[TF] = new_names
+			} # END for (i in 1:length(duplicate_names))
+		cat("\n")
+		txt = "WARNING from error_checks_for_fossils_xls(): added specimen numbers to OTU names in xls, in order to make all OTUs unique."
+		cat(txt)
+		cat("\n")
+		warning(txt)
+		xls$Fossil_Taxon_orig = Fossil_Taxon_orig
+		} # END if (length(uniq_fossil_taxa) != length(fossil_taxa_names))
+
+
+
 	
 		
 	cat("\nPassed error checks in error_checks_for_fossils_xls(), but this only checks for the problems Nick thought of. Returning xls (perhaps modified!)...\n\n")
@@ -444,7 +484,9 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 		{
 		# Find the row in the xls table:
 		TF = list_of_fossil_tips_added[i] == fossils_in_xls
-		
+# 		print("sum(TF):")
+# 		print(sum(TF))
+# 		print(xls[TF,])
 		# STUPID Excel readin converts "'0000100" to "100" in R
 		# Fix with sprintf
 		#######################################################
@@ -467,7 +509,7 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 		# What sort of geographic constraint?
 		geog_constraint = xls$geog_constraint[TF]
 		
-		#print(geog_constraint)
+		print(geog_constraint)
 		
 		# If the fossil data is presence-only, then the absences don't mean anything,
 		# just the presences
@@ -509,6 +551,15 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 
 		
 		# OK, now add the modified ranges to the table of ranges to add
+		
+		print("tipranges_to_add:")
+		print(tipranges_to_add)
+		print("")
+		print("ranges:")
+		print(ranges)
+		print("")
+		
+		
 		tipranges_to_add = rbind(tipranges_to_add, ranges)
 		}
 	
