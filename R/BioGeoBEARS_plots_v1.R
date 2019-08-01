@@ -212,7 +212,7 @@ add_statum_boundaries_to_phylo_plot <- function(tr, timeperiods=1, lty="dashed",
 #' @examples
 #' test=1
 #' # See example script at PhyloWiki for example
-plot_BioGeoBEARS_results <- function(results_object, analysis_titletxt=NULL, addl_params=list(), plotwhat="text", label.offset=NULL, tipcex=0.8, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, plotlegend=FALSE, legend_ncol=NULL, legend_cex=1, cornercoords_loc="manual", tr=NULL, tipranges=NULL, if_ties="takefirst", pie_tip_statecex=0.7, juststats=FALSE, xlab="Millions of years ago", root.edge=TRUE, colors_list_for_states=NULL, skiptree=FALSE, show.tip.label=TRUE, tipcol="black", dej_params_row=NULL, plot_max_age=NULL, skiplabels=FALSE, plot_stratum_lines=TRUE, include_null_range=NULL, plot_null_range=FALSE, simplify_piecharts=FALSE, tipboxes_TF=TRUE, tiplabel_adj=c(0.5), no.margin=FALSE, xlims=NULL, ylims=NULL)
+plot_BioGeoBEARS_results <- function(results_object, analysis_titletxt=NULL, addl_params=list(), plotwhat="text", label.offset=NULL, tipcex=0.8, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, plotlegend=FALSE, legend_ncol=NULL, legend_cex=1, cornercoords_loc="auto", tr=NULL, tipranges=NULL, if_ties="takefirst", pie_tip_statecex=0.7, juststats=FALSE, xlab="Millions of years ago", root.edge=TRUE, colors_list_for_states=NULL, skiptree=FALSE, show.tip.label=TRUE, tipcol="black", dej_params_row=NULL, plot_max_age=NULL, skiplabels=FALSE, plot_stratum_lines=TRUE, include_null_range=NULL, plot_null_range=FALSE, simplify_piecharts=FALSE, tipboxes_TF=TRUE, tiplabel_adj=c(0.5), no.margin=FALSE, xlims=NULL, ylims=NULL)
 	{
 	
 	junk='
@@ -1784,11 +1784,14 @@ add_corners <- function(startnode, tr, nodecoords, corners_list)
 #' @param tr A tree object in \code{\link[ape]{phylo}} format.
 #' @param coords_fun The name of the function to use to get node coordinates. Default: 
 #' "plot_phylo3_nodecoords". 
-#' @param tmplocation Default is "manual", which throws an error check unless your path structure matches the developer's.  Most users
-#' should probably use the \code{\link[base]{system.file}} command in the examples, below. The directory location containing the R 
+#' @param tmplocation The directory location containing the R 
 #' script \code{plot_phylo3_nodecoords.R}. This function, modified from the \code{\link[ape]{ape}} function
-#' \code{\link[ape]{plot.phylo}}, cannot be included directly in the R package as it contains C code that does not pass CRAN's R CMD check. The default, 
-#' cornercoords_loc="manual", will not allow split states to be plot.  The R script \code{plot_phylo3_nodecoords.R} is located in the BioGeoBEARS extension data 
+#' \code{\link[ape]{plot.phylo}}, cannot be included directly in the R package as it contains C code that 
+#' does not pass CRAN's R CMD check. Default is "auto". Option "manual" will throw an error 
+#' check unless your path structure matches the developer's.  Most users
+#' should probably use the \code{\link[base]{system.file}} command in the examples, below. 
+#' Using cornercoords_loc="manual", will not allow split states to be plot. The R script \code{plot_phylo3_nodecoords.R} 
+#' is located in the BioGeoBEARS extension data 
 #' directory, \code{extdata/a_scripts}.  You should be able to get the full path with 
 #' \code{list.files(system.file("extdata/a_scripts", package="BioGeoBEARS"), full.names=TRUE)}.
 #' @param root.edge Plot the root.edge, if it exists? Default TRUE.
@@ -1815,7 +1818,7 @@ add_corners <- function(startnode, tr, nodecoords, corners_list)
 #' 
 #'
 #' 
-corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="manual", root.edge=TRUE)
+corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="auto", root.edge=TRUE)
 	{
 	defaults='
 	coords_fun="plot_phylo3_nodecoords"
@@ -1833,15 +1836,18 @@ corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="
 	
 	# tr = read.tree(trfn)
 	
-	if (tmplocation != "manual")
-		{
-		scriptdir = tmplocation
-		}
-
+	# 2019-08-01_NJM fix for some scripts that defaulted to "manual"
 	if (tmplocation == "manual")
 		{
 		scriptdir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/a_scripts/"
+		} else if (tmplocation == "auto") {
+		extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+		scriptdir = slashslash(paste(extdata_dir, "a_scripts" , sep="/"))
+		} else {
+		scriptdir = tmplocation
 		}
+
+
 	file_to_source = np(paste(addslash(scriptdir), coords_fun, ".R", sep=""))
 	source(file=file_to_source)
 	
@@ -1925,11 +1931,14 @@ corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="
 #' @param tr A tree object in \code{\link[ape]{phylo}} format.
 #' @param coords_fun The name of the function to use to get node coordinates. Default: 
 #' "plot_phylo3_nodecoords". 
-#' @param tmplocation Default is "manual", which throws an error check unless your path structure matches the developer's.  Most users
-#' should probably use the \code{\link[base]{system.file}} command in the examples, below. The directory location containing the R 
+#' @param tmplocation The directory location containing the R 
 #' script \code{plot_phylo3_nodecoords.R}. This function, modified from the \code{\link[ape]{ape}} function
-#' \code{\link[ape]{plot.phylo}}, cannot be included directly in the R package as it contains C code that does not pass CRAN's R CMD check. The default, 
-#' cornercoords_loc="manual", will not allow split states to be plot.  The R script \code{plot_phylo3_nodecoords.R} is located in the BioGeoBEARS extension data 
+#' \code{\link[ape]{plot.phylo}}, cannot be included directly in the R package as it contains C code that 
+#' does not pass CRAN's R CMD check. Default is "auto". Option "manual" will throw an error 
+#' check unless your path structure matches the developer's.  Most users
+#' should probably use the \code{\link[base]{system.file}} command in the examples, below. 
+#' Using cornercoords_loc="manual", will not allow split states to be plot. The R script \code{plot_phylo3_nodecoords.R} 
+#' is located in the BioGeoBEARS extension data 
 #' directory, \code{extdata/a_scripts}.  You should be able to get the full path with 
 #' \code{list.files(system.file("extdata/a_scripts", package="BioGeoBEARS"), full.names=TRUE)}.
 #' @param root.edge Plot the root.edge, if it exists? Default TRUE.
@@ -1958,7 +1967,7 @@ corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="
 #' 
 #'
 #' 
-node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="manual", root.edge=TRUE)
+node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="auto", root.edge=TRUE)
 	{
 	defaults='
 	coords_fun="plot_phylo3_nodecoords"
@@ -1975,15 +1984,16 @@ node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="ma
 	# inst/extdata/examples/Psychotria_M0/LGcpp/Psychotria_5.2.newick"
 	
 	# tr = read.tree(trfn)
-	
-	if (tmplocation != "manual")
-		{
-		scriptdir = tmplocation
-		}
 
+	# 2019-08-01_NJM fix for some scripts that defaulted to "manual"
 	if (tmplocation == "manual")
 		{
 		scriptdir = "/Dropbox/_njm/__packages/BioGeoBEARS_setup/inst/extdata/a_scripts/"
+		} else if (tmplocation == "auto") {
+		extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+		scriptdir = slashslash(paste(extdata_dir, "a_scripts" , sep="/"))
+		} else {
+		scriptdir = tmplocation
 		}
 	file_to_source = np(paste(addslash(scriptdir), coords_fun, ".R", sep=""))
 	source(file=file_to_source)
@@ -2143,7 +2153,7 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 	nodenums = (ntips+1):(ntips+numnodes)
 
 	extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
-	tmplocation=paste(extdata_dir, "a_scripts" , sep="/")
+	tmplocation=slashslash(paste(extdata_dir, "a_scripts" , sep="/"))
 	nodes_xy = node_coords(tr, root.edge=root.edge, tmplocation=tmplocation)
 	nodes_xy
 
@@ -2250,7 +2260,7 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 	nodenums = (ntips+1):(ntips+numnodes)
 
 	extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
-	tmplocation=paste(extdata_dir, "a_scripts" , sep="/")
+	tmplocation=slashslash(paste(extdata_dir, "a_scripts" , sep="/"))
 	nodes_xy = node_coords(tr, root.edge=root.edge, tmplocation=tmplocation)
 	nodes_xy
 
@@ -2452,7 +2462,9 @@ add_per_area_probs_to_corners <- function(tr, probs_each_area, left_or_right, co
 	nodenums = (ntips+1):(ntips+numnodes)
 	
 	# Get the plot coordinates of the corners ABOVE each node
-	corners_list = corner_coords(tr, root.edge=root.edge)
+	extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+	tmplocation = slashslash(paste(extdata_dir, "a_scripts" , sep="/"))
+	corners_list = corner_coords(tr, root.edge=root.edge, tmplocation=tmplocation)
 	corners_list
 	
 	# Get the node numbers of the nodes ABOVE each corner above each node
