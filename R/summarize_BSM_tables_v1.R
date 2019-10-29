@@ -806,6 +806,90 @@ get_huge_events_tables_from_BSM_Rdata <- function(BSM_tables_dir, BSM_fn_base, m
 
 
 
+
+
+
+
+
+#######################################################
+# Get huge events tables from saved stochastic maps
+# Rdata files
+#######################################################
+get_huge_events_tables_from_clado_ana_events_tables <- function(clado_events_tables, ana_events_tables, model_name="")
+	{
+	defaults='
+	# Working directory
+	wd = "/drives/Dropbox/_njm/__packages/BioGeoBEARS_setup/_basic_example/"
+	setwd(wd)
+
+	# Biogeographical stochastic mappings (BSMs) saved
+	BSM_tables_dir = "BSM_tables_M0_v1"
+	BSM_fn_base = "BSM_M0_"
+	model_name = "DEC"
+	suffix = ".Rdata"
+	' # END defaults
+
+	# Necessary setting to avoid getting numbers etc. in the stochastic mapping output
+	options(stringsAsFactors=FALSE)
+	
+	
+	# Get the list of files
+	num_BSMs = length(clado_events_tables)
+	
+	# Huge tables, and indexes each BSM
+	huge_cladogenetic_events_table = NULL
+	huge_anagenetic_events_table = NULL
+	ic = NULL
+	ia = NULL
+
+
+	# Get the output
+	for (i in 1:num_BSMs)
+		{
+		# Add to huge tables
+		huge_cladogenetic_events_table = rbind(huge_cladogenetic_events_table, clado_events_tables[[i]])
+		huge_anagenetic_events_table = rbind(huge_anagenetic_events_table, ana_events_tables[[i]])
+		
+		# Add to the ic, ia indexes
+		if (is.null(clado_events_tables[[i]]) == FALSE)
+			{
+			tmp_ic = rep(i, nrow(clado_events_tables[[i]]))
+			ic = c(ic, tmp_ic)
+			} # END if (!is.null(master_table_cladogenetic_events))
+
+		if (is.null(ana_events_tables[[i]]) == FALSE)
+			{
+			tmp_ia = rep(i, nrow(ana_events_tables[[i]]))
+			ia = c(ia, tmp_ia)
+			} # END if (!is.null(table_w_anagenetic_events))
+		
+		} # END
+	
+	# Add the indexes
+	i = ic
+	huge_cladogenetic_events_table = cbind(i, huge_cladogenetic_events_table)
+	i = ia
+	huge_anagenetic_events_table = cbind(i, huge_anagenetic_events_table)
+	i = 0
+	
+	# Store as list of 2 tables
+	huge_tables = NULL
+	huge_tables$huge_cladogenetic_events_table = huge_cladogenetic_events_table
+	huge_tables$huge_anagenetic_events_table = huge_anagenetic_events_table
+	
+	# To extract
+	#huge_cladogenetic_events_table = huge_tables$huge_cladogenetic_events_table
+	#huge_anagenetic_events_table = huge_tables$huge_anagenetic_events_table
+	
+	return(huge_tables)
+	} # END get_huge_events_tables_from_BSM_Rdata
+
+
+
+
+
+
+
 count_events_huge_tables <- function(huge_tables, timeperiod=NULL, area_abbr_to=NULL, area_abbr_from=NULL, BSM_i=NULL)
 	{
 	# Extract
@@ -955,7 +1039,7 @@ count_clado_events_nonjump <- function(clado_events_tables, ana_events_tables, a
 # a collection of BSMs
 #######################################################
 
-count_ana_clado_events <- function(clado_events_tables, ana_events_tables, areanames, actual_names)
+count_ana_clado_events <- function(clado_events_tables, ana_events_tables, areanames, actual_names, timeperiod=NULL)
 	{
 	defaults='
 	areanames = c("A", "B", "C", "D", "E", "F", "G")
@@ -983,6 +1067,48 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 		cat("\n\n")
 		stop(txt)
 		} # END if (length(areanames) != length(actual_names))
+
+
+	# If desired, count only within a timeperiod / stratum / time bin
+	if (is.null(timeperiod) == FALSE)
+		{
+		# Error check
+		if (length(timeperiod) != 2)
+			{
+			errortxt = paste("\n\nERROR in count_events_huge_tables(): timeperiod must either be NULL or be 2 numbers (min and max of time bin, in time before present).\n\n", sep="")
+			cat(errortxt)
+			stop(errortxt)
+			}
+		
+		minT = min(timeperiod)
+		maxT = max(timeperiod)
+		
+		original_clado_events_tables = clado_events_tables
+		original_ana_events_tables = ana_events_tables
+		
+		for (i in 1:length(original_clado_events_tables))
+			{
+			clado_events_table = clado_events_tables[[i]]
+			ana_events_table = ana_events_tables[[i]]
+			
+			TF1 = clado_events_table$time_bp < maxT
+			TF2 = clado_events_table$time_bp >= minT
+			TF = (TF1 + TF2) == 2
+			clado_events_table = clado_events_table[TF,]
+
+			TF1 = ana_events_table$abs_event_time < maxT
+			TF2 = ana_events_table$abs_event_time >= minT
+			TF = (TF1 + TF2) == 2
+			ana_events_table = ana_events_table[TF,]
+			
+			clado_events_tables[[i]] = clado_events_table
+			ana_events_table[[i]] = ana_events_table
+			}
+		} else {
+		minT = 0
+		maxT = 1e50
+		}
+
 	
 	# Initialize
 	dimdata = c(length(areanames), length(areanames))
@@ -1020,8 +1146,7 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 
 		# Convert e.g. AB->B,A to AB->A,B, since these are identical
 		clado_events_table = uniquify_clado_events(clado_events_table)
-
-
+		
 		# Count vicariance events
 		vicariance_clado_events_table = clado_events_table[clado_events_table$clado_event_type == "vicariance (v)",]
 		vicariance_clado_events_table
@@ -1490,6 +1615,84 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 	
 	return(counts_list)
 	} # END count_ana_clado_events <- function(clado_events_tables, ana_events_tables, areanames, actual_names)
+
+
+
+
+
+print_counts_lists_to_file <- function(list_of_counts_lists, model_name="default")
+	{
+	time_txt_TF = TRUE
+	if (is.list(list_of_counts_lists[[1]]) == FALSE)
+		{
+		list_of_counts_lists = list(list_of_counts_lists)
+		
+		time_txt_TF = FALSE
+		}
+	
+	for (i in 1:length(list_of_counts_lists))
+		{
+		counts_list = list_of_counts_lists[[i]]
+
+		summary_counts_BSMs = counts_list$summary_counts_BSMs
+		print(conditional_format_table(summary_counts_BSMs))
+
+		# Histogram of event counts
+		# Convert 1 to 01
+		
+		if (time_txt_TF == TRUE)
+			{
+			txtnum = sprintf("%02.0f", i)
+			time_txt = paste0("_time", txtnum)
+			} else {
+			time_txt = ""
+			}
+			
+		# Make the histograms of event counts
+		pdffn = paste0(model_name, time_txt, "_histograms_of_event_counts.pdf")
+		hist_event_counts(counts_list, pdffn=pdffn)
+
+		#######################################################
+		# Print counts to files
+		#######################################################
+		tmpnames = names(counts_list)
+		
+		if (time_txt_TF == TRUE)
+			{
+			txtnum = sprintf("%02.0f", i)
+			time_txt = paste0("_time", txtnum)
+			} else {
+			time_txt = ""
+			} 
+		tmpfns = paste0(model_name, time_txt, "_", tmpnames)
+		cat("\n\nWriting tables* of counts to tab-delimited text files:\n(* = Tables have dimension=2 (rows and columns). Cubes (dimension 3) and lists (dimension 1) will not be printed to text files.) \n\n")
+		for (i in 1:length(tmpnames))
+				{
+				cmdtxt = paste0("item = counts_list$", tmpnames[i])
+				eval(parse(text=cmdtxt))
+
+				# Skip cubes
+				if (length(dim(item)) != 2)
+						{
+						next()
+						}
+
+				outfn = paste0(tmpfns[i], ".txt")
+				if (length(item) == 0)
+						{
+						cat(outfn, " -- NOT written, *NO* events recorded of this type", sep="")
+						cat("\n")
+						} else {
+						cat(outfn)
+						cat("\n")
+						write.table(conditional_format_table(item), file=outfn, quote=FALSE, sep="\t", col.names=TRUE, row.names=TRUE)
+						} # END if (length(item) == 0)
+				} # END for (i in 1:length(tmpnames))
+		cat("...done.\n")
+		} # END for-loop
+	}  # END print_counts_lists_to_file <- function(list_of_counts_lists, model_name="default")
+
+
 
 
 calc_BSM_mean_node_states <- function(clado_events_tables, tr, numstates)
