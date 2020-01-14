@@ -2743,13 +2743,13 @@ coo2crs <- function(ia, ja, a, n=NA, transpose_needed=FALSE)
 	vals = c(0,0.01,0.01,0.01,0.01,0,0,0,0,0,0,0,0,0,0,0,0,-0.04,0,0,0,0.01,0.01,0.01,0,0,0,0,0,0,0,0,0,0,-0.04,0,0,0.01,0,0,0.01,0.01,0,0,0,0,0,0,0,0,0,-0.04,0,0,0.01,0,0.01,0,0.01,0,0,0,0,0,0,0,0,0,-0.04,0,0,0.01,0,0.01,0.01,0,0,0,0,0,0,0.01,0.01,0,0,-0.06,0,0,0,0,0,0.01,0.01,0,0,0,0,0.01,0,0.01,0,0,-0.06,0,0,0,0,0.01,0,0.01,0,0,0,0.01,0,0,0.01,0,0,-0.06,0,0,0,0,0.01,0.01,0,0,0,0,0.01,0.01,0,0,0,0,-0.06,0,0,0.01,0,0,0.01,0,0,0,0.01,0,0.01,0,0,0,0,-0.06,0,0,0.01,0,0.01,0,0,0,0,0.01,0.01,0,0,0,0,0,-0.06,0,0,0.01,0.01,0,0,0,0,0,0,0.02,0.02,0,0.02,0,0,-0.06,0,0,0,0.01,0,0,0,0,0,0.02,0,0.02,0,0.02,0,0,-0.06,0,0,0.01,0,0,0,0,0,0,0.02,0.02,0,0,0.02,0,0,-0.06,0,0.01,0,0,0,0,0,0,0,0,0.02,0.02,0.02,0,0,0,-0.06,0.01,0,0,0,0,0,0,0,0,0,0,0,0.03,0.03,0.03,0.03,-0.04)
 	
 	Qmat = matrix(vals, nrow=16, ncol=16, byrow=FALSE)
-	library(SparseM)
-	library(kexpmv)
+	#library(SparseM)
+	#library(kexpmv)
 	crsQmat = SparseM::as.matrix.csr(Qmat)
 	crsQmat
 	
-	library(BioGeoBEARS)
-	cooQmat = mat2coo(Qmat)
+	#library(BioGeoBEARS)
+	cooQmat = rexpokit::mat2coo(Qmat)
 	cooQmat
 	
 	# Test coo2crs
@@ -2758,7 +2758,7 @@ coo2crs <- function(ia, ja, a, n=NA, transpose_needed=FALSE)
 	a=cooQmat[,"a"]
 	transpose_needed = FALSE
 	n=16
-	crsR_Qmat = coo2crs(ia=ia, ja=ja, a=a, n=16, transpose_needed=FALSE)
+	crsR_Qmat = BioGeoBEARS::coo2crs(ia=ia, ja=ja, a=a, n=16, transpose_needed=FALSE)
 	crsR_Qmat
 	
 	# Check:

@@ -1102,7 +1102,7 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 			ana_events_table = ana_events_table[TF,]
 			
 			clado_events_tables[[i]] = clado_events_table
-			ana_events_table[[i]] = ana_events_table
+			ana_events_tables[[i]] = ana_events_table
 			}
 		} else {
 		minT = 0
