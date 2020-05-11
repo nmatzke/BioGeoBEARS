@@ -185,6 +185,10 @@ error_checks_for_fossils_xls <- function(xls, fix_duplicates=TRUE)
 		cat("\n\n")
 		stop(stoptxt)	
 		}
+
+
+
+
 	
 	# Fix repeated names
 	if (length(uniq_fossil_taxa) != length(fossil_taxa_names))
@@ -224,6 +228,42 @@ error_checks_for_fossils_xls <- function(xls, fix_duplicates=TRUE)
 		cat("\n\n")
 		stop(stoptxt)
 		}
+
+
+
+	# Fix repeated names - Fossil_Taxon_orig
+	Fossil_Taxon_orig = xls$Fossil_Taxon_orig
+	uniq_Fossil_Taxon_orig = unique(Fossil_Taxon_orig)
+	
+	if (length(uniq_Fossil_Taxon_orig) != length(xls$Fossil_Taxon_orig))
+		{
+		counts = table(Fossil_Taxon_orig)
+		duplicate_names = names(counts)[counts > 1]
+		duplicate_names
+		
+		# Fix the duplicates
+		for (i in 1:length(duplicate_names))
+			{
+			name_to_add_numbers_to = duplicate_names[i]
+			TF = Fossil_Taxon_orig == name_to_add_numbers_to
+			nums_to_add = 1:sum(TF)
+			nums_as_strings = sprintf(fmt="%04.0f", (nums_to_add))
+			nums_as_strings = paste("_specimen", nums_as_strings, sep="")
+			new_names = paste(Fossil_Taxon_orig[TF], nums_as_strings, sep="")
+			
+			# Insert new names
+			Fossil_Taxon_orig[TF] = new_names
+			} # END for (i in 1:length(duplicate_names))
+		cat("\n")
+		txt = "WARNING from error_checks_for_fossils_xls(): added specimen numbers to OTU names in xls, in order to make all OTUs unique."
+		cat(txt)
+		cat("\n")
+		warning(txt)
+		xls$Fossil_Taxon_orig = Fossil_Taxon_orig
+		} # END if (length(uniq_fossil_taxa) != length(fossil_taxa_names))
+
+
+
 	
 		
 	cat("\nPassed error checks in error_checks_for_fossils_xls(), but this only checks for the problems Nick thought of. Returning xls (perhaps modified!)...\n\n")
@@ -444,7 +484,9 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 		{
 		# Find the row in the xls table:
 		TF = list_of_fossil_tips_added[i] == fossils_in_xls
-		
+# 		print("sum(TF):")
+# 		print(sum(TF))
+# 		print(xls[TF,])
 		# STUPID Excel readin converts "'0000100" to "100" in R
 		# Fix with sprintf
 		#######################################################
@@ -467,7 +509,7 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 		# What sort of geographic constraint?
 		geog_constraint = xls$geog_constraint[TF]
 		
-		#print(geog_constraint)
+		print(geog_constraint)
 		
 		# If the fossil data is presence-only, then the absences don't mean anything,
 		# just the presences
@@ -509,6 +551,15 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 
 		
 		# OK, now add the modified ranges to the table of ranges to add
+		
+		print("tipranges_to_add:")
+		print(tipranges_to_add)
+		cat("\n")
+		print("ranges:")
+		print(ranges)
+		cat("\n")
+		
+		
 		tipranges_to_add = rbind(tipranges_to_add, ranges)
 		}
 	
@@ -520,6 +571,12 @@ add_list_of_fossil_tips_to_tipranges <- function(tipranges_df, list_of_fossil_ti
 	rownames(tipranges_to_add) = list_of_fossil_tips_added
 	
 	# Merge the tipranges
+	
+	print("dim(tipranges_df):")
+	print(dim(tipranges_df))
+	print("dim(tipranges_to_add):")
+	print(dim(tipranges_to_add))
+	
 	new_tipranges_df = rbind(tipranges_df, tipranges_to_add)
 	new_tipranges_df
 	
@@ -898,7 +955,7 @@ add_fossil_randomly <- function(tr, tip_specifiers, fossil_name, max_age, min_ag
 	
 	if (class(branches) == "try-error")
 		{
-		txt = paste("\n\nWARNING in add_fossil_randomly(): In add_fossil_randomly(), 'get_possible_branches_to_add_fossils_to()' failed. The input tree is being returned. The fossil name is: '", fossil_name, " (min=", min_age, " / max=", max_age, "). tip_specifiers='", paste0(tip_specifiers, sep=","), "', stem_or_crown='", stem_or_crown, "'. Printing try-error...\n\n", sep="")
+		warning_txt = paste("\n\nWARNING in add_fossil_randomly(): In add_fossil_randomly(), 'get_possible_branches_to_add_fossils_to()' failed. The input tree is being returned. The fossil name is: '", fossil_name, " (min=", min_age, " / max=", max_age, "). tip_specifiers='", paste0(tip_specifiers, sep=","), "', stem_or_crown='", stem_or_crown, "'. Printing try-error...\n\n", sep="")
 		cat(warning_txt)
 		print("Printing 'branches' result (result was of class 'try-error'):")
 		print(branches)
@@ -1055,7 +1112,17 @@ get_possible_branches_to_add_fossils_to <- function(tr, trtable, tip_specifiers,
 	#######################################################
 	#stem_or_crown = "both"	# could be stem, crown, or both
 							# default (i.e. BEAST stem) is "both"
-
+	
+	TF = stem_or_crown %in% c("stem", "crown", "both")
+	if (TF == FALSE)
+		{
+		errortxt = paste0("\n\nSTOP ERROR in get_possible_branches_to_add_fossils_to(): input 'stem_or_crown' must be 'stem', 'crown', or 'both'. You had stem_or_crown='", stem_or_crown, "'")
+		cat(errortxt)
+		print(tip_specifiers)
+		stop(errortxt)		
+		}
+	
+	
 	# tip_specifiers must have a length of 1 or greater
 	if (length(tip_specifiers) <= 0)
 		{
@@ -1208,10 +1275,12 @@ add_random_side_branch <- function(tr, trtable, branches, fossil_name, fossil_ag
 		warning_txt = paste("\n\nWARNING: In add_random_side_branch(), fossil has no possible branches to attach to\nin this tree, given the constraints and fossil date. The input tree is being returned.\nThe fossil name is: '", fossil_name, "', age=", fossil_age, ".\n\n", sep="")
 		cat(warning_txt)
 
+		warning_txt = paste("One way this can occur is if you added another fossil branch previously that restricts the date range for adding this fossil. Try moving '", fossil_name, "' to the front of the Excel table. (For very complex combinations of fossils we may have to re-do this function.)\n\n", sep="")
+		cat(warning_txt)
+
 		warning_txt = paste("The branches in the clade have these maximum ages:\n\n", sep="")
 		cat(warning_txt)
-		
-		#print(branch_max_ages)
+		print(branch_max_ages)
 
 		warning_txt = paste("\n\nReturning the tree unchanged...\n", sep="")
 		cat(warning_txt)

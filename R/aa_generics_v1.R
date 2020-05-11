@@ -4860,3 +4860,53 @@ remove_multiple_commas_from_strings_in_list <- function(list_of_strings)
 	return(OTUs_list_of_lists_reduced)
 	}
 
+
+
+
+
+
+
+
+
+
+# Check if object is a list BUT NOT a data.frame
+# At some point, R started saying that is.list() on a data.frame would 
+# evaluate to TRUE. This is ANNOYING.
+# The function is_list_not_dataframe() function gives the desired behavior.
+is_list_not_dataframe <- function(obj)
+	{
+	setup='
+	# Set up a BioGeoBEARS_run_object
+	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
+
+	# Get the dmat (trivial case, non-stratified Psychotria example)
+	tmpres = get_dmat_times_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object, numstates=NULL, max_range_size=4)
+	tmpres
+	class(tmpres)
+	length(tmpres)
+	
+	# Is a matrix a list?
+	is.list(tmpres$dmat)
+	is_list_not_dataframe(obj=tmpres$dmat)
+	
+	# Convert the matrix to a data.frame
+	tmpdf = as.data.frame(tmpres)
+	tmpdf
+	class(tmpdf)
+	length(tmpdf)
+	
+	# Is a data.frame a list?
+	is.list(tmpdf)
+	is_list_not_dataframe(obj=tmpdf)
+	'
+
+
+
+	TF1 = is.list(obj)
+	TF2 = (class(obj) == "data.frame") == FALSE
+	TF = (TF1 + TF2) == 2
+	return(TF)
+	}
+
+
+

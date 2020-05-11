@@ -777,7 +777,12 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		}
 	
 	# Used if time-changing stratified states list
+	# Save the list of all states, inferred from the areas and maxareas constraint
 	all_states_list = states_list
+	all_geog_states_list_usually_inferred_from_areas_maxareas = all_states_list
+	
+	# Save it, for stochastic mapping
+	BioGeoBEARS_run_object$all_geog_states_list_usually_inferred_from_areas_maxareas = all_states_list
 	
 	#######################################################
 	# NON-STRATIFIED: Modify the states_list if needed
@@ -874,6 +879,12 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	
 	if ( (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE) && (state_space_changing_TF == TRUE) && (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == TRUE) )
 		{
+		# Save the original states_list, for the case where the user is automatically
+		# inferring the overall states list (may conflict with the list of 
+		# states allowed by areas_allowed)
+		all_geog_states_list_usually_inferred_from_areas_maxareas
+
+
 		need_to_print_list_of_states_list = FALSE
 		ntimes = length(BioGeoBEARS_run_object$timeperiods)
 		lists_of_states_lists_0based = list()
@@ -951,11 +962,12 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		} # END if ( (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE) && (state_space_changing_TF == TRUE) )
 
 
-	# Or, if the time-stratified stats list is pre-specified
+	# Or, if the time-stratified states list is pre-specified
 	if (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE)
 		{
 		ntimes = length(BioGeoBEARS_run_object$timeperiods)
 		
+		# Default is all TRUE
 		states_allowed_TF1 = rep(TRUE, times=length(all_states_list))
 		states_allowed_TF2 = rep(TRUE, times=length(all_states_list))
 		states_allowed_TF3 = rep(TRUE, times=length(all_states_list))
@@ -1007,7 +1019,13 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 				} # END if ( (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE))
 
 			# Combine the 3 (areas_allowed, areas_adjacency, lists_of_states_lists_0based)
+			
 			states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2 + states_allowed_TF3) == 3)
+# 			print(states_allowed_TF1)
+# 			print(states_allowed_TF2)
+# 			print(states_allowed_TF3)
+# 			print(states_allowed_TF)
+# 			stop()
 
 			# CHANGE the inputs here, so that it can be used easily in BSM
 			BioGeoBEARS_run_object$lists_of_states_lists_0based[[ntimes_i]] = all_states_list[states_allowed_TF]
@@ -1320,6 +1338,9 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		allareas = areas_list
 		all_states_list = states_list
 		
+		# Previously saved the list of all states, inferred from the areas and maxareas constraint
+		all_geog_states_list_usually_inferred_from_areas_maxareas
+		
 		use_optimx = BioGeoBEARS_run_object$use_optimx
 		
 		# USING OPTIM
@@ -1537,7 +1558,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 
 			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))
 				{
-				txt = paste0("STOP ERROR #3 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")
+				txt = paste0("STOP ERROR #3 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?\n\nANOTHER SOURCE OF THIS ERROR: if your phylogeny has many tips that don't quite come up to 0.00 my before present (which is hard to see when you plot it), you may be trying to time-slice on a single tip branch that reaches higher than the others, causing an error that then gets trapped by STOP ERROR #3. Here the solution is to FIX YOUR TREE. Use trtable = prt(tr); trtable$time_bp to see exactly how high each tip reaches; see https://groups.google.com/forum/#!topic/biogeobears/yoPkc5Xr-OM for more advice.\n\n")
 				
 				cat("\n\n")
 				cat(txt)

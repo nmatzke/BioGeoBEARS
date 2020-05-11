@@ -30,9 +30,6 @@
 #'                       if \code{NULL}, will be taken from 
 #'                       \code{res$inputs$max_range_size},
 #'                       so one of these must be specified.
-#' @return dmat_times, a list containing (1) \code{dmat_times$dmat},
-#' the \code{dmat}(s), and (2) if time-stratified, \code{dmat_times$times},
-#' the list of time-bin borders.
 #' @export
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
 #' @examples

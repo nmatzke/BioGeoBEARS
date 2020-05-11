@@ -9,8 +9,15 @@ simulate_source_areas_ana_clado <- function(res, clado_events_tables, ana_events
 	{
 	# Get the dmat and times
 	dmat_times = get_dmat_times_from_res(res=res, numstates=NULL)
+		
 	dmat = dmat_times$dmat
 	times = dmat_times$times
+	
+	# 2019-07-11 update to fix Mathias issue with dmat length 1
+# 	print("dmat_times$dmat")
+# 	print(dmat_times$dmat)
+# 	print("dmat")
+# 	print(dmat)
 	
 	# Error check
 	if (length(clado_events_tables) != length(ana_events_tables))
@@ -90,7 +97,7 @@ simulate_source_area_ana <- function(ana_events_table, areanames, dmat=NULL, tim
 	
 	# Check for times (different dmats through time)
 	strat_TF = FALSE
-	if (is.list(dmat) && is.null(times))
+	if (is_list_not_dataframe(dmat) && is.null(times))
 		{
 		txt = "STOP ERROR in simulate_source_area_ana(): if 'dmat' is a list of dmats, 'times' cannot be NULL."
 		cat("\n\n")
@@ -98,7 +105,7 @@ simulate_source_area_ana <- function(ana_events_table, areanames, dmat=NULL, tim
 		cat("\n\n")
 		stop(txt)
 		}
-	if (is.list(dmat) && !is.null(times))
+	if (is_list_not_dataframe(dmat) && !is.null(times))
 		{
 		strat_TF = TRUE
 		
@@ -123,7 +130,7 @@ simulate_source_area_ana <- function(ana_events_table, areanames, dmat=NULL, tim
 			cat("\n\n")
 			stop(txt)
 			} # END if ( all( times == sort(times) ) )
-		} # END if (is.list(dmat) && is.null(times))
+		} # END if (is_list_not_dataframe(dmat) && is.null(times))
 	
 	# If dmat is NULL, set to all 1s
 	# This is the dispersal_multipliers_matrix, which includes the influence 
@@ -231,15 +238,15 @@ simulate_source_area_clado <- function(clado_events_table, areanames, dmat=NULL,
 
 	# Check for times (different dmats through time)
 	strat_TF = FALSE
-	if (is.list(dmat) && is.null(times))
+	if (is_list_not_dataframe(dmat) && is.null(times))
 		{
-		txt = "STOP ERROR in simulate_source_area_ana(): if 'dmat' is a list of dmats, 'times' cannot be NULL."
+		txt = "STOP ERROR in simulate_source_area_clado(): if 'dmat' is a list of dmats, 'times' cannot be NULL."
 		cat("\n\n")
 		cat(txt)
 		cat("\n\n")
 		stop(txt)
 		}
-	if (is.list(dmat) && !is.null(times))
+	if (is_list_not_dataframe(dmat) && !is.null(times))
 		{
 		strat_TF = TRUE
 		
@@ -249,7 +256,7 @@ simulate_source_area_clado <- function(clado_events_table, areanames, dmat=NULL,
 		
 		if (length(dmat) != length(times))
 			{
-			txt = "STOP ERROR in simulate_source_area_ana(): the length of the 'dmat' list must equal the length of 'times' in a time-stratified analysis."
+			txt = "STOP ERROR in simulate_source_area_clado(): the length of the 'dmat' list must equal the length of 'times' in a time-stratified analysis."
 			cat("\n\n")
 			cat(txt)
 			cat("\n\n")
@@ -258,13 +265,13 @@ simulate_source_area_clado <- function(clado_events_table, areanames, dmat=NULL,
 		
 		if ( all(times == sort(times))==FALSE || (0 %in% times) == TRUE )
 			{
-			txt = "STOP ERROR in simulate_source_area_ana(): 'times' in a time-stratified analysis must be sorted from youngest to oldest. Also, time '0' should *not* be included."
+			txt = "STOP ERROR in simulate_source_area_clado(): 'times' in a time-stratified analysis must be sorted from youngest to oldest. Also, time '0' should *not* be included."
 			cat("\n\n")
 			cat(txt)
 			cat("\n\n")
 			stop(txt)
 			} # END if ( all( times == sort(times) ) )
-		} # END if (is.list(dmat) && is.null(times))
+		} # END if (is_list_not_dataframe(dmat) && is.null(times))
 	
 	
 	# If dmat is NULL, set to all 1s
@@ -799,6 +806,90 @@ get_huge_events_tables_from_BSM_Rdata <- function(BSM_tables_dir, BSM_fn_base, m
 
 
 
+
+
+
+
+
+#######################################################
+# Get huge events tables from saved stochastic maps
+# Rdata files
+#######################################################
+get_huge_events_tables_from_clado_ana_events_tables <- function(clado_events_tables, ana_events_tables, model_name="")
+	{
+	defaults='
+	# Working directory
+	wd = "/drives/Dropbox/_njm/__packages/BioGeoBEARS_setup/_basic_example/"
+	setwd(wd)
+
+	# Biogeographical stochastic mappings (BSMs) saved
+	BSM_tables_dir = "BSM_tables_M0_v1"
+	BSM_fn_base = "BSM_M0_"
+	model_name = "DEC"
+	suffix = ".Rdata"
+	' # END defaults
+
+	# Necessary setting to avoid getting numbers etc. in the stochastic mapping output
+	options(stringsAsFactors=FALSE)
+	
+	
+	# Get the list of files
+	num_BSMs = length(clado_events_tables)
+	
+	# Huge tables, and indexes each BSM
+	huge_cladogenetic_events_table = NULL
+	huge_anagenetic_events_table = NULL
+	ic = NULL
+	ia = NULL
+
+
+	# Get the output
+	for (i in 1:num_BSMs)
+		{
+		# Add to huge tables
+		huge_cladogenetic_events_table = rbind(huge_cladogenetic_events_table, clado_events_tables[[i]])
+		huge_anagenetic_events_table = rbind(huge_anagenetic_events_table, ana_events_tables[[i]])
+		
+		# Add to the ic, ia indexes
+		if (is.null(clado_events_tables[[i]]) == FALSE)
+			{
+			tmp_ic = rep(i, nrow(clado_events_tables[[i]]))
+			ic = c(ic, tmp_ic)
+			} # END if (!is.null(master_table_cladogenetic_events))
+
+		if (is.null(ana_events_tables[[i]]) == FALSE)
+			{
+			tmp_ia = rep(i, nrow(ana_events_tables[[i]]))
+			ia = c(ia, tmp_ia)
+			} # END if (!is.null(table_w_anagenetic_events))
+		
+		} # END
+	
+	# Add the indexes
+	i = ic
+	huge_cladogenetic_events_table = cbind(i, huge_cladogenetic_events_table)
+	i = ia
+	huge_anagenetic_events_table = cbind(i, huge_anagenetic_events_table)
+	i = 0
+	
+	# Store as list of 2 tables
+	huge_tables = NULL
+	huge_tables$huge_cladogenetic_events_table = huge_cladogenetic_events_table
+	huge_tables$huge_anagenetic_events_table = huge_anagenetic_events_table
+	
+	# To extract
+	#huge_cladogenetic_events_table = huge_tables$huge_cladogenetic_events_table
+	#huge_anagenetic_events_table = huge_tables$huge_anagenetic_events_table
+	
+	return(huge_tables)
+	} # END get_huge_events_tables_from_BSM_Rdata
+
+
+
+
+
+
+
 count_events_huge_tables <- function(huge_tables, timeperiod=NULL, area_abbr_to=NULL, area_abbr_from=NULL, BSM_i=NULL)
 	{
 	# Extract
@@ -948,7 +1039,7 @@ count_clado_events_nonjump <- function(clado_events_tables, ana_events_tables, a
 # a collection of BSMs
 #######################################################
 
-count_ana_clado_events <- function(clado_events_tables, ana_events_tables, areanames, actual_names)
+count_ana_clado_events <- function(clado_events_tables, ana_events_tables, areanames, actual_names, timeperiod=NULL)
 	{
 	defaults='
 	areanames = c("A", "B", "C", "D", "E", "F", "G")
@@ -976,6 +1067,48 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 		cat("\n\n")
 		stop(txt)
 		} # END if (length(areanames) != length(actual_names))
+
+
+	# If desired, count only within a timeperiod / stratum / time bin
+	if (is.null(timeperiod) == FALSE)
+		{
+		# Error check
+		if (length(timeperiod) != 2)
+			{
+			errortxt = paste("\n\nERROR in count_events_huge_tables(): timeperiod must either be NULL or be 2 numbers (min and max of time bin, in time before present).\n\n", sep="")
+			cat(errortxt)
+			stop(errortxt)
+			}
+		
+		minT = min(timeperiod)
+		maxT = max(timeperiod)
+		
+		original_clado_events_tables = clado_events_tables
+		original_ana_events_tables = ana_events_tables
+		
+		for (i in 1:length(original_clado_events_tables))
+			{
+			clado_events_table = clado_events_tables[[i]]
+			ana_events_table = ana_events_tables[[i]]
+			
+			TF1 = clado_events_table$time_bp < maxT
+			TF2 = clado_events_table$time_bp >= minT
+			TF = (TF1 + TF2) == 2
+			clado_events_table = clado_events_table[TF,]
+
+			TF1 = ana_events_table$abs_event_time < maxT
+			TF2 = ana_events_table$abs_event_time >= minT
+			TF = (TF1 + TF2) == 2
+			ana_events_table = ana_events_table[TF,]
+			
+			clado_events_tables[[i]] = clado_events_table
+			ana_events_tables[[i]] = ana_events_table
+			}
+		} else {
+		minT = 0
+		maxT = 1e50
+		}
+
 	
 	# Initialize
 	dimdata = c(length(areanames), length(areanames))
@@ -1013,8 +1146,7 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 
 		# Convert e.g. AB->B,A to AB->A,B, since these are identical
 		clado_events_table = uniquify_clado_events(clado_events_table)
-
-
+		
 		# Count vicariance events
 		vicariance_clado_events_table = clado_events_table[clado_events_table$clado_event_type == "vicariance (v)",]
 		vicariance_clado_events_table
@@ -1483,6 +1615,84 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 	
 	return(counts_list)
 	} # END count_ana_clado_events <- function(clado_events_tables, ana_events_tables, areanames, actual_names)
+
+
+
+
+
+print_counts_lists_to_file <- function(list_of_counts_lists, model_name="default")
+	{
+	time_txt_TF = TRUE
+	if (is.list(list_of_counts_lists[[1]]) == FALSE)
+		{
+		list_of_counts_lists = list(list_of_counts_lists)
+		
+		time_txt_TF = FALSE
+		}
+	
+	for (i in 1:length(list_of_counts_lists))
+		{
+		counts_list = list_of_counts_lists[[i]]
+
+		summary_counts_BSMs = counts_list$summary_counts_BSMs
+		print(conditional_format_table(summary_counts_BSMs))
+
+		# Histogram of event counts
+		# Convert 1 to 01
+		
+		if (time_txt_TF == TRUE)
+			{
+			txtnum = sprintf("%02.0f", i)
+			time_txt = paste0("_time", txtnum)
+			} else {
+			time_txt = ""
+			}
+			
+		# Make the histograms of event counts
+		pdffn = paste0(model_name, time_txt, "_histograms_of_event_counts.pdf")
+		hist_event_counts(counts_list, pdffn=pdffn)
+
+		#######################################################
+		# Print counts to files
+		#######################################################
+		tmpnames = names(counts_list)
+		
+		if (time_txt_TF == TRUE)
+			{
+			txtnum = sprintf("%02.0f", i)
+			time_txt = paste0("_time", txtnum)
+			} else {
+			time_txt = ""
+			} 
+		tmpfns = paste0(model_name, time_txt, "_", tmpnames)
+		cat("\n\nWriting tables* of counts to tab-delimited text files:\n(* = Tables have dimension=2 (rows and columns). Cubes (dimension 3) and lists (dimension 1) will not be printed to text files.) \n\n")
+		for (i in 1:length(tmpnames))
+				{
+				cmdtxt = paste0("item = counts_list$", tmpnames[i])
+				eval(parse(text=cmdtxt))
+
+				# Skip cubes
+				if (length(dim(item)) != 2)
+						{
+						next()
+						}
+
+				outfn = paste0(tmpfns[i], ".txt")
+				if (length(item) == 0)
+						{
+						cat(outfn, " -- NOT written, *NO* events recorded of this type", sep="")
+						cat("\n")
+						} else {
+						cat(outfn)
+						cat("\n")
+						write.table(conditional_format_table(item), file=outfn, quote=FALSE, sep="\t", col.names=TRUE, row.names=TRUE)
+						} # END if (length(item) == 0)
+				} # END for (i in 1:length(tmpnames))
+		cat("...done.\n")
+		} # END for-loop
+	}  # END print_counts_lists_to_file <- function(list_of_counts_lists, model_name="default")
+
+
 
 
 calc_BSM_mean_node_states <- function(clado_events_tables, tr, numstates)
@@ -2012,8 +2222,105 @@ linear_regression_plot_OLD <- function(x, y, xlabel="x", ylabel="y", tmppch=".",
 
 
 
+#######################################################
+# BSM_to_phytools_SM
+#######################################################
+#' Convert Biogeographic Stochastic Map (BSM) to phytools SIMMAP stochastic map (SM) format
+#' 
+#' This function converts a Biogeographic Stochastic Map (BSM) to a \code{phytools} "\code{simmap}" 
+#' object. This is useful mostly to make use of the more diverse plotting functions for
+#' simmaps available in \code{phytools}. 
+#'
+#' The BioGeoBEARS Biogeographic Stochastic Map (BSM) output is rather complex, as it
+#' keeps track of numerous different types of anagenetic and cladogenetic events, the
+#' source and destination areas of dispersal events (*), etc. However, BioGeoBEARS only 
+#' has plotting functions for the standard, rectangular, right-facing phylogeny. 
+#' \code{\link{BSM_to_phytools_SM}} converts a BioGeoBEARS BSM result into a phytools 
+#' stochastic mapping object (which is a really a phylo3 tree object, with extra fields
+#' to contain the stochastic map.
+#'
+#' The inputs to \code{BSM_to_phytools_SM} consist of (1) a "res" object (the result of 
+#' an ML inference), a \code{clado_events_table} containing
+#' the events sampled at each node of the phylogeny, and (optionally, but usually needed)
+#' a \code{ana_events_table} containing the anagenetic events on each branch (or branch 
+#' segment, in the case of a time-stratified analysis, where the tree has been broken
+#' up into subpieces.
+#'
+#' The resulting object, \code{tr_wSimmap}, is a phytools simmap object, which really 
+#' consists of a standard APE phylogeny object, plus the extra fields "map", "mapped.edge",
+#' "Q", and "logL". The class of this object, i.e. the result of class(tr_wSimmap), is
+#' \code{c("simmap", "phylo")}. 
+#'
+#' Notes on using the resulting simmap object in phytools:
+#'
+#' <b>1.</b> The phytools functions, like \code{countSimmap(tr_wSimmap)}, will only count the 
+#'    \emph{anagenetic} events, as that is all that is formally recorded in the \code{phytools}
+#'    \code{simmap} object. For example, imagine if your model parameters for a DEC+J model were
+#'    \emph{d}=0.00224, \emph{e}=0.0, \emph{j}=0.0297. In this case, \code{countSimmap(tr_wSimmap)}
+#'    would count transitions like \code{A->AB}, because d is positive. However, the 
+#'    reverse transition of \code{AB->A} would require an "\emph{e}" event, but \emph{e} is 
+#'    inferred to be 0.0, as is very common in DEC, DEC+J etc. analyses. 
+#'
+#'    Transitions to 
+#'    single-area states in "\emph{j}" events would be common at cladogenesis events (e.g., 
+#'    \code{AB->AB,C}), but \code{phytools} doesn't know anything about cladogenesis models, 
+#'    as it was written assuming purely anagenetic models.  One could probably write a 
+#'    script to infer "<i>j</i>" events off the \code{phytools} \code{simmap} object by 
+#'    comparing the last-state-below-a-node with the descendent-pairs-above-a-node, but 
+#'    it would probably be easier to just use the BioGeoBEARS BSM outputs 
+#'    (\code{clado_events_table} and \code{ana_events_table}), because they record all 
+#'    of this information already, and the text files output by the example BSM script
+#'    summarize all of the different types of events and their direction.
+#'
+#' \bold{2.} For similar reasons, the \code{phytools} graphics, while they should branch
+#' the branch histories correctly, don't always correctly 
+#' draw the colors at the "corners" between a speciation event and the beginning of a 
+#' descendant branch. This is for the same reasons as #1: \code{phytools} doesn't 
+#' know about cladogenesis models and assumes a purely anagenetic model, where the state
+#' just before and just after cladogenesis would always be identical. (Counting the 
+#' states at nodes may also be somewhat inaccurate if counted off the \code{phytools} \code{simmap}
+#' derived from a BioGeoBEARS BSM, I haven't tested this.)
+#' 
+#' \bold{(*) Please note carefully:} area-to-area dispersal events are not identical with the 
+#' state transitions. For example, a state can be a geographic range with multiple 
+#' areas, but under the logic of DEC-type models, a range-expansion event like 
+#' ABC->ABCD actually means that a dispersal happened from some specific area (A, B, or C)
+#' to the new area, D.  BSMs track this area-to-area sourcing, at least if 
+#' \code{\link{simulate_source_areas_ana_clado}} has been run.
+#' 
+#' @param \code{res} A BioGeoBEARS results object, produced by ML inference via \code{\link{bears_optim_run}}.
+#' @param \code{clado_events_table} A cladogenetic events table, from BioGeoBEARS BSM.
+#' @param \code{ana_events_table} An anagenetic events table, from BioGeoBEARS BSM. Default is NA, 
+#' in which case the function assumes that the BSM had 0 anagenetic range-changing events, and 
+#' all range-changing events were cladogenetic. This will only process properly if actually is
+#' true that the sampled states at branch bottoms and branch tops in the the \code{clado_events_table}
+#' always match (an error check checks for this).
+#' @return \code{tr_wSimmap} This is an object of type \code{c("simmap", "phylo"). It contains
+#' the following: 
+#' \code{tr_wSimmap$tr} is a \code{phylo3} APE tree object
+#' \code{tr_wSimmap$maps} = A list for each branch (branch numbers when \code{phylo} object in "cladewise" order),
+#' with the state history of each branch (the length of time in each state list of states inhabited, with the 
+#' cell names giving the state).
+#' \code{tr_wSimmap$mapped.edge} The total amount of time in each state, for each branch (same order as
+#' in \code{$maps}).  The row names are the names of the nodes at the bottom and top of each branch/edge.
+#' tr_wSimmap$Q The \code{Q} transition matrix (calculated from the ML parameter estimates contained in f;cc).
+#' tr_wSimmap$logL The log-likelihood of the data under the ML model (this will be the same across all BSMs).
+#' @export
+#' @seealso \code{\link{BSMs_to_phytools_SMs}}, \code{\link{simulate_source_areas_ana_clado}}, 
+#' \code{phytools::countSimmap},  \code{phytools::make.simmap}
+#' @note Go (BioGeo)BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' 
+#' @examples
+#' 
 BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	{
+	# Error check
+	if (is.null(ana_events_table) == TRUE)
+		{
+		ana_events_table = NA
+		}
 	
 	# Is it time-stratified?
 	stratTF = (length(res$inputs$timeperiods) > 0)
@@ -2026,6 +2333,26 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	# Get list of edges:
 	trtable = prt(tr, printflag=FALSE)
 	trtable
+
+	# Convert pruningwise edge numbers to cladewise edgenums
+	# The clado_events_table (non-stratified) has the edge numbers in
+	# pruningwise order
+	if (stratTF == FALSE)
+		{
+		pruningwise_edgenums = clado_events_table$parent_br
+		cladewise_edgenums = trtable$parent_br
+		translation_pruning_to_clade_edgenums = as.data.frame(cbind(pruningwise_edgenums, cladewise_edgenums), stringsAsFactors=FALSE)
+		translation_pruning_to_clade_edgenums
+		
+		# Error trap for when there are no anagenetic events
+		if (is.na(ana_events_table) == FALSE)
+			{
+			ana_events_edgenums_indexes_in_clado_events_table = match(x=ana_events_table$parent_br, table=clado_events_table$parent_br)
+			ana_events_table$parent_br = translation_pruning_to_clade_edgenums$cladewise_edgenums[ana_events_edgenums_indexes_in_clado_events_table]
+			}
+		clado_events_table$parent_br = trtable$parent_br
+		}
+	
 
 	# Get the edgenums, exclude the "NA" for the root branch
 	# Order edgenums from smallest to largest
@@ -2250,6 +2577,7 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	tr$edge.length
 	all(c(lapply(X=maps, FUN=sum)) == tr$edge.length)
 
+	cbind(tr$edge.length, c(lapply(X=maps, FUN=sum)))
 
 
 	# Make the mapped.edge output
@@ -2265,13 +2593,6 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	observed_states = sort(unique(names(maps[[i]])))
 	observed_states
 
-	# Get the sum of one state
-	get_sum_statetime_on_branch <- function(statename_to_sum, branch_history_map)
-		{
-		TF = names(branch_history_map) == statename_to_sum
-		total_residence_time = sum(branch_history_map[TF])
-		return(total_residence_time)
-		}
 
 	# sapply to get the sum of each
 	sapply(X=observed_states, FUN=get_sum_statetime_on_branch, branch_history_map=maps[[i]])
@@ -2306,6 +2627,16 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 
 	return(tr_wSimmap)
 	} # END BSM_to_phytools_SM
+
+
+	# Get the sum of one state
+	get_sum_statetime_on_branch <- function(statename_to_sum, branch_history_map)
+		{
+		TF = names(branch_history_map) == statename_to_sum
+		total_residence_time = sum(branch_history_map[TF])
+		return(total_residence_time)
+		}
+
 
 
 BSMs_to_phytools_SMs <- function(res, clado_events_tables, ana_events_tables)
