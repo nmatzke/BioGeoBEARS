@@ -1463,8 +1463,8 @@ simmaps_list = BSMs_to_phytools_SMs(res=resDEC, clado_events_tables=clado_events
 #
 summary(simmaps_list)#
 print(simmaps_list)#
-countSimmap(simmaps_list) # Gets big fast, for large states lists
-dev.off()
+countSimmap(simmaps_list) # Gets big fast, for large states lists#
+# Plot to PDF#
 pdffn = "50BSMs_in_phytools_simmap_format.pdf"#
 pdf(file=pdffn, width=6, height=6)#
 #
@@ -1473,16 +1473,183 @@ plotSimmap(simmaps_list, colors=cols, lwd=3, hold=FALSE, add=FALSE, plot=TRUE)
 dev.off()#
 cmdstr = paste0("open ", pdffn)#
 system(cmdstr)
-x=c("a","c","b")
-order(x)
-x[order(x)]
-library(BioGeoBEARS)#
-remove.packages("BioGeoBEARS")#
-detach("package:BioGeoBEARS")#
-library(BioGeoBEARS)#
+source('/GitHub/BioGeoBEARS/R/summarize_BSM_tables_v1.R', chdir = TRUE)
+source('/GitHub/BioGeoBEARS/R/summarize_BSM_tables_v1.R', chdir = TRUE)
+# Plot to PDF#
+pdffn = "BSM_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
 #
-remove.packages("BioGeoBEARS")#
-detach("package:BioGeoBEARS")#
-library(devtools)#
-devtools::install_local(path="/GitHub/BioGeoBEARS", dependencies=FALSE)#
-library(BioGeoBEARS)
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)#
+########################################################
+# Convert a list of time-stratified BSMs to a phytools list of BSMs#
+########################################################
+#
+simmaps_list = BSMs_to_phytools_SMs(res=resDEC, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)#
+#
+summary(simmaps_list)#
+print(simmaps_list)#
+countSimmap(simmaps_list) # Gets big fast, for large states lists#
+# Plot to PDF#
+pdffn = "50BSMs_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(simmaps_list, colors=cols, lwd=3, hold=FALSE, add=FALSE, plot=TRUE)
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+ana_events_table
+ana_events_table= ana_events_tables[[1]]
+ana_events_table
+tail(ana_events_table)
+tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_tables[[6]], ana_events_table=ana_events_tables[[6]])#
+summary(tr_wSimmap)#
+print(tr_wSimmap)#
+countSimmap(tr_wSimmap)#
+# Plot to PDF#
+pdffn = "BSM_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+names(ana_events_table)
+tmp_ana_events_table
+ana_events_table
+source('/GitHub/BioGeoBEARS/R/summarize_BSM_tables_v1.R', chdir = TRUE)
+returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=resDEC$inputs)#
+ranges_list = returned_mats$ranges_list#
+########################################################
+# Convert a time-stratified BSM to a phytools BSM#
+########################################################
+#
+res = resDEC#
+clado_events_table = clado_events_tables[[1]]#
+ana_events_table = ana_events_tables[[1]]#
+#
+tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_tables[[6]], ana_events_table=ana_events_tables[[6]])#
+summary(tr_wSimmap)#
+print(tr_wSimmap)#
+countSimmap(tr_wSimmap)#
+# Plot to PDF#
+pdffn = "BSM_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=resDEC$inputs)#
+ranges_list = returned_mats$ranges_list#
+########################################################
+# Convert a time-stratified BSM to a phytools BSM#
+########################################################
+#
+res = resDEC#
+clado_events_table = clado_events_tables[[1]]#
+ana_events_table = ana_events_tables[[1]]#
+#
+tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_tables[[6]], ana_events_table=ana_events_tables[[6]])#
+summary(tr_wSimmap)#
+print(tr_wSimmap)#
+countSimmap(tr_wSimmap)#
+# Plot to PDF#
+pdffn = "BSM_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+source('/GitHub/BioGeoBEARS/R/summarize_BSM_tables_v1.R', chdir = TRUE)
+returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=resDEC$inputs)#
+ranges_list = returned_mats$ranges_list#
+########################################################
+# Convert a time-stratified BSM to a phytools BSM#
+########################################################
+#
+res = resDEC#
+clado_events_table = clado_events_tables[[1]]#
+ana_events_table = ana_events_tables[[1]]#
+#
+tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_tables[[6]], ana_events_table=ana_events_tables[[6]])#
+summary(tr_wSimmap)#
+print(tr_wSimmap)#
+countSimmap(tr_wSimmap)#
+# Plot to PDF#
+pdffn = "BSM_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=resDEC$inputs)#
+ranges_list = returned_mats$ranges_list#
+########################################################
+# Convert a time-stratified BSM to a phytools BSM#
+########################################################
+#
+res = resDEC#
+clado_events_table = clado_events_tables[[1]]#
+ana_events_table = ana_events_tables[[1]]#
+#
+tr_wSimmap = BSM_to_phytools_SM(res=resDEC, clado_events_table=clado_events_tables[[6]], ana_events_table=ana_events_tables[[6]])#
+summary(tr_wSimmap)#
+print(tr_wSimmap)#
+countSimmap(tr_wSimmap)#
+# Plot to PDF#
+pdffn = "BSM_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(tr_wSimmap, lwd=3, colors=cols)#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+simmaps_list = BSMs_to_phytools_SMs(res=resDEC, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)#
+#
+summary(simmaps_list)#
+print(simmaps_list)#
+countSimmap(simmaps_list) # Gets big fast, for large states lists#
+# Plot to PDF#
+pdffn = "50BSMs_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(simmaps_list, colors=cols, lwd=3, hold=FALSE, add=FALSE, plot=TRUE)
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+simmaps_list = BSMs_to_phytools_SMs(res=resDEC, clado_events_tables=clado_events_tables, ana_events_tables=ana_events_tables)#
+#
+summary(simmaps_list)#
+print(simmaps_list)#
+countSimmap(simmaps_list) # Gets big fast, for large states lists#
+# Plot to PDF#
+pdffn = "50BSMs_in_phytools_simmap_format.pdf"#
+pdf(file=pdffn, width=6, height=6)#
+#
+cols = setNames(colors_list_for_states, ranges_list) #
+plotSimmap(simmaps_list, colors=cols, lwd=3, hold=FALSE, add=FALSE, plot=TRUE)
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)
+summary(simmaps_list)#
+print(simmaps_list)#
+countSimmap(simmaps_list) # Gets big fast, for large states lists

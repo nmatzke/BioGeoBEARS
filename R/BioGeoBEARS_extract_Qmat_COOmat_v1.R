@@ -526,7 +526,9 @@ get_Qmat_COOmat_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, 
 	#######################################################
 	# Check that no tips have larger ranges than you allowed
 	#######################################################
-	TF = (rowSums(dfnums_to_numeric(tipranges@df))) > max_range_size
+	tipranges_tmp = tipranges@df
+	tipranges_tmp[tipranges_tmp == "?"] = 0
+	TF = (rowSums(dfnums_to_numeric(tipranges_tmp))) > max_range_size
 	if (sum(TF, na.rm=TRUE) > 0)
 		{
 		cat("\n\nERROR: Tips with ranges too big:\n", sep="")
