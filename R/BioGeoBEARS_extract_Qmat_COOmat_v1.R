@@ -238,7 +238,49 @@ get_dmat_times_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, B
 	return(dmat_times)
 	} # END get_dmat_times_from_BioGeoBEARS_run_object <- function(BioGeoBEARS_run_object, BioGeoBEARS_model_object=NULL, numstates=NULL, include_null_range=TRUE)
 
+# Returns Carray table, with per-event probs, in 1-based state numbering
+get_Cevent_probs_df_from_mats <- function(mats, include_null_range=TRUE)
+	{
+	numstates = length(mats$states_list)
 
+	# Calculate the per-event probabilities
+	num_event_totals = length(mats$Rsp_rowsums)+include_null_range
+	print(num_event_totals)
+	per_event_probs_totals = rep(0.0, times=num_event_totals)
+	per_event_probs = rep(0.0, times=length(mats$COO_weights_columnar[[4]]))
+	for (i in 1:length(mats$COO_weights_columnar[[1]]))
+		{
+		anc_state = mats$COO_weights_columnar[[1]][i] + 1 + include_null_range
+		left_state = mats$COO_weights_columnar[[2]][i] + 1 + include_null_range
+		right_state = mats$COO_weights_columnar[[3]][i] + 1 + include_null_range
+		sumWeights = mats$Rsp_rowsums[anc_state - include_null_range]
+		per_event_probs[i] = mats$COO_weights_columnar[[4]][i] / sumWeights
+		per_event_probs_totals[anc_state] = per_event_probs[anc_state] + mats$COO_weights_columnar[[4]][i] / sumWeights
+		}
+
+	per_event_probs
+
+	i = mats$COO_weights_columnar[[1]] + 1 + include_null_range
+	j = mats$COO_weights_columnar[[2]] + 1 + include_null_range
+	k = mats$COO_weights_columnar[[3]] + 1 + include_null_range
+	wt = mats$COO_weights_columnar[[4]]
+	prob = per_event_probs
+	Carray_df = as.data.frame(cbind(i, j, k, wt, prob), stringsAsFactors=FALSE)
+	#head(Carray_df)
+	#tail(Carray_df)
+	return(Carray_df)
+	} # END get_Cevent_probs_from_mats <- function(mats, include_null_range=TRUE)
+
+
+# Returns Carray table, with per-event probs, in 1-based state numbering
+get_Cevent_probs_df_from_res <- function(res)
+	{
+	mats = get_Qmat_COOmat_from_res(res, numstates=ncol(res$ML_marginal_prob_each_state_at_branch_top_AT_node), include_null_range=res$include_null_range, max_range_size=res$inputs$max_range_size, timeperiod_i=1)
+	include_null_range=res$include_null_range
+	
+	Carray_df = get_Cevent_probs_df_from_mats(mats, include_null_range=include_null_range)
+	return(Carray_df)
+	} # END get_Cevent_probs_df_from_res <- function(res)
 
 
 
