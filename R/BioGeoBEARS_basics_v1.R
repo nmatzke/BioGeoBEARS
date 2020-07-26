@@ -789,8 +789,32 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 		{
 		cat("Note: tipranges_to_tip_condlikes_of_data_on_each_state() is\n")
 		cat("      creating 'states_list' automatically.\n")
-		states_list = areas_list_to_states_list_new(areas=areas_list_0based, include_null_range=include_null_range, maxareas=maxareas)
+		states_list_as_0based_area_numbers_wNULL_underscore = areas_list_to_states_list_new(areas=areas_list_0based, include_null_range=include_null_range, maxareas=maxareas)
+		states_list_as_lists_of_letters = areas_list_to_states_list_new(areas=areanames, include_null_range=include_null_range, maxareas=maxareas)
+		states_list = states_list_as_lists_of_letters
 		}
+	
+	# If the states_list is using numbers, convert to character
+	TF = is.na(as.numeric(states_list[[length(states_list)]][1])) == FALSE
+	print("Note: tipranges_to_tip_condlikes_of_data_on_each_state() is converting a states_list with (0-based) numbers to the equivalent areanames")
+	if (TF == TRUE)
+		{
+		tmp_states_list = NULL
+		tmpi = 1
+		if (include_null_range == TRUE)
+			{
+			tmp_states_list[[tmpi]] = states_list[[tmpi]]
+			tmpi = tmpi + 1
+			}
+		for (i in (include_null_range+1):(length(states_list)))
+			{
+			tmp_states_list[[tmpi]] = list(areanames[(states_list[[tmpi]] + 1)])
+			tmpi = tmpi + 1
+			}
+		states_list = unlist(tmp_states_list, recursive=FALSE)
+		}
+
+	
 	
 	# Check for ranges greater than the maximum number of areas in states_list
 	ranges_greater_than_maxareas_TF = sapply(states_list, length) > maxareas
@@ -854,7 +878,8 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 				}
 			
 			# See if this tipstate matches anything in the list
-			state_match_TF = temp_state == allowed_states_list_0based_txt
+			#state_match_TF = temp_state == allowed_states_list_0based_txt
+			state_match_TF = temp_state_txt == allowed_states_list_0based_txt
 			
 			# See if this tipstate matches anything in the list
 			# If not...
@@ -924,7 +949,8 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 			temp_state = paste(number_code_ranges_0based[rownum][[1]], collapse="_", sep="")
 			
 			# See if this tipstate matches anything in the list
-			state_match_TF = temp_state == allowed_states_list_0based_txt
+			#state_match_TF = temp_state == allowed_states_list_0based_txt
+			state_match_TF = temp_state_txt == allowed_states_list_0based_txt
 			
 			# See if this tipstate matches anything in the list
 			# If not...
