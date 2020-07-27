@@ -4610,6 +4610,32 @@ calc_loglike_for_optim_stratified_neg <- function(params, BioGeoBEARS_run_object
 #' 
 calc_loglike_for_optim_stratified <- function(params, BioGeoBEARS_run_object, phy, tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list, states_list, force_sparse=FALSE, cluster_already_open=FALSE, min_branchlength=0.000001)
 	{
+	# Fix states_lists with "_" instead of NA for null range
+	if (is.null(states_list) == FALSE)
+		{
+		if (is.na(states_list[[1]]) == FALSE)
+			{
+			if (states_list[[1]] == "_")
+				{
+				states_list[[1]] = NA
+				} # END if (states_list[[1]] == "_")
+			} # END if (is.na(states_list[[1]]) == FALSE)
+		} # END if (is.null(states_list) == FALSE)
+	
+	# Fix states_lists with "_" instead of NA for null range
+	if (is.null(BioGeoBEARS_run_object$states_list) == FALSE)
+		{
+		if (is.na(BioGeoBEARS_run_object$states_list[[1]]) == FALSE)
+			{
+			if (BioGeoBEARS_run_object$states_list[[1]] == "_")
+				{
+				BioGeoBEARS_run_object$states_list[[1]] = NA
+				} # END if (states_list[[1]] == "_")
+			} # END if (is.na(states_list[[1]]) == FALSE)
+		} # END if (is.null(states_list) == FALSE)
+	
+
+	
 	# Put the parameters into the BioGeoBEARS_model_object, so that they can be universally read out
 	# into any function
 	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object

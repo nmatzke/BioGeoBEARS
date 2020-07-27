@@ -63,6 +63,18 @@ calc_loglike_for_optim <- function(params, BioGeoBEARS_run_object, phy, tip_cond
 	print_optim=TRUE; areas_list=areas_list; states_list=states_list; force_sparse=force_sparse; cluster_already_open=cluster_already_open; return_what="loglike"; calc_ancprobs=TRUE
 	'
 	
+	# Fix states_lists with "_" instead of NA for null range
+	if (is.null(states_list) == FALSE)
+		{
+		if (is.na(states_list[[1]]) == FALSE)
+			{
+			if (states_list[[1]] == "_")
+				{
+				states_list[[1]] = NA
+				} # END if (states_list[[1]] == "_")
+			} # END if (is.na(states_list[[1]]) == FALSE)
+		} # END if (is.null(states_list) == FALSE)
+	
 	if (is.null(BioGeoBEARS_run_object$printlevel))
 		{
 		BioGeoBEARS_run_object$printlevel = 0
@@ -537,7 +549,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 	BioGeoBEARS_run_object
 	skip_optim=FALSE
-	
+	skip_optim_option="return_loglike"	
 	skip_optim=TRUE
 	skip_optim_option="return_all"
 	'
@@ -775,6 +787,19 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		#BioGeoBEARS_run_object$states_list = states_list
 		#inputs$states_list = states_list
 		}
+
+	# Fix states_lists with "_" instead of NA for null range
+	if (is.null(states_list) == FALSE)
+		{
+		if (is.na(states_list[[1]]) == FALSE)
+			{
+			if (states_list[[1]] == "_")
+				{
+				states_list[[1]] = NA
+				} # END if (states_list[[1]] == "_")
+			} # END if (is.na(states_list[[1]]) == FALSE)
+		} # END if (is.null(states_list) == FALSE)
+	
 	
 	# Used if time-changing stratified states list
 	# Save the list of all states, inferred from the areas and maxareas constraint
@@ -1116,7 +1141,35 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	trfn = np(BioGeoBEARS_run_object$trfn)
 	#phy = read.tree(file=trfn)
 	phy = check_trfn(trfn=trfn)
+	
+	# Fix states_lists with "_" instead of NA for null range
+	if (is.null(states_list) == FALSE)
+		{
+		if (is.na(states_list[[1]]) == FALSE)
+			{
+			if (states_list[[1]] == "_")
+				{
+				states_list[[1]] = NA
+				} # END if (states_list[[1]] == "_")
+			} # END if (is.na(states_list[[1]]) == FALSE)
+		} # END if (is.null(states_list) == FALSE)
+	
 
+
+	# Fix states_lists with "_" instead of NA for null range
+	if (is.null(BioGeoBEARS_run_object$states_list) == FALSE)
+		{
+		if (is.na(BioGeoBEARS_run_object$states_list[[1]]) == FALSE)
+			{
+			if (BioGeoBEARS_run_object$states_list[[1]] == "_")
+				{
+				BioGeoBEARS_run_object$states_list[[1]] = NA
+				} # END if (states_list[[1]] == "_")
+			} # END if (is.na(states_list[[1]]) == FALSE)
+		} # END if (is.null(states_list) == FALSE)
+	
+
+	
 	# The likelihood of each state at the tips
 	# Change this, if you have observations instead of presence/absence at the tips
 
@@ -1761,6 +1814,9 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 
 			inputs = BioGeoBEARS_run_object
 			inputs$printlevel = 2
+			
+			areas_list
+			states_list
 			
 			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
 
