@@ -2937,8 +2937,11 @@ calc_loglike_sp_stratified <- function(tip_condlikes_of_data_on_each_state, phy,
 			tmpca_1 = rep(1, sum(states_allowed_TF)+state_space_size_Qmat_to_cladoMat)
 			tmpcb_1 = rep(1, sum(states_allowed_TF)+state_space_size_Qmat_to_cladoMat)
 			
-			
-			COO_weights_columnar = rcpp_calc_anclikes_sp_COOweights_faster(Rcpp_leftprobs=tmpca_1, Rcpp_rightprobs=tmpcb_1, l=l, s=maxent01s_param, v=maxent01v_param, j=maxent01j_param, y=maxent01y_param, dmat=dmat, maxent01s=maxent01s, maxent01v=maxent01v, maxent01j=maxent01j, maxent01y=maxent01y, max_minsize_as_function_of_ancsize=max_minsize_as_function_of_ancsize, printmat=FALSE, m=m)
+			# Bug here: maxent01s_param instead of spPmat_inputs$s
+			#COO_weights_columnar = rcpp_calc_anclikes_sp_COOweights_faster(Rcpp_leftprobs=tmpca_1, Rcpp_rightprobs=tmpcb_1, l=l, s=maxent01s_param, v=maxent01v_param, j=maxent01j_param, y=maxent01y_param, dmat=dmat, maxent01s=maxent01s, maxent01v=maxent01v, maxent01j=maxent01j, maxent01y=maxent01y, max_minsize_as_function_of_ancsize=max_minsize_as_function_of_ancsize, printmat=FALSE, m=m)
+			# 2020-08-27_NJM
+			COO_weights_columnar = rcpp_calc_anclikes_sp_COOweights_faster(Rcpp_leftprobs=tmpca_1, Rcpp_rightprobs=tmpcb_1, l=l, s=spPmat_inputs$s, v=spPmat_inputs$v, j=spPmat_inputs$j, y=spPmat_inputs$y, dmat=dmat, maxent01s=maxent01s, maxent01v=maxent01v, maxent01j=maxent01j, maxent01y=maxent01y, max_minsize_as_function_of_ancsize=max_minsize_as_function_of_ancsize, printmat=FALSE, m=m)
+
 
 
 			# This gives 15 states

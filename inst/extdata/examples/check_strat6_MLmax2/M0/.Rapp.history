@@ -1,0 +1,2089 @@
+# Load the package (after installation, see above).#
+library(GenSA)    # GenSA is better than optimx (although somewhat slower)#
+library(FD)       # for FD::maxent() (make sure this is up-to-date)#
+library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)#
+library(parallel)#
+#
+########################################################
+# 2018-10-10 update: I have been putting the #
+# updates on CRAN/GitHub#
+# You should use:#
+# rexpokit version 0.26.6 from CRAN#
+# cladoRcpp version 0.15 from CRAN#
+# BioGeoBEARS version 1.1 from GitHub, install with:#
+# library(devtools)#
+# devtools::install_github(repo="nmatzke/BioGeoBEARS")#
+########################################################
+library(rexpokit)#
+library(cladoRcpp)#
+library(BioGeoBEARS)#
+#
+########################################################
+# CUT: The old instructions to source() online upgrade .R files have been deleted,#
+#         all updates are now on the GitHub version of the package, version 1.1+#
+########################################################
+#
+########################################################
+# (This local-sourcing is mostly useful for Nick, while actively developing)#
+# Local source()-ing method -- uses BioGeoBEARS sourceall() function #
+# on a directory of .R files, so you don't have to type them out.#
+# The directories here are on my machine, you would have to make a #
+# directory, save the .R files there, and refer to them.#
+##
+# NOTE: it's best to source the "cladoRcpp.R" update first, to avoid warnings like this:#
+###
+## Note: possible error in 'rcpp_calc_anclikes_sp_COOweights_faster(Rcpp_leftprobs = tmpca_1, ': #
+##         unused arguments (m = m, m_null_range = include_null_range, jts_matrix = jts_matrix) #
+###
+##
+# TO USE: Delete or comment out the 'source("http://...")' commands above, and un-comment#
+#              the below...#
+#########################################################################
+# Un-comment (and fix directory paths) to use:#
+#library(BioGeoBEARS)#
+#source("/drives/Dropbox/_njm/__packages/cladoRcpp_setup/cladoRcpp.R")#
+#sourceall("/drives/Dropbox/_njm/__packages/BioGeoBEARS_setup/")#
+#calc_loglike_sp = compiler::cmpfun(calc_loglike_sp_prebyte)    # crucial to fix bug in uppass calculations#
+#calc_independent_likelihoods_on_each_branch = compiler::cmpfun(calc_independent_likelihoods_on_each_branch_prebyte)#
+#########################################################################
+#
+########################################################
+# SETUP: YOUR WORKING DIRECTORY#
+########################################################
+# You will need to set your working directory to match your local system#
+#
+# Note these very handy functions!#
+# Command "setwd(x)" sets your working directory#
+# Command "getwd()" gets your working directory and tells you what it is.#
+# Command "list.files()" lists the files in your working directory#
+# To get help on any command, use "?".  E.g., "?list.files"#
+#
+# Set your working directory for output files#
+# default here is your home directory ("~")#
+# Change this as you like#
+wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/check_strat6_MLmax2/M0/"#
+setwd(wd)#
+#
+# Double-check your working directory with getwd()#
+getwd()#
+#
+########################################################
+# SETUP: Extension data directory#
+########################################################
+# When R packages contain extra files, they are stored in the "extdata" directory #
+# inside the installed package.#
+##
+# BioGeoBEARS contains various example files and scripts in its extdata directory.#
+# #
+# Each computer operating system might install BioGeoBEARS in a different place, #
+# depending on your OS and settings. #
+# #
+# However, you can find the extdata directory like this:#
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))#
+extdata_dir#
+list.files(extdata_dir)#
+#
+# "system.file" looks in the directory of a specified package (in this case BioGeoBEARS)#
+# The function "np" is just a shortcut for normalizePath(), which converts the #
+# path to the format appropriate for your system (e.g., Mac/Linux use "/", but #
+# Windows uses "\\", if memory serves).#
+#
+# Even when using your own data files, you should KEEP these commands in your #
+# script, since the plot_BioGeoBEARS_results function needs a script from the #
+# extdata directory to calculate the positions of "corners" on the plot. This cannot#
+# be made into a straight up BioGeoBEARS function because it uses C routines #
+# from the package APE which do not pass R CMD check for some reason.#
+#
+########################################################
+# SETUP: YOUR TREE FILE AND GEOGRAPHY FILE#
+########################################################
+# Example files are given below. To run your own data,#
+# make the below lines point to your own files, e.g.#
+# trfn = "/mydata/frogs/frogBGB/tree.newick"#
+# geogfn = "/mydata/frogs/frogBGB/geog.data"#
+#
+########################################################
+# Phylogeny file#
+# Notes: #
+# 1. Must be binary/bifurcating: no polytomies#
+# 2. No negative branchlengths (e.g. BEAST MCC consensus trees sometimes have negative branchlengths)#
+# 3. Be careful of very short branches, as BioGeoBEARS will interpret ultrashort branches as direct ancestors#
+# 4. You can use non-ultrametric trees, but BioGeoBEARS will interpret any tips significantly below the #
+#    top of the tree as fossils!  This is only a good idea if you actually do have fossils in your tree,#
+#    as in e.g. Wood, Matzke et al. (2013), Systematic Biology.#
+# 5. The default settings of BioGeoBEARS make sense for trees where the branchlengths are in units of #
+#    millions of years, and the tree is 1-1000 units tall. If you have a tree with a total height of#
+#    e.g. 0.00001, you will need to adjust e.g. the max values of d and e, or (simpler) multiply all#
+#    your branchlengths to get them into reasonable units.#
+# 6. DON'T USE SPACES IN SPECIES NAMES, USE E.G. "_"#
+########################################################
+# This is the example Newick file for Hawaiian 3taxa#
+# (from Ree & Smith 2008)#
+# "trfn" = "tree file name"#
+trfn = "tree.newick"#
+#
+# Look at the raw Newick file:#
+moref(trfn)#
+#
+# Look at your phylogeny (plots to a PDF, which avoids issues with multiple graphics in same window):#
+pdffn = "tree.pdf"#
+pdf(file=pdffn, width=9, height=12)#
+#
+tr = read.tree(trfn)#
+tr#
+plot(tr)#
+title("Example 3taxa phylogeny")#
+axisPhylo() # plots timescale#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)#
+#
+########################################################
+# Geography file#
+# Notes:#
+# 1. This is a PHYLIP-formatted file. This means that in the #
+#    first line, #
+#    - the 1st number equals the number of rows (species)#
+#    - the 2nd number equals the number of columns (number of areas)#
+#    - after a tab, put the areas in parentheses, with spaces: (A B C D)#
+##
+# 1.5. Example first line:#
+#    10    4    (A B C D)#
+# #
+# 2. The second line, and subsequent lines:#
+#    speciesA    0110#
+#    speciesB    0111#
+#    speciesC    0001#
+#         ...#
+# #
+# 2.5a. This means a TAB between the species name and the area 0/1s#
+# 2.5b. This also means NO SPACE AND NO TAB between the area 0/1s.#
+# #
+# 3. See example files at:#
+#    http://phylo.wikidot.com/biogeobears#files#
+# #
+# 4. Make you understand what a PLAIN-TEXT EDITOR is:#
+#    http://phylo.wikidot.com/biogeobears#texteditors#
+##
+# 3. The PHYLIP format is the same format used for C++ LAGRANGE geography files.#
+##
+# 4. All names in the geography file must match names in the phylogeny file.#
+##
+# 5. DON'T USE SPACES IN SPECIES NAMES, USE E.G. "_"#
+##
+# 6. Operational taxonomic units (OTUs) should ideally be phylogenetic lineages, #
+#    i.e. genetically isolated populations.  These may or may not be identical #
+#    with species.  You would NOT want to just use specimens, as each specimen #
+#    automatically can only live in 1 area, which will typically favor DEC+J #
+#    models.  This is fine if the species/lineages really do live in single areas,#
+#    but you wouldn't want to assume this without thinking about it at least. #
+#    In summary, you should collapse multiple specimens into species/lineages if #
+#    data indicates they are the same genetic population.#
+#######################################################
+#
+# This is the example geography file for Hawaiian 3taxa#
+# (from Ree & Smith 2008)#
+geogfn = "geog.data"#
+#
+# Look at the raw geography text file:#
+moref(geogfn)#
+#
+# Look at your geographic range data:#
+tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)#
+tipranges#
+#
+# Maximum range size observed:#
+max(rowSums(dfnums_to_numeric(tipranges@df)))#
+#
+# Set the maximum number of areas any species may occupy; this cannot be larger #
+# than the number of areas you set up, but it can be smaller.#
+max_range_size = 2#
+#
+#####################################################
+#####################################################
+# KEY HINT: The number of states (= number of different possible geographic ranges)#
+# depends on (a) the number of areas and (b) max_range_size.#
+# If you have more than about 500-600 states, the calculations will get REALLY slow,#
+# since the program has to exponentiate a matrix of e.g. 600x600.  Often the computer#
+# will just sit there and crunch, and never get through the calculation of the first#
+# likelihood.#
+# #
+# (this is also what is usually happening when LAGRANGE hangs: you have too many states!)#
+##
+# To check the number of states for a given number of ranges, try:#
+numstates_from_numareas(numareas=4, maxareas=4, include_null_range=TRUE)#
+numstates_from_numareas(numareas=4, maxareas=4, include_null_range=FALSE)#
+numstates_from_numareas(numareas=4, maxareas=3, include_null_range=TRUE)#
+numstates_from_numareas(numareas=4, maxareas=2, include_null_range=TRUE)#
+#
+# Large numbers of areas have problems:#
+numstates_from_numareas(numareas=10, maxareas=10, include_null_range=TRUE)#
+#
+# ...unless you limit the max_range_size:#
+numstates_from_numareas(numareas=10, maxareas=2, include_null_range=TRUE)#
+#####################################################
+#####################################################
+#
+########################################################
+########################################################
+# DEC AND DEC+J ANALYSIS#
+########################################################
+########################################################
+# NOTE: The BioGeoBEARS "DEC" model is identical with #
+# the Lagrange DEC model, and should return identical#
+# ML estimates of parameters, and the same #
+# log-likelihoods, for the same datasets.#
+##
+# Ancestral state probabilities at nodes will be slightly #
+# different, since BioGeoBEARS is reporting the #
+# ancestral state probabilities under the global ML#
+# model, and Lagrange is reporting ancestral state#
+# probabilities after re-optimizing the likelihood#
+# after fixing the state at each node. These will #
+# be similar, but not identical. See Matzke (2014),#
+# Systematic Biology, for discussion.#
+##
+# Also see Matzke (2014) for presentation of the #
+# DEC+J model.#
+########################################################
+########################################################
+#
+########################################################
+########################################################
+#
+########################################################
+# Run DEC#
+########################################################
+#
+# Intitialize a default model (DEC model)#
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+#
+# Give BioGeoBEARS the location of the phylogeny Newick file#
+BioGeoBEARS_run_object$trfn = trfn#
+#
+# Give BioGeoBEARS the location of the geography text file#
+BioGeoBEARS_run_object$geogfn = geogfn#
+#
+# Input the maximum range size#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+# 1. Here, un-comment ONLY the files you want to use.#
+# 2. Also un-comment "BioGeoBEARS_run_object = section_the_tree(...", below.#
+# 3. For example files see (a) extdata_dir, #
+#  or (b) http://phylo.wikidot.com/biogeobears#files#
+#  and BioGeoBEARS Google Group posts for further hints)#
+##
+# Uncomment files you wish to use in time-stratified analyses:#
+#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"#
+#BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+# (use more cores to speed it up; this requires#
+# library(parallel) and/or library(snow). The package "parallel" #
+# is now default on Macs in R 3.0+, but apparently still #
+# has to be typed on some Windows machines. Note: apparently #
+# parallel works on Mac command-line R, but not R.app.#
+# BioGeoBEARS checks for this and resets to 1#
+# core with R.app)#
+#
+# Sparse matrix exponentiation is an option for huge numbers of ranges/states (600+)#
+# I have experimented with sparse matrix exponentiation in EXPOKIT/rexpokit,#
+# but the results are imprecise and so I haven't explored it further.#
+# In a Bayesian analysis, it might work OK, but the ML point estimates are#
+# not identical.#
+# Also, I have not implemented all functions to work with force_sparse=TRUE.#
+# Volunteers are welcome to work on it!!#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up DEC model#
+# (nothing to do; defaults)#
+#
+# Look at the BioGeoBEARS_run_object; it's just a list of settings etc.#
+BioGeoBEARS_run_object#
+#
+# This contains the model object#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object#
+#
+# This table contains the parameters of the model #
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table#
+#
+# Run this to check inputs. Read the error messages if you get them!#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# For a slow analysis, run once, then set runslow=FALSE to just #
+# load the saved result.#
+runslow = TRUE#
+resfn = "3taxa_DEC_M0_unconstrained_v1.Rdata"#
+if (runslow)#
+    {#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+    resDEC = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resDEC = res#
+    }#
+#
+########################################################
+# Run DEC+J#
+########################################################
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+BioGeoBEARS_run_object$trfn = trfn#
+BioGeoBEARS_run_object$geogfn = geogfn#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"#
+#BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up DEC+J model#
+# Get the ML parameter values from the 2-parameter nested model#
+# (this will ensure that the 3-parameter model always does at least as good)#
+dstart = resDEC$outputs@params_table["d","est"]#
+estart = resDEC$outputs@params_table["e","est"]#
+jstart = 0.0001#
+#
+# Input starting values for d, e#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","init"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d","est"] = dstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","init"] = estart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","est"] = estart#
+#
+# Add j as a free parameter#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = jstart#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart#
+#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+resfn = "3taxa_DEC+J_M0_unconstrained_v1.Rdata"#
+runslow = TRUE#
+if (runslow)#
+    {#
+    #sourceall("/Dropbox/_njm/__packages/BioGeoBEARS_setup/")#
+#
+    res = bears_optim_run(BioGeoBEARS_run_object)#
+    res    #
+#
+    save(res, file=resfn)#
+#
+    resDECj = res#
+    } else {#
+    # Loads to "res"#
+    load(resfn)#
+    resDECj = res#
+    }#
+#
+########################################################
+# PDF plots#
+########################################################
+pdffn = "3taxa_DEC_vs_DEC+J_M0_unconstrained_v1.pdf"#
+pdf(pdffn, width=6, height=6)#
+#
+########################################################
+# Plot ancestral states - DEC#
+########################################################
+analysis_titletxt ="BioGeoBEARS DEC on 3taxa M0_unconstrained"#
+#
+# Setup#
+results_object = resDEC#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+########################################################
+# Plot ancestral states - DECJ#
+########################################################
+analysis_titletxt ="BioGeoBEARS DEC+J on 3taxa M0_unconstrained"#
+#
+# Setup#
+results_object = resDECj#
+scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))#
+#
+# States#
+res1 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+# Pie chart#
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)#
+#
+dev.off()  # Turn off PDF#
+cmdstr = paste("open ", pdffn, sep="")#
+system(cmdstr) # Plot it
+names(resDEC)
+resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+rowSums(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS)
+resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS
+resDEC$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS
+skip_optim=FALSE; skip_optim_option="return_loglike"
+wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/check_strat6_MLmax2/M0/"#
+setwd(wd)#
+#
+# Double-check your working directory with getwd()#
+getwd()#
+#
+########################################################
+# SETUP: Extension data directory#
+########################################################
+# When R packages contain extra files, they are stored in the "extdata" directory #
+# inside the installed package.#
+##
+# BioGeoBEARS contains various example files and scripts in its extdata directory.#
+# #
+# Each computer operating system might install BioGeoBEARS in a different place, #
+# depending on your OS and settings. #
+# #
+# However, you can find the extdata directory like this:#
+extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))#
+extdata_dir#
+list.files(extdata_dir)#
+#
+# "system.file" looks in the directory of a specified package (in this case BioGeoBEARS)#
+# The function "np" is just a shortcut for normalizePath(), which converts the #
+# path to the format appropriate for your system (e.g., Mac/Linux use "/", but #
+# Windows uses "\\", if memory serves).#
+#
+# Even when using your own data files, you should KEEP these commands in your #
+# script, since the plot_BioGeoBEARS_results function needs a script from the #
+# extdata directory to calculate the positions of "corners" on the plot. This cannot#
+# be made into a straight up BioGeoBEARS function because it uses C routines #
+# from the package APE which do not pass R CMD check for some reason.#
+#
+########################################################
+# SETUP: YOUR TREE FILE AND GEOGRAPHY FILE#
+########################################################
+# Example files are given below. To run your own data,#
+# make the below lines point to your own files, e.g.#
+# trfn = "/mydata/frogs/frogBGB/tree.newick"#
+# geogfn = "/mydata/frogs/frogBGB/geog.data"#
+#
+########################################################
+# Phylogeny file#
+# Notes: #
+# 1. Must be binary/bifurcating: no polytomies#
+# 2. No negative branchlengths (e.g. BEAST MCC consensus trees sometimes have negative branchlengths)#
+# 3. Be careful of very short branches, as BioGeoBEARS will interpret ultrashort branches as direct ancestors#
+# 4. You can use non-ultrametric trees, but BioGeoBEARS will interpret any tips significantly below the #
+#    top of the tree as fossils!  This is only a good idea if you actually do have fossils in your tree,#
+#    as in e.g. Wood, Matzke et al. (2013), Systematic Biology.#
+# 5. The default settings of BioGeoBEARS make sense for trees where the branchlengths are in units of #
+#    millions of years, and the tree is 1-1000 units tall. If you have a tree with a total height of#
+#    e.g. 0.00001, you will need to adjust e.g. the max values of d and e, or (simpler) multiply all#
+#    your branchlengths to get them into reasonable units.#
+# 6. DON'T USE SPACES IN SPECIES NAMES, USE E.G. "_"#
+########################################################
+# This is the example Newick file for Hawaiian 3taxa#
+# (from Ree & Smith 2008)#
+# "trfn" = "tree file name"#
+trfn = "tree.newick"#
+#
+# Look at the raw Newick file:#
+moref(trfn)#
+#
+# Look at your phylogeny (plots to a PDF, which avoids issues with multiple graphics in same window):#
+pdffn = "tree.pdf"#
+pdf(file=pdffn, width=9, height=12)#
+#
+tr = read.tree(trfn)#
+tr#
+plot(tr)#
+title("Example 3taxa phylogeny")#
+axisPhylo() # plots timescale#
+#
+dev.off()#
+cmdstr = paste0("open ", pdffn)#
+system(cmdstr)#
+#
+########################################################
+# Geography file#
+# Notes:#
+# 1. This is a PHYLIP-formatted file. This means that in the #
+#    first line, #
+#    - the 1st number equals the number of rows (species)#
+#    - the 2nd number equals the number of columns (number of areas)#
+#    - after a tab, put the areas in parentheses, with spaces: (A B C D)#
+##
+# 1.5. Example first line:#
+#    10    4    (A B C D)#
+# #
+# 2. The second line, and subsequent lines:#
+#    speciesA    0110#
+#    speciesB    0111#
+#    speciesC    0001#
+#         ...#
+# #
+# 2.5a. This means a TAB between the species name and the area 0/1s#
+# 2.5b. This also means NO SPACE AND NO TAB between the area 0/1s.#
+# #
+# 3. See example files at:#
+#    http://phylo.wikidot.com/biogeobears#files#
+# #
+# 4. Make you understand what a PLAIN-TEXT EDITOR is:#
+#    http://phylo.wikidot.com/biogeobears#texteditors#
+##
+# 3. The PHYLIP format is the same format used for C++ LAGRANGE geography files.#
+##
+# 4. All names in the geography file must match names in the phylogeny file.#
+##
+# 5. DON'T USE SPACES IN SPECIES NAMES, USE E.G. "_"#
+##
+# 6. Operational taxonomic units (OTUs) should ideally be phylogenetic lineages, #
+#    i.e. genetically isolated populations.  These may or may not be identical #
+#    with species.  You would NOT want to just use specimens, as each specimen #
+#    automatically can only live in 1 area, which will typically favor DEC+J #
+#    models.  This is fine if the species/lineages really do live in single areas,#
+#    but you wouldn't want to assume this without thinking about it at least. #
+#    In summary, you should collapse multiple specimens into species/lineages if #
+#    data indicates they are the same genetic population.#
+#######################################################
+#
+# This is the example geography file for Hawaiian 3taxa#
+# (from Ree & Smith 2008)#
+geogfn = "geog.data"#
+#
+# Look at the raw geography text file:#
+moref(geogfn)#
+#
+# Look at your geographic range data:#
+tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)#
+tipranges#
+#
+# Maximum range size observed:#
+max(rowSums(dfnums_to_numeric(tipranges@df)))#
+#
+# Set the maximum number of areas any species may occupy; this cannot be larger #
+# than the number of areas you set up, but it can be smaller.#
+max_range_size = 2#
+#
+#####################################################
+#####################################################
+# KEY HINT: The number of states (= number of different possible geographic ranges)#
+# depends on (a) the number of areas and (b) max_range_size.#
+# If you have more than about 500-600 states, the calculations will get REALLY slow,#
+# since the program has to exponentiate a matrix of e.g. 600x600.  Often the computer#
+# will just sit there and crunch, and never get through the calculation of the first#
+# likelihood.#
+# #
+# (this is also what is usually happening when LAGRANGE hangs: you have too many states!)#
+##
+# To check the number of states for a given number of ranges, try:#
+numstates_from_numareas(numareas=4, maxareas=4, include_null_range=TRUE)#
+numstates_from_numareas(numareas=4, maxareas=4, include_null_range=FALSE)#
+numstates_from_numareas(numareas=4, maxareas=3, include_null_range=TRUE)#
+numstates_from_numareas(numareas=4, maxareas=2, include_null_range=TRUE)#
+#
+# Large numbers of areas have problems:#
+numstates_from_numareas(numareas=10, maxareas=10, include_null_range=TRUE)#
+#
+# ...unless you limit the max_range_size:#
+numstates_from_numareas(numareas=10, maxareas=2, include_null_range=TRUE)#
+#####################################################
+#####################################################
+#
+########################################################
+########################################################
+# DEC AND DEC+J ANALYSIS#
+########################################################
+########################################################
+# NOTE: The BioGeoBEARS "DEC" model is identical with #
+# the Lagrange DEC model, and should return identical#
+# ML estimates of parameters, and the same #
+# log-likelihoods, for the same datasets.#
+##
+# Ancestral state probabilities at nodes will be slightly #
+# different, since BioGeoBEARS is reporting the #
+# ancestral state probabilities under the global ML#
+# model, and Lagrange is reporting ancestral state#
+# probabilities after re-optimizing the likelihood#
+# after fixing the state at each node. These will #
+# be similar, but not identical. See Matzke (2014),#
+# Systematic Biology, for discussion.#
+##
+# Also see Matzke (2014) for presentation of the #
+# DEC+J model.#
+########################################################
+########################################################
+#
+########################################################
+########################################################
+#
+########################################################
+# Run DEC#
+########################################################
+#
+# Intitialize a default model (DEC model)#
+BioGeoBEARS_run_object = define_BioGeoBEARS_run()#
+#
+# Give BioGeoBEARS the location of the phylogeny Newick file#
+BioGeoBEARS_run_object$trfn = trfn#
+#
+# Give BioGeoBEARS the location of the geography text file#
+BioGeoBEARS_run_object$geogfn = geogfn#
+#
+# Input the maximum range size#
+BioGeoBEARS_run_object$max_range_size = max_range_size#
+#
+BioGeoBEARS_run_object$min_branchlength = 0.000001    # Min to treat tip as a direct ancestor (no speciation event)#
+BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC* model, DEC*+J, etc.#
+# (For DEC* and other "*" models, please cite: Massana, Kathryn A.; Beaulieu, #
+#  Jeremy M.; Matzke, Nicholas J.; O’Meara, Brian C. (2015). Non-null Effects of #
+#  the Null Range in Biogeographic Models: Exploring Parameter Estimation in the #
+#  DEC Model. bioRxiv,  http://biorxiv.org/content/early/2015/09/16/026914 )#
+# Also: search script on "include_null_range" for other places to change#
+#
+# Set up a time-stratified analysis:#
+# 1. Here, un-comment ONLY the files you want to use.#
+# 2. Also un-comment "BioGeoBEARS_run_object = section_the_tree(...", below.#
+# 3. For example files see (a) extdata_dir, #
+#  or (b) http://phylo.wikidot.com/biogeobears#files#
+#  and BioGeoBEARS Google Group posts for further hints)#
+##
+# Uncomment files you wish to use in time-stratified analyses:#
+#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"#
+#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"#
+#BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"#
+#BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"#
+#BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"#
+# See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.#
+#
+# Speed options and multicore processing if desired#
+BioGeoBEARS_run_object$on_NaN_error = -1e50    # returns very low lnL if parameters produce NaN error (underflow check)#
+BioGeoBEARS_run_object$speedup = TRUE          # shorcuts to speed ML search; use FALSE if worried (e.g. >3 params)#
+BioGeoBEARS_run_object$use_optimx = "GenSA"    # if FALSE, use optim() instead of optimx()#
+BioGeoBEARS_run_object$num_cores_to_use = 1#
+# (use more cores to speed it up; this requires#
+# library(parallel) and/or library(snow). The package "parallel" #
+# is now default on Macs in R 3.0+, but apparently still #
+# has to be typed on some Windows machines. Note: apparently #
+# parallel works on Mac command-line R, but not R.app.#
+# BioGeoBEARS checks for this and resets to 1#
+# core with R.app)#
+#
+# Sparse matrix exponentiation is an option for huge numbers of ranges/states (600+)#
+# I have experimented with sparse matrix exponentiation in EXPOKIT/rexpokit,#
+# but the results are imprecise and so I haven't explored it further.#
+# In a Bayesian analysis, it might work OK, but the ML point estimates are#
+# not identical.#
+# Also, I have not implemented all functions to work with force_sparse=TRUE.#
+# Volunteers are welcome to work on it!!#
+BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathology & isn't much faster at this scale#
+#
+# This function loads the dispersal multiplier matrix etc. from the text files into the model object. Required for these to work!#
+# (It also runs some checks on these inputs for certain errors.)#
+BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)#
+#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)#
+# The stratified tree is described in this table:#
+#BioGeoBEARS_run_object$master_table#
+#
+# Good default settings to get ancestral states#
+BioGeoBEARS_run_object$return_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE#
+BioGeoBEARS_run_object$calc_ancprobs = TRUE    # get ancestral states from optim run#
+#
+# Set up DEC model#
+# (nothing to do; defaults)#
+#
+# Look at the BioGeoBEARS_run_object; it's just a list of settings etc.#
+BioGeoBEARS_run_object#
+#
+# This contains the model object#
+BioGeoBEARS_run_object$BioGeoBEARS_model_object#
+#
+# This table contains the parameters of the model #
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table#
+#
+# Run this to check inputs. Read the error messages if you get them!#
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+#
+# For a slow analysis, run once, then set runslow=FALSE to just #
+# load the saved result.#
+runslow = TRUE#
+resfn = "3taxa_DEC_M0_unconstrained_v1.Rdata"
+assign("last.warning", NULL, envir = baseenv())#
+	if (is.null(BioGeoBEARS_run_object$include_null_range))#
+		{#
+		BioGeoBEARS_run_object$include_null_range = TRUE#
+		}	#
+	include_null_range = BioGeoBEARS_run_object$include_null_range#
+	if (is.null(BioGeoBEARS_run_object$allow_null_tips))#
+		{#
+		BioGeoBEARS_run_object$allow_null_tips = FALSE#
+		}#
+	# 2017-11-29#
+	# Error check for tr if not loaded elsewhere#
+	if (exists("tr") == FALSE)#
+		{#
+		tr = read.tree(BioGeoBEARS_run_object$trfn)#
+		}#
+	########################################################
+	# Check for traits and trait model#
+	#   - Need BOTH, or NEITHER#
+	########################################################
+	traitTF = is.null(BioGeoBEARS_run_object$trait) == FALSE#
+#
+	# Initialize m, if needed#
+	m = NULL#
+	if (is.null(BioGeoBEARS_run_object$min_branchlength) == FALSE)#
+		{#
+		min_branchlength = BioGeoBEARS_run_object$min_branchlength#
+		} else {#
+		min_branchlength = 0.000001#
+		}#
+	# ERROR CHECKS FOR TRAIT MODEL#
+	if (traitTF)#
+		{#
+		if (is.na(BioGeoBEARS_run_object$timesfn) == FALSE)#
+			{#
+			txt = "WARNING: you have loaded a BioGeoBEARS_run_object$trait, but you have a timesfn, indicate a time-stratified analysis. Traits-based dispersal has now been implemented for time-stratified analyses, but is still experimental."#
+			cat("\n\n")#
+			cat(txt)#
+			cat("\n\n")#
+			warning(txt)			#
+			}#
+		# Check for trait_Pmat_txt#
+		if (is.null(BioGeoBEARS_run_object$trait_Pmat_txt) == TRUE)#
+			{#
+			txt = "STOP ERROR: you have loaded a BioGeoBEARS_run_object$trait, but you are missing a BioGeoBEARS_run_object$trait_Pmat_txt"#
+			cat("\n\n")#
+			cat(txt)#
+			cat("\n\n")#
+			stop(txt)#
+			}#
+		# Check for trait transition rates#
+		# Check for t12, t21, etc.#
+		trait_transition_rates_TF = grepl(pattern="trait transition rate", x=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table$desc)#
+		if (sum(trait_transition_rates_TF) < 1)#
+			{#
+			txt = "STOP ERROR: you have loaded a BioGeoBEARS_run_object$trait, but you need one or more 'trait transition rates' in  BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table"#
+			cat("\n\n")#
+			cat(txt)#
+			cat("\n\n")#
+			stop(txt)#
+			}#
+		# Check for trait-based dispersal rate multipliers		#
+		# Check for m1, m2, etc.#
+		numtraitstates = ncol(BioGeoBEARS_run_object$trait@df)#
+		traitbased_dispersal_Ms_TF = grepl(pattern="trait-based dispersal rate multiplier", x=BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table$desc)#
+#
+		if (sum(traitbased_dispersal_Ms_TF) != numtraitstates)#
+			{#
+			txt = paste0("STOP ERROR: you have loaded a BioGeoBEARS_run_object$trait, and it has ", numtraitstates, " states, so you need to have ", numtraitstates, " multipliers ('m1', 'm2', etc.) with 'desc' field 'trait-based dispersal rate multipliers...' in  BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table. Instead, you have only this many: ", sum(traitbased_dispersal_Ms_TF))#
+			cat("\n\n")#
+			cat(txt)#
+			cat("\n\n")#
+			stop(txt)#
+			}#
+		} # END if (traitTF) # ERROR CHECK#
+	# Load the trait as a (another) tipranges-class object#
+	if (traitTF == TRUE)#
+		{#
+		trait = BioGeoBEARS_run_object$trait#
+		trait_as_tip_condlikes = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges=trait, phy=tr, states_list=NULL, maxareas=1, include_null_range=FALSE, useAmbiguities=BioGeoBEARS_run_object$useAmbiguities, trait_as_tip_condlikes=NULL)#
+		# Number of traits#
+		ntrait_states = ncol(trait_as_tip_condlikes)#
+		# Extract these submatrices, just for dimensions, names etc.#
+		# ALWAYS extract parameter values from the main model_object#
+		# Trait modeling effect on dispersal#
+		# (m1, m2, etc.)#
+		BGB_trait_model_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table[traitbased_dispersal_Ms_TF,]#
+		# Parameters of transition matrix for the trait#
+		# (t12, t21, etc.)#
+		BGB_trait_Pmat_params_table = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table[trait_transition_rates_TF,]#
+#
+		# Text transition matrix for the trait#
+		trait_Pmat_txt = BioGeoBEARS_run_object$trait_Pmat_txt#
+		} else {#
+		# No trait; set to NULL#
+		trait_as_tip_condlikes = NULL#
+		ntrait_states = NULL#
+		BGB_trait_model_params_table = NULL#
+		BGB_trait_Pmat_params_table = NULL#
+		} # END if (traitTF == TRUE)#
+	########################################################
+	# Load the model object#
+	########################################################
+	#inputs = BioGeoBEARS_run_object#
+	BioGeoBEARS_model_object = BioGeoBEARS_run_object$BioGeoBEARS_model_object#
+	# Should the optim run be printed?#
+	print_optim = BioGeoBEARS_run_object$print_optim#
+	# Get geographic ranges at tips#
+	if (BioGeoBEARS_run_object$use_detection_model == FALSE)#
+		{#
+		tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=np(BioGeoBEARS_run_object$geogfn))#
+		}#
+	if (BioGeoBEARS_run_object$use_detection_model == TRUE)#
+		{#
+		if (BioGeoBEARS_run_object$use_detection_model == TRUE)#
+			{#
+			tipranges = tipranges_from_detects_fn(detects_fn=BioGeoBEARS_run_object$detects_fn)#
+			} # END if (inputs$use_detection_model == TRUE)#
+		} # END if (BioGeoBEARS_run_object$use_detection_model == TRUE)#
+	# Should we do optimx speedup?#
+	speedup = BioGeoBEARS_run_object$speedup#
+	# Get the list of geographic areas#
+#	print("print(tipranges):")#
+#	print(tipranges)#
+	areas = getareas_from_tipranges_object(tipranges)#
+	areas_list = seq(0, length(areas)-1, 1)		# 0-base indexes#
+#
+	# Change the names to tipranges@df:#
+	# This converts the tipranges names to 0-based index#
+	# this doesn't make sense if areas_list is 0-based indexes#
+	# XXX - check at some point#
+	# REMOVED: 2017-03-14#
+	#names(tipranges@df) = areas_list#
+#
+	########################################################
+	# Set the maximum range size (can be thought of as#
+	# a free parameter#
+	########################################################
+	if (is.na(BioGeoBEARS_run_object$max_range_size))#
+		{#
+		if (is.null(BioGeoBEARS_run_object$states_list))#
+			{#
+			# Maximum range size is all areas#
+			max_range_size = length(areas)#
+			} else {#
+			# If not NA#
+			# Get max rangesize from states list#
+			max_range_size = max(sapply(X=BioGeoBEARS_run_object$states_list, FUN=length), na.rm=TRUE)#
+			}#
+		} else {#
+		# Maximum range size hard-coded#
+		max_range_size = BioGeoBEARS_run_object$max_range_size#
+		}#
+	max_numareas = max_range_size#
+	########################################################
+	# Check that no tips have larger ranges than you allowed#
+	########################################################
+	#print("Here")#
+	#print(tipranges@df)#
+	# The dfnums_to_numeric fails, if you re-labeled the area names to 0, 1, 2, etc...#
+	tipranges_df_tmp = tipranges@df#
+	names(tipranges_df_tmp) = paste0("col", names(tipranges_df_tmp))#
+	tipranges_df_tmp[tipranges_df_tmp=="?"] = 0#
+	TF = (rowSums(dfnums_to_numeric(tipranges_df_tmp))) > max_range_size#
+	if (sum(TF, na.rm=TRUE) > 0)#
+		{#
+		cat("\n\nERROR: Tips with ranges too big:\n", sep="")#
+		print(dfnums_to_numeric(tipranges_df_tmp)[TF, ])#
+		cat("\n\nCheck your input geography file!\n", sep="")#
+		txt = paste("ERROR: Some tips (listed above) have range sizes larger than ", max_range_size, sep="")#
+		stop(txt)#
+		}#
+	# Old/slow way of getting the list of states and speciation matrix (slow)#
+	# old_states_list = areas_list_to_states_list(areas, include_null_range=BioGeoBEARS_run_object$include_null_range)#
+	# old_states_list#
+	# spmat = make_relprob_matrix_bi(old_states_list)#
+	# spmat#
+	# max_numareas = max(sapply(X=old_states_list, FUN=length), na.rm=TRUE)#
+	# max_numareas#
+	# Take the list of areas, and get list of possible states#
+	# (the user can manually input states if they like)#
+	if (is.null(BioGeoBEARS_run_object$states_list))#
+		{#
+		states_list = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=BioGeoBEARS_run_object$include_null_range)#
+		states_list#
+		#BioGeoBEARS_run_object$states_list = states_list#
+		#inputs$states_list = states_list#
+		} else {#
+		states_list = BioGeoBEARS_run_object$states_list#
+		#BioGeoBEARS_run_object$states_list = states_list#
+		#inputs$states_list = states_list#
+		}#
+#
+	# Fix states_lists with "_" instead of NA for null range#
+	if (is.null(states_list) == FALSE)#
+		{#
+		if (is.na(states_list[[1]]) == FALSE)#
+			{#
+			if (states_list[[1]] == "_")#
+				{#
+				states_list[[1]] = NA#
+				} # END if (states_list[[1]] == "_")#
+			} # END if (is.na(states_list[[1]]) == FALSE)#
+		} # END if (is.null(states_list) == FALSE)#
+	# Used if time-changing stratified states list#
+	# Save the list of all states, inferred from the areas and maxareas constraint#
+	all_states_list = states_list#
+	all_geog_states_list_usually_inferred_from_areas_maxareas = all_states_list#
+	# Save it, for stochastic mapping#
+	BioGeoBEARS_run_object$all_geog_states_list_usually_inferred_from_areas_maxareas = all_states_list#
+	########################################################
+	# NON-STRATIFIED: Modify the states_list if needed#
+	########################################################
+	if ( is.numeric(BioGeoBEARS_run_object$timeperiods) == FALSE )#
+		{#
+		########################################################
+		# If needed, modify the states_list by areas_allowed_mat#
+		########################################################
+		if ( (is.null(BioGeoBEARS_run_object$list_of_areas_allowed_mats) == FALSE))#
+			{#
+			# Take the first areas_allowed matrix (non-stratified)#
+			areas_allowed_mat = BioGeoBEARS_run_object$list_of_areas_allowed_mats[[1]]#
+			# Cut down the states accordingly (hopefully not slow!)#
+			original_states_list = states_list#
+			states_list = prune_states_list(states_list_0based_index=states_list, areas_allowed_mat=areas_allowed_mat)#
+			BioGeoBEARS_run_object$states_list = states_list#
+#
+			print("Limiting original_states_list using an areas_allowed matrix")#
+			print("original_states_list")#
+			print(original_states_list)#
+			cat("\nlength(original_states_list) = ", length(original_states_list), " states/ranges.\n")#
+			cat("\n")#
+#
+			print("states_list")#
+			print(states_list)#
+			cat("\nlength(original_states_list) = ", length(original_states_list), " states/ranges.")#
+			cat("\nlength(states_list) = ", length(states_list), " states/ranges.\n")#
+			} else {#
+			# Make no change#
+			pass = 1#
+			# states_list = states_list#
+			}#
+#
+		########################################################
+		# If needed, modify the states_list by areas_adjacency_mat#
+		########################################################
+		if ( (is.null(BioGeoBEARS_run_object$list_of_areas_adjacency_mats) == FALSE))#
+			{#
+			# Take the first areas_adjacency matrix (non-stratified)#
+			areas_adjacency_mat = BioGeoBEARS_run_object$list_of_areas_adjacency_mats[[1]]#
+			# Cut down the states accordingly (hopefully not slow!)#
+			original_states_list = states_list#
+			states_list = prune_states_list_by_adjacency(states_list_0based_index=states_list, areas_adjacency_mat=areas_adjacency_mat)#
+			BioGeoBEARS_run_object$states_list = states_list#
+			print("Limiting original_states_list using an area adjacency matrix")#
+			print("original_states_list")#
+			print(original_states_list)#
+			print(length(original_states_list))#
+			cat("\n")#
+#
+			print("states_list")#
+			print(states_list)#
+			print("length(states_list)")#
+			print(length(states_list))#
+			} else {#
+			# Make no change#
+			pass = 1#
+			# states_list = states_list#
+			}#
+		} # END if ( is.numeric(BioGeoBEARS_run_object$timeperiods) == FALSE )#
+	# Change the states_list by traits, if needed#
+	# (non-stratified)#
+	if (traitTF == TRUE)#
+		{#
+		states_list_ORIG = states_list#
+		#states_list_wTrait = #
+		#trait_as_tip_condlikes#
+		}#
+	########################################################
+	# STRATIFIED: Modify the states_list if needed#
+	# (this is ONLY if the state-space is changing in the#
+	#  different time-slices)#
+	########################################################
+	# Will the state space be changing?#
+	TF1 = (is.null(BioGeoBEARS_run_object$list_of_areas_allowed_mats) == FALSE)#
+	TF2 = (is.null(BioGeoBEARS_run_object$list_of_areas_adjacency_mats) == FALSE)#
+	state_space_changing_TF = (TF1 + TF2) > 0#
+	need_to_print_list_of_states_list = TRUE#
+	master_states_list = states_list	# store the master list of all states;#
+										# check that this includes all, at some point#
+										# if not, warn user to change it manually#
+	if ( (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE) && (state_space_changing_TF == TRUE) && (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == TRUE) )#
+		{#
+		# Save the original states_list, for the case where the user is automatically#
+		# inferring the overall states list (may conflict with the list of #
+		# states allowed by areas_allowed)#
+		all_geog_states_list_usually_inferred_from_areas_maxareas#
+		need_to_print_list_of_states_list = FALSE#
+		ntimes = length(BioGeoBEARS_run_object$timeperiods)#
+		lists_of_states_lists_0based = list()#
+		# Go through each time bin, and make the state space different in each time bin#
+		for (ti in 1:ntimes)#
+			{#
+			# Initialize#
+			states_list_for_this_stratum = states_list#
+			########################################################
+			# If needed, modify the states_list by areas_allowed_mat#
+			########################################################
+			# Areas allowed matrix#
+			if (TF1 == TRUE)#
+				{#
+				# Take the first areas_allowed matrix (non-stratified)#
+				areas_allowed_mat = BioGeoBEARS_run_object$list_of_areas_allowed_mats[[ti]]#
+				# Cut down the states accordingly (hopefully not slow!)#
+				states_list_for_this_stratum = prune_states_list(states_list_0based_index=states_list_for_this_stratum, areas_allowed_mat=areas_allowed_mat)#
+				} else {#
+				# Make no change#
+				pass = 1#
+				# states_list = states_list#
+				}#
+#
+			# Message to user#
+			timeslice_num = ti#
+			if (timeslice_num == 1)#
+				{#
+				toptime = 0#
+				} else {#
+				toptime = BioGeoBEARS_run_object$timeperiods[ti-1]#
+				}#
+			if (timeslice_num == ntimes)#
+				{#
+				bottime = BioGeoBEARS_run_object$timeperiods[ti]#
+				catend = "\n\n"#
+				} else {#
+				bottime = BioGeoBEARS_run_object$timeperiods[ti]#
+				catend = ""#
+				}#
+			txt = paste0("bears_optim_run() note: overall states_list has ", length(master_states_list), " states/ranges. In stratum #", ti, " (", toptime, "-", bottime, " mya), states_list_for_this_stratum has ", length(states_list_for_this_stratum), " states/ranges, due to areas_allowed and/or areas_adjacency matrices. See BioGeoBEARS_run_object$lists_of_states_lists_0based.")#
+			cat("\n")#
+			cat(txt)#
+			cat(catend)#
+			########################################################
+			# If needed, modify the states_list by areas_adjacency_mat#
+			########################################################
+			# Areas adjacency matrix#
+			if (TF2 == TRUE)#
+				{#
+				# Take the first areas_adjacency matrix (non-stratified)#
+				areas_adjacency_mat = BioGeoBEARS_run_object$list_of_areas_adjacency_mats[[ti]]#
+				# Cut down the states accordingly (hopefully not slow!)#
+				states_list_for_this_stratum = prune_states_list_by_adjacency(states_list_0based_index=states_list_for_this_stratum, areas_adjacency_mat=areas_adjacency_mat)#
+				} else {#
+				# Make no change#
+				pass = 1#
+				# states_list = states_list#
+				}#
+#
+			# Store in the list of states_lists#
+			lists_of_states_lists_0based[[ti]] = states_list_for_this_stratum#
+			} # END for (ti in 1:ntimes)#
+		# Store the time-stratified list of states_lists in the BioGeoBEARS_run_object#
+		BioGeoBEARS_run_object$lists_of_states_lists_0based = lists_of_states_lists_0based#
+		} # END if ( (is.numeric(BioGeoBEARS_run_object$timeperiods) == TRUE) && (state_space_changing_TF == TRUE) )#
+	# Or, if the time-stratified states list is pre-specified#
+	if (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE)#
+		{#
+		ntimes = length(BioGeoBEARS_run_object$timeperiods)#
+		# Default is all TRUE#
+		states_allowed_TF1 = rep(TRUE, times=length(all_states_list))#
+		states_allowed_TF2 = rep(TRUE, times=length(all_states_list))#
+		states_allowed_TF3 = rep(TRUE, times=length(all_states_list))#
+		for (ntimes_i in 1:ntimes)#
+			{#
+			# Combine the 3 ways of changing states lists		#
+			# Areas allowed in this time bin#
+			if ( (is.null(BioGeoBEARS_run_object$list_of_areas_allowed_mats) == FALSE))#
+				{#
+				areas_allowed_mat = BioGeoBEARS_run_object$list_of_areas_allowed_mats[[ntimes_i]]#
+#
+				states_allowed_TF1 = sapply(X=all_states_list, FUN=check_if_state_is_allowed, areas_allowed_mat)#
+				#states_to_use_TF = all_states_list %in% tmp_states_list#
+				if (include_null_range == TRUE)#
+					{#
+					states_allowed_TF1[1] = TRUE#
+					}#
+				# NO; use all areas for this#
+				# states_to_use_TF = states_allowed_TF#
+				} # END if ( (is.null(BioGeoBEARS_run_object$list_of_areas_allowed_mats) == FALSE))#
+			# Areas adjacency#
+			if ( (is.null(BioGeoBEARS_run_object$list_of_areas_adjacency_mats) == FALSE))#
+				{#
+				areas_adjacency_mat = BioGeoBEARS_run_object$list_of_areas_adjacency_mats[[ntimes_i]]#
+#
+				states_allowed_TF2 = sapply(X=all_states_list, FUN=check_if_state_is_allowed_by_adjacency, areas_adjacency_mat)#
+				#states_to_use_TF = all_states_list %in% tmp_states_list#
+				if (include_null_range == TRUE)#
+					{#
+					states_allowed_TF2[1] = TRUE#
+					}#
+				# NO; use all areas for this#
+				# states_to_use_TF = states_allowed_TF#
+				} # END if ( (is.null(BioGeoBEARS_run_object$list_of_areas_adjacency_mats) == FALSE))#
+#
+			# Manual list of allowed states#
+			if ( (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE))#
+				{#
+				states_allowed_TF3 = all_states_list %in% BioGeoBEARS_run_object$lists_of_states_lists_0based[[ntimes_i]]#
+				if (include_null_range == TRUE)#
+					{#
+					states_allowed_TF3[1] = TRUE#
+					}#
+				} # END if ( (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == FALSE))#
+#
+			# Combine the 3 (areas_allowed, areas_adjacency, lists_of_states_lists_0based)#
+			states_allowed_TF = ((states_allowed_TF1 + states_allowed_TF2 + states_allowed_TF3) == 3)#
+# 			print(states_allowed_TF1)#
+# 			print(states_allowed_TF2)#
+# 			print(states_allowed_TF3)#
+# 			print(states_allowed_TF)#
+# 			stop()#
+#
+			# CHANGE the inputs here, so that it can be used easily in BSM#
+			BioGeoBEARS_run_object$lists_of_states_lists_0based[[ntimes_i]] = all_states_list[states_allowed_TF]#
+			} # END for (ntimes_i in 1:ntimes)#
+		txt = paste0("bears_optim_run() note: BioGeoBEARS_run_object$lists_of_states_lists_0based has been specified. This means there is a different state space in each timebin / stratum / epoch.")#
+		cat("\n")#
+		cat(txt)#
+		cat("\n")#
+		# Check that number of lists of states matches the number of timebins#
+		number_of_lists_of_states = length(BioGeoBEARS_run_object$lists_of_states_lists_0based)#
+		if (ntimes == number_of_lists_of_states)#
+			{#
+			txt = paste0("bears_optim_run() note: BioGeoBEARS_run_object has ", ntimes, " timebins and ", number_of_lists_of_states, " lists of states ranges. Check passed.")#
+			cat("\n")#
+			cat(txt)#
+			cat("\n")#
+			} else {#
+			txt = paste0("bears_optim_run() STOP ERROR: BioGeoBEARS_run_object has ", ntimes, " timebins and ", number_of_lists_of_states, " lists of states ranges. Check FAILED.")#
+			cat("\n")#
+			cat(txt)#
+			cat("\n")#
+			stop(txt)#
+			} # END if (ntimes = number_of_lists_of_states)#
+		# Go through each time bin, and make the state #
+		# space different in each time bin#
+		if (need_to_print_list_of_states_list == TRUE)#
+			{#
+			for (ti in 1:ntimes)#
+				{#
+				# Extract the states list in this time-stratum#
+				states_list_for_this_stratum = BioGeoBEARS_run_object$lists_of_states_lists_0based[[ti]]#
+				# Message to user#
+				timeslice_num = ti#
+				if (timeslice_num == 1)#
+					{#
+					toptime = 0#
+					} else {#
+					toptime = BioGeoBEARS_run_object$timeperiods[ti-1]#
+					}#
+				if (timeslice_num == ntimes)#
+					{#
+					bottime = BioGeoBEARS_run_object$timeperiods[ti]#
+					catend = "\n\n"#
+					} else {#
+					bottime = BioGeoBEARS_run_object$timeperiods[ti]#
+					catend = ""#
+					} # END if (timeslice_num == ntimes)				#
+				txt = paste0("bears_optim_run() note: overall states_list has ", length(master_states_list), " states/ranges. In stratum #", ti, " (", toptime, "-", bottime, " mya), states_list_for_this_stratum has ", length(states_list_for_this_stratum), " states/ranges, due to user-specified states_lists. See BioGeoBEARS_run_object$lists_of_states_lists_0based.")#
+				cat("\n")#
+				cat(txt)#
+				cat(catend)#
+				} # END for (ti in 1:ntimes)#
+			} # END if (need_to_print_list_of_states_list == TRUE)#
+		} # END if (is.null(BioGeoBEARS_run_object$lists_of_states_lists_0based) == TRUE)#
+		# END printing user-specified list of states_lists#
+	########################################################
+	# Sparse matrix exponentiation, if desired (dubious)#
+	########################################################
+	if (is.na(BioGeoBEARS_run_object$force_sparse))#
+		{#
+		if (length(states_list) > 128)#
+			{#
+			force_sparse = TRUE#
+			cat("\nNote: force_sparse being set to TRUE, as length(states_list) > 128\n", sep="")#
+			} else {#
+			force_sparse = FALSE#
+			}#
+		} else {#
+		force_sparse = BioGeoBEARS_run_object$force_sparse#
+		}#
+	########################################################
+	# Load the phylogenetic tree#
+	########################################################
+	trfn = np(BioGeoBEARS_run_object$trfn)#
+	#phy = read.tree(file=trfn)#
+	phy = check_trfn(trfn=trfn)#
+	# Fix states_lists with "_" instead of NA for null range#
+	if (is.null(states_list) == FALSE)#
+		{#
+		if (is.na(states_list[[1]]) == FALSE)#
+			{#
+			if (states_list[[1]] == "_")#
+				{#
+				states_list[[1]] = NA#
+				} # END if (states_list[[1]] == "_")#
+			} # END if (is.na(states_list[[1]]) == FALSE)#
+		} # END if (is.null(states_list) == FALSE)#
+	# Fix states_lists with "_" instead of NA for null range#
+	if (is.null(BioGeoBEARS_run_object$states_list) == FALSE)#
+		{#
+		if (is.na(BioGeoBEARS_run_object$states_list[[1]]) == FALSE)#
+			{#
+			if (BioGeoBEARS_run_object$states_list[[1]] == "_")#
+				{#
+				BioGeoBEARS_run_object$states_list[[1]] = NA#
+				} # END if (states_list[[1]] == "_")#
+			} # END if (is.na(states_list[[1]]) == FALSE)#
+		} # END if (is.null(states_list) == FALSE)#
+	# The likelihood of each state at the tips#
+	# Change this, if you have observations instead of presence/absence at the tips#
+#
+	# Options:#
+	# 1. Use tipranges_to_tip_condlikes_of_data_on_each_state ()#
+	# 2. Use detection model to generate tip likelihoods if desired; or #
+	# 3. Take pre-specified tip likelihoods. #
+	if (is.null(BioGeoBEARS_run_object$tip_condlikes_of_data_on_each_state) == TRUE)#
+		{#
+		if (BioGeoBEARS_run_object$use_detection_model == FALSE)#
+			{#
+			#print("here2")#
+			#print(states_list)#
+#
+			tip_condlikes_of_data_on_each_state = tipranges_to_tip_condlikes_of_data_on_each_state(tipranges, phy, states_list=states_list, maxareas=max_numareas, include_null_range=BioGeoBEARS_run_object$include_null_range, useAmbiguities=BioGeoBEARS_run_object$useAmbiguities, trait_as_tip_condlikes=trait_as_tip_condlikes, allow_null_tips=BioGeoBEARS_run_object$allow_null_tips)#
+			} else {#
+			# Calculate the initial tip likelihoods, using the detection model#
+			# Assumes correct order, double-check this#
+			numareas = length(areas)#
+			detects_df = BioGeoBEARS_run_object$detects_df#
+			controls_df = BioGeoBEARS_run_object$controls_df#
+			mean_frequency = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mf", "init"]#
+			dp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["dp", "init"]#
+			fdp = BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["fdp", "init"]#
+			# return_LnLs=TRUE ensures no under-flow#
+			tip_condlikes_of_data_on_each_state = tiplikes_wDetectionModel(states_list_0based_index=states_list, phy=phy, numareas=numareas, detects_df=detects_df, controls_df=controls_df, mean_frequency=mean_frequency, dp=dp, fdp=fdp, null_range_gets_0_like=TRUE, return_LnLs=TRUE, relative_LnLs=TRUE, exp_LnLs=TRUE, error_check=TRUE)#
+#
+			if (is.null(BioGeoBEARS_run_object$prior_by_range_size) == FALSE)#
+				{#
+				cat("\n\nNOTE: BioGeoBEARS will multiply the initial tip conditional likelihoods ('tip_condlikes_of_data_on_each_state') by the user-specified 'BioGeoBEARS_run_object$prior_by_range_size'.\n")#
+				for (iii in 1:nrow(tip_condlikes_of_data_on_each_state))#
+					{#
+					tip_condlikes_of_data_on_each_state[iii,] = tip_condlikes_of_data_on_each_state[iii,] * BioGeoBEARS_run_object$prior_by_range_size#
+					} # END for (iii in 1:nrow(tip_condlikes_of_data_on_each_state))#
+				cat("...done.\n\n")	#
+				}#
+			}#
+		} else {#
+		# Or, use pre-specified tip conditional likelihoods#
+		# Pre-specified (custom) tip-likelihoods#
+		tip_condlikes_of_data_on_each_state = BioGeoBEARS_run_object$tip_condlikes_of_data_on_each_state#
+		} # END if (is.null(BioGeoBEARS_run_object$tip_condlikes_of_data_on_each_state) == FALSE)#
+#
+	numstates = ncol(tip_condlikes_of_data_on_each_state)#
+#
+	#print(tip_condlikes_of_data_on_each_state)#
+	if (is.null(BioGeoBEARS_run_object$printlevel))#
+		{#
+		BioGeoBEARS_run_object$printlevel = 0#
+		}#
+	printlevel = BioGeoBEARS_run_object$printlevel#
+	########################################################
+	# Read the stratification/distances input files, if any#
+	########################################################
+	#inputs = readfiles_BioGeoBEARS_run(inputs=BioGeoBEARS_run_object)#
+#
+	########################################################
+	# Check for problems in the input files; will throw stop() if there are problems#
+	########################################################
+	#check_result = check_BioGeoBEARS_run(inputs=BioGeoBEARS_run_object)#
+	#check_result#
+	########################################################
+	# Set up the function for optimization#
+	#######################################################	#
+	# params are a list of the values of the FREE parameters; but everything is contained in the #
+	# BioGeoBEARS_model object at all times#
+	# (moved to separate function)#
+	# defaults for optimization#
+	# We are using "L-BFGS-B", which is:#
+	######################################################################################################
+	# Method "L-BFGS-B" is that of Byrd et. al. (1995) which allows box constraints, that is each#
+	# variable can be given a lower and/or upper bound. The initial value must satisfy the constraints.#
+	# This uses a limited-memory modification of the BFGS quasi-Newton method. If non-trivial bounds#
+	# are supplied, this method will be selected, with a warning.#
+	# #
+	# [...]#
+	##
+	# Byrd, R. H., Lu, P., Nocedal, J. and Zhu, C. (1995) A limited memory algorithm for bound constrained#
+	# optimization. SIAM J. Scientific Computing, 16, 1190-1208.#
+	######################################################################################################
+	##
+	# "BGFS" refers to: 4 articles, Broyden, Fletcher, Goldfarb and Shanno (1970).#
+	# Run check, before rescaling#
+	check_BioGeoBEARS_run(BioGeoBEARS_run_object)#
+	########################################################
+	# 2016-03-23_NJM: adding rescaling#
+	########################################################
+	if (BioGeoBEARS_run_object$rescale_params == TRUE)#
+		{#
+		BioGeoBEARS_model_object@params_table = scale_BGB_params(orig_params_table=BioGeoBEARS_model_object@params_table, add_smin=0, add_smax=1)#
+		BioGeoBEARS_run_object$BioGeoBEARS_model_object = BioGeoBEARS_model_object#
+		}#
+	params = BioGeoBEARS_model_object_to_init_params(BioGeoBEARS_model_object)#
+	minj = 1e-05#
+	# start on Lagrange results#
+	#params = c(3.11882,  2.51741)#
+	lower = BioGeoBEARS_model_object_to_params_lower(BioGeoBEARS_model_object)#
+	upper = BioGeoBEARS_model_object_to_params_upper(BioGeoBEARS_model_object)#
+	# High performance computing#
+	# HPC using parallel package in R 2.15 or higher, which allows#
+	# mcmapply (multicore apply)#
+	# Don't use multicore if using R.app ('AQUA')#
+	num_cores_to_use = BioGeoBEARS_run_object$num_cores_to_use#
+	cluster_already_open = BioGeoBEARS_run_object$cluster_already_open#
+#
+	cluster_was_open = FALSE#
+	if (.Platform$GUI != "AQUA" && ((is.na(num_cores_to_use) == TRUE) || ( (is.na(num_cores_to_use)==FALSE) && (num_cores_to_use > 1))) )#
+		{#
+		# We are doing manual, optional processing on several cores;#
+		# this seems to have less overhead/hassle/incompatibility issues#
+		# than using mcmapply, mclapply, etc...#
+		#require("parallel") #<- do this higher up#
+#
+		num_cores_computer_has = detectCores()#
+		txt = paste0("Your computer has ", num_cores_computer_has, " cores.")#
+		cat("\n")#
+		cat(txt)#
+		cat("\n")		#
+#
+		if (is.null(num_cores_to_use))#
+			{#
+			num_cores_to_use = num_cores_computer_has#
+			}#
+#
+		if (num_cores_to_use > num_cores_computer_has)#
+			{#
+			txt = paste0("WARNING from bears_optim_run(): You specified num_cores_to_use=", num_cores_to_use, " cores, but your computer only has ", num_cores_computer_has, ". Resetting to ", num_cores_computer_has, ".")#
+			cat("\n")#
+			cat(txt)#
+			cat("\n")#
+			warning(txt)#
+			num_cores_to_use = num_cores_computer_has#
+			}#
+		# Don't do this, if the cluster is already open#
+		cat("\nYour computer has ", num_cores_computer_has, " cores. You have chosen to use:\nnum_cores_to_use = ", num_cores_to_use, " cores for the matrix exponentiations in the likelihood calculations.\n", sep="")#
+		if ( is.logical(cluster_already_open) == TRUE )#
+			{#
+			if (cluster_already_open == FALSE)#
+				{#
+				cluster_already_open = makeCluster(rep("localhost",num_cores_to_use), type = "SOCK")#
+				cat("Started cluster with ", num_cores_to_use, " cores.\n\n", sep="")#
+#
+				# Flag so that you remember to close cluster at the end#
+				cluster_open=TRUE#
+				cluster_was_open = FALSE#
+				}#
+			} else {#
+			cluster_was_open = TRUE#
+			cat("Cluster with ", num_cores_to_use, " cores already open.\n\n", sep="")#
+			}#
+		} else {#
+		# You are using R.app and clusters don't work...#
+#
+		num_cores_computer_has = detectCores()#
+		txt = paste0("Your computer has ", num_cores_computer_has, " cores.")#
+		cat("\n")#
+		cat(txt)#
+		cat("\n")	#
+		if (num_cores_to_use > 1)#
+			{#
+			txt = paste0("WARNING from bears_optim_run(): You specified num_cores_to_use=", num_cores_to_use, " cores, but in R.app, multicore functionality doesn't work. Resetting num_cores_to_use=1.")#
+			cat("\n")#
+			cat(txt)#
+			cat("\n")#
+			warning(txt)#
+			num_cores_to_use = num_cores_computer_has#
+			}#
+		cluster_already_open = NULL#
+		cluster_was_open = FALSE#
+		}#
+	if (force_sparse == TRUE)#
+		{#
+		cat("\nNote: force_sparse is set to TRUE; length(states_list)=", length(states_list), "\n", sep="")#
+#
+		txt = paste0("\n\nNote: sparse matrix exponentiation is being used. When on exponentiation on a branch is completed, 'L',  'R', 'S', or 'U' will print to screen  (for left and right branches, S segments in time-stratified analyses, U for uppass on a segment/branch). This will help you judge the time this analysis will take.  An ML search takes (at least) 100+ downpass calculations of the log-likelihood (lnL) of the tip data, given on left branch, given the tree, model, and parameters. Each downpass requires a matrix exponentiation on each branch of the tree. Your tree has ", length(tr$tip.label), " tips, thus ", length(tr$tip.label)+length(tr$tip.label)-1, " branches. The transition matrix has ", numstates, " states (states=possible geographic ranges), so it would be of size ", numstates, "x", numstates, " if it were dense, but you are using the sparse matrix routine to speed up calculations. Starting now...\n")#
+		cat(txt)#
+		} # END if (force_sparse == TRUE)#
+	########################################################
+	# Check if there are multiple time periods#
+	########################################################
+	# i.e., timeperiods must exist (not be null and be numeric) and must be of length > 1#
+	if ( is.numeric(BioGeoBEARS_run_object$timeperiods) ) #&& (length(BioGeoBEARS_run_object$timeperiods) > 1))#
+		{#
+		########################################################
+		########################################################
+		# STRATIFIED analysis#
+		########################################################
+		########################################################
+		# Run optimization on a STRATIFIED tree#
+		allareas = areas_list#
+		all_states_list = states_list#
+		# Previously saved the list of all states, inferred from the areas and maxareas constraint#
+		all_geog_states_list_usually_inferred_from_areas_maxareas#
+		use_optimx = BioGeoBEARS_run_object$use_optimx#
+		# USING OPTIM#
+		if ( (use_optimx == FALSE) || (use_optimx == "optim") )#
+			{#
+			cat("\n\nNOTE: Before running optim(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optim().\n", sep="")#
+			inputs = BioGeoBEARS_run_object#
+			inputs$printlevel = 2#
+			loglike = calc_loglike_for_optim_stratified(params=params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)#
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+				{#
+				txt = paste0("STOP ERROR #1 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")#
+				cat("\n\n")#
+				cat(txt)#
+				cat("\n\n")#
+				stop(txt)#
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optim()...\n\n", sep="")#
+			if (skip_optim == TRUE)#
+				{#
+				# Skip optimization#
+				# Skip the optimization, just calculate the log-likelihood from the input parameters#
+				if (skip_optim_option == "return_loglike")#
+					{#
+					cat("Skipping ML search as skip_optim==TRUE. Returning only the log-likelihood.\n\n", sep="")#
+					return(loglike)#
+					} #
+#
+				# Skip the optimization, just calculate the log-likelihood AND EVERYTHING ELSE from the input parameters#
+				# (Do this, *if* the skip_optim_option is 'res' (BGB results) or another list)#
+				if (skip_optim_option == "return_all")#
+					{#
+					inputs = BioGeoBEARS_run_object#
+					cat("Skipping ML search as skip_optim==TRUE. Returning everything (ancestral probabilities etc.) conditional on 'est' parameters given in 'BioGeoBEARS_model_object' .\n\n", sep="")#
+					optim_result2 = put_params_into_optim_or_optimx_result(BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, total_loglikelihood=loglike, use_optimx=BioGeoBEARS_run_object$use_optimx)#
+					}#
+				} else {#
+				inputs = BioGeoBEARS_run_object#
+				optim_result2 = optim(par=params, fn=calc_loglike_for_optim_stratified, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))#
+				} # END if (skip_optim == TRUE)#
+		#optim_result2 = nlminb(start=params, objective=calc_loglike_for_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))#
+			} # END if ( (use_optimx == FALSE) || (use_optimx == "optim") )#
+		# USING OPTIMX#
+		if ( (use_optimx == TRUE) || (use_optimx == "optimx") )#
+			{#
+			# Compare methods with optimx#
+			#require(optimx)#
+			print_optim = BioGeoBEARS_run_object$print_optim#
+			# For optimx#
+			# Speedup if desired, using #
+			# lower # of generations on optimx#
+			#speedup = TRUE#
+			if (speedup)#
+				{#
+				# use itnmax, not maxit, for optimx#
+				# IN OPTIM ONLY: default reltol: #
+				# sqrt(.Machine$double.eps) = 1.490116e-08 ;#
+				# this should be the amount of LnL at which it stops#
+				# IN OPTIMX, L-BFGS-B method:#
+				# factr = controls the convergence of the #
+				# "L-BFGS-B" method. Convergence occurs when the #
+				# reduction in the objective is within this#
+				# factor of the machine tolerance. Default is#
+				# 1e7, that is a tolerance of about 1e-8.#
+				# IN OPTIMX, bobyqa method:#
+				# no control on tolerance#
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE)#
+				# old:#
+				# factr=0.0001)#, reltol=0.001)#, maxit=100)#
+				# Bogus note (NJM):#
+				# This causes pathology: reltol=0.001#
+				# Actually, this was fine, it was #
+				# force_sparse = TRUE that was the problem#
+				# (leads to different results!!  probably rounding errors)#
+				# Limit the number of iterations so it #
+				# doesn't go on forever#
+				num_free_params = sum(BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table$"type" == "free")#
+				num_free_params#
+				itnmax = 50 * num_free_params#
+				} else {#
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE)#
+				itnmax = NULL#
+				} # END if (speedup)#
+			# For error check, on stratified analysis, just calculate the log-likelihood for hard-coded parameters#
+			#params = c(0.037, 0.0000000000001)#
+			#params = c(0.03645000, 4.49500e-08)#
+			cat("\n\nNOTE: Before running optimx(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optimx().\n\n", sep="")#
+			inputs = BioGeoBEARS_run_object#
+			inputs$printlevel = 2#
+			loglike = calc_loglike_for_optim_stratified(params=params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)#
+#
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+				{#
+				txt = paste0("STOP ERROR #2 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")#
+				cat("\n\n")#
+				cat(txt)#
+				cat("\n\n")#
+				stop(txt)#
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optimx()...\n\n", sep="")#
+#
+			cat("\n\nPrinting any warnings() that occurred during calc_loglike_for_optim_stratified():\n\n")#
+			print(warnings())#
+			if (skip_optim == TRUE)#
+				{#
+				# Skip optimization#
+				# Skip the optimization, just calculate the log-likelihood from the input parameters#
+				if (skip_optim_option == "return_loglike")#
+					{#
+					cat("Skipping ML search as skip_optim==TRUE. Returning only the log-likelihood.\n\n", sep="")#
+					return(loglike)#
+					} #
+#
+				# Skip the optimization, just calculate the log-likelihood AND EVERYTHING ELSE from the input parameters#
+				# (Do this, *if* the skip_optim_option is 'res' (BGB results) or another list)#
+				if (skip_optim_option == "return_all")#
+					{#
+					inputs = BioGeoBEARS_run_object#
+					cat("Skipping ML search as skip_optim==TRUE. Returning everything (ancestral probabilities etc.) conditional on 'est' parameters given in 'BioGeoBEARS_model_object' .\n\n", sep="")#
+					optim_result2 = put_params_into_optim_or_optimx_result(BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, total_loglikelihood=loglike, use_optimx=BioGeoBEARS_run_object$use_optimx)#
+					}#
+				} else {#
+				inputs = BioGeoBEARS_run_object#
+				# Run optimx scalecheck#
+				scalecheck_results = optimx_scalecheck(par=params, lower=lower, upper=upper)#
+				cat("\n\nResults of optimx_scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")#
+				print(scalecheck_results)#
+#
+				minqa_TF = is.element("minqa", installed.packages()[,1])#
+				if (minqa_TF == FALSE)#
+					{#
+					if (packageVersion("optimx") > 2017)#
+						{#
+						txt = "Warning in bears_optim_run(): optimx version 2018.7.10 requires package 'minqa' to do optimx ML optimization with the 'bobyqa' method (optimization with mix/max limits on parameters). However, optimx 2018.7.10 doesn't load 'minqa' automatically, so you may have to do:\n\ninstall.packages('minqa')\n\n...and re-run, to get rid of this warning, and/or the error where optimx returns NA for the parameter inferences after one step, and crashes the resulting uppass calculations."#
+						cat("\n\n")#
+						cat(txt)#
+						cat("\n\n")#
+						warning(txt)#
+						requireNamespace("minqa")#
+						} # END if (packageVersion("optimx") > 2017)#
+					} # END if (minqa_TF == FALSE)#
+#
+				optim_result2 = optimx(par=params, fn=calc_loglike_for_optim_stratified, lower=lower, upper=upper, itnmax=itnmax, method=c("bobyqa"), control=control_list, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))#
+				} # END if (skip_optim == TRUE)#
+			# print(condlikes_table)#
+			# Run with all methods, for testing:#
+			# optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))#
+			########################################################
+			# Compare optimization routines#
+			########################################################
+			# BEARS_results_7areas_2param#
+			#                        par   fvalues   method fns grs itns conv  KKT1 KKT2  xtimes#
+			# 6 0.010165217, 0.009422923 -57.81254   bobyqa  30  NA NULL    0 FALSE TRUE  29.761#
+			# 1 0.010180679, 0.009492254 -57.81255 L-BFGS-B  33  33 NULL    0 FALSE TRUE 151.137#
+			# 4   0.01017895, 0.00970706 -57.81263   Rcgmin  32   7 NULL    0 FALSE TRUE  42.461#
+			# 2 0.010242504, 0.009822486 -57.81284   nlminb  40   6    3    1 FALSE TRUE  43.399#
+			# 3   0.01017850, 0.01001962 -57.81293      spg  68  NA   47    0 FALSE TRUE 150.932#
+			# 5               0.01, 0.01 -57.81366   Rvmmin  20   1 NULL    0 FALSE TRUE  21.456#
+			#return (optim_result2)#
+			} # END if ( (use_optimx == TRUE) || (use_optimx == "optimx") )#
+		# USING GenSA#
+		if (use_optimx == "GenSA")#
+			{#
+			#require(GenSA)#
+#
+			cat("\n\nNOTE: You are optimizing with GenSA::GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")#
+			cat("\n\nNOTE: Before running GenSA::GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim_stratified() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA::GenSA().\n", sep="")#
+			inputs = BioGeoBEARS_run_object#
+			inputs$printlevel = 2#
+			loglike = calc_loglike_for_optim_stratified(params=params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)#
+#
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+				{#
+				txt = paste0("STOP ERROR #3 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim_stratified() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?\n\nANOTHER SOURCE OF THIS ERROR: if your phylogeny has many tips that don't quite come up to 0.00 my before present (which is hard to see when you plot it), you may be trying to time-slice on a single tip branch that reaches higher than the others, causing an error that then gets trapped by STOP ERROR #3. Here the solution is to FIX YOUR TREE. Use trtable = prt(tr); trtable$time_bp to see exactly how high each tip reaches; see https://groups.google.com/forum/#!topic/biogeobears/yoPkc5Xr-OM for more advice.\n\n")#
+				cat("\n\n")#
+				cat(txt)#
+				cat("\n\n")#
+				stop(txt)#
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+			cat("\ncalc_loglike_for_optim_stratified() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA::GenSA()...\n\n", sep="")#
+			if (skip_optim == TRUE)#
+				{#
+				# Skip optimization#
+				# Skip the optimization, just calculate the log-likelihood from the input parameters#
+				if (skip_optim_option == "return_loglike")#
+					{#
+					cat("Skipping ML search as skip_optim==TRUE. Returning only the log-likelihood.\n\n", sep="")#
+					return(loglike)#
+					} #
+#
+				# Skip the optimization, just calculate the log-likelihood AND EVERYTHING ELSE from the input parameters#
+				# (Do this, *if* the skip_optim_option is 'res' (BGB results) or another list)#
+				if (skip_optim_option == "return_all")#
+					{#
+					inputs = BioGeoBEARS_run_object#
+					cat("Skipping ML search as skip_optim==TRUE. Returning everything (ancestral probabilities etc.) conditional on 'est' parameters given in 'BioGeoBEARS_model_object' .\n\n", sep="")#
+					optim_result2 = put_params_into_optim_or_optimx_result(BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, total_loglikelihood=loglike, use_optimx=BioGeoBEARS_run_object$use_optimx)#
+					}#
+				} else {#
+				control_list = list(nb.stop.improvement=50, simple.function=TRUE, trace.mat=TRUE)			#
+#
+				# NJM: I am assuming that the functions are fairly smooth in BioGeoBEARS analyses#
+				if (is.null(BioGeoBEARS_run_object$temperature) == FALSE)#
+					{#
+					temperature = BioGeoBEARS_run_object$temperature#
+					control_list = c(control_list, list(temperature=temperature))#
+					}#
+				if (is.null(BioGeoBEARS_run_object$max.call) == FALSE)#
+					{#
+					max.call = BioGeoBEARS_run_object$max.call#
+					control_list = c(control_list, list(max.call=max.call))#
+					} else {#
+					max.call = length(params) * 250#
+					control_list = c(control_list, list(max.call=max.call))#
+					}#
+				inputs = BioGeoBEARS_run_object#
+				optim_result2 = GenSA::GenSA(par=params, fn=calc_loglike_for_optim_stratified_neg, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, lower=lower, upper=upper, control=control_list)#
+			#optim_result2 = nlminb(start=params, objective=calc_loglike_for_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))#
+				} # END if (skip_optim == TRUE)#
+			} # END if (use_optimx == "GenSA")#
+		} else {#
+		########################################################
+		########################################################
+		# NON-stratified analysis#
+		########################################################
+		########################################################
+		# Run optimization on a SINGLE tree#
+		use_optimx = BioGeoBEARS_run_object$use_optimx#
+		if ( (use_optimx == FALSE) || (use_optimx == "optim") )#
+			{#
+#
+			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!#
+			cat("\n\nNOTE: Before running optim(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optim().\n\n", sep="")#
+			inputs = BioGeoBEARS_run_object#
+			inputs$printlevel = 2#
+			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)#
+#
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+				{#
+				txt = paste0("STOP ERROR #4 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")#
+				cat("\n\n")#
+				cat(txt)#
+				cat("\n\n")#
+				stop(txt)#
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optim()...\n\n", sep="")			#
+#
+			if (skip_optim == TRUE)#
+				{#
+				# Skip optimization#
+				# Skip the optimization, just calculate the log-likelihood from the input parameters#
+				if (skip_optim_option == "return_loglike")#
+					{#
+					cat("Skipping ML search as skip_optim==TRUE. Returning only the log-likelihood.\n\n", sep="")#
+					return(loglike)#
+					} #
+#
+				# Skip the optimization, just calculate the log-likelihood AND EVERYTHING ELSE from the input parameters#
+				# (Do this, *if* the skip_optim_option is 'res' (BGB results) or another list)#
+				if (skip_optim_option == "return_all")#
+					{#
+					inputs = BioGeoBEARS_run_object#
+					cat("Skipping ML search as skip_optim==TRUE. Returning everything (ancestral probabilities etc.) conditional on 'est' parameters given in 'BioGeoBEARS_model_object' .\n\n", sep="")#
+					optim_result2 = put_params_into_optim_or_optimx_result(BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, total_loglikelihood=loglike, use_optimx=BioGeoBEARS_run_object$use_optimx)#
+					}#
+				} else {#
+				# Try parscale:#
+				# parscale: A vector of scaling values for the parameters. #
+				# Optimization is performed on par/parscale and these should #
+				# be comparable in the sense that a unit change in any element #
+				# produces about a unit change in the scaled value.For optim.#
+				# https://www.mail-archive.com/r-help@r-project.org/msg152890.html#
+				# "(optimx includes parscale on all methods)."#
+				parscale = (upper - lower) / min(upper - lower)#
+				print("parscale:")#
+				print(parscale)#
+#
+				optim_result2 = optim(par=params, fn=calc_loglike_for_optim, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE, method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, parscale=parscale))#
+			#optim_result2 = nlminb(start=params, objective=calc_loglike_for_optim, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, lower=lower, upper=upper, control=list(iter.max=50, trace=1, abs.tol=0.001))# method="L-BFGS-B", lower=lower, upper=upper, control=list(fnscale=-1, trace=2, maxit=500))#
+				} # END if (skip_optim == TRUE)#
+			} # END if ( (use_optimx == FALSE) || (use_optimx == "optim") )#
+		if ( (use_optimx == TRUE) || (use_optimx == "optimx") )#
+			{#
+			# Compare methods with optimx#
+			#require(optimx)#
+#
+			# For optimx#
+			# Speedup if desired, using #
+			# lower # of generations on optimx#
+			#speedup = TRUE#
+			if (speedup)#
+				{#
+				# use itnmax, not maxit, for optimx#
+				# IN OPTIM ONLY: default reltol: #
+				# sqrt(.Machine$double.eps) = 1.490116e-08 ;#
+				# this should be the amount of LnL at which it stops#
+				# IN OPTIMX, L-BFGS-B method:#
+				# factr = controls the convergence of the #
+				# "L-BFGS-B" method. Convergence occurs when the #
+				# reduction in the objective is within this#
+				# factor of the machine tolerance. Default is#
+				# 1e7, that is a tolerance of about 1e-8.#
+				# IN OPTIMX, bobyqa method:#
+				# no control on tolerance#
+				# Try parscale:#
+				# parscale: A vector of scaling values for the parameters. #
+				# Optimization is performed on par/parscale and these should #
+				# be comparable in the sense that a unit change in any element #
+				# produces about a unit change in the scaled value.For optim.#
+				# https://www.mail-archive.com/r-help@r-project.org/msg152890.html#
+				# "(optimx includes parscale on all methods)."#
+				parscale = (upper - lower) / min(upper - lower)#
+				print("parscale:")#
+				print(parscale)#
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE)#
+				# old:#
+				# factr=0.0001)#, reltol=0.001)#, maxit=100)#
+				# Bogus note (NJM):#
+				# This causes pathology: reltol=0.001#
+				# Actually, this was fine, it was #
+				# force_sparse = TRUE that was the problem#
+				# (leads to different results!!  probably rounding errors)#
+				# Limit the number of iterations so it #
+				# doesn't go on forever#
+				num_free_params = sum(BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table$"type" == "free")#
+				num_free_params#
+				itnmax = 50 * num_free_params#
+				} else {#
+				# Try parscale:#
+				# parscale: A vector of scaling values for the parameters. #
+				# Optimization is performed on par/parscale and these should #
+				# be comparable in the sense that a unit change in any element #
+				# produces about a unit change in the scaled value.For optim.#
+				# https://www.mail-archive.com/r-help@r-project.org/msg152890.html#
+				# "(optimx includes parscale on all methods)."#
+				parscale = (upper - lower) / min(upper - lower)#
+				print("parscale:")#
+				print(parscale)#
+				control_list = list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE)#
+				itnmax = NULL#
+				} # END if (speedup)#
+#
+			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!#
+			cat("\n\nNOTE: Before running optimx(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside optimx().\n\n", sep="")#
+#
+			inputs = BioGeoBEARS_run_object#
+			inputs$printlevel = 2#
+			areas_list#
+			states_list#
+			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)#
+#
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+				{#
+				txt = paste0("STOP ERROR #5 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")#
+				cat("\n\n")#
+				cat(txt)#
+				cat("\n\n")#
+				stop(txt)#
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with optimx()...\n\n", sep="")#
+#
+			cat("\n\nPrinting any warnings() that occurred during calc_loglike_for_optim():\n\n")#
+			print(warnings())#
+			if (skip_optim == TRUE)#
+				{#
+				# Skip optimization#
+				# Skip the optimization, just calculate the log-likelihood from the input parameters#
+				if (skip_optim_option == "return_loglike")#
+					{#
+					cat("Skipping ML search as skip_optim==TRUE. Returning only the log-likelihood.\n\n", sep="")#
+					return(loglike)#
+					} #
+#
+				# Skip the optimization, just calculate the log-likelihood AND EVERYTHING ELSE from the input parameters#
+				# (Do this, *if* the skip_optim_option is 'res' (BGB results) or another list)#
+				if (skip_optim_option == "return_all")#
+					{#
+					inputs = BioGeoBEARS_run_object#
+					cat("Skipping ML search as skip_optim==TRUE. Returning everything (ancestral probabilities etc.) conditional on 'est' parameters given in 'BioGeoBEARS_model_object' .\n\n", sep="")#
+					optim_result2 = put_params_into_optim_or_optimx_result(BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, total_loglikelihood=loglike, use_optimx=BioGeoBEARS_run_object$use_optimx)#
+					}#
+				} else {#
+				# optimx 2012 versus 2013#
+				if (packageVersion("optimx") < 2013)#
+					{#
+					# optimx 2012#
+					optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, gr=NULL, hess=NULL, lower=lower, upper=upper, method=c("bobyqa"), itnmax=itnmax, hessian=NULL, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)#
+					# old:#
+					# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))#
+					} else {#
+					# Run optimx scalecheck#
+					scalecheck_results = optimx_scalecheck(par=params, lower=lower, upper=upper)#
+					cat("\n\nResults of optimx_scalecheck() below. Note: sometimes rescaling parameters may be helpful for ML searches, when the parameters have much different absolute sizes. This can be attempted by setting BioGeoBEARS_run_object$rescale_params = TRUE.\n\n")#
+					print(scalecheck_results)#
+					# Check if minqa is installed, for the newest optimx (needed for optimx with 'bobyqa' optimizer)#
+					minqa_TF = is.element("minqa", installed.packages()[,1])#
+					if (minqa_TF == FALSE)#
+						{#
+						if (packageVersion("optimx") > 2017)#
+							{#
+							txt = "Warning in bears_optim_run(): optimx version 2018.7.10 requires package 'minqa' to do optimx ML optimization with the 'bobyqa' method (optimization with mix/max limits on parameters). However, optimx 2018.7.10 doesn't load 'minqa' automatically, so you may have to do:\n\ninstall.packages('minqa')\n\n...and re-run, to get rid of this warning, and/or the error where optimx returns NA for the parameter inferences after one step, and crashes the resulting uppass calculations."#
+							cat("\n\n")#
+							cat(txt)#
+							cat("\n\n")#
+							warning(txt)#
+							requireNamespace("minqa")#
+							} # END if (packageVersion("optimx") > 2017)#
+						} # END if (minqa_TF == FALSE)#
+#
+					# optimx 2013#
+					optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, gr=NULL, hess=NULL, lower=lower, upper=upper, method=c("bobyqa"), itnmax=itnmax, hessian=FALSE, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)#
+					# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))				#
+					} # end packageVersion#
+				} # END if (skip_optim == TRUE)#
+			# Run with all methods, for testing:#
+			# optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, lower=lower, upper=upper, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=TRUE, maxent_constraint_01=maxent_constraint_01, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open,itnmax=250, method=c("bobyqa"), control=list(all.methods=FALSE, maximize=TRUE, save.failures=TRUE))# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))#
+			########################################################
+			# Compare optimization routines#
+			########################################################
+			# BEARS_results_7areas_2param#
+			#                        par   fvalues   method fns grs itns conv  KKT1 KKT2  xtimes#
+			# 6 0.010165217, 0.009422923 -57.81254   bobyqa  30  NA NULL    0 FALSE TRUE  29.761#
+			# 1 0.010180679, 0.009492254 -57.81255 L-BFGS-B  33  33 NULL    0 FALSE TRUE 151.137#
+			# 4   0.01017895, 0.00970706 -57.81263   Rcgmin  32   7 NULL    0 FALSE TRUE  42.461#
+			# 2 0.010242504, 0.009822486 -57.81284   nlminb  40   6    3    1 FALSE TRUE  43.399#
+			# 3   0.01017850, 0.01001962 -57.81293      spg  68  NA   47    0 FALSE TRUE 150.932#
+			# 5               0.01, 0.01 -57.81366   Rvmmin  20   1 NULL    0 FALSE TRUE  21.456#
+			#return (optim_result2)#
+			} # END if ( (use_optimx == TRUE) || (use_optimx == "optimx") )#
+		# Try GenSA for more complex optimization problems (4+ parameters, or #
+		# wildly different parameter scalings)#
+		if (use_optimx == "GenSA")#
+			{#
+			#require(GenSA)#
+			cat("\n\nNOTE: You are optimizing with GenSA::GenSA() ('Generalized Simulated Annealing') instead of optimx() or optim(). GenSA seems to be better for more complex problems (4+ parameters, wildly different scalings). However, it will likely be slower, as it does more calculations of the likelihood to search the parameter space.")#
+			# Un-comment only for error checking, then re-comment!!!!!!!!!!!!!!#
+			cat("\n\nNOTE: Before running GenSA::GenSA(), here is a test calculation of the data likelihood\nusing calc_loglike_for_optim() on initial parameter values, with printlevel=2...\nif this crashes, the error messages are more helpful\nthan those from inside GenSA::GenSA().\n\n", sep="")#
+#
+			inputs = BioGeoBEARS_run_object#
+			inputs$printlevel = 2#
+#
+			loglike = calc_loglike_for_optim(params, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)#
+#
+			if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+				{#
+				txt = paste0("STOP ERROR #6 in bears_optim_run(). Test calculation of the likelihood with calc_loglike_for_optim() returned LnL=", loglike, ", which is not a valid starting likelihood. Probably, you have an overly constrained analysis and have thus made your data impossible. For example, if your tips had ranges A and B, but you disallowed the state AB, then your data would be impossible under DEC, because AB is a required intermediate state. Try removing some of the areas allowed/area adjacency/manual states list constraints.  You can also try changing manual dispersal multipliers from 0 to some small value (e.g. 0.00001) -- note that this can works on dispersal multiplers, but NOT on area constraints, which have to be 0 or 1.  Have a CAREFUL THINK about what you are doing and why you think the list of ranges should be so constrained - do you actually have a good argument for your constraints?")#
+				cat("\n\n")#
+				cat(txt)#
+				cat("\n\n")#
+				stop(txt)#
+				} # END if ((loglike < -1e10) || (is.finite(loglike) == FALSE))#
+			cat("\ncalc_loglike_for_optim() on initial parameters loglike=", loglike, "\n\n\n\nCalculation of likelihood on initial parameters: successful.\n\nNow starting Maximum Likelihood (ML) parameter optimization with GenSA::GenSA()...\n\n", sep="")#
+#
+			cat("\n\nPrinting any warnings() that occurred during calc_loglike_for_optim():\n\n")#
+			print(warnings())#
+#
+			if (skip_optim == TRUE)#
+				{#
+				# Skip optimization#
+				# Skip the optimization, just calculate the log-likelihood from the input parameters#
+				if (skip_optim_option == "return_loglike")#
+					{#
+					cat("Skipping ML search as skip_optim==TRUE. Returning only the log-likelihood.\n\n", sep="")#
+					return(loglike)#
+					} #
+#
+				# Skip the optimization, just calculate the log-likelihood AND EVERYTHING ELSE from the input parameters#
+				# (Do this, *if* the skip_optim_option is 'res' (BGB results) or another list)#
+				if (skip_optim_option == "return_all")#
+					{#
+					inputs = BioGeoBEARS_run_object#
+					cat("Skipping ML search as skip_optim==TRUE. Returning everything (ancestral probabilities etc.) conditional on 'est' parameters given in 'BioGeoBEARS_model_object' .\n\n", sep="")#
+					optim_result2 = put_params_into_optim_or_optimx_result(BioGeoBEARS_model_object=BioGeoBEARS_run_object$BioGeoBEARS_model_object, total_loglikelihood=loglike, use_optimx=BioGeoBEARS_run_object$use_optimx)#
+					}#
+				} else {#
+				control_list = list(nb.stop.improvement=50, simple.function=TRUE, trace.mat=TRUE)			#
+#
+				# NJM: I am assuming that the functions are fairly smooth in BioGeoBEARS analyses#
+				if (is.null(BioGeoBEARS_run_object$temperature) == FALSE)#
+					{#
+					temperature = BioGeoBEARS_run_object$temperature#
+					control_list = c(control_list, list(temperature=temperature))#
+					}#
+				if (is.null(BioGeoBEARS_run_object$max.call) == FALSE)#
+					{#
+					max.call = BioGeoBEARS_run_object$max.call#
+					control_list = c(control_list, list(max.call=max.call))#
+					} else {#
+					max.call = length(params) * 250#
+					control_list = c(control_list, list(max.call=max.call))#
+					}#
+				optim_result2 = GenSA::GenSA(par=params, fn=calc_loglike_for_optim_neg, lower=lower, upper=upper, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)#
+				} # END if (skip_optim == TRUE)#
+			} # END if ( (use_optimx == TRUE) || (use_optimx == "optimx") )#
+		} # END if stratified#
+	########################################################
+	# Summarize results #
+	########################################################
+#
+	if ((skip_optim == TRUE) && (skip_optim_option == "return_loglike"))#
+		{#
+		# Skip optimization#
+		#cat("Just returning initial loglike as skip_optim==TRUE.\n\n", sep="")#
+		return(loglike)#
+		}#
+	# Update the parameter values in the output BioGeoBEARS_model_object using#
+	# the ML results#
+	optimx_result = optim_result2#
+	use_optimx = BioGeoBEARS_run_object$use_optimx#
+	if (printlevel >= 0)#
+		{#
+		cat("\n\nThis is the output from optim, optimx, or GenSA. Check the help on those functions to\ninterpret this output and check for convergence issues:\n\n")#
+		print(optimx_result)#
+		}#
+	if (printlevel >= 1)#
+		{#
+		cat("\n\nReading the optim/optimx/GenSA output into the BioGeoBEARS_model object:\n\nBioGeoBEARS_model_object =\n\n")#
+		}#
+#
+	BioGeoBEARS_model_object = update_BioGeoBEARS_model_object_w_optimx_result(BioGeoBEARS_model_object, optimx_result, use_optimx)#
+	# ERROR CHECK#
+	if (any(is.na(BioGeoBEARS_model_object@params_table$est)) == TRUE)#
+		{#
+		txt = "STOP ERROR in bears_optim_run(). For some reason, your ML optimizer returned one or more NA / NaN values for the estimated parameters. Probably this is a version conflict with an update to one of the optimizer functions/packages (e.g., optim, optimx, minqa, GenSA. Printing BioGeoBEARS_model_object@params_table to screen, below.  Email the BioGeoBEARS Google Group if you cannot figure out the problem."#
+		cat("\n\n")#
+		cat(txt)#
+		cat("\n\n")#
+		cat("BioGeoBEARS_model_object@params_table:\n\n")#
+		print(BioGeoBEARS_model_object@params_table)#
+		cat("\n\n")#
+		stop(txt)#
+		} # END if (any(is.na(BioGeoBEARS_model_object@params_table$est)) == TRUE)#
+	#######################################################
+	# 2016-03-23_NJM: adding rescaling#
+	# (unscale params, if they were used before)#
+	#######################################################
+	if (BioGeoBEARS_run_object$rescale_params == TRUE)#
+		{#
+		cat("\n(Because BioGeoBEARS_run_object$rescale_params == TRUE, using unscale_BGB_params() to return parameter estimates to the original scaling...\n")#
+		BioGeoBEARS_model_object@params_table = unscale_BGB_params(scaled_params_table=BioGeoBEARS_model_object@params_table)#
+		if (BioGeoBEARS_run_object$use_optimx == FALSE)#
+			{#
+			optim_result2$par = BioGeoBEARS_model_object@params_table$est[BioGeoBEARS_model_object@params_table$type=="free"]#
+			} # END if (BioGeoBEARS_run_object$use_optimx == FALSE)#
+#
+		if ( (BioGeoBEARS_run_object$use_optimx == TRUE) || (BioGeoBEARS_run_object$use_optimx == "optimx") )#
+			{#
+			# optimx 2013+#
+			if (packageVersion("optimx") >= 2013)#
+				{#
+				param_names = names(optim_result2)#
+				param_1st_letter = substr(x=param_names, start=1, stop=1)#
+				param_TF = param_1st_letter == "p"#
+				param_names = param_names[param_TF]#
+				optim_result2[param_names] = BioGeoBEARS_model_object@params_table$est[BioGeoBEARS_model_object@params_table$type=="free"]#
+				}#
+			# optimx 2012#
+			if (packageVersion("optimx") < 2013)#
+				{#
+				optim_result2$par[[1]] = BioGeoBEARS_model_object@params_table$est[BioGeoBEARS_model_object@params_table$type=="free"]#
+				}#
+			} # END if (BioGeoBEARS_run_object$use_optimx == TRUE)#
+#
+		#cat("...done.)\n\n")#
+		} # END if (BioGeoBEARS_run_object$rescale_params == TRUE)#
+	if (printlevel >= 1)#
+		{#
+		print(BioGeoBEARS_model_object)#
+		}	#
+#
+	# Update the output#
+	BioGeoBEARS_run_object$BioGeoBEARS_model_object = BioGeoBEARS_model_object
+params = BioGeoBEARS_model_object_to_est_params(BioGeoBEARS_model_object)#
+		#print(params)#
+		# Calculate the log-likelihood of the data, given the model parameters during this iteration	#
+		#model_results = calc_loglike_sp(tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, phy=phy, Qmat=Qmat, spPmat=NULL, return_what="all", sparse=force_sparse, use_cpp=TRUE, input_is_COO=force_sparse, spPmat_inputs=spPmat_inputs, printlevel=1, calc_ancprobs=TRUE, include_null_range=BioGeoBEARS_run_object$include_null_range)#
+#
+		# We need to put the params back into the inputs #
+		# to get the reconstructed ancestors etc.#
+		# Note that fixlikes SHOULD be included here in the #
+		# final results, if specified by the user at the beginning#
+		# (thanks to Julien for pointing out issue)#
+		calc_ancprobs = BioGeoBEARS_run_object$calc_ancprobs#
+		# (originally, to do local ancestral states, you would set#
+		#  calc_ancprobs to FALSE and use the subsequent optim_result#
+		#  $ fvalue to get the LnL optimal on that node state.#
+		#  I am now changing it to always use the fixlikes.)#
+		#print("Calculating final LnL...")#
+		model_results = calc_loglike_for_optim(params=params, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=BioGeoBEARS_run_object$print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="all", calc_ancprobs=calc_ancprobs)
+model_results
+BioGeoBEARS_run_object = inputs#
+	if (is.null(inputs$printlevel))#
+		{#
+		inputs$printlevel = 0#
+		}#
+	printlevel = inputs$printlevel
+resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+rowSums(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS)
+resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,] / rowSums(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,])
+resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,] / rowSums(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,])
+c(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,]) / rowSums(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,])
+sum
+c(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,]) / sum(resDEC$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[3,])
+COO_weights_columnar = rcpp_calc_anclikes_sp_COOweights_faster(Rcpp_leftprobs=tmpca_1, Rcpp_rightprobs=tmpcb_1, l=l, s=spPmat_inputs$s, v=spPmat_inputs$v, j=spPmat_inputs$j, y=spPmat_inputs$y, dmat=dmat, maxent01s=maxent01s, maxent01v=maxent01v, maxent01j=maxent01j, maxent01y=maxent01y, max_minsize_as_function_of_ancsize=max_minsize_as_function_of_ancsize, printmat=FALSE, m=m)#
+			# This gives 15 states#
+			Rsp_rowsums = rcpp_calc_rowsums_for_COOweights_columnar(COO_weights_columnar=COO_weights_columnar)
