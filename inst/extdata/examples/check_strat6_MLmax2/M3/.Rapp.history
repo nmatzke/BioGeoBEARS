@@ -1,3 +1,5 @@
+library(devtools)#
+devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
 # Load the package (after installation, see above).#
 library(GenSA)    # GenSA is better than optimx (although somewhat slower)#
 library(FD)       # for FD::maxent() (make sure this is up-to-date)#
@@ -61,7 +63,7 @@ library(BioGeoBEARS)#
 # Set your working directory for output files#
 # default here is your home directory ("~")#
 # Change this as you like#
-wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/check_strat/M3/"#
+wd = "/GitHub/BioGeoBEARS/inst/extdata/examples/check_strat6_MLmax2/M3/"#
 setwd(wd)#
 # Double-check your working directory with getwd()#
 getwd()#
@@ -197,7 +199,7 @@ max(rowSums(dfnums_to_numeric(tipranges@df)))#
 #
 # Set the maximum number of areas any species may occupy; this cannot be larger #
 # than the number of areas you set up, but it can be smaller.#
-max_range_size = 4#
+max_range_size = 2#
 #
 #####################################################
 #####################################################
