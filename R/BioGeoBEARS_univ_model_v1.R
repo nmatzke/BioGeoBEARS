@@ -559,6 +559,28 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 	
 	
 	# Wipe out any old/previous warnings()
+	
+	########################################################
+	# NOTE 2021-06-20_NJM:
+	# As of R4.1, it appears this causes an error on 
+	# some R systems
+	# 
+	# Error in assign ("last.warning", NULL, envir = baseenv ()):
+  # it is not possible to add 'last.warning' binding to the base environment
+  #
+  # This page:
+  # https://stackoverflow.com/questions/5725106/r-how-to-clear-all-warnings
+  # 
+  # ...suggests:
+  # 
+  # The error message is Error in assign("last.warning"...) occurres on non-vanilla R platforms 
+  # (i.e. MRO and RRO), because last.warning is locked by default. To unlock the binding, use 
+  # unlockBinding("last.warning", baseenv()). This implementation is consistent with ?warning, w
+  # which says "If warn is zero (the default), a read-only variable last.warning is created."
+  #  – Jthorpe Mar 9 '16 at 21:39
+  # 
+	#######################################################
+	unlockBinding("last.warning", baseenv())
 	assign("last.warning", NULL, envir = baseenv())
 	
 	
