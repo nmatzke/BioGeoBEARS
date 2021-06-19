@@ -580,9 +580,18 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
   #  – Jthorpe Mar 9 '16 at 21:39
   # 
 	#######################################################
-	unlockBinding("last.warning", baseenv())
-	assign("last.warning", NULL, envir = baseenv())
+	# BUT, THIS ADVICE NO LONGER WORKS IN VERSION 4.1
 	
+	#unlockBinding("last.warning", baseenv())
+	# Adding the above CAUSES the error:
+	# Error in assign("last.warning", NULL, envir = baseenv()) : 
+  # cannot add binding of 'last.warning' to the base environment
+  
+	# assign("last.warning", NULL, envir = baseenv())
+	
+	# Replacing with:
+	savedwarning <- warnings()
+	# ...which works
 	
 	if (is.null(BioGeoBEARS_run_object$include_null_range))
 		{
