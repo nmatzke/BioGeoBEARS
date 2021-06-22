@@ -376,7 +376,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			cat("\n\n")
 			print("ERROR in stochastic_map_given_inputs(): probs_branch_top had NA(s) or NaNs:")
 			print("probs_branch_top:")
-			print(probs_branch_top)
+			printall(probs_branch_top)
 			cat("\n\n")
 			
 			print("stochastic_map_given_inputs():")
@@ -408,7 +408,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			cat("\n\n")
 
 			print("probs_branch_top:")
-			print(probs_branch_top)
+			printall(probs_branch_top)
 			stop(txt)
 			}
 
@@ -850,6 +850,48 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			# 2015 version - prob OK
 			probs_Left_branch_top = condprobs_Left_branch_top * res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
 			probs_Right_branch_top = condprobs_Right_branch_top * res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
+
+			TF = isblank_TF(probs_Left_branch_top)
+			if (sum(TF) > 0)
+				{
+				txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Left_branch_top. Printing 'probs_Left_branch_top':"
+
+				cat("\n\n")
+				print("condprobs_Left_branch_top")
+				printall(condprobs_Left_branch_top)
+
+				cat("\n\n")
+				print("res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]")
+				printall(res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,])
+
+				cat("\n\n")
+				print("probs_Left_branch_top")
+				printall(probs_Left_branch_top)
+				cat("\n\n")
+				stop(txt)
+				}
+
+			TF = isblank_TF(probs_Right_branch_top)
+			if (sum(TF) > 0)
+				{
+				txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Right_branch_top. Printing 'probs_Right_branch_top':"
+	
+				cat("\n\n")
+				print("condprobs_Right_branch_top")
+				printall(condprobs_Right_branch_top)
+
+				cat("\n\n")
+				print("res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]")
+				printall(res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,])
+	
+				cat("\n\n")
+				print("probs_Left_branch_top")
+				printall(probs_Right_branch_top)
+				cat("\n\n")
+				stop(txt)
+				}
+
+
 			
 			# In case users want to trace what's going on
 			left_desc_nodenum_global = left_desc_nodenum
@@ -906,8 +948,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		
 		#print("Checking:")
 		print ("#5")
-		print(probs_Left_branch_top)
-		print(probs_Right_branch_top)
+		printall(probs_Left_branch_top)
+		printall(probs_Right_branch_top)
 
 		TF = isblank_TF(probs_Left_branch_top)
 		if (sum(TF) > 0)
@@ -915,7 +957,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Left_branch_top. Printing 'probs_Left_branch_top':"
 			cat("\n\n")
 			print("probs_Left_branch_top")
-			print(probs_Left_branch_top)
+			printall(probs_Left_branch_top)
 			cat("\n\n")
 			stop(txt)
 			}
@@ -926,7 +968,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Right_branch_top. Printing 'probs_Right_branch_top':"
 			cat("\n\n")
 			print("probs_Left_branch_top")
-			print(probs_Right_branch_top)
+			printall(probs_Right_branch_top)
 			cat("\n\n")
 			stop(txt)
 			}
@@ -948,7 +990,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			cat("\n\n")
 
 			print("probs_Left_branch_top:")
-			print(probs_Left_branch_top)
+			printall(probs_Left_branch_top)
 			stop(txt)
 			}
 		print ("#6")
@@ -964,7 +1006,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			cat("\n\n")
 
 			print("probs_Right_branch_top:")
-			print(probs_Right_branch_top)
+			printall(probs_Right_branch_top)
 			stop(txt)
 			}
 
@@ -1075,7 +1117,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 				print(left_branch_decnode)
 				print(left_desc_nodenum)
 				print(sampled_state_Left_branch_top_1based)
-				print(probs_Left_branch_top)
+				printall(probs_Left_branch_top)
 				} # END if (left_branch_decnode <= ntips)
 
 			if (right_branch_decnode <= ntips)
@@ -1084,7 +1126,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 				print(right_branch_decnode)
 				print(right_desc_nodenum)
 				print(sampled_state_Right_branch_top_1based)
-				print(probs_Right_branch_top)
+				printall(probs_Right_branch_top)
 				} # END if (right_branch_decnode <= ntips)
 			} # END if (check_left_vs_right_numbering == TRUE)
 	
@@ -1623,7 +1665,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 				set.seed(seed=seedval)
 				
 				#print("print(AD_probs_branch_top):")
-				#print(probs_branch_top)
+				#printall(probs_branch_top)
 				
 				sampled_state_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_branch_top)
 				sampled_state_branch_top_1based
@@ -1681,7 +1723,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 					print(downpass_relprobs_at_branch_top)
 
 					print("probs_branch_top")
-					print(probs_branch_top)
+					printall(probs_branch_top)
 
 				
 					print("sampled_state_branch_top_1based")
