@@ -581,7 +581,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			} # END if (stratified == FALSE)
 
 
-
+		print ("#1")
 
 		# If it's a hooknode, then copy the node state up
 		# (no sampling needed)
@@ -701,7 +701,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			stop(txt)		
 			}
 
-	
+			print ("#2")
+
 	
 		#######################################################
 		# STOCHASTIC MAPPING OF ANAGENETIC PROCESS
@@ -801,6 +802,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			# Relative probabilities of states at the top of right branch
 			condprobs_Right_branch_top = condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[[j]]
 			} # END if (is.null(cluster_already_open))
+
+		print ("#3")
 
 
 		# Un-subset the results
@@ -904,6 +907,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		#print("Checking:")
 		#print(probs_Left_branch_top)
 		#print(probs_Right_branch_top)
+		print ("#5")
 
 		#for (zzz in 1:20)
 		#	{
@@ -924,6 +928,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			print(probs_Left_branch_top)
 			stop(txt)
 			}
+		print ("#6")
 
 		sampled_state_Right_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_Right_branch_top)
 		print(sampled_state_Right_branch_top_1based)
@@ -947,6 +952,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 
 		trtable$sampled_states_AT_nodes[right_branch_decnode] = sampled_state_Right_branch_top_1based
 
+		print ("#7")
 
 
 		if (stratified == FALSE)
