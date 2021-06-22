@@ -897,7 +897,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# Normalize by sum so they add to 1
 		probs_Left_branch_top = probs_Left_branch_top / sum(probs_Left_branch_top)
 		probs_Right_branch_top = probs_Right_branch_top / sum(probs_Right_branch_top)
-
+	
 # 		print("left_desc_nodenum_global:")
 # 		print(left_desc_nodenum_global)
 # 		print("right_desc_nodenum_global:")
@@ -905,9 +905,32 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		
 		
 		#print("Checking:")
-		#print(probs_Left_branch_top)
-		#print(probs_Right_branch_top)
 		print ("#5")
+		print(probs_Left_branch_top)
+		print(probs_Right_branch_top)
+
+		TF = isblank_TF(probs_Left_branch_top)
+		if (sum(TF) > 0)
+			{
+			txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Left_branch_top. Printing 'probs_Left_branch_top':"
+			cat("\n\n")
+			print("probs_Left_branch_top")
+			print(probs_Left_branch_top)
+			cat("\n\n")
+			stop(txt)
+			}
+
+		TF = isblank_TF(probs_Right_branch_top)
+		if (sum(TF) > 0)
+			{
+			txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Right_branch_top. Printing 'probs_Right_branch_top':"
+			cat("\n\n")
+			print("probs_Left_branch_top")
+			print(probs_Right_branch_top)
+			cat("\n\n")
+			stop(txt)
+			}
+
 
 		#for (zzz in 1:20)
 		#	{
