@@ -865,7 +865,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 
 				cat("\n\n")
 				print("res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]")
-				printall(res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,])
+				tmprow = res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
+				print(tmprow)
 
 				cat("\n\n")
 				print("probs_Left_branch_top")
@@ -877,7 +878,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			TF = isblank_TF(probs_Right_branch_top)
 			if ( (sum(TF) > 0) || (sum(probs_Right_branch_top) == 0))
 				{
-				txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Right_branch_top. Printing 'probs_Right_branch_top':"
+				txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Right_branch_top, OR sum(probs_Right_branch_top) == 0). Printing 'probs_Right_branch_top':"
 	
 				cat("\n\n")
 				cat(txt)
@@ -888,7 +889,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 
 				cat("\n\n")
 				print("res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]")
-				printall(res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,])
+				tmprow = res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
+				print(tmprow)
 	
 				cat("\n\n")
 				print("probs_Left_branch_top")
