@@ -347,7 +347,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		
 		# 2021-06-22_NJM allow null tips means, possibly, sister groups with null ranges 
 		# (at least, Michael Nicolai has this)
-		if ((include_null_range == TRUE) && (allow_null_tips == FALSE))
+		dont_zero_out_nulls = TRUE
+		if ((include_null_range == TRUE) && (allow_null_tips == FALSE) && (dont_zero_out_nulls==TRUE))
 			{
 			condprobs_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 			downpass_relprobs_at_branch_top[1] = 0
@@ -590,7 +591,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			} # END if (stratified == FALSE)
 
 
-		print ("#1")
+		#print ("#1")
 
 		# If it's a hooknode, then copy the node state up
 		# (no sampling needed)
@@ -710,7 +711,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			stop(txt)		
 			}
 
-			print ("#2")
+			#print ("#2")
 
 	
 		#######################################################
@@ -812,7 +813,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			condprobs_Right_branch_top = condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[[j]]
 			} # END if (is.null(cluster_already_open))
 
-		print ("#3")
+		#print ("#3")
 
 
 		# Un-subset the results
@@ -841,7 +842,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# zero out the NULL range, since it is impossible in a survivor
 		# 2021-06-22_NJM allow null tips means, possibly, sister groups with null ranges 
 		# (at least, Michael Nicolai has this)
-		if ((include_null_range == TRUE) && (allow_null_tips == FALSE))
+		dont_zero_out_nulls = TRUE
+		if ((include_null_range == TRUE) && (allow_null_tips == FALSE) && (dont_zero_out_nulls==TRUE))
 			{
 			condprobs_Left_branch_top[1] = 0
 			condprobs_Right_branch_top[1] = 0
@@ -976,26 +978,30 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			probs_Right_branch_top = condprobs_Right_branch_top * res$condlikes[right_desc_nodenum_global,]
 			} # END if (stratified == FALSE)
 		
-		cat("\n\n")
-		print ("#4.5")
-		cat("\n\n")
-		print("probs_Left_branch_top")
-		printall(probs_Left_branch_top)
-		cat("\n\n")
-		print("sum(probs_Left_branch_top)")
-		print(sum(probs_Left_branch_top))
-		cat("\n\n")
+		printflag2 == FALSE
+		if (printflag2)
+			{
+			cat("\n\n")
+			print ("#4.5")
+			cat("\n\n")
+			print("probs_Left_branch_top")
+			printall(probs_Left_branch_top)
+			cat("\n\n")
+			print("sum(probs_Left_branch_top)")
+			print(sum(probs_Left_branch_top))
+			cat("\n\n")
 		
 
-		cat("\n\n")
-		print ("#4.5b")
-		cat("\n\n")
-		print("probs_Right_branch_top")
-		printall(probs_Right_branch_top)
-		cat("\n\n")
-		print("sum(probs_Right_branch_top)")
-		print(sum(probs_Right_branch_top))
-		cat("\n\n")
+			cat("\n\n")
+			print ("#4.5b")
+			cat("\n\n")
+			print("probs_Right_branch_top")
+			printall(probs_Right_branch_top)
+			cat("\n\n")
+			print("sum(probs_Right_branch_top)")
+			print(sum(probs_Right_branch_top))
+			cat("\n\n")
+			}
 
 
 	
@@ -1010,9 +1016,9 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		
 		
 		#print("Checking:")
-		print ("#5")
-		printall(probs_Left_branch_top)
-		printall(probs_Right_branch_top)
+# 		print ("#5")
+# 		printall(probs_Left_branch_top)
+# 		printall(probs_Right_branch_top)
 
 		TF = isblank_TF(probs_Left_branch_top)
 		if (sum(TF) > 0)
@@ -1043,7 +1049,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# (these are conditional on the uppass probs, conditional on the 
 		#  present node, AND on the saved downpass probs
 		sampled_state_Left_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_Left_branch_top)
-		print(sampled_state_Left_branch_top_1based)
+		#print(sampled_state_Left_branch_top_1based)
 		
 		if (isblank_TF(sampled_state_Left_branch_top_1based) == TRUE)
 			{
@@ -1056,10 +1062,10 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			printall(probs_Left_branch_top)
 			stop(txt)
 			}
-		print ("#6")
+		#print ("#6")
 
 		sampled_state_Right_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_Right_branch_top)
-		print(sampled_state_Right_branch_top_1based)
+		#print(sampled_state_Right_branch_top_1based)
 
 		if (isblank_TF(sampled_state_Right_branch_top_1based) == TRUE)
 			{
@@ -1080,7 +1086,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 
 		trtable$sampled_states_AT_nodes[right_branch_decnode] = sampled_state_Right_branch_top_1based
 
-		print ("#7")
+		#print ("#7")
 
 
 		if (stratified == FALSE)
@@ -1688,7 +1694,8 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 				# zero out the NULL range, since it is impossible in a survivor
 				# 2021-06-22_NJM allow null tips means, possibly, sister groups with null ranges 
 				# (at least, Michael Nicolai has this)
-				if ( (res$inputs$include_null_range == TRUE) && (res$inputs$allow_null_tips == FALSE) )
+				dont_zero_out_nulls = TRUE
+				if ( (res$inputs$include_null_range == TRUE) && (res$inputs$allow_null_tips == FALSE) && (dont_zero_out_nulls==TRUE))
 					{
 					condprobs_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 					} # END if (res$inputs$include_null_range == TRUE)
