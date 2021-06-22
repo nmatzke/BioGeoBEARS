@@ -80,7 +80,7 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 		# Run stratified or non-stratified stochastic mapping
 		if (strat_TF == FALSE)
 			{
-			cmdstr = paste0("stochastic_mapping_results = stochastic_map_given_inputs(stochastic_mapping_inputs=stochastic_mapping_inputs_list, piecenum=NULL, maxtries=", maxtries_per_branch, ", seedval=", startseed, ", include_null_range=res$inputs$include_null_range, master_nodenum_toPrint=master_nodenum_toPrint)")
+			cmdstr = paste0("stochastic_mapping_results = stochastic_map_given_inputs(stochastic_mapping_inputs=stochastic_mapping_inputs_list, piecenum=NULL, maxtries=", maxtries_per_branch, ", seedval=", startseed, ", include_null_range=res$inputs$include_null_range, master_nodenum_toPrint=master_nodenum_toPrint), allow_null_tips=res$inputs$allow_null_tips")
 			} else {
 			# Stratified
 			#maxtries=40000; seedval=521; master_nodenum_toPrint=0

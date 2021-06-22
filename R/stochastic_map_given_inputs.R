@@ -15,7 +15,7 @@
 # 
 
 
-stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL, maxtries=40000, seedval=as.numeric(Sys.time()), include_null_range, master_nodenum_toPrint=0)
+stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL, maxtries=40000, seedval=as.numeric(Sys.time()), include_null_range, master_nodenum_toPrint=0, allow_null_tips=FALSE)
 	{
 	#######################################################
 	# running_stochastic_mapping, given a results object
@@ -34,6 +34,13 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 	seedval=12346	
 	include_null_range=TRUE
 	'
+	
+	
+	# Fix allow_null_tips
+	if (isblank_TF(allow_null_tips) == TRUE)
+		{
+		allow_null_tips = FALSE
+		}
 	
 	# Set the seed
 	#print(paste0("stochastic_map_given_inputs seedval=", seedval, sep=""))
@@ -338,7 +345,9 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		
 		condprobs_branch_top = condprobs_branch_bot %*% independent_likelihoods_on_root_branch_of_subtree
 		
-		if (include_null_range == TRUE)
+		# 2021-06-22_NJM allow null tips means, possibly, sister groups with null ranges 
+		# (at least, Michael Nicolai has this)
+		if ((include_null_range == TRUE) && (allow_null_tips == FALSE))
 			{
 			condprobs_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 			downpass_relprobs_at_branch_top[1] = 0
@@ -830,7 +839,9 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 
 
 		# zero out the NULL range, since it is impossible in a survivor
-		if (include_null_range == TRUE)
+		# 2021-06-22_NJM allow null tips means, possibly, sister groups with null ranges 
+		# (at least, Michael Nicolai has this)
+		if ((include_null_range == TRUE) && (allow_null_tips == FALSE))
 			{
 			condprobs_Left_branch_top[1] = 0
 			condprobs_Right_branch_top[1] = 0
@@ -851,6 +862,25 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			probs_Left_branch_top = condprobs_Left_branch_top * res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[left_desc_nodenum,]
 			probs_Right_branch_top = condprobs_Right_branch_top * res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[right_desc_nodenum,]
 
+				if ( (condprobs_Left_branch_top[1] == 1) && (include_null_range == TRUE))
+					{
+					txt = "NOTE CAREFULLY in stochastic_map_given_inputs(): the 1st cell of 'condprobs_Left_branch_top' equals 1.0. This means all of the probability is on the null range. This probably means you have high 'e', and multiple tips in the null range, perhaps as sister groups. This is a quite odd situation that can easily lead to 0/0 errors, because formally speaking, null ranges are impossible ancestral ranges at nodes. NJM has programmed a workaround to allow it if allow_null_tips==TRUE, such that the null range probabilities are not zeroed out at nodes, but: THINK VERY CAREFULLY IF YOU MEANT TO DO THIS AND REALLY THINK IT IS A GOOD IDEA."
+					cat("\n\n")
+					cat(txt)
+					cat("\n\n")
+					warning(txt)
+					}
+
+				if ( (condprobs_Right_branch_top[1] == 1) && (include_null_range == TRUE))
+					{
+					txt = "NOTE CAREFULLY in stochastic_map_given_inputs(): the 1st cell of 'condprobs_Right_branch_top' equals 1.0. This means all of the probability is on the null range. This probably means you have high 'e', and multiple tips in the null range, perhaps as sister groups. This is a quite odd situation that can easily lead to 0/0 errors, because formally speaking, null ranges are impossible ancestral ranges at nodes. NJM has programmed a workaround to allow it if allow_null_tips==TRUE, such that the null range probabilities are not zeroed out at nodes, but: THINK VERY CAREFULLY IF YOU MEANT TO DO THIS AND REALLY THINK IT IS A GOOD IDEA."
+					cat("\n\n")
+					cat(txt)
+					cat("\n\n")
+					warning(txt)
+					}
+
+
 			TF = isblank_TF(probs_Left_branch_top)
 			if ( (sum(TF) > 0) || (sum(probs_Left_branch_top) == 0))
 				{
@@ -859,7 +889,9 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 				cat("\n\n")
 				cat(txt)
 				cat("\n\n")
-
+				
+				
+				
 				print("condprobs_Left_branch_top")
 				printall(condprobs_Left_branch_top)
 
@@ -1651,8 +1683,12 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 					Qmat_big = matrix(data=0, nrow=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF), ncol=length(stochastic_mapping_inputs$states_allowed_this_timeperiod_TF))
 					Qmat_big[subset_nums,subset_nums] = Qmat
 					}
-				
-				if (res$inputs$include_null_range == TRUE)
+
+
+				# zero out the NULL range, since it is impossible in a survivor
+				# 2021-06-22_NJM allow null tips means, possibly, sister groups with null ranges 
+				# (at least, Michael Nicolai has this)
+				if ( (res$inputs$include_null_range == TRUE) && (res$inputs$allow_null_tips == FALSE) )
 					{
 					condprobs_branch_top[1] = 0	# zero out the NULL range, since it is impossible in a survivor
 					} # END if (res$inputs$include_null_range == TRUE)
@@ -1976,7 +2012,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 # 					}
 
 				#cat("\nA_stochastic_map_given_inputs():\n")
-				master_table_timeperiod_i = stochastic_map_given_inputs(stochastic_mapping_inputs, piecenum=piecenum, maxtries=maxtries, seedval=seedval, include_null_range=res$inputs$include_null_range, master_nodenum_toPrint=master_nodenum_toPrint)
+				master_table_timeperiod_i = stochastic_map_given_inputs(stochastic_mapping_inputs, piecenum=piecenum, maxtries=maxtries, seedval=seedval, include_null_range=res$inputs$include_null_range, master_nodenum_toPrint=master_nodenum_toPrint, allow_null_tips=res$inputs$allow_null_tips)
 				#cat("\nB_stochastic_map_given_inputs():\n")
 				
 # 				if (any(is.na(master_table_timeperiod_i$sampled_states_AT_nodes)))
