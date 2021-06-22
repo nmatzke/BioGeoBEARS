@@ -368,7 +368,30 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			print(round(probs_branch_top, 3))
 			}
 		
-		
+		TF = is.na(probs_branch_top)
+		if (sum(TF) > 0)
+			{
+			cat("\n\n")
+			print("ERROR in stochastic_map_given_inputs(): probs_branch_top had NA(s):")
+			print("probs_branch_top:")
+			print(probs_branch_top)
+			cat("\n\n")
+			
+			print("stochastic_map_given_inputs():")
+			print("rownum:")
+			print(rownum)
+			print("master_nodenum_toPrint:")
+			print(master_nodenum_toPrint)
+			print("condprobs_branch_bot:")
+			print(round(condprobs_branch_bot, 3))
+			print("downpass_relprobs_at_branch_top:")
+			print(round(downpass_relprobs_at_branch_top, 3))
+			print("condprobs_branch_top:")
+			print(round(condprobs_branch_top, 3))
+			print("probs_branch_top:")
+			print(round(probs_branch_top, 3))
+			
+			}
 		
 		
 		# Sample the state
