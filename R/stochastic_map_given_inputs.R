@@ -978,7 +978,7 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			probs_Right_branch_top = condprobs_Right_branch_top * res$condlikes[right_desc_nodenum_global,]
 			} # END if (stratified == FALSE)
 		
-		printflag2 == FALSE
+		printflag2 = FALSE
 		if (printflag2)
 			{
 			cat("\n\n")
