@@ -368,11 +368,13 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			print(round(probs_branch_top, 3))
 			}
 		
-		TF = is.na(probs_branch_top)
+		TF1 = is.na(probs_branch_top)
+		TF2 = is.nan(probs_branch_top)
+		TF = (TF1 + TF2 ) > 0
 		if (sum(TF) > 0)
 			{
 			cat("\n\n")
-			print("ERROR in stochastic_map_given_inputs(): probs_branch_top had NA(s):")
+			print("ERROR in stochastic_map_given_inputs(): probs_branch_top had NA(s) or NaNs:")
 			print("probs_branch_top:")
 			print(probs_branch_top)
 			cat("\n\n")
@@ -750,38 +752,45 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			{
 			# Relative probabilities of states at the top of left branch
 			condprobs_Left_branch_top = try(condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i])
-		
-			if (class(condprobs_Left_branch_top) == "try-error")
+			
+			if (length(class(condprobs_Left_branch_top)) == 1)
 				{
-				print(i)
-				print(length(condprobs_Left_branch_bot))
-				print(dim(independent_likelihoods_on_each_branch[,,i]))
-				#print(condprobs_Left_branch_top)
+				if (class(condprobs_Left_branch_top) == "try-error")
+					{
+					print(i)
+					print(length(condprobs_Left_branch_bot))
+					print(dim(independent_likelihoods_on_each_branch[,,i]))
+					#print(condprobs_Left_branch_top)
 
-				save(condprobs_Left_branch_bot, file="condprobs_Left_branch_bot.Rdata")
-				save(independent_likelihoods_on_each_branch, file="independent_likelihoods_on_each_branch.Rdata")
-				save(independent_likelihoods_on_each_branch[,,i], file="independent_likelihoods_on_each_branch_i.Rdata")
+					save(condprobs_Left_branch_bot, file="condprobs_Left_branch_bot.Rdata")
+					save(independent_likelihoods_on_each_branch, file="independent_likelihoods_on_each_branch.Rdata")
+					save(independent_likelihoods_on_each_branch[,,i], file="independent_likelihoods_on_each_branch_i.Rdata")
 
-				print("STOPPING on error in 'condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i]'")
-				stop("STOPPING on error in 'condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i]'")
+					print("STOPPING on error in 'condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i]'")
+					stop("STOPPING on error in 'condprobs_Left_branch_bot %*% independent_likelihoods_on_each_branch[,,i]'")
+					}
 				}
 				
 			# Relative probabilities of states at the top of right branch
 			condprobs_Right_branch_top = try(condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j])
 
-			if (class(condprobs_Right_branch_top) == "try-error")
+
+			if (length(class(condprobs_Right_branch_top)) == 1)
 				{
-				print(j)
-				print(length(condprobs_Right_branch_bot))
-				print(dim(independent_likelihoods_on_each_branch[,,j]))
-				#print(condprobs_Right_branch_top)
+				if (class(condprobs_Right_branch_top) == "try-error")
+					{
+					print(j)
+					print(length(condprobs_Right_branch_bot))
+					print(dim(independent_likelihoods_on_each_branch[,,j]))
+					#print(condprobs_Right_branch_top)
 			
-				save(condprobs_Right_branch_bot, file="condprobs_Right_branch_bot.Rdata")
-				save(independent_likelihoods_on_each_branch, file="independent_likelihoods_on_each_branch.Rdata")
-				save(independent_likelihoods_on_each_branch[,,j], file="independent_likelihoods_on_each_branch_i.Rdata")
+					save(condprobs_Right_branch_bot, file="condprobs_Right_branch_bot.Rdata")
+					save(independent_likelihoods_on_each_branch, file="independent_likelihoods_on_each_branch.Rdata")
+					save(independent_likelihoods_on_each_branch[,,j], file="independent_likelihoods_on_each_branch_i.Rdata")
 			
-				print("STOPPING on error in 'condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j]'")
-				stop("STOPPING on error in 'condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j]'")
+					print("STOPPING on error in 'condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j]'")
+					stop("STOPPING on error in 'condprobs_Right_branch_bot %*% independent_likelihoods_on_each_branch[,,j]'")
+					}
 				}
 			} else {
 	

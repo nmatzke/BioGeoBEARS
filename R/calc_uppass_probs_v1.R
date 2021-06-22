@@ -33,6 +33,24 @@ sample_uppass_split_scenario_given_probs_ancstate <- function(probs_ancstate, CO
 	
 	# Sample a split scenario
 	split_scenario_nums = 1:length(COO_weights_columnar[[1]])
+	
+	# Error check
+	TF1 = is.na(split_scenario_nums)
+	TF2 = is.nan(split_scenario_nums)
+	TF = (TF1 + TF2) > 0
+	if (sum(TF) > 0)
+		{
+		txt = paste0("STOP ERROR in: sample_uppass_split_scenario_given_probs_ancstate() -- NA or NaN in split_scenario_nums. Printing 'COO_weights_columnar' and 'split_scenario_nums':")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		print("COO_weights_columnar")
+		print(COO_weights_columnar)
+		cat("\n\n")
+		print("split_scenario_nums")
+		print(split_scenario_nums)
+		stop(txt)
+		}
 	split_scenario_num = sample(x=split_scenario_nums, size=1, replace=TRUE, prob=probs_each_split_scenario)
 	
 	# Get the ancestor state, Left corner, Right corner
