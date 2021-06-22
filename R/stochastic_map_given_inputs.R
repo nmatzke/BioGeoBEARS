@@ -857,6 +857,9 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 				txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Left_branch_top. Printing 'probs_Left_branch_top':"
 
 				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+
 				print("condprobs_Left_branch_top")
 				printall(condprobs_Left_branch_top)
 
@@ -877,6 +880,9 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 				txt = "STOP ERROR in stochastic_map_given_inputs(): NA/NaN in probs_Right_branch_top. Printing 'probs_Right_branch_top':"
 	
 				cat("\n\n")
+				cat(txt)
+				cat("\n\n")
+
 				print("condprobs_Right_branch_top")
 				printall(condprobs_Right_branch_top)
 
@@ -935,6 +941,29 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			probs_Left_branch_top = condprobs_Left_branch_top * res$condlikes[left_desc_nodenum_global,]
 			probs_Right_branch_top = condprobs_Right_branch_top * res$condlikes[right_desc_nodenum_global,]
 			} # END if (stratified == FALSE)
+		
+		cat("\n\n")
+		print ("#4.5")
+		cat("\n\n")
+		print("probs_Left_branch_top")
+		printall(probs_Left_branch_top)
+		cat("\n\n")
+		print("sum(probs_Left_branch_top)")
+		print(sum(probs_Left_branch_top))
+		cat("\n\n")
+		
+
+		cat("\n\n")
+		print ("#4.5b")
+		cat("\n\n")
+		print("probs_Right_branch_top")
+		printall(probs_Right_branch_top)
+		cat("\n\n")
+		print("sum(probs_Right_branch_top)")
+		print(sum(probs_Right_branch_top))
+		cat("\n\n")
+
+
 	
 		# Normalize by sum so they add to 1
 		probs_Left_branch_top = probs_Left_branch_top / sum(probs_Left_branch_top)
