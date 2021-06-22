@@ -911,10 +911,11 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 		# (these are conditional on the uppass probs, conditional on the 
 		#  present node, AND on the saved downpass probs
 		sampled_state_Left_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_Left_branch_top)
-
+		print(sampled_state_Left_branch_top_1based)
+		
 		if (isblank_TF(sampled_state_Left_branch_top_1based) == TRUE)
 			{
-			txt = paste0("STOP ERROR_line715 in stochastic_map_given_inputs(): sampled_state_Left_branch_top_1based is NA.")
+			txt = paste0("STOP ERROR_line715 in stochastic_map_given_inputs(): sampled_state_Left_branch_top_1based is NA or NaN.")
 			cat("\n\n")
 			cat(txt)
 			cat("\n\n")
@@ -925,6 +926,8 @@ stochastic_map_given_inputs <- function(stochastic_mapping_inputs, piecenum=NULL
 			}
 
 		sampled_state_Right_branch_top_1based = sample(x=1:numstates, size=1, replace=TRUE, prob=probs_Right_branch_top)
+		print(sampled_state_Right_branch_top_1based)
+
 		if (isblank_TF(sampled_state_Right_branch_top_1based) == TRUE)
 			{
 			txt = paste0("STOP ERROR_line728 in stochastic_map_given_inputs(): sampled_state_Right_branch_top_1based is NA.")
