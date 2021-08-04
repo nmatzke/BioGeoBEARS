@@ -2034,6 +2034,57 @@ read_times_fn <- function(inputs=NULL, timesfn=NULL)
 	}
 
 
+subset_distmats <- function(distmats_list, rows_to_keep_TF, replace_NAs_with=0.0)
+	{
+	new_distmats_list = list()
+
+	for (i in 1:length(distmats_list))
+		{
+		# subset cols
+		tmpmat = distmats_list[[i]]
+		tmpmat2 = tmpmat[,rows_to_keep_TF]
+		tmpmat3 = tmpmat2[rows_to_keep_TF,]
+	
+		# Replace NAs with 0
+		tmpmat3[is.na(tmpmat3)] = replace_NAs_with
+	
+		new_distmats_list[[i]] = tmpmat3
+		}
+	return(new_distmats_list)
+	} # END subset_distmats <- function(distmats_list, rows_to_keep_TF, replace_NAs_with=0.0)
+
+
+write_distances_to_fn <- function(new_distmats_list, outfn)
+	{
+	# Write distances matrix
+	defaults='
+	wd = "~/Downloads/395lab/"
+	setwd(wd)
+	tmpfn = "geological_distances_v3_div100_stay_same.txt"
+	outfn = gsub(pattern=".txt", replacement="_subset.txt", x=tmpfn)
+	'
+	for (i in 1:length(new_distmats_list))
+		{
+		if (i == 1)
+			{
+			write.table(x=new_distmats_list[i], file=outfn, sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE, append=FALSE)
+			} else {
+			write.table(x=new_distmats_list[i], file=outfn, sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE, append=TRUE)		
+			}
+	
+		# Line break	
+		if (i < length(new_distmats_list))
+			{
+			write(x="", file=outfn, append=TRUE)
+			} else {
+			write(x="", file=outfn, append=TRUE)
+			write(x="END", file=outfn, append=TRUE)
+			}
+		}
+	
+	return()
+	} # END write_distances_to_fn <- function(new_distmats_list, outfn)
+
 
 
 # Distances file is just a list of distance matrices, separated by blank lines,
