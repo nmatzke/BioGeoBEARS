@@ -1053,7 +1053,7 @@ get_trait_from_traitgeog_results <- function(res, num_trait_states)
 		
 		trait_res$ML_marginal_prob_each_state_at_branch_top_AT_node[,i] = rowSums(res$ML_marginal_prob_each_state_at_branch_top_AT_node[,cols_to_sum])
 		
-		trait_res$relative_probs_of_each_state_at_bottom_of_root_branch[,i] = sum(res$relative_probs_of_each_state_at_bottom_of_root_branch[cols_to_sum])
+		trait_res$relative_probs_of_each_state_at_bottom_of_root_branch[i] = sum(res$relative_probs_of_each_state_at_bottom_of_root_branch[cols_to_sum])
 
 
 		startcol = startcol + num_geog_states
