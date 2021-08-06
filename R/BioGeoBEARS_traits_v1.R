@@ -959,7 +959,7 @@ rerun_optimization_w_HiLow <- function(res=NULL, Rdata_fn=NULL, fraction_change=
 
 
 
-get_geog_from_traitgeog_results <- function(res, numtraitstates)
+get_geog_from_traitgeog_results <- function(res, num_trait_states)
 	{
 	numrows = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[1]
 	numcols = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[2]
@@ -970,7 +970,7 @@ get_geog_from_traitgeog_results <- function(res, numtraitstates)
 	#######################################################
 
 	geog_res = res
-	num_geog_states = numcols / numtraitstates
+	num_geog_states = numcols / num_trait_states
 	num_geog_states
 
 	geog_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
@@ -984,7 +984,7 @@ get_geog_from_traitgeog_results <- function(res, numtraitstates)
 	
 	# Collapse by trait and add
 	startcol = 0
-	for (i in 1:numtraitstates)
+	for (i in 1:num_trait_states)
 		{
 		cols_to_add = (startcol+1):(startcol+num_geog_states)
 		geog_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = geog_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS + res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[,cols_to_add]
@@ -1005,17 +1005,17 @@ get_geog_from_traitgeog_results <- function(res, numtraitstates)
 		
 		# Update startcol
 		startcol = startcol + num_geog_states
-		} # END for (i in 1:numtraitstates)
+		} # END for (i in 1:num_trait_states)
 	
 	return(geog_res)
 	}
 
-get_trait_from_traittrait_results <- function(res, numtraitstates)
+get_trait_from_traitgeog_results <- function(res, num_trait_states)
 	{
 	numrows = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[1]
 	numcols = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[2]
 
-	num_geog_states = numcols / numtraitstates
+	num_geog_states = numcols / num_trait_states
 	num_geog_states
 
 	#######################################################
@@ -1035,7 +1035,7 @@ get_trait_from_traittrait_results <- function(res, numtraitstates)
 	
 	# Collapse by trait and add
 	startcol = 0
-	for (i in 1:numtraitstates)
+	for (i in 1:num_trait_states)
 		{
 		cols_to_sum = (startcol+1):(startcol+num_geog_states)
 
@@ -1057,7 +1057,7 @@ get_trait_from_traittrait_results <- function(res, numtraitstates)
 
 
 		startcol = startcol + num_geog_states
-		} # END for (i in 1:numtraitstates)
+		} # END for (i in 1:num_trait_states)
 	
 	return(trait_res)
 	}
