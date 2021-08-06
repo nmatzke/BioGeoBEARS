@@ -957,3 +957,113 @@ rerun_optimization_w_HiLow <- function(res=NULL, Rdata_fn=NULL, fraction_change=
 	} # END rerun_optimization_w_HiLow <- function(res=NULL, Rdata_fn=NULL)
 
 
+
+
+get_geog_from_traitgeog_results <- function(res, numtraitstates)
+	{
+	numrows = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[1]
+	numcols = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[2]
+
+	#######################################################
+	# Collapse joint probabilities to geography
+	# probabilities for plotting
+	#######################################################
+
+	geog_res = res
+	num_geog_states = numcols / numtraitstates
+	num_geog_states
+
+	geog_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
+	geog_res$condlikes_of_each_state = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
+	geog_res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
+	geog_res$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
+	geog_res$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
+	geog_res$ML_marginal_prob_each_state_at_branch_bottom_below_node = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
+	geog_res$ML_marginal_prob_each_state_at_branch_top_AT_node = matrix(data=0.0, nrow=numrows, ncol=num_geog_states)
+	geog_res$relative_probs_of_each_state_at_bottom_of_root_branch = rep(0.0, times=num_geog_states)
+	
+	# Collapse by trait and add
+	startcol = 0
+	for (i in 1:numtraitstates)
+		{
+		cols_to_add = (startcol+1):(startcol+num_geog_states)
+		geog_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = geog_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS + res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[,cols_to_add]
+		
+		geog_res$condlikes_of_each_state = geog_res$condlikes_of_each_state + res$condlikes_of_each_state[,cols_to_add]
+		
+		geog_res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS = geog_res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS + res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[,cols_to_add]
+		
+		geog_res$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS = geog_res$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS +  res$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[,cols_to_add]
+		
+		geog_res$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS = geog_res$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS +  res$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[,cols_to_add]
+		
+		geog_res$ML_marginal_prob_each_state_at_branch_bottom_below_node = geog_res$ML_marginal_prob_each_state_at_branch_bottom_below_node + res$ML_marginal_prob_each_state_at_branch_bottom_below_node[,cols_to_add]
+		
+		geog_res$ML_marginal_prob_each_state_at_branch_top_AT_node = geog_res$ML_marginal_prob_each_state_at_branch_top_AT_node + res$ML_marginal_prob_each_state_at_branch_top_AT_node[,cols_to_add]
+		
+		geog_res$relative_probs_of_each_state_at_bottom_of_root_branch = geog_res$relative_probs_of_each_state_at_bottom_of_root_branch + res$relative_probs_of_each_state_at_bottom_of_root_branch[cols_to_add]
+		
+		# Update startcol
+		startcol = startcol + num_geog_states
+		} # END for (i in 1:numtraitstates)
+	
+	return(geog_res)
+	}
+
+get_trait_from_traittrait_results <- function(res, numtraitstates)
+	{
+	numrows = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[1]
+	numcols = dim(res$ML_marginal_prob_each_state_at_branch_top_AT_node)[2]
+
+	num_geog_states = numcols / numtraitstates
+	num_geog_states
+
+	#######################################################
+	# Collapse joint probabilities to geography
+	# probabilities for plotting
+	#######################################################
+
+	trait_res = res
+	trait_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = matrix(data=0.0, nrow=numrows, ncol=num_trait_states)
+	trait_res$condlikes_of_each_state = matrix(data=0.0, nrow=numrows, ncol=num_trait_states)
+	trait_res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS = matrix(data=0.0, nrow=numrows, ncol=num_trait_states)
+	trait_res$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS = matrix(data=0.0, nrow=numrows, ncol=num_trait_states)
+	trait_res$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS = matrix(data=0.0, nrow=numrows, ncol=num_trait_states)
+	trait_res$ML_marginal_prob_each_state_at_branch_bottom_below_node = matrix(data=0.0, nrow=numrows, ncol=num_trait_states)
+	trait_res$ML_marginal_prob_each_state_at_branch_top_AT_node = matrix(data=0.0, nrow=numrows, ncol=num_trait_states)
+	trait_res$relative_probs_of_each_state_at_bottom_of_root_branch = rep(0.0, times=num_trait_states)
+	
+	# Collapse by trait and add
+	startcol = 0
+	for (i in 1:numtraitstates)
+		{
+		cols_to_sum = (startcol+1):(startcol+num_geog_states)
+
+		trait_res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[,i] = rowSums(res$relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS[,cols_to_sum])
+		
+		trait_res$condlikes_of_each_state[,i] = rowSums(res$condlikes_of_each_state[,cols_to_sum])
+		
+		trait_res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[,i] = rowSums(res$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[,cols_to_sum])
+		
+		trait_res$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[,i] = rowSums(res$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[,cols_to_sum])
+		
+		trait_res$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[,i] = rowSums(res$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS[,cols_to_sum])
+		
+		trait_res$ML_marginal_prob_each_state_at_branch_bottom_below_node[,i] = rowSums(res$ML_marginal_prob_each_state_at_branch_bottom_below_node[,cols_to_sum])
+		
+		trait_res$ML_marginal_prob_each_state_at_branch_top_AT_node[,i] = rowSums(res$ML_marginal_prob_each_state_at_branch_top_AT_node[,cols_to_sum])
+		
+		trait_res$relative_probs_of_each_state_at_bottom_of_root_branch[,i] = sum(res$relative_probs_of_each_state_at_bottom_of_root_branch[cols_to_sum])
+
+
+		startcol = startcol + num_geog_states
+		} # END for (i in 1:numtraitstates)
+	
+	return(trait_res)
+	}
+
+
+
+
+
+
