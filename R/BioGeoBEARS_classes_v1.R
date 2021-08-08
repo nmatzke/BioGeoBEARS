@@ -2036,6 +2036,14 @@ read_times_fn <- function(inputs=NULL, timesfn=NULL)
 
 subset_distmats <- function(distmats_list, rows_to_keep_TF, replace_NAs_with=0.0)
 	{
+	defaults='
+	tmpfn = "geological_distances_v3_div100_stay_same.txt"
+	distmats_list = read_distances_fn(inputs=NULL, distsfn=tmpfn)
+	rows_to_keep_TF = c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE)
+
+	new_distmats_list = subset_distmats(distmats_list, rows_to_keep_TF=rows_to_keep_TF, replace_NAs_with=0.0)
+
+	'
 	new_distmats_list = list()
 
 	for (i in 1:length(distmats_list))
@@ -2058,8 +2066,6 @@ write_distances_to_fn <- function(new_distmats_list, outfn)
 	{
 	# Write distances matrix
 	defaults='
-	wd = "~/Downloads/395lab/"
-	setwd(wd)
 	tmpfn = "geological_distances_v3_div100_stay_same.txt"
 	outfn = gsub(pattern=".txt", replacement="_subset.txt", x=tmpfn)
 	'
