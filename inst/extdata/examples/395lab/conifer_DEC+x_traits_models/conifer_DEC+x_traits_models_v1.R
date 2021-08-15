@@ -689,6 +689,7 @@ geog_res = get_geog_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_sta
 # Extract just trait ancestral states from geog+trait ancestral states
 #######################################################
 trait_res = get_trait_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
+tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2b, "geog.data", sep="/")))
 
 # Plot the geographic ancestral states
 scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
@@ -700,10 +701,10 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 
 # Plot the trait ancestral states
 results_object = trait_res
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=trait_values)
 
 # Pie chart
-plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=trait_values)
 
 
 
