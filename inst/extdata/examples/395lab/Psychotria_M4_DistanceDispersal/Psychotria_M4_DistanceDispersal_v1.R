@@ -110,9 +110,7 @@ trfn = np(paste(addslash(extdata_dir), "Psychotria_5.2.newick", sep=""))
 # Look at the raw Newick file:
 moref(trfn)
 
-# Look at your phylogeny (plots to a PDF, which avoids issues with multiple graphics in same window):
-pdffn = "tree.pdf"
-pdf(file=pdffn, width=9, height=12)
+# Look at your phylogeny (you may have to manually re-size graphics window):
 
 tr = read.tree(trfn)
 tr
@@ -120,9 +118,6 @@ plot(tr)
 title("Example Psychotria phylogeny from Ree & Smith (2008)")
 axisPhylo() # plots timescale
 
-dev.off()
-cmdstr = paste0("open ", pdffn)
-system(cmdstr)
 
 #######################################################
 # Geography file
@@ -441,8 +436,8 @@ if (runslow)
 #######################################################
 # PDF plots
 #######################################################
-pdffn = "Psychotria_DEC_vs_DEC+J_M4_distances_v1.pdf"
-pdf(pdffn, width=6, height=6)
+# pdffn = "Psychotria_DEC_vs_DEC+J_M4_distances_v1.pdf"
+# pdf(pdffn, width=6, height=6)
 
 #######################################################
 # Plot ancestral states - DEC
@@ -474,9 +469,9 @@ res1 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 # Pie chart
 plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
-dev.off()  # Turn off PDF
-cmdstr = paste("open ", pdffn, sep="")
-system(cmdstr) # Plot it
+# dev.off()  # Turn off PDF
+# cmdstr = paste("open ", pdffn, sep="")
+# system(cmdstr) # Plot it
 
 #######################################################
 #######################################################
@@ -695,8 +690,8 @@ if (runslow)
     resDIVALIKEj = res
     }
 
-pdffn = "Psychotria_DIVALIKE_vs_DIVALIKE+J_M4_distances_v1.pdf"
-pdf(pdffn, width=6, height=6)
+# pdffn = "Psychotria_DIVALIKE_vs_DIVALIKE+J_M4_distances_v1.pdf"
+# pdf(pdffn, width=6, height=6)
 
 #######################################################
 # Plot ancestral states - DIVALIKE
@@ -989,8 +984,8 @@ if (runslow)
     resBAYAREALIKEj = res
     }
 
-pdffn = "Psychotria_BAYAREALIKE_vs_BAYAREALIKE+J_M4_distances_v1.pdf"
-pdf(pdffn, width=6, height=6)
+# pdffn = "Psychotria_BAYAREALIKE_vs_BAYAREALIKE+J_M4_distances_v1.pdf"
+# pdf(pdffn, width=6, height=6)
 
 #######################################################
 # Plot ancestral states - BAYAREALIKE
