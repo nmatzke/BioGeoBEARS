@@ -1059,6 +1059,9 @@ get_trait_from_traitgeog_results <- function(res, num_trait_states)
 		startcol = startcol + num_geog_states
 		} # END for (i in 1:num_trait_states)
 	
+	trait_res$inputs$max_range_size = 1
+	trait_res$include_null_range = FALSE
+	
 	return(trait_res)
 	}
 
