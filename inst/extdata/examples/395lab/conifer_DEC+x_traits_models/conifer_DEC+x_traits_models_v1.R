@@ -654,9 +654,6 @@ BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 
-# Calculate the lnL for the parameters, and store in text file
-
-
 
 resfn = "DECJx+t12+t21+m2_inf.Rdata"
 runslow = TRUE
@@ -677,7 +674,8 @@ if (runslow)
 
 
 
-
+# pdffn = "south_conifers_DEC+J+x+trait_v1.pdf"
+# pdf(file=pdffn, width=10, height=30)
 
 
 #######################################################
@@ -689,27 +687,35 @@ geog_res = get_geog_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_sta
 # Extract just trait ancestral states from geog+trait ancestral states
 #######################################################
 trait_res = get_trait_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
-tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2b, "geog.data", sep="/")))
+tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2a, "geog.data", sep="/")))
 
+#######################################################
 # Plot the geographic ancestral states
+#######################################################
+analysis_titletxt = "S. conifers: Geog reconstruction under DEC+J+x+trait"
+
 scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
 results_object = geog_res
 res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
 # Pie chart
-plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
+# plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
+
+#######################################################
 # Plot the trait ancestral states
+#######################################################
+analysis_titletxt = "S. conifers: Trait reconstruction under DEC+J+x+trait"
 results_object = trait_res
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=trait_values)
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
 # Pie chart
-plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=trait_values)
+# plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
 
-
-
-
+# dev.off()
+# cmdstr = paste0("open ", pdffn)
+# system(cmdstr)
 
 
 
