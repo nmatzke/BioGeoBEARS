@@ -320,7 +320,7 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 8
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
@@ -371,7 +371,7 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 8
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
@@ -437,7 +437,7 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 8
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
@@ -555,7 +555,7 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 8
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
