@@ -113,9 +113,9 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","est"] = 0.
 tr = read.tree(BioGeoBEARS_run_object$trfn)
 #plot(tr); axisPhylo()
 
-geog_values = getranges_from_LagrangePHYLIP("trait.data")
-
 trait_fn = slashslash(paste(labpt2a, "trait.data", sep="/"))
+geog_values = getranges_from_LagrangePHYLIP(trait_fn)
+
 trait_values = getranges_from_LagrangePHYLIP(lgdata_fn=trait_fn)
 trait_values
 
