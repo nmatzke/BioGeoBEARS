@@ -697,9 +697,9 @@ res1 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 # Pie chart
 plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
-dev.off()
-cmdstr = paste("open ", pdffn, sep="")
-system(cmdstr)
+# dev.off()
+# cmdstr = paste("open ", pdffn, sep="")
+# system(cmdstr)
 
 #######################################################
 #######################################################
@@ -979,9 +979,9 @@ res1 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 # Pie chart
 plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
-dev.off()
-cmdstr = paste("open ", pdffn, sep="")
-system(cmdstr)
+# dev.off()
+# cmdstr = paste("open ", pdffn, sep="")
+# system(cmdstr)
 
 
 
