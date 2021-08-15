@@ -23,7 +23,7 @@ library(parallel)
 # (University computers may need to repeat installation
 #  after each login)
 library(devtools)
-devtools::install_github(repo="nmatzke/BioGeoBEARS", upgrade="never")
+#devtools::install_github(repo="nmatzke/BioGeoBEARS", upgrade="never")
 #######################################################
 library(rexpokit)
 library(cladoRcpp)
@@ -45,9 +45,9 @@ library(BioGeoBEARS)
 
 
 # SET THE WORKING DIRECTORY IF NEEDED
-wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/Psychotria_M0_equalRates/"
+#wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/Psychotria_M0_equalRates/"
 #wd = "Psychotria_M0_equalRates/"
-setwd(wd)
+#setwd(wd)
 
 # Double-check your working directory with getwd()
 getwd()
