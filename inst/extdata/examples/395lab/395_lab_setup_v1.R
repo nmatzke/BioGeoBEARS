@@ -50,4 +50,5 @@ labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models
 # Open an R script in R Studio
 file.edit(labpt1a_script)
 
+file.edit(labpt2a_script)
 
