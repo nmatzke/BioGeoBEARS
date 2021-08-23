@@ -161,18 +161,18 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 # For a slow analysis, run once, then set runslow=FALSE to just 
 # load the saved result.
 runslow = TRUE
-resfn = "sim_traitsOnly_1rate_v1.Rdata"
+resfn = "sim_traitsOnly_1rate_v2.Rdata"
 if (runslow)
 		{
 		res = bears_optim_run(BioGeoBEARS_run_object)
 		res    
 
 		save(res, file=resfn)
-		resTrait_1rate = res
+		resTrait_1rate_v2 = res
 		} else {
 		# Loads to "res"
 		load(resfn)
-		resTrait_1rate = res
+		resTrait_1rate_v2 = res
 		} # END if (runslow)
 
 
@@ -297,18 +297,18 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 # For a slow analysis, run once, then set runslow=FALSE to just 
 # load the saved result.
 runslow = TRUE
-resfn = "sim_traitsOnly_2rates_v1.Rdata"
+resfn = "sim_traitsOnly_2rates_v2.Rdata"
 if (runslow)
 		{
 		res = bears_optim_run(BioGeoBEARS_run_object)
 		res    
 
 		save(res, file=resfn)
-		resTrait_2rates = res
+		resTrait_2rates_v2 = res
 		} else {
 		# Loads to "res"
 		load(resfn)
-		resTrait_2rates = res
+		resTrait_2rates_v2 = res
 		} # END if (runslow)
 
 
@@ -349,18 +349,18 @@ BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 runslow = TRUE
-resfn = "DEC_inf.Rdata"
+resfn = "DECx_inf.Rdata"
 if (runslow)
 	{
 	res = bears_optim_run(BioGeoBEARS_run_object)
 	res    
 
 	save(res, file=resfn)
-	resDEC = res
+	resDECx = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDEC = res
+	resDECx = res
 	}
 
 
@@ -411,18 +411,18 @@ print("Printing warnings: 'warnings()':")
 print(warnings())
 
 runslow = TRUE
-resfn = "DECj_inf.Rdata"
+resfn = "DECjx_inf.Rdata"
 if (runslow)
 	{
 	res = bears_optim_run(BioGeoBEARS_run_object)
 	res    
 
 	save(res, file=resfn)
-	resDECj = res
+	resDECjx = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDECj = res
+	resDECjx = res
 	}
 
 
@@ -538,11 +538,11 @@ if (runslow)
 	res = bears_optim_run(BioGeoBEARS_run_object, skip_optim=FALSE, skip_optim_option="return_all")
 
 	save(res, file=resfn)
-	resDEC_t12_t21_m2 = res
+	resDECx_t12_t21_m2 = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDEC_t12_t21_m2 = res
+	resDECx_t12_t21_m2 = res
 	}
 
 
@@ -663,11 +663,11 @@ if (runslow)
 	res = bears_optim_run(BioGeoBEARS_run_object, skip_optim=FALSE, skip_optim_option="return_all")
 	save(res, file=resfn)
 
-	resDECj_t12_t21_m2 = res
+	resDECjx_t12_t21_m2 = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDECj_t12_t21_m2 = res
+	resDECjx_t12_t21_m2 = res
 	}
 
 
@@ -681,12 +681,12 @@ if (runslow)
 #######################################################
 # Extract just geography ancestral states from geog+trait ancestral states
 #######################################################
-geog_res = get_geog_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
+geog_res = get_geog_from_traitgeog_results(res=resDECjx_t12_t21_m2, num_trait_states=2)
 
 #######################################################
 # Extract just trait ancestral states from geog+trait ancestral states
 #######################################################
-trait_res = get_trait_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
+trait_res = get_trait_from_traitgeog_results(res=resDECjx_t12_t21_m2, num_trait_states=2)
 tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2a, "geog.data", sep="/")))
 
 #######################################################
@@ -719,6 +719,27 @@ res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 
 
 
+
+#######################################################
+# Extract parameters, lnLs, etc. like you did for
+# Psychotria, and calculate AICs & AIC weights
+#######################################################
+
+
+#######################################################
+# The log-likelihoods and parameter estimates are stored in:
+#######################################################
+# resTrait_1rate_v2
+# resTrait_2rates_v2
+# resDECx
+# resDECjx
+# resDECx_t12_t21_m2
+# resDECjx_t12_t21_m2
+
+# E.g.
+resDECjx_t12_t21_m2$total_loglikelihood
+resDECjx_t12_t21_m2$outputs@params_table
+resDECjx_t12_t21_m2$outputs@params_table["x","est"]
 
 
 

@@ -720,6 +720,22 @@ res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 # Psychotria, and calculate AICs & AIC weights
 #######################################################
 
+#######################################################
+# The log-likelihoods and parameter estimates are stored in:
+#######################################################
+# resTrait_1rate
+# resTrait_2rates
+# resDEC
+# resDECj
+# resDEC_t12_t21_m2
+# resDECj_t12_t21_m2
+
+# E.g.
+resDECj_t12_t21_m2$total_loglikelihood
+resDECj_t12_t21_m2$outputs@params_table
+resDECj_t12_t21_m2$outputs@params_table["x","est"]
+
+
 
 
 
