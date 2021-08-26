@@ -14,7 +14,7 @@ library(FD)       # for FD::maxent() (make sure this is up-to-date)
 library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
 library(parallel)
 library(BioGeoBEARS)
-
+library(GenSA)  # run install.packages("GenSA") if you need this
 
 
 # wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC+x_traits_models/"
@@ -438,7 +438,7 @@ BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
 BioGeoBEARS_run_object$num_cores_to_use = 1
-BioGeoBEARS_run_object$use_optimx=TRUE
+BioGeoBEARS_run_object$use_optimx="GenSA"
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
 BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
@@ -556,7 +556,7 @@ BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
 BioGeoBEARS_run_object$num_cores_to_use = 1
-BioGeoBEARS_run_object$use_optimx=TRUE
+BioGeoBEARS_run_object$use_optimx="GenSA"
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
 BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
