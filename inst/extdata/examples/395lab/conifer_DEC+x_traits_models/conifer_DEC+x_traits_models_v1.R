@@ -388,10 +388,10 @@ BioGeoBEARS_run_object$force_sparse = FALSE
 
 #tr = read.tree(BioGeoBEARS_run_object$trfn)
 
-dstart = resDEC$outputs@params_table["d","est"]
-estart = resDEC$outputs@params_table["e","est"]
+dstart = resDECx$outputs@params_table["d","est"]
+estart = resDECx$outputs@params_table["e","est"]
 jstart = 0.0001
-xstart = resDEC$outputs@params_table["x","est"]
+xstart = resDECx$outputs@params_table["x","est"]
 
 # Add j as a free parameter
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"
@@ -471,10 +471,10 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
 t12_start = resTrait_2rates$outputs@params_table["t12","est"]
 t21_start = resTrait_2rates$outputs@params_table["t21","est"]
 m2_start = 1
-dstart = resDEC$outputs@params_table["d","est"]
-estart = max(c(resDEC$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
+dstart = resDECx$outputs@params_table["d","est"]
+estart = max(c(resDECx$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
 jstart = 0.0001
-xstart = resDEC$outputs@params_table["x","est"]
+xstart = resDECx$outputs@params_table["x","est"]
 
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "init"] = dstart
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "est"] = dstart
@@ -586,10 +586,10 @@ BioGeoBEARS_run_object = add_trait_to_BioGeoBEARS_run_object(BioGeoBEARS_run_obj
 t12_start = resTrait_2rates$outputs@params_table["t12","est"]
 t21_start = resTrait_2rates$outputs@params_table["t21","est"]
 m2_start = 1
-dstart = resDECj$outputs@params_table["d","est"]
-estart = max(c(resDECj$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
-jstart = resDECj$outputs@params_table["j","est"]
-xstart = resDECj$outputs@params_table["x","est"]
+dstart = resDECjx$outputs@params_table["d","est"]
+estart = max(c(resDECjx$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
+jstart = resDECjx$outputs@params_table["j","est"]
+xstart = resDECjx$outputs@params_table["x","est"]
 
 
 # Set up DEC+J model
