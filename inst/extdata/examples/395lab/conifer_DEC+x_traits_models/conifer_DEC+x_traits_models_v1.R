@@ -468,8 +468,8 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
 
 
 # Starting values from ML results of simpler run
-t12_start = resTrait_2rates$outputs@params_table["t12","est"]
-t21_start = resTrait_2rates$outputs@params_table["t21","est"]
+t12_start = resTrait_2rates_v2$outputs@params_table["t12","est"]
+t21_start = resTrait_2rates_v2$outputs@params_table["t21","est"]
 m2_start = 1
 dstart = resDECx$outputs@params_table["d","est"]
 estart = max(c(resDECx$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
@@ -583,8 +583,8 @@ BioGeoBEARS_run_object = add_trait_to_BioGeoBEARS_run_object(BioGeoBEARS_run_obj
 
 
 # Starting values from ML results of simpler run
-t12_start = resTrait_2rates$outputs@params_table["t12","est"]
-t21_start = resTrait_2rates$outputs@params_table["t21","est"]
+t12_start = resTrait_2rates_v2$outputs@params_table["t12","est"]
+t21_start = resTrait_2rates_v2$outputs@params_table["t21","est"]
 m2_start = 1
 dstart = resDECjx$outputs@params_table["d","est"]
 estart = max(c(resDECjx$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
