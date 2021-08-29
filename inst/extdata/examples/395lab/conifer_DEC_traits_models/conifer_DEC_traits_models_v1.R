@@ -13,7 +13,7 @@ library(FD)       # for FD::maxent() (make sure this is up-to-date)
 library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
 library(parallel)
 library(BioGeoBEARS)
-
+library(GenSA)
 
 
 # wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC_traits_models/"
@@ -430,14 +430,14 @@ if (runslow)
 
 
 #######################################################
-# Run DEC + x + t12 + t21 + m2, starting from DEC-geog and 2rates
+# Run DEC + t12 + t21 + m2, starting from DEC-geog and 2rates
 #######################################################
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
 BioGeoBEARS_run_object$num_cores_to_use = 1
-BioGeoBEARS_run_object$use_optimx=TRUE
+BioGeoBEARS_run_object$use_optimx="GenSA"
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog.data", sep="/"))
 BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
@@ -529,7 +529,7 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 
 runslow = TRUE
-resfn = "DECx+t12+t21+m2_inf.Rdata"
+resfn = "DEC+t12+t21+m2_inf.Rdata"
 if (runslow)
 	{
 	# Calculate the lnL for the parameters, and store in text file
@@ -546,14 +546,14 @@ if (runslow)
 
 
 #######################################################
-# Run DECj + x + t12 + t21 + m2, starting from DECj-geog and 2rates
+# Run DECj + t12 + t21 + m2, starting from DECj-geog and 2rates
 #######################################################
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
 BioGeoBEARS_run_object$num_cores_to_use = 1
-BioGeoBEARS_run_object$use_optimx=TRUE
+BioGeoBEARS_run_object$use_optimx="GenSA"
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog.data", sep="/"))
 BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
@@ -652,7 +652,7 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 
 
-resfn = "DECJx+t12+t21+m2_inf.Rdata"
+resfn = "DECJ+t12+t21+m2_inf.Rdata"
 runslow = TRUE
 if (runslow)
 	{
@@ -745,13 +745,13 @@ resDECj_t12_t21_m2$outputs@params_table["x","est"]
 # Several independent re-runs to check optimizations
 # (not needed for lab exercise)
 # 
-# Rdata_fn = "DECx+t12+t21+m2_inf.Rdata"
+# Rdata_fn = "DEC+t12+t21+m2_inf.Rdata"
 # rerun_optim_table_DEC = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
 # 
-# Rdata_fn = "DECJx+t12+t21+m2_inf.Rdata"
+# Rdata_fn = "DECJ+t12+t21+m2_inf.Rdata"
 # rerun_optim_table_DECj = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
 # 
-# Rdata_fn = "DECJx+t12+t21+m2_rep2_inf.Rdata"
+# Rdata_fn = "DECJ+t12+t21+m2_rep2_inf.Rdata"
 # rerun_optim_table_DECj_rep2 = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
 # 
 
