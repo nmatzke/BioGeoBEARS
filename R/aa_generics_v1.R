@@ -3861,7 +3861,7 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 	# assemble beginning table
 	
 	# check if internal node labels exist
-	if ("node.label" %in% attributes(t)$names == FALSE)
+	if (("node.label" %in% attributes(t)$names == FALSE) || (is.null(t$node.label) == TRUE))
 		{
 		rootnum = get_nodenum_structural_root(t)
 		
