@@ -839,6 +839,9 @@ plot_stratum_lines=TRUE
 #' 
 get_colors_for_numareas = function(numareas, use_rainbow=FALSE)
 	{
+	# default
+	area_colors = sapply(X=(1:numareas)/numareas, FUN=gray)
+	
 	if (use_rainbow == TRUE)
 		{
 		area_colors = rainbow(numareas)
