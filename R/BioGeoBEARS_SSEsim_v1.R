@@ -315,7 +315,7 @@ SSEsim_setup_inputs <- function(SSEmodel=NULL, BioGeoBEARS_run_object=NULL, trai
 	# Analysis with a trait modifying dispersal rate
 	if (traitTF == TRUE)
 		{
-		numstates_geogtrait = length(states_list)
+		numstates_geogtrait = length(states_list) * number_of_trait_states
 		res = modify_Qmat_with_trait(Qmat=NULL, BioGeoBEARS_run_object=BioGeoBEARS_run_object, numstates_geogtrait=numstates_geogtrait, areas_list=areas_list, states_list=states_list, dispersal_multipliers_matrix=dispersal_multipliers_matrix, elist=elist, force_sparse=force_sparse)
 		Qmat = res$Qmat
 		m = res$m
