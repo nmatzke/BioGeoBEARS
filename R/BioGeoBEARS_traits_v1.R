@@ -1062,6 +1062,20 @@ get_trait_from_traitgeog_results <- function(res, num_trait_states)
 	trait_res$inputs$max_range_size = 1
 	trait_res$include_null_range = FALSE
 	
+	# You have to override the states_list (if it was overridden in the 
+	# original joint analysis
+	# The states list here is 0-BASED
+	if (is.null(res$inputs$states_list) == FALSE)
+		{
+		tmp_trait_states_list = list()
+		for (i in 1:num_trait_states)
+			{
+			tmp_trait_states_list[[i]] = i-1
+			}
+		
+		trait_res$inputs$states_list = tmp_trait_states_list
+		}
+	
 	return(trait_res)
 	}
 
