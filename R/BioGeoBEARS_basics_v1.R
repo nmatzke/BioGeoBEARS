@@ -2042,15 +2042,26 @@ save_tipranges_to_LagrangePHYLIP <- function(tipranges_object, lgdata_fn="lagran
 	tipranges_df = tipranges_object@df
 
 	# If there are no area names, or if they are the wrong length, assign A B C D E etc...
-	if ( (length(areanames) != ncol(tipranges_df)) || ((length(areanames) == 1) && (areanames == "replace")) )
+	if (length(areanames) ==1)
 		{
-		new_areanames = LETTERS[1:ncol(tipranges_df)]
-		areanames_txt = paste(new_areanames, sep=" ")
-
-		cat("\nNote: assigning '", areanames_txt, "' as area names.\n", sep="")
-
+		if (areanames == "replace")
+			{
+			new_areanames = LETTERS[1:ncol(tipranges_df)]
+			areanames_txt = paste(new_areanames, sep=" ")
+			cat("\nNote: assigning '", areanames_txt, "' as area names.\n", sep="")
+			} else {
+			areanames_txt = paste(areanames, collapse=" ")
+			}
 		} else {
-		areanames_txt = paste(areanames, collapse=" ")
+		# Not length 1
+		if (length(areanames) != ncol(tipranges_df))
+			{
+			new_areanames = LETTERS[1:ncol(tipranges_df)]
+			areanames_txt = paste(new_areanames, sep=" ")
+			cat("\nNote: assigning '", areanames_txt, "' as area names.\n", sep="")
+			} else {
+			areanames_txt = paste(areanames, collapse=" ")
+			}
 		}
 
 
