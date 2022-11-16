@@ -3492,16 +3492,20 @@ get_all_node_ages <- function(obj)
 #'
 #' I.e., the distance of the highest node above the root.  A utility function. 
 #' Use of \code{\link[ape]{dist.nodes}} may be slow.
+#'
+#' Same function as \code{\link{get_root_age}}.
 #' 
 #' @param obj An ape phylo object
 #' @return \code{max_height} The age (from the root) of the highest node.
 #' @export
-#' @seealso \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @seealso \code{\link{get_root_age}}, \code{\link{prt}}, \code{\link{chainsaw2}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
 #' @examples
 #' test=1
 #' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
 #' get_all_node_ages(obj=tr)
+#' max(get_all_node_ages(obj=tr))
+#' get_max_height_tree(obj=tr)
 #' 
 get_max_height_tree <- function(obj)
 	{
@@ -3512,6 +3516,38 @@ get_max_height_tree <- function(obj)
 	max_height = max(get_node_ages_of_tips(obj))
 	return(max_height)
 	}
+
+
+
+#######################################################
+# get_root_age
+#######################################################
+#' Get the age of the root node.
+#'
+#' I.e., the distance of the highest node above the root.  A utility function. 
+#' Use of \code{\link[ape]{dist.nodes}} may be slow.
+#'
+#' Same function as \code{\link{get_max_height_tree}}.
+#' 
+#' @param obj An ape phylo object
+#' @return \code{root_age} The age of the root
+#' @export
+#' @seealso \code{\link{get_max_height_tree}}, \code{\link{prt}}, \code{\link{chainsaw2}}
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @examples
+#' test=1
+#' tr = read.tree(file="", text="((human:1,chimp:1):1,gorilla:2);")
+#' get_all_node_ages(obj=tr)
+#' max(get_all_node_ages(obj=tr))
+#' get_root_age(obj=tr)
+#'  
+get_root_age <- function(tr)
+	{
+	tip_ages_above_root = get_node_ages_of_tips(tr)
+	root_age = max(tip_ages_above_root)
+	return(root_age)
+	}
+	
 
 
 
