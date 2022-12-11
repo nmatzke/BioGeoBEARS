@@ -31,6 +31,8 @@ labdir = paste(extdata_dir, "examples/395lab/", sep="/")
 labpt2a = paste(extdata_dir, "examples/395lab/conifer_DEC_traits_models/", sep="/")
 labpt2b = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models/", sep="/")
 
+setwd(labpt2b)
+
 
 #######################################################
 # Inference
@@ -438,7 +440,7 @@ BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
 BioGeoBEARS_run_object$num_cores_to_use = 1
-BioGeoBEARS_run_object$use_optimx=TRUE
+BioGeoBEARS_run_object$use_optimx="GenSA"
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
 BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
@@ -556,7 +558,7 @@ BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
 BioGeoBEARS_run_object$num_cores_to_use = 1
-BioGeoBEARS_run_object$use_optimx=TRUE
+BioGeoBEARS_run_object$use_optimx="GenSA"
 BioGeoBEARS_run_object$speedup=TRUE
 BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
 BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
@@ -650,20 +652,51 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m2", "max"] = 1
 
 
 
+#######################################################
+# Optimal answers:
+#          p1    p2        p3        p4
+# 0.0871862 1e-13 -1.067154 0.6062411
+#           p5          p6        p7     value
+# 0.004288243 0.003762523 0.5454133 -306.8073
+#######################################################
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "init"] = 0.087186202
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "est"] = 0.087186202
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e", "init"] = 1.00E-13
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e", "est"] = 1.00E-13
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j", "init"] = 0.606241138
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j", "est"] = 0.606241138
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x", "init"] = -1.067153685
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x", "est"] = -1.067153685
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t12", "init"] = 0.004288243
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t12", "est"] = 0.004288243
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t21", "init"] = 0.003762523
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t21", "est"] = 0.003762523
+
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m1", "init"] = 1
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m1", "est"] = 1
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m2", "init"] = 0.545413287
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m2", "est"] = 0.545413287
+
+
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 
-# Calculate the lnL for the parameters, and store in text file
-
 
 
 resfn = "DECJx+t12+t21+m2_inf.Rdata"
-runslow = FALSE
+runslow = TRUE
 if (runslow)
 	{
 	# Calculate the lnL for the parameters, and store in text file
-	res = bears_optim_run(BioGeoBEARS_run_object, skip_optim=FALSE, skip_optim_option="return_all")
+	res = bears_optim_run(BioGeoBEARS_run_object, skip_optim=TRUE, skip_optim_option="return_all")
 	save(res, file=resfn)
 
 	resDECj_t12_t21_m2 = res
@@ -673,6 +706,15 @@ if (runslow)
 	resDECj_t12_t21_m2 = res
 	}
 
+
+
+# Calculate the lnL for the parameters, and store in text file
+resTrait_1rate$total_loglikelihood
+resTrait_2rates$total_loglikelihood
+resDEC$total_loglikelihood
+resDECj$total_loglikelihood
+resDEC_t12_t21_m2$total_loglikelihood
+resDECj_t12_t21_m2$total_loglikelihood
 
 
 

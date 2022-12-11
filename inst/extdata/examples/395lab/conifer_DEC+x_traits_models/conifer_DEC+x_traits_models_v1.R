@@ -649,6 +649,44 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m2", "max"] = 1
 
 
 
+#######################################################
+# Optimal answers:
+#          p1    p2        p3        p4
+# 0.0871862 1e-13 -1.067154 0.6062411
+#           p5          p6        p7     value
+# 0.004288243 0.003762523 0.5454133 -306.8073
+#######################################################
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "init"] = 0.087186202
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "est"] = 0.087186202
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e", "init"] = 1.00E-13
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e", "est"] = 1.00E-13
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j", "init"] = 0.606241138
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j", "est"] = 0.606241138
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x", "init"] = -1.067153685
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x", "est"] = -1.067153685
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t12", "init"] = 0.004288243
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t12", "est"] = 0.004288243
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t21", "init"] = 0.003762523
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["t21", "est"] = 0.003762523
+
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m1", "init"] = 1
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m1", "est"] = 1
+
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m2", "init"] = 0.545413287
+BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["m2", "est"] = 0.545413287
+
+
+BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object)
+check_BioGeoBEARS_run(BioGeoBEARS_run_object)
+
+
+
 
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
