@@ -2027,11 +2027,110 @@ read_times_fn <- function(inputs=NULL, timesfn=NULL)
 		} else {
 		timeperiods = NULL
 		}
-	
-	
-	
 	return(timeperiods)
 	}
+
+
+
+#' library(ape)
+#' library(BioGeoBEARS)
+#' 
+#' extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
+#' 
+#' # Load timeperiods from file
+#' times_fn = np(paste(addslash(extdata_dir), "examples/Psychotria_M3strat/BGB/timeperiods.txt", sep=""))
+#' inputs = NULL
+#' inputs$times_fn = times_fn
+#' timeperiods = read_times_fn(inputs$times_fn)
+#' 
+#' # Or set the timeperiods manually
+#' timeperiods = c(0.5, 1.9, 3.7, 5.1, 10)
+#' 
+#' # Load tree from file
+#' trfn = np(paste(addslash(extdata_dir), "Psychotria_5.2.newick", sep=""))
+#' tr = read.tree(trfn)
+#' 
+#' # Run the function
+#' counts_df = sum_nodes_branchlengths_by_timeperiod(tr, timeperiods)
+#' counts_df
+#' 
+#' # Check that the sums add up
+#' sum(tr$edge.length)
+#' sum(counts_df$branchlength_sums)
+#' 
+#' tr$Nnode
+#' sum(counts_df$node_counts)
+#' 
+#' #   time_tops time_bots node_counts branchlength_sums
+#' # 1       0.0       0.5           0          9.500000
+#' # 2       0.5       1.9           6         23.908071
+#' # 3       1.9       3.7           9         13.601658
+#' # 4       3.7       5.1           2          4.490857
+#' # 5       5.1      10.0           1          0.200000
+#' 
+sum_nodes_branchlengths_by_timeperiod <- function(tr, timeperiods)
+	{
+	# Check if "tr" is useable
+	if (("phylo" %in% class(tr)) == TRUE)
+		{
+		trfn = "temp_tree.newick"
+		write.tree(tr, file=trfn)
+		} else if (("character" %in% class(tr)) == TRUE) {
+		trfn = tr
+		} else {
+		txt = "STOP ERROR in sum_nodes_branchlengths_by_timeperiod(): argument 'tr' must be either a 'phylo' tree object, or a 'character' filename."
+		stop(txt)
+		}
+	
+	
+	
+	inputs = NULL
+	inputs$trfn = trfn
+	inputs$timeperiods = timeperiods
+
+	tree_pieces = section_the_tree(inputs, make_master_table=TRUE, plot_pieces=FALSE, cut_fossils=FALSE)
+
+	tree_pieces
+
+	node_counts = NULL
+	branchlength_sums = NULL
+
+	for (i in 1:length(tree_pieces$tree_sections_list))
+		{
+		tree_piece = tree_pieces$tree_sections_list[[i]]
+		branchlength_sum = 0
+		nodes_sum = 0
+	
+		for (j in 1:length(tree_piece$return_pieces_list))
+			{
+			if ("numeric" %in% class(tree_piece$return_pieces_list[[j]]))
+				{
+				branchlength_sum = branchlength_sum + tree_piece$return_pieces_list[[j]]
+				} else {
+				tmptr = tree_piece$return_pieces_list[[j]]
+				nodes_sum = nodes_sum + tmptr$Nnode
+				if (is.null(tmptr$root.edge))
+					{
+					branchlength_sum = branchlength_sum + sum(tmptr$edge.length) + 0.0
+					} else {
+					branchlength_sum = branchlength_sum + sum(tmptr$edge.length) + tmptr$root.edge
+					}
+				} # END if ("numeric" %in% class
+			} # END for (j in 1:length(tree_piece$return_pieces_list))
+		node_counts = c(node_counts, nodes_sum)
+		branchlength_sums = c(branchlength_sums, branchlength_sum)	
+		} # END for (i in 1:length(tree_pieces))
+	
+	time_tops = c(0.0, timeperiods[1:(length(timeperiods)-1)])
+	time_bots = timeperiods
+	tmpmat = cbind(time_tops, time_bots, node_counts, branchlength_sums)
+	counts_df = as.data.frame(tmpmat, stringsAsFactors=FALSE)
+	names(counts_df) = c("time_tops", "time_bots", "node_counts", "branchlength_sums")
+	counts_df
+	} # END sum_nodes_branchlengths_by_timeperiod <- function(tr, timeperiods)
+
+
+
 
 
 subset_distmats <- function(distmats_list, rows_to_keep_TF, replace_NAs_with=0.0)
