@@ -275,8 +275,8 @@ get_Cevent_probs_df_from_mats <- function(mats, include_null_range=TRUE)
 # Returns Carray table, with per-event probs, in 1-based state numbering
 get_Cevent_probs_df_from_res <- function(res)
 	{
-	mats = get_Qmat_COOmat_from_res(res, numstates=ncol(res$ML_marginal_prob_each_state_at_branch_top_AT_node), include_null_range=res$include_null_range, max_range_size=res$inputs$max_range_size, timeperiod_i=1)
-	include_null_range=res$include_null_range
+	mats = get_Qmat_COOmat_from_res(res, numstates=ncol(res$ML_marginal_prob_each_state_at_branch_top_AT_node), include_null_range=res$inputs$include_null_range, max_range_size=res$inputs$max_range_size, timeperiod_i=1)
+	include_null_range=res$inputs$include_null_range
 	
 	Carray_df = get_Cevent_probs_df_from_mats(mats, include_null_range=include_null_range)
 	return(Carray_df)

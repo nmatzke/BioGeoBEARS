@@ -2089,7 +2089,15 @@ sum_nodes_branchlengths_by_timeperiod <- function(tr, timeperiods)
 	inputs$timeperiods = timeperiods
 
 	tree_pieces = section_the_tree(inputs, make_master_table=TRUE, plot_pieces=FALSE, cut_fossils=FALSE)
-
+	
+	# WATCH OUT: Because of this, when cut_fossils=FALSE, the sum of edge lengths will be wrong...
+	# 
+	# This will extend ALL tips up to time_bp=0 my.  Keep track of true tip age through orig_tr_table$fossils and orig_tr_table$time_bp
+	# 	phy_as_it_is_chopped_down = extend_tips_to_ultrametricize(obj=phy_as_it_is_chopped_down, age_of_root=0, tips_end_at_this_date=NA)
+	#
+	# ...check each tree pice
+	
+	
 	tree_pieces
 
 	node_counts = NULL
@@ -2105,7 +2113,28 @@ sum_nodes_branchlengths_by_timeperiod <- function(tr, timeperiods)
 			{
 			if ("numeric" %in% class(tree_piece$return_pieces_list[[j]]))
 				{
-				branchlength_sum = branchlength_sum + tree_piece$return_pieces_list[[j]]
+				# Check if this branch segment actually is actually alive during or after this time bin
+				stratum = i
+				piecenum = j
+				TF1 = tree_pieces$master_table$stratum == stratum
+				TF2 = tree_pieces$master_table$piecenum == piecenum
+				TF = (TF1 + TF2) == 2
+				master_row = tree_pieces$master_table[TF,]
+				if (master_row$time_bp > master_row$time_bot)
+					{
+					next() # skip; this fossil tip is older than the time bin
+					}
+				else if ( (master_row$time_bp < master_row$time_bot) && (master_row$time_bp > master_row$time_top) )
+					{
+					# This branch tip ends in this time bin; add it's segmental length
+					length_of_segment = master_row$time_bot - master_row$time_bp
+					branchlength_sum = branchlength_sum + length_of_segment
+					}
+				else
+					{
+					# This branch is continuing through the time bin; add it
+					branchlength_sum = branchlength_sum + tree_piece$return_pieces_list[[j]]
+					}
 				} else {
 				tmptr = tree_piece$return_pieces_list[[j]]
 				nodes_sum = nodes_sum + tmptr$Nnode
