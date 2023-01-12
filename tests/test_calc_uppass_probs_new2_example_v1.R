@@ -179,11 +179,11 @@ right_branch_downpass_likes = rep(1, numstates)
 Rsp_rowsums = tmpres$Rsp_rowsums
 
 
-clado_table = cbind(tmpres$COO_weights_columnar[[1]]+1, tmpres$COO_weights_columnar[[2]]+1, tmpres$COO_weights_columnar[[3]]+1, tmpres$COO_weights_columnar[[4]])
+clado_table = cbind(tmpres$COO_weights_columnar[[1]]+1+include_null_range, tmpres$COO_weights_columnar[[2]]+1+include_null_range, tmpres$COO_weights_columnar[[3]]+1+include_null_range, tmpres$COO_weights_columnar[[4]])
 
 probs = rep(0, nrow(clado_table))
 for (i in 1:length(probs))
-	probs[i] = clado_table[i,4] / Rsp_rowsums[clado_table[i,1]]
+	probs[i] = clado_table[i,4] / Rsp_rowsums[clado_table[i,1]-include_null_range]
 end
 clado_table = cbind(clado_table, probs)
 clado_table_df = adf2(clado_table)
