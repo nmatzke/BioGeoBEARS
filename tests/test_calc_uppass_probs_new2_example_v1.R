@@ -303,6 +303,18 @@ resDEC$ML_marginal_prob_each_state_at_branch_bottom_below_node[6,]
 # [1] 0.00000000 0.02123577 0.75782822 0.22093601
 
 
+
+
+
+
+
+# Check uppass
+
+tmpres = get_Qmat_COOmat_from_res(resDEC, numstates=numstates, include_null_range=TRUE, max_range_size=NULL, timeperiod_i=1)
+
+
+u0 = c(0.0, 0.125, 0.75, 0.125)
+u0 %*% expm(tmpres$Qmat)
 	} # END calc_uppass_probs_new2_example <- function()
 	
 	
