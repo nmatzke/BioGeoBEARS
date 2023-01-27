@@ -1473,6 +1473,12 @@ addslash <- function(tmpstr)
 #' @param numdigits_for_superhigh_scientific Number of digits after the '.' for scientific notation of large numbers.
 #' @param numdigits_inbetween_have_fixed_digits Numbers of medium size have this many fixed digits.  Note that other cutoffs are specified
 #' in the code, and \code{\link[base]{signif}} is used to make e.g. integers appear as 0, 1, 2..
+#' NOTE: "numdigits_inbetween_have_fixed_digits"
+#' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
+#' to 3 + 1 (the dot) + typical number of integer digits.
+#' NOTE: "numdigits_inbetween_have_fixed_digits"
+#' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
+#' to 3 + 1 (the dot) + typical number of integer digits.
 #' @return \code{cellval} The value, reformatted and of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
@@ -1646,6 +1652,9 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' @param numdigits_for_superhigh_scientific Number of digits after the '.' for scientific notation of large numbers.
 #' @param numdigits_inbetween_have_fixed_digits Numbers of medium size have this many fixed digits.  Note that other cutoffs are specified
 #' in the code, and \code{\link[base]{signif}} is used to make e.g. integers appear as 0, 1, 2..
+#' NOTE: "numdigits_inbetween_have_fixed_digits"
+#' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
+#' to 3 + 1 (the dot) + typical number of integer digits.
 #' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
@@ -1720,6 +1729,9 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #' @param numdigits_for_superhigh_scientific Number of digits after the '.' for scientific notation of large numbers.
 #' @param numdigits_inbetween_have_fixed_digits Numbers of medium size have this many fixed digits.  Note that other cutoffs are specified
 #' in the code, and \code{\link[base]{signif}} is used to make e.g. integers appear as 0, 1, 2..
+#' NOTE: "numdigits_inbetween_have_fixed_digits"
+#' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
+#' to 3 + 1 (the dot) + typical number of integer digits.
 #' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}

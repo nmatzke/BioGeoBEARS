@@ -312,7 +312,7 @@ prob_each_split_scenario_to_uppass_probs <- function(prob_each_split_scenario, C
 #######################################################
 # EXAMPLE TO CHECK calc_uppass_probs_new2
 #######################################################
-calc_uppass_probs_new2_example <- function()
+calc_uppass_probs_new2_example_DEC <- function()
 	{
 # dput(resDEC)
 
@@ -497,6 +497,10 @@ end
 clado_table = cbind(clado_table, probs)
 clado_table_df = adf2(clado_table)
 names(clado_table_df) = c("i", "j", "k", "wt", "prob")
+
+clado_table_df$i = clado_table_df$i + include_null_range # match to Julia
+clado_table_df$j = clado_table_df$j + include_null_range # match to Julia
+clado_table_df$k = clado_table_df$k + include_null_range # match to Julia
 clado_table_df
 
 # equal ancstate probs
@@ -613,6 +617,335 @@ resDEC$ML_marginal_prob_each_state_at_branch_bottom_below_node[6,]
 
 
 	} # END calc_uppass_probs_new2_example <- function()
+	
+
+
+
+
+
+
+
+
+
+
+calc_uppass_probs_new2_example_DECj <- function()
+	{
+# dput(resDEC)
+
+# dput(resDEC)
+
+resDECj = structure(list(computed_likelihoods_at_each_node = c(1, 1, 1, 
+1, 0.507575467228889, 0.523809470236301, 1.16666613519192), relative_probs_of_each_state_at_branch_top_AT_node_DOWNPASS = structure(c(0, 
+0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0.402984832755885, 0.409090670518368, 
+0.428571393903405, 1, 0, 1, 1, 0.402985273118811, 0.409091125681156, 
+0.428571393903405, 0, 0, 0, 0, 0.194029894125303, 0.181818203800476, 
+0.14285721219319), dim = c(7L, 4L)), condlikes_of_each_state = structure(c(0, 
+0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0.204545214772224, 0.21428556740284, 
+0.499999731779099, 1, 0, 1, 1, 0.204545438289642, 0.214285805821419, 
+0.499999731779099, 0, 0, 0, 0, 0.0984848141670227, 0.095238097012043, 
+0.16666667163372), dim = c(7L, 4L)), relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS = structure(c(0, 
+0, 0, 0, NA, 0, 0, 4.99999996003697e-25, 0.999999999999, 1.99999998401279e-24, 
+4.49999996402427e-24, NA, 0.409090670518066, 0.428571393903058, 
+0.999999999999, 4.99999996003697e-25, 0.999999999998, 0.999999999997, 
+NA, 0.409091125680855, 0.428571393903058, 9.99999996003197e-13, 
+9.99999996003197e-13, 1.99999999200439e-12, 2.99999998800359e-12, 
+NA, 0.181818203801079, 0.142857212193884), dim = c(7L, 4L)), 
+    relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS = structure(c(0, 
+    0, 0, 0, NA, 0, 0, 1.08061343334044e-06, 0.985294102116435, 
+    0.478571679250394, 0.440789704720395, NA, 0.874999582489757, 
+    0.956521717030822, 0.985293037394407, 1.47065931591761e-14, 
+    0.478571178238921, 0.440789243569054, NA, 4.17510337035861e-07, 
+    5.72006626818978e-13, 0.0147058819921599, 0.0147058978835505, 
+    0.042857142510685, 0.11842105171055, NA, 0.124999999999906, 
+    0.0434782829686063), dim = c(7L, 4L)), relative_probs_of_each_state_at_branch_top_AT_node_UPPASS = structure(c(9.85294114069829e-13, 
+    9.85294098178438e-13, 1.91428570732586e-12, 2.64473683429363e-12, 
+    0.25, 8.74999996503016e-13, 9.56521713208408e-13, 1.08061344804416e-06, 
+    0.985294102114479, 0.478571679248565, 0.440789704718106, 
+    0.25, 0.874999582488132, 0.956521717028952, 0.985293037392451, 
+    2.94124909843985e-14, 0.478571178237093, 0.440789243566765, 
+    0.25, 4.17510462035026e-07, 6.154849096131e-13, 0.0147058819931158, 
+    0.0147058978845063, 0.0428571425124279, 0.118421051712485, 
+    0.25, 0.125000000000531, 0.0434782829694758), dim = c(7L, 
+    4L)), ML_marginal_prob_each_state_at_branch_bottom_below_node = structure(c(0, 
+    0, 0, 0, NA, 0, 0, 5.48371592862491e-31, 0.999999999999985, 
+    2.0000020777968e-24, 4.50000467190996e-24, NA, 0.940298019269117, 
+    0.985074610727033, 0.999999999999985, 7.46304733279965e-39, 
+    0.999999999999821, 0.999999999999194, NA, 4.4866830521154e-07, 
+    5.89081455459344e-13, 1.4925389072359e-14, 1.4925389072359e-14, 
+    1.79104569134887e-13, 8.05970560522871e-13, NA, 0.059701532062578, 
+    0.0149253892723778), dim = c(7L, 4L)), ML_marginal_prob_each_state_at_branch_top_AT_node = structure(c(0, 
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0.402984832755885, 0.940298019268833, 
+    0.98507461072675, 1, 0, 1, 1, 0.402985273118811, 4.48668439539842e-07, 
+    6.33857597743347e-13, 0, 0, 0, 0, 0.194029894125303, 0.0597015320627273, 
+    0.0149253892726166), dim = c(7L, 4L)), relative_probs_of_each_state_at_bottom_of_root_branch = c(0, 
+    0.402984832755885, 0.402985273118811, 0.194029894125303), 
+    total_loglikelihood = -1.17058691814607, inputs = list(geogfn = "geog.data", 
+        trfn = "tree.newick", abbr = "default", description = "defaults", 
+        BioGeoBEARS_model_object = new("BioGeoBEARS_model", params_table = structure(list(
+            type = c("free", "free", "fixed", "fixed", "fixed", 
+            "fixed", "fixed", "fixed", "free", "3-j", "ysv*2/3", 
+            "ysv*1/3", "ysv*1/3", "ysv*1/3", "fixed", "mx01", 
+            "mx01", "mx01", "mx01", "fixed", "fixed", "fixed", 
+            "fixed"), init = c(1e-12, 1e-12, 0, 1, 0, 0, 1, 0, 
+            2.99998997978887, 2.99999, 1.99999, 1, 1, 1, 1e-04, 
+            1e-04, 1e-04, 1e-04, 1e-04, 0.5, 0.1, 1, 0), min = c(1e-12, 
+            1e-12, 1e-12, 1e-12, -2.5, -10, -10, -10, 1e-05, 
+            1e-05, 1e-05, 1e-05, 1e-05, 1e-05, 1e-04, 1e-04, 
+            1e-04, 1e-04, 1e-04, 1e-04, 0.005, 0.005, 0.005), 
+            max = c(4.999999999999, 4.999999999999, 4.999999999999, 
+            0.999999999999, 2.5, 10, 10, 10, 2.99999, 3, 2, 1, 
+            1, 1, 0.9999, 0.9999, 0.9999, 0.9999, 0.9999, 0.9999, 
+            0.995, 0.995, 0.995), est = c(1e-12, 1e-12, 0, 1, 
+            0, 0, 1, 0, 2.99998997978887, 1.00202111301684e-05, 
+            6.6801407534456e-06, 3.3400703767228e-06, 3.3400703767228e-06, 
+            3.3400703767228e-06, 1e-04, 1e-04, 1e-04, 1e-04, 
+            1e-04, 0.5, 0.1, 1, 0), note = c("works", "works", 
+            "works", "non-stratified only", "works", "works", 
+            "works", "works", "works", "works", "works", "works", 
+            "works", "works", "works", "works", "works", "works", 
+            "works", "no", "yes", "yes", "yes"), desc = c("anagenesis: rate of 'dispersal' (range expansion)", 
+            "anagenesis: rate of 'extinction' (range contraction)", 
+            "anagenesis: rate of range-switching (i.e. for a standard char.)", 
+            "anagenesis: exponent on branch lengths", "exponent on distance (modifies d, j, a)", 
+            "exponent on environmental distance (modifies d, j, a)", 
+            "exponent on manual dispersal multipliers (modifies d, j, a)", 
+            "anagenesis: exponent on extinction risk with area (modifies e)", 
+            "cladogenesis: relative per-event weight of jump dispersal", 
+            "cladogenesis: y+s+v", "cladogenesis: y+s", "cladogenesis: relative per-event weight of sympatry (range-copying)", 
+            "cladogenesis: relative per-event weight of subset speciation", 
+            "cladogenesis: relative per-event weight of vicariant speciation", 
+            "cladogenesis: controls range size of smaller daughter", 
+            "cladogenesis: controls range size of smaller daughter", 
+            "cladogenesis: controls range size of smaller daughter", 
+            "cladogenesis: controls range size of smaller daughter", 
+            "cladogenesis: controls range size of smaller daughter", 
+            "root: controls range size probabilities of root", 
+            "mean frequency of truly sampling OTU of interest", 
+            "detection probability per true sample of OTU of interest", 
+            "false detection of OTU probability per true taphonomic control sample"
+            )), row.names = c("d", "e", "a", "b", "x", "n", "w", 
+        "u", "j", "ysv", "ys", "y", "s", "v", "mx01", "mx01j", 
+        "mx01y", "mx01s", "mx01v", "mx01r", "mf", "dp", "fdp"
+        ), class = "data.frame")), timesfn = NA, distsfn = NA, 
+        dispersal_multipliers_fn = NA, area_of_areas_fn = NA, 
+        areas_allowed_fn = NA, areas_adjacency_fn = NA, detects_fn = NA, 
+        controls_fn = NA, max_range_size = 2, force_sparse = FALSE, 
+        use_detection_model = FALSE, print_optim = TRUE, printlevel = 0, 
+        on_NaN_error = -1e+50, wd = "/GitHub/PhyBEARS.jl/test/apes_SSE", 
+        num_cores_to_use = 1, cluster_already_open = FALSE, use_optimx = TRUE, 
+        rescale_params = FALSE, return_condlikes_table = TRUE, 
+        calc_TTL_loglike_from_condlikes_table = TRUE, calc_ancprobs = TRUE, 
+        speedup = TRUE, include_null_range = TRUE, useAmbiguities = FALSE, 
+        min_branchlength = 1e-06, allow_null_tips = FALSE, all_geog_states_list_usually_inferred_from_areas_maxareas = list(
+            NA, 0L, 1L, 0:1)), outputs = new("BioGeoBEARS_model", 
+        params_table = structure(list(type = c("free", "free", 
+        "fixed", "fixed", "fixed", "fixed", "fixed", "fixed", 
+        "free", "3-j", "ysv*2/3", "ysv*1/3", "ysv*1/3", "ysv*1/3", 
+        "fixed", "mx01", "mx01", "mx01", "mx01", "fixed", "fixed", 
+        "fixed", "fixed"), init = c(1e-12, 1e-12, 0, 1, 0, 0, 
+        1, 0, 2.99998997978887, 2.99999, 1.99999, 1, 1, 1, 1e-04, 
+        1e-04, 1e-04, 1e-04, 1e-04, 0.5, 0.1, 1, 0), min = c(1e-12, 
+        1e-12, 1e-12, 1e-12, -2.5, -10, -10, -10, 1e-05, 1e-05, 
+        1e-05, 1e-05, 1e-05, 1e-05, 1e-04, 1e-04, 1e-04, 1e-04, 
+        1e-04, 1e-04, 0.005, 0.005, 0.005), max = c(4.999999999999, 
+        4.999999999999, 4.999999999999, 0.999999999999, 2.5, 
+        10, 10, 10, 2.99999, 3, 2, 1, 1, 1, 0.9999, 0.9999, 0.9999, 
+        0.9999, 0.9999, 0.9999, 0.995, 0.995, 0.995), est = c(1e-12, 
+        1e-12, 0, 1, 0, 0, 1, 0, 2.99998997978887, 1.00202111301684e-05, 
+        6.6801407534456e-06, 3.3400703767228e-06, 3.3400703767228e-06, 
+        3.3400703767228e-06, 1e-04, 1e-04, 1e-04, 1e-04, 1e-04, 
+        0.5, 0.1, 1, 0), note = c("works", "works", "works", 
+        "non-stratified only", "works", "works", "works", "works", 
+        "works", "works", "works", "works", "works", "works", 
+        "works", "works", "works", "works", "works", "no", "yes", 
+        "yes", "yes"), desc = c("anagenesis: rate of 'dispersal' (range expansion)", 
+        "anagenesis: rate of 'extinction' (range contraction)", 
+        "anagenesis: rate of range-switching (i.e. for a standard char.)", 
+        "anagenesis: exponent on branch lengths", "exponent on distance (modifies d, j, a)", 
+        "exponent on environmental distance (modifies d, j, a)", 
+        "exponent on manual dispersal multipliers (modifies d, j, a)", 
+        "anagenesis: exponent on extinction risk with area (modifies e)", 
+        "cladogenesis: relative per-event weight of jump dispersal", 
+        "cladogenesis: y+s+v", "cladogenesis: y+s", "cladogenesis: relative per-event weight of sympatry (range-copying)", 
+        "cladogenesis: relative per-event weight of subset speciation", 
+        "cladogenesis: relative per-event weight of vicariant speciation", 
+        "cladogenesis: controls range size of smaller daughter", 
+        "cladogenesis: controls range size of smaller daughter", 
+        "cladogenesis: controls range size of smaller daughter", 
+        "cladogenesis: controls range size of smaller daughter", 
+        "cladogenesis: controls range size of smaller daughter", 
+        "root: controls range size probabilities of root", "mean frequency of truly sampling OTU of interest", 
+        "detection probability per true sample of OTU of interest", 
+        "false detection of OTU probability per true taphonomic control sample"
+        )), row.names = c("d", "e", "a", "b", "x", "n", "w", 
+        "u", "j", "ysv", "ys", "y", "s", "v", "mx01", "mx01j", 
+        "mx01y", "mx01s", "mx01v", "mx01r", "mf", "dp", "fdp"
+        ), class = "data.frame")), optim_result = structure(list(
+        p1 = 1e-12, p2 = 1e-12, p3 = 2.99998997978887, value = -1.17058691814607, 
+        fevals = 58, gevals = NA_real_, niter = NA_real_, convcode = 0, 
+        kkt1 = FALSE, kkt2 = TRUE, xtime = 0.401), row.names = "bobyqa", class = c("optimx", 
+    "data.frame"), details = structure(list("bobyqa", c(0, 0, 
+    0.107063822542346), structure(c(0, 0, 0, 0, 0, 0, 0, 0, -0.0550331748526196
+    ), dim = c(3L, 3L)), c(-0.0550331748526196, 0, 0), "none"), dim = c(1L, 
+    5L), dimnames = list("bobyqa", c("method", "ngatend", "nhatend", 
+    "hev", "message"))), maximize = TRUE, npar = 3L, follow.on = FALSE)), class = "calc_loglike_sp_results")
+
+trfn = "/GitHub/PhyBEARS.jl/test/apes_SSE/tree.newick"
+moref(trfn)
+
+tree_string = "(((chimp:1,human:1):1,gorilla:2):1,orang:3);"
+tr = read.tree(file="", text=tree_string)
+trtable = prt(tr, printflag=FALSE)
+
+numstates = 4
+tmpres = get_Qmat_COOmat_from_res(resDECj, numstates=numstates, include_null_range=TRUE, max_range_size=NULL, timeperiod_i=1)
+
+probs_ancstate = rep(0.25, numstates)
+COO_weights_columnar = tmpres$COO_weights_columnar
+include_null_range = TRUE
+left_branch_downpass_likes = rep(1, numstates)
+right_branch_downpass_likes = rep(1, numstates)
+Rsp_rowsums = tmpres$Rsp_rowsums
+
+
+clado_table = cbind(tmpres$COO_weights_columnar[[1]]+1, tmpres$COO_weights_columnar[[2]]+1, tmpres$COO_weights_columnar[[3]]+1, tmpres$COO_weights_columnar[[4]])
+
+probs = rep(0, nrow(clado_table))
+for (i in 1:length(probs))
+	probs[i] = clado_table[i,4] / Rsp_rowsums[clado_table[i,1]]
+end
+clado_table = cbind(clado_table, probs)
+clado_table_df = adf2(clado_table)
+names(clado_table_df) = c("i", "j", "k", "wt", "prob")
+
+clado_table_df$i = clado_table_df$i + include_null_range # match to Julia
+clado_table_df$j = clado_table_df$j + include_null_range # match to Julia
+clado_table_df$k = clado_table_df$k + include_null_range # match to Julia
+cft(clado_table_df)
+
+# equal ancstate probs
+calc_uppass_probs_new2(probs_ancstate, COO_weights_columnar, numstates, include_null_range = include_null_range, 
+    left_branch_downpass_likes = NULL, right_branch_downpass_likes = NULL, 
+    Rsp_rowsums = NULL)
+
+$condprob_each_split_scenario_df2
+              [,1]
+ [1,] 1.855600e-07
+ [2,] 1.855600e-07
+ [3,] 5.555556e-02
+ [4,] 5.555556e-02
+ [5,] 5.555556e-02
+ [6,] 5.555556e-02
+ [7,] 5.555556e-02
+ [8,] 5.555556e-02
+ [9,] 1.666666e-01
+[10,] 1.666666e-01
+[11,] 1.666666e-01
+[12,] 1.666666e-01
+
+$relprobs_just_after_speciation_UPPASS_Left
+[1] 0.0000000 0.4444444 0.4444444 0.1111111
+
+$relprobs_just_after_speciation_UPPASS_Right
+[1] 0.0000000 0.4444444 0.4444444 0.1111111
+
+
+
+# Ancestral node states
+
+# Ancestral root node number: 5
+# Left branch node number: 6  (internal)
+# Right branch node number: 4 (a tip, orangutan)
+
+numstates = ncol(resDEC$ML_marginal_prob_each_state_at_branch_top_AT_node)
+rootnode = 5
+#probs_ancstate = resDEC$ML_marginal_prob_each_state_at_branch_top_AT_node[5,]
+probs_ancstate = rep(1/numstates, numstates)
+calc_uppass_probs_new2(probs_ancstate, COO_weights_columnar, numstates, include_null_range = include_null_range, 
+    left_branch_downpass_likes = NULL, right_branch_downpass_likes = NULL, 
+    Rsp_rowsums = NULL)
+
+# $condprob_each_split_scenario_df2
+#              [,1]
+# [1,] 6.426934e-14
+# [2,] 7.578282e-01
+# [3,] 4.036196e-02
+# [4,] 4.036196e-02
+# [5,] 4.036196e-02
+# [6,] 4.036196e-02
+# [7,] 4.036196e-02
+# [8,] 4.036196e-02
+# 
+# $relprobs_just_after_speciation_UPPASS_Left
+# [1] 0.00000000 0.08072392 0.83855215 0.08072392
+# 
+# $relprobs_just_after_speciation_UPPASS_Right
+# [1] 0.00000000 0.08072392 0.83855215 0.08072392
+
+# Calculate uppass probabilities for RIGHT branch, the corner below node 4 (sister branch is node 6)
+left_branch_downpass_likes = resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[6,]
+right_branch_downpass_likes = rep(1.0, numstates)
+tmpres = calc_uppass_probs_new2(probs_ancstate, COO_weights_columnar, numstates, include_null_range = include_null_range, 
+    left_branch_downpass_likes=left_branch_downpass_likes, right_branch_downpass_likes=right_branch_downpass_likes, 
+    Rsp_rowsums = NULL)
+
+tmpres$relprobs_just_after_speciation_UPPASS_Right
+
+calc = tmpres$relprobs_just_after_speciation_UPPASS_Right * resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[4,]
+calc / sum(calc)
+
+resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[4,]
+resDEC$ML_marginal_prob_each_state_at_branch_bottom_below_node[4,]
+
+# > tmpres$relprobs_just_after_speciation_UPPASS_Right
+# [1] 0.00000000 0.29260052 0.61644839 0.09095109
+# > 
+# > calc = tmpres$relprobs_just_after_speciation_UPPASS_Right * resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[4,]
+# > calc / sum(calc)
+# [1] 0.000000e+00 2.394214e-13 1.000000e+00 5.170425e-13
+# > 
+# > resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[4,]
+# [1] 0.00000000 0.29260052 0.61644839 0.09095109
+# > resDEC$ML_marginal_prob_each_state_at_branch_bottom_below_node[4,]
+# [1] 0.000000e+00 2.394214e-13 1.000000e+00 5.170425e-13
+
+
+
+# Calculate uppass probabilities for LEFT branch, the corner below node 6 (sister branch is node 4)
+left_branch_downpass_likes = rep(1.0, numstates)
+right_branch_downpass_likes = resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[4,]
+tmpres = calc_uppass_probs_new2(probs_ancstate, COO_weights_columnar, numstates, include_null_range = include_null_range, 
+    left_branch_downpass_likes=left_branch_downpass_likes, right_branch_downpass_likes=right_branch_downpass_likes, 
+    Rsp_rowsums = NULL)
+
+tmpres$relprobs_just_after_speciation_UPPASS_Left
+
+calc = tmpres$relprobs_just_after_speciation_UPPASS_Left * resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[6,]
+calc / sum(calc)
+
+resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[6,]
+resDEC$ML_marginal_prob_each_state_at_branch_bottom_below_node[6,]
+
+
+# > tmpres$relprobs_just_after_speciation_UPPASS_Left
+# [1] 0.000 0.125 0.750 0.125
+# > 
+# > calc = tmpres$relprobs_just_after_speciation_UPPASS_Left * resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS[6,]
+# > calc / sum(calc)
+# [1] 0.00000000 0.02123577 0.75782822 0.22093601
+# > 
+# > resDEC$relative_probs_of_each_state_at_branch_bottom_below_node_UPPASS[6,]
+# [1] 0.000 0.125 0.750 0.125
+# > resDEC$ML_marginal_prob_each_state_at_branch_bottom_below_node[6,]
+# [1] 0.00000000 0.02123577 0.75782822 0.22093601
+
+
+	} # END calc_uppass_probs_new2_example <- function()
+	
+	
+	
+	
+	
 	
 	
 	
