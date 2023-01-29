@@ -183,6 +183,19 @@ sourceall <- function(path=path, pattern="\\.R", ...)
 
 
 
+#' Shortcut for names()
+n <- function(x)
+	{
+	return(names(x))
+	}
+
+#' Shortcut for names()
+rn <- function(x)
+	{
+	return(names(x))
+	}
+
+
 
 #######################################################
 # catdf
@@ -1655,6 +1668,9 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' NOTE: "numdigits_inbetween_have_fixed_digits"
 #' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
 #' to 3 + 1 (the dot) + typical number of integer digits.
+#' @digits The "digits" argument overrides the "numdigits_inbetween_have_fixed_digits" argument, 
+#' replacing it with digits+2 (e.g. digits=4 means numdigits_inbetween_have_fixed_digits=6
+#' which means 0.12 will print 0.01234 instead. Default is NULL.
 #' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
@@ -1666,12 +1682,20 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' 0.0000, 0.0001, 0.00001, 0.0000111))
 #' conditional_format_table(input_table=input_table)
 #' 
-conditional_format_table <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4)
+conditional_format_table <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4, digits=NULL)
 	{
 	defaults='
 	input_table = adf(c(143514514514532, -42.235235, -42.0000000, 0.0000, 0.0001, 0.00001, 0.0000111))
 	conditional_format_table(input_table=input_table)
 	'
+	
+	# The "digits" argument overrides the "numdigits_inbetween_have_fixed_digits" argument, 
+	# replacing it with digits+2 (e.g. digits=4 means numdigits_inbetween_have_fixed_digits=6
+	# which means 0.12 will print 0.01234 instead.
+	if (is.null(digits) == FALSE)
+		{
+		numdigits_inbetween_have_fixed_digits = digits + 2
+		}
 	
 	# Error check for row names
 	uniq_rownames = unique(rownames(input_table))
@@ -1732,7 +1756,9 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #' NOTE: "numdigits_inbetween_have_fixed_digits"
 #' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
 #' to 3 + 1 (the dot) + typical number of integer digits.
-#' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
+#' @digits The "digits" argument overrides the "numdigits_inbetween_have_fixed_digits" argument, 
+#' replacing it with digits+2 (e.g. digits=4 means numdigits_inbetween_have_fixed_digits=6
+#' which means 0.12 will print 0.01234 instead. Default is NULL.#' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
@@ -1743,14 +1769,14 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #' 0.0000, 0.0001, 0.00001, 0.0000111))
 #' conditional_format_table(input_table=input_table)
 #' 
-cft <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4)
-	{
+cft <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4, digits=NULL)
+	{	
 	return(conditional_format_table(input_table, 
 		numbers_below_this_get_scientific=numbers_below_this_get_scientific,
 		numdigits_for_superlow_scientific=numdigits_for_superlow_scientific,
 		numbers_above_this_get_scientific=numbers_above_this_get_scientific,
 		numdigits_for_superhigh_scientific=numdigits_for_superhigh_scientific,
-		numdigits_inbetween_have_fixed_digits=numdigits_inbetween_have_fixed_digits))
+		numdigits_inbetween_have_fixed_digits=numdigits_inbetween_have_fixed_digits, digits=digits))
 	} # END cft
 
 
