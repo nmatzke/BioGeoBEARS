@@ -828,27 +828,27 @@ calc_uppass_probs_new2(probs_ancstate, COO_weights_columnar, numstates, include_
     left_branch_downpass_likes = NULL, right_branch_downpass_likes = NULL, 
     Rsp_rowsums = NULL)
 
-$condprob_each_split_scenario_df2
-              [,1]
- [1,] 1.855600e-07
- [2,] 1.855600e-07
- [3,] 5.555556e-02
- [4,] 5.555556e-02
- [5,] 5.555556e-02
- [6,] 5.555556e-02
- [7,] 5.555556e-02
- [8,] 5.555556e-02
- [9,] 1.666666e-01
-[10,] 1.666666e-01
-[11,] 1.666666e-01
-[12,] 1.666666e-01
-
-$relprobs_just_after_speciation_UPPASS_Left
-[1] 0.0000000 0.4444444 0.4444444 0.1111111
-
-$relprobs_just_after_speciation_UPPASS_Right
-[1] 0.0000000 0.4444444 0.4444444 0.1111111
-
+# $condprob_each_split_scenario_df2
+#               [,1]
+#  [1,] 1.855600e-07
+#  [2,] 1.855600e-07
+#  [3,] 5.555556e-02
+#  [4,] 5.555556e-02
+#  [5,] 5.555556e-02
+#  [6,] 5.555556e-02
+#  [7,] 5.555556e-02
+#  [8,] 5.555556e-02
+#  [9,] 1.666666e-01
+# [10,] 1.666666e-01
+# [11,] 1.666666e-01
+# [12,] 1.666666e-01
+# 
+# $relprobs_just_after_speciation_UPPASS_Left
+# [1] 0.0000000 0.4444444 0.4444444 0.1111111
+# 
+# $relprobs_just_after_speciation_UPPASS_Right
+# [1] 0.0000000 0.4444444 0.4444444 0.1111111
+# 
 
 
 # Ancestral node states
