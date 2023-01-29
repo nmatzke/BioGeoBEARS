@@ -1758,7 +1758,7 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #' to 3 + 1 (the dot) + typical number of integer digits.
 #' @digits The "digits" argument overrides the "numdigits_inbetween_have_fixed_digits" argument, 
 #' replacing it with digits+2 (e.g. digits=4 means numdigits_inbetween_have_fixed_digits=6
-#' which means 0.12 will print 0.01234 instead. Default is NULL.#' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
+#' which means 0.12 will print 0.01234 instead. Default is digits=NULL.#' @return \code{output_table} The table, reformatted with cells of class \code{\link[base]{character}}.
 #' @export
 #' @seealso \code{\link[base]{signif}}, \code{\link[base]{sprintf}}
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
