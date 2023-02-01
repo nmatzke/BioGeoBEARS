@@ -950,12 +950,16 @@ mix_colors_for_states <- function(colors_matrix, states_list_0based_index, plot_
 		tmp_numareas = length(tmpareas_in_state_0based_index)
 		
 		# Check for null etc.
-		if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))
+		# Avoid warning by checking for length = 1 first...
+		if (length(tmpareas_in_state_0based_index == "_" ||) == 1)
 			{
-			# NULL/empty range gets black
-			colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)
-			next()
-			}
+			if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))
+				{
+				# NULL/empty range gets black
+				colors_list_for_states[i] = rgb(red=0, green=0, blue=0, maxColorValue=255)
+				next()
+				} # END (tmpareas_in_state_0based_index == "_" ...
+			} # END if (length(tmpareas_in_state_0based_index == "_" ||) == 1)
 		
 		
 		
