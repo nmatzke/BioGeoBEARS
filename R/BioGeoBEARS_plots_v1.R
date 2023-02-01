@@ -951,7 +951,7 @@ mix_colors_for_states <- function(colors_matrix, states_list_0based_index, plot_
 		
 		# Check for null etc.
 		# Avoid warning by checking for length = 1 first...
-		if (length(tmpareas_in_state_0based_index == "_" ||) == 1)
+		if (length(tmpareas_in_state_0based_index) == 1)
 			{
 			if (tmpareas_in_state_0based_index == "_" || tmpareas_in_state_0based_index == "" || is.na(tmpareas_in_state_0based_index) || is.null(tmpareas_in_state_0based_index))
 				{
