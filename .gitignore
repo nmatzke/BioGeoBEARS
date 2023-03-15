@@ -33,3 +33,6 @@ tests/testthat/.DS_Store
 .DS_Store
 inst/.DS_Store
 tests/.DS_Store
+.DS_Store
+inst/.DS_Store
+tests/.DS_Store
