@@ -636,7 +636,14 @@ uniquify_clado_events <- function(clado_events_table)
 	clado_events_table = clado_events_table[TF,]
 	clado_event_txt = clado_events_table$clado_event_txt
 	dim(clado_events_table)
-
+	
+	# If no events in here, just return the original
+	if (dim(clado_events_table)[1] == 0)
+		{
+		return(clado_events_table)
+		}
+	
+	
 	# Lose something here?
 	x = sapply(X=clado_event_txt, FUN=strsplit, split="->")
 	# lx = unlist(lapply(X=x, FUN=length))
@@ -2316,16 +2323,27 @@ linear_regression_plot_OLD <- function(x, y, xlabel="x", ylabel="y", tmppch=".",
 #' 
 BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	{
+	run_parent_brs_TF = TRUE
+	
 	# Error check
+	if ((class(ana_events_table) == "data.frame") && (dim(ana_events_table)[1] > 0))
+		{
+		run_parent_brs_TF = TRUE
+		} else {
+		ana_events_table = NA
+		run_parent_brs_TF = FALSE
+		}
+
 	if (is.null(ana_events_table) == TRUE)
 		{
 		ana_events_table = NA
+		run_parent_brs_TF = FALSE
 		}
 	
 	# Is it time-stratified?
 	stratTF = (length(res$inputs$timeperiods) > 0)
 	
-	returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=res$inputs)
+	returned_mats = get_Qmat_COOmat_from_BioGeoBEARS_run_object(BioGeoBEARS_run_object=res$inputs, include_null_range=res$inputs$include_null_range)
 	returned_mats
 	areanames = returned_mats$areanames
 	ranges_list = returned_mats$ranges_list
@@ -2345,7 +2363,7 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 		translation_pruning_to_clade_edgenums
 		
 		# Error trap for when there are no anagenetic events
-		if (is.na(ana_events_table) == FALSE)
+		if (run_parent_brs_TF == TRUE)
 			{
 			ana_events_edgenums_indexes_in_clado_events_table = match(x=ana_events_table$parent_br, table=clado_events_table$parent_br)
 			ana_events_table$parent_br = translation_pruning_to_clade_edgenums$cladewise_edgenums[ana_events_edgenums_indexes_in_clado_events_table]
