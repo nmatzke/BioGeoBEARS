@@ -2679,3 +2679,127 @@ BSMs_to_phytools_SMs <- function(res, clado_events_tables, ana_events_tables)
 	} # END BSMs_to_phytools_SMs
 
 
+# Converts a BioGeoBEARS BSM to phytools format, then 
+# counts branchlength in each state FOR A TIMEPERIOD
+# like timeperiod=c(0,1)
+count_brlen_in_each_state <- function(timeperiods=c(0,1), res, trtable, clado_events_table, ana_events_table)
+	{
+	# Convert BioGeoBEARS BSMs to phytools stochastic maps (SMs)
+	phytools_SM = BSM_to_phytools_SM(res, clado_events_table, ana_events_table)
+	mapped_edge_abs_times = phytools_SM$mapped.edge
+	
+	# Construct a TIMED matrix with mapped edges in absolute time,
+	# rather than time since beginning
+	maps = phytools_SM$maps
+	max_numchanges = max(sapply(X=phytools_SM$maps, FUN=length))
+	mapped_edge_matrix = matrix(data=NA, nrow=nrow(mapped_edge_abs_times), ncol=max_numchanges+1)
+	mapped_edge_matrix[,1] = 0.0
+	statenames = colnames(mapped_edge_abs_times)
+	timeperiods_bp = timeperiods
+	colnames(mapped_edge_matrix) = unlist(rep(statenames, times=50))[1:ncol(mapped_edge_matrix)]
+	head(mapped_edge_matrix)
+	
+	
+	# Cumulative times of state changes along branches
+	# Absolute times (times bp, before present)
+	#cumtimes = matrix(data=0.0, nrow=nrow(mapped_edge_abs_times), ncol=ncol(mapped_edge_abs_times)+1)
+	#abstimes = matrix(data=0.0, nrow=nrow(mapped_edge_abs_times), ncol=ncol(mapped_edge_abs_times)+1)
+	cumtimes_list = list()
+	abstimes_bp_list = list() # In branch order; i.e. the branch behind the node
+	sums_table = NULL
+	tree_age = max(trtable$time_bp)
+	for (i in 1:length(maps))
+		{
+		map = maps[[i]]
+		brnum = i
+		TF = trtable$parent_br == brnum
+		TF[is.na(TF)] = FALSE
+		nodenum = trtable$node[TF]
+		
+		time_bp_node = trtable$time_bp[TF]
+		time_brlen = trtable$edge.length[TF]
+		
+		time_above_root_brbot = tree_age - (time_bp_node + time_brlen)
+		time_bp_root_brbot = time_bp_node + time_brlen
+		
+		cumtime_map = c(time_above_root_brbot, map)
+		abstime_map = c(time_bp_root_brbot, map)
+		for (j in 1:length(map))
+			{
+			if (j == 1)
+				{
+				cumtime_map[j+1] = cumtime_map[j] + map[j]
+				abstime_map[j+1] = abstime_map[j] - map[j]
+				} else {
+				cumtime_map[j+1] = cumtime_map[j] + map[j]
+				abstime_map[j+1] = abstime_map[j] - map[j]
+				}
+			}
+		names(cumtime_map) = c(names(map), names(map)[length(names(map))])
+		names(abstime_map) = c(names(map), names(map)[length(names(map))])
+		
+		cumtimes_list[[i]] = cumtime_map
+		abstimes_bp_list[[i]] = abstime_map
+		}
+	sums = sapply(X=abstimes_bp_list, FUN=total_brlen_each_state, statenames=statenames, timeperiods_bp=timeperiods_bp, simplify=FALSE)
+	sums
+	sums_table = matrix(data=unlist(sums), ncol=2, byrow=TRUE)
+	sums_by_state = colSums(sums_table)
+	names(sums_by_state) = statenames
+	timewidths_by_state = as.data.frame(sums_table, stringsAsFactors=FALSE)
+	names(timewidths_by_state) = statenames
+	#head(sums_table)
+	#sum(sums_table)
+	return(timewidths_by_state)
+	}
+
+# Total branchlengths in each state
+# This ASSUMES the "map" is 
+# * states in order along the branch, named by the starting state (except the last column, which is the end)
+# * times are in times_bp
+total_brlen_each_state <- function(abstime_map, statenames, timeperiods_bp)
+	{
+	timebin_bot = timeperiods_bp[2]
+	timebin_top = timeperiods_bp[1]
+	sums = rep(0.0, times=length(statenames))
+	names(sums) = statenames
+	
+	
+	for (j in 1:(length(abstime_map)-1))
+		{
+		bsm_time_bp_bot = abstime_map[j]
+		bsm_time_bp_top = abstime_map[j+1]
+		statename = names(abstime_map[j])
+		timeperiod_too_old_TF = bsm_time_bp_top > timebin_bot
+		timeperiod_too_young_TF = bsm_time_bp_bot < timebin_top
+		if ((timeperiod_too_old_TF + timeperiod_too_young_TF) == 0)
+			{
+			timewidth = bsm_time_bp_bot - bsm_time_bp_top
+
+			amount_to_subtract1 = timebin_top - bsm_time_bp_top
+			amount_to_subtract1[amount_to_subtract1 < 0] = 0
+
+			amount_to_subtract2 = bsm_time_bp_bot - timebin_bot
+			amount_to_subtract2[amount_to_subtract2 < 0] = 0
+	
+			timewidth = timewidth - amount_to_subtract1 - amount_to_subtract2
+			} else {
+			timewidth = 0.0
+			}
+		TF = statenames == statename
+		sums[TF] = sums[TF] + timewidth
+		}
+	return(sums)
+	} # END total_brlen_each_state <- function(abstime_map, statenames, timeperiods_bp)
+
+
+
+
+
+
+
+
+
+
+
+
