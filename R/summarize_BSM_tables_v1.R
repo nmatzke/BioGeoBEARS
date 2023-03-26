@@ -650,7 +650,10 @@ uniquify_clado_events <- function(clado_events_table)
 	# zero_TF = (lx == 0)
 	# clado_events_table[zero_TF,]
 	# Eliminate events with 0 hits first
-
+	if (length(clado_event_txt) < 1)
+		{
+		return(clado_events_table)
+		}
 
 	events_df = as.data.frame(matrix(unlist(x), ncol=2, byrow=TRUE), stringsAsFactors=FALSE)
 	names(events_df) = c("ancrange", "decrange")

@@ -3895,7 +3895,7 @@ level_tree_tips <- function(tr, method="mean", printflag=FALSE, fossils_older_th
 #' 	trtable1 = prt(tr)
 #' 	trtable2 = prt(t=tr, printflag=FALSE, relabel_nodes=TRUE, get_tipnames=TRUE, fossils_older_than=0.000001)
 #' 
-prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=FALSE, fossils_older_than=0.6, silence_warnings=FALSE)
+prt <- function(t, printflag=FALSE, relabel_nodes = FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=TRUE, fossils_older_than=0.6, silence_warnings=FALSE)
 	{
 	defaults='
 	#wd = "/drives/GDrive/__classes/BIOSCI210/lab3_genome_size/"
