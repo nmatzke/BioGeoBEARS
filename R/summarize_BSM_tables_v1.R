@@ -664,7 +664,14 @@ uniquify_clado_events <- function(clado_events_table)
 	dim(LRdf)
 
 	# Switch if left is bigger
-	nchar_LRdf = as.data.frame(sapply(X=LRdf, FUN=nchar))
+	# Deal with the case of 1 event, which produces 2,1 matrix instead of nrowsx2 matrix
+	LRdf_temp = sapply(X=LRdf, FUN=nchar)
+	if (is.null(dim(u)) == TRUE)
+		{
+		LRdf_temp = matrix(data=LRdf_temp, nrow=1, byrow=TRUE)
+		}
+	
+	nchar_LRdf = as.data.frame(LRdf_temp, stringsAsFactors=FALSE)
 	names(nchar_LRdf) = c("L", "R")
 	class(nchar_LRdf$L) = "numeric"
 	class(nchar_LRdf$R) = "numeric"
