@@ -683,7 +683,13 @@ uniquify_clado_events <- function(clado_events_table)
 	LRdf
 
 	# In cases where left and right are equal, sort
-	nchar_LRdf = as.data.frame(sapply(X=LRdf, FUN=nchar))
+	LRdf_temp = sapply(X=LRdf, FUN=nchar)
+	if (is.null(dim(LRdf_temp)) == TRUE)
+		{
+		LRdf_temp = matrix(data=LRdf_temp, nrow=1, byrow=TRUE)
+		}
+	
+	nchar_LRdf = as.data.frame(LRdf_temp, stringsAsFactors=FALSE)
 	names(nchar_LRdf) = c("L", "R")
 	class(nchar_LRdf$L) = "numeric"
 	class(nchar_LRdf$R) = "numeric"
