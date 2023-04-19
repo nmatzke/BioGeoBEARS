@@ -1,3 +1,15 @@
+CHANGES in BioGeoBEARS VERSION 1.1.3
+
+NEW FEATURES
+
+    o removed kexpmv from Suggests (this package no longer available on CRAN)
+    o various accumulated bug fixes (see GitHub commits)
+
+OTHER CHANGES
+
+    o none
+
+
 CHANGES in BioGeoBEARS VERSION 1.1
 
 NEW FEATURES
