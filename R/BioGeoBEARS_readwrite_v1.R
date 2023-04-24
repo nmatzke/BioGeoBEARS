@@ -1160,6 +1160,55 @@ postorder_nodes_phylo4_return_table <- function(tr4)
 	return(postorder_table)	
 	}
 
+
+# Works on castor simulation$tree
+postorder_nodes_phylo4_return_table2 <- function(tr4)
+	{
+	#require(phylobase)
+	
+	# Check if phylo instead of phylo4
+	if (is(tr4, "phylo") == TRUE)
+		{
+		tr4 = as(tr4, "phylo4")
+		
+		# Force this, to get "descendants" to work properly;
+		# see r-sig-phylo
+		tr4@order = "unknown"
+		}
+	
+	# Find root row
+	rootnode = nodeId(tr4, type="root")
+
+	tipnames = descendants(phy=tr4, node=rootnode, type="tips")
+	
+	tr5 = reorder(tr4, "postorder")
+	tmp_edge = attr(tr5, "edge")
+	tmp_edge2 = tmp_edge[tmp_edge[,2] > length(tipnames), ]
+	tmp_edge2[,2]
+	
+	nodenums = tmp_edge2[,2]
+	internal_nodenums = tmp_edge2[,2]-length(tipnames)
+	postorder = 1:length(nodenums)
+
+	# Get postorder numbering, DIVA-style
+	# Old: causes error: 
+	# "Error: $ operator is invalid for atomic vectors"
+	# ntips = summary(tr4)$nb.tips
+	
+	# New:
+	summary_tr4 = summary(tr4)
+	ntips = summary_tr4$nb.tips
+	
+	DIVA_postorder = ntips+postorder
+	
+	postorder_table = cbind(nodenums, internal_nodenums, postorder, DIVA_postorder)
+	postorder_table = adf2(postorder_table)
+	
+	return(postorder_table)	
+	}
+
+
+
 #######################################################
 # traverse_up
 #######################################################
