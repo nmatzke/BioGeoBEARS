@@ -1751,16 +1751,17 @@ define_BioGeoBEARS_run <- function(abbr="default", description="defaults", BioGe
 	if (is.null(geogfn))
 		{
 		geogfn = np(paste(addslash(extdata_dir), "Psychotria_geog.data", sep=""))
-		inputs$geogfn = geogfn
+		inputs$geogfn <- geogfn
 		}
 
 	if (is.null(trfn))
 		{
 		trfn = np(paste(addslash(extdata_dir), "Psychotria_5.2.newick", sep=""))
-		inputs$trfn = trfn
+		inputs$trfn <- trfn
 		}
 
 	inputs$trfn = trfn
+	inputs$geogfn = geogfn
 
 	
 	inputs$abbr = abbr
