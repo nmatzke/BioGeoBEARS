@@ -3393,8 +3393,8 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE, allow_null_ra
 
 
 	# Check for negative branchlengths
-	blren_equal_below_0_TF = tmptr$edge.length <= 0
-	if (sum(blren_equal_below_0_TF) > 0)
+	brlen_equal_below_0_TF = tmptr$edge.length <= 0
+	if (sum(brlen_equal_below_0_TF) > 0)
 		{
 		tmptr_table = prt(tmptr, printflag=FALSE)
 		rows_w_BL0_TF = tmptr_table$edge.length <= 0
@@ -3427,6 +3427,16 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE, allow_null_ra
 		cat(stoptxt)
 		stop(stoptxt)
 		}
+
+	# Check for singletons
+	if (has.singles(tmptr) == FALSE)
+		{
+		stoptxt = paste("\ncheck_BioGeoBEARS_run() says: FATAL ERROR in inputs: Your tree not bifurcating, because it as singletons (direct ancestor) nodes. I.e. has.singles(tmptr) returns FALSE.\n", 
+		"\nYou must fix the Newick file. APE's collapse.singles() function is an option.  See ?check_BioGeoBEARS_run for comments.\n", sep="")
+		cat(stoptxt)
+		stop(stoptxt)
+		}
+
 
 
 	# Check for rooted tree
