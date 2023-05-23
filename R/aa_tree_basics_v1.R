@@ -915,6 +915,11 @@ motA_tree_example <- function()
 	return(tr)
 	}
 
+check_tree <- function(tr, with_explanations=FALSE)
+	{
+	checktree(tr, with_explanations=with_explanations)
+	}
+
 # Check a tree for all common issues
 checktree <- function(tr, with_explanations=FALSE)
 	{
