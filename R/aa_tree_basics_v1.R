@@ -1072,7 +1072,7 @@ nodenums_to_check
 
 	# Check for negative branchlengths
 	brlen_equal_below_0_TF = tr$edge.length <= 0
-	if (sum(brlen_equal_below_0_TF) > 0)
+	if (sum(brlen_equal_below_0_TF, na.rm=TRUE) > 0)
 		{
 		tr_table = prt(tr, printflag=FALSE)
 		rows_w_BL0_TF = tr_table$edge.length <= 0
@@ -1100,7 +1100,7 @@ nodenums_to_check
 
 	# Check for zero branchlengths
 	brlen_equal_0_TF = tr$edge.length == 0
-	if (sum(brlen_equal_below_0_TF) > 0)
+	if (sum(brlen_equal_below_0_TF, na.rm=TRUE) > 0)
 		{
 		tr_table = prt(tr, printflag=FALSE)
 		rows_w_BL0_TF = tr_table$edge.length <= 0
