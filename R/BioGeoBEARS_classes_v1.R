@@ -3429,9 +3429,9 @@ check_BioGeoBEARS_run <- function(inputs, allow_huge_ranges=FALSE, allow_null_ra
 		}
 
 	# Check for singletons
-	if (has.singles(tmptr) == FALSE)
+	if (has.singles(tmptr) == TRUE)
 		{
-		stoptxt = paste("\ncheck_BioGeoBEARS_run() says: FATAL ERROR in inputs: Your tree not bifurcating, because it as singletons (direct ancestor) nodes. I.e. has.singles(tmptr) returns FALSE.\n", 
+		stoptxt = paste("\ncheck_BioGeoBEARS_run() says: FATAL ERROR in inputs: Your tree not bifurcating, because it as singletons (direct ancestor) nodes. I.e. has.singles(tmptr) returns TRUE.\n", 
 		"\nYou must fix the Newick file. APE's collapse.singles() function is an option.  See ?check_BioGeoBEARS_run for comments.\n", sep="")
 		cat(stoptxt)
 		stop(stoptxt)
