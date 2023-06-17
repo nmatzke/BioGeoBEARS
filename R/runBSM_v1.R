@@ -176,7 +176,7 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 			# Error trap -- if no anagenetic events, put NA
 			# 2016-05-05 bug: is.na(ana_events_table) is flagging yes when whole 
 			# row is NAs
-			if ((length(ana_events_table) > 1) && (is.na(ana_events_table)==TRUE))
+			if ((length(ana_events_table) > 1) && ((sum(is.na(ana_events_table))>1)==TRUE))
 				{
 				error_msg = "STOP ERROR in runBSM(): your anagenetic events table seems to have row(s) that have multiple NAs. This could be due to an out of date 'BioGeoBEARS_stochastic_mapping_v1.R' file, missing this bug fix: '# NJM 2016-05-05 bug fix: add 'as.numeric'   rownums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)'"
 				cat("\n\n")
