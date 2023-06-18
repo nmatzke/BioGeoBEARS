@@ -1269,7 +1269,8 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 		founder_totals_list[i] = sum(founder_counts_df)
 		
 		# Count range-expansion events
-		if ( (length(ana_events_table) > 1) || (is.na(ana_events_table)==FALSE) )
+#		if ( (length(ana_events_table) > 1) || (is.na(ana_events_table)==FALSE) )
+		if ( length(ana_events_table) > 1 )
 			{
 			# Parse out the different sorts of anagenetic dispersal
 			#ana_counts_df = 
@@ -1283,7 +1284,8 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 			#round(ana_counts_df, 1)
 			} # END if ( (length(ana_events_table) > 1) || (is.na(ana_events_table)==FALSE) )
 	
-		if ( (length(ana_events_table) > 1) || (is.na(ana_events_table)==FALSE) )
+#		if ( (length(ana_events_table) > 1) || (is.na(ana_events_table)==FALSE) )
+		if ( length(ana_events_table) > 1 )
 			{
 			if (!is.null(ana_counts_df))
 				{

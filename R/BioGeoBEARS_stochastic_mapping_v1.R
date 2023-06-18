@@ -654,7 +654,12 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 		curr_time = 0
 		time_stop = brlen	# (subtracting since we are going up towards 0)
 		current_rangenum_1based = statenum_1based_at_branch_bottom
-
+		
+		# 2023-06-17: Error where new_rangenum_1based is never set;
+		# probably because no events occur on a short branch
+		#new_rangenum_1based = current_rangenum_1based
+		new_rangenum_1based = NULL
+		
 		trynum = trynum + 1
 		# Keep track of events
 		event_time = NULL
