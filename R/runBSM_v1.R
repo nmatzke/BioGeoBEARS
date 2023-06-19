@@ -109,10 +109,20 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 		# 2016-05-05
 		# Now that stochastic_mapping_results is initialized to NA each loop, should
 		# have no weird blank results
-		TF2 = ( (length(stochastic_mapping_results)==1) && (is.na(stochastic_mapping_results) == TRUE) )
+		#TF2 = ( (length(stochastic_mapping_results)==1) && (is.na(stochastic_mapping_results) == TRUE) )
+		success_TF = ( class(stochastic_mapping_results)== "data.frame" )
 		
-		if ( (class(try_result) != "try-error") && TF2==FALSE )
+		#if ( (class(try_result) != "try-error") && TF2==FALSE )
+		if ( (class(try_result) == "try-error") && (success_TF == FALSE) )
 			{
+			# FAILURE!
+			cat("\nFailure on stochastic mapping attempt #", m, "/", maxnum_maps_to_try, " tries. Holding at success #", lnum, "/", nummaps_goal, ".", sep="")
+			cat("\n")
+			print(try_result)
+			# END if (class(try_result) != "try-error")
+			} else {
+			# SUCCESS!
+			# Non-stratified:
 			if (strat_TF == FALSE)
 				{
 				##########################################
@@ -187,12 +197,15 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 # 				}
 # 			
 			
-			if ( check_for_ana_events_table(ana_events_table) == TRUE )
+			if ( check_for_ana_events_table(ana_events_table) == FALSE )
 				{
-				cat("\nWARNING: 'ana_events_table' was null, NA or length <1 or >1. Replacing with 'NA'\n")
+				cat("\nNOTE: 'ana_events_table' for this BSM was null, NA or length <1 or >1; this suggests no anagenetic events in this BSM. Replacing with 'NA'.")
 				ana_events_table = NA
+				ana_events_tables[[lnum]] = ana_events_table
+				} else {
+				ana_events_tables[[lnum]] = ana_events_table
 				}
-			ana_events_tables[[lnum]] = ana_events_table
+			
 			
 			if (save_after_every_try == TRUE)
 				{
@@ -231,13 +244,7 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 					cat("...saved 'RES_ana_events_tables_PARTIAL.Rdata'")
 					}
 				} # END if (save_after_every_try == TRUE)
-			
-			} else {
-			cat("\nFailure on stochastic mapping attempt #", m, "/", maxnum_maps_to_try, " tries. Holding at success #", lnum, "/", nummaps_goal, ".", sep="")
-			cat("\n")
-			print(try_result)
-			} # END if (class(try_result) != "try-error")
-
+			} # END if ( (class(try_result) == "try-error") && (success_TF == FALSE) )
 		} # END for (m in 1:maxnum_maps_to_try)
 	
 	# Archive at the end
