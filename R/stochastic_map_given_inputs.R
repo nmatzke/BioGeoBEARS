@@ -1,4 +1,190 @@
 #######################################################
+# Code for checking the ana_events table, which 
+# is sometimes a table, and sometimes NA
+#######################################################
+
+example_ana_events_table <- function()
+	{
+	example_code='
+	ana_events_table = NA
+	check_for_ana_events_table(ana_events_table)
+
+	ana_events_table = NaN
+	check_for_ana_events_table(ana_events_table)
+
+	ana_events_table = c(NA, NaN, NA)
+	check_for_ana_events_table(ana_events_table)
+
+	ana_events_table = example_ana_events_table()
+	check_for_ana_events_table(ana_events_table)
+	'
+	
+	# Just to have an example BSM ana_events_table, for checks
+	# from dput(ana_events_table)
+	
+	# Load the structure
+	ana_events_table = structure(list(node = c(19L, 23L, 25L, 32L, 32L, 36L), ord_ndname = c(19L, 
+23L, 25L, 32L, 32L, 36L), node_lvl = c(2, 3, 5, 4, 4, 1), node.type = c("tip", 
+"internal", "internal", "internal", "internal", "internal"), 
+    parent_br = c(20L, 31L, 25L, 27L, 27L, 36L), edge.length = c(2.827918756, 
+    1.689170274, 0.3347375986, 0.4601084855, 0.4601084855, 2.372081244
+    ), ancestor = c(36L, 22L, 24L, 31L, 31L, 20L), daughter_nds = list(
+        `19` = integer(0), `23` = c(24L, 30L), `25` = c(26L, 
+        29L), `32` = c(33L, 13L), `32` = c(33L, 13L), `36` = c(37L, 
+        19L)), node_ht = c(5.2, 2.7110008382, 3.3480878148, 2.2148560087, 
+    2.2148560087, 2.372081244), time_bp = c(0, 2.4889992, 1.8519122, 
+    2.985144, 2.985144, 2.8279188), fossils = c(FALSE, NA, NA, 
+    NA, NA, NA), label = c("P_hexandra_Oahu", "inNode23", "inNode25", 
+    "inNode32", "inNode32", "inNode36"), tipnames = c("P_hexandra_Oahu", 
+    "P_fauriei2,P_greenwelliae07,P_greenwelliae907,P_hathewayi_1,P_hawaiiensis_WaikamoiL1,P_kaduana_HawaiiLoa,P_kaduana_PuuKukuiAS,P_mauiensis_Eke,P_mauiensis_PepeAS", 
+    "P_fauriei2,P_hathewayi_1,P_hawaiiensis_WaikamoiL1,P_kaduana_PuuKukuiAS,P_mauiensis_Eke,P_mauiensis_PepeAS", 
+    "P_hawaiiensis_Makaopuhi,P_mariniana_Kokee2,P_mariniana_MauiNui,P_mariniana_Oahu", 
+    "P_hawaiiensis_Makaopuhi,P_mariniana_Kokee2,P_mariniana_MauiNui,P_mariniana_Oahu", 
+    "P_hexandra_K1,P_hexandra_M,P_hexandra_Oahu"), sampled_states_AT_nodes = c(3L, 
+    6L, 9L, 16L, 16L, 6L), sampled_states_AT_brbots = c(6, 2, 
+    3, 7, 7, 2), left_desc_nodes = c(NA, 24L, 26L, 33L, 33L, 
+    37L), right_desc_nodes = c(NA, 30L, 29L, 13L, 13L, 19L), 
+    samp_LEFT_dcorner = c(NA, 3, 9, 15, 15, 2), samp_RIGHT_dcorner = c(NA, 
+    2, 4, 2, 2, 6), clado_event_type = c("", "vicariance (v)", 
+    "subset (s)", "vicariance (v)", "vicariance (v)", "subset (s)"
+    ), clado_event_txt = c("", "KO->O,K", "OM->OM,M", "KOMH->OMH,K", 
+    "KOMH->OMH,K", "KO->K,KO"), clado_dispersal_to = c("", "", 
+    "", "", "", ""), nodenum_at_top_of_branch = c(19, 23, 25, 
+    32, 32, 36), trynum = c(21, 7, 84, 293, 293, 19), brlen = c(2.827918756, 
+    1.689170274, 0.3347375986, 0.4601084855, 0.4601084855, 2.372081244
+    ), current_rangenum_1based = c(6, 2, 3, 7, 14, 2), new_rangenum_1based = c(3, 
+    6, 9, 14, 16, 6), current_rangetxt = c("KO", "K", "O", "KM", 
+    "KMH", "K"), new_rangetxt = c("O", "KO", "OM", "KMH", "KOMH", 
+    "KO"), abs_event_time = c(2.69243630957946, 2.83491980803861, 
+    2.15629285978422, 3.05739740782267, 3.01228826742977, 4.59435041439648
+    ), event_time = c(0.135482446420536, 1.34324966596139, 0.0303569388157761, 
+    0.38785507767733, 0.432964218070227, 0.605649629603522), 
+    event_type = c("e", "d", "d", "d", "d", "d"), event_txt = c("KO->O", 
+    "K->KO", "O->OM", "KM->KMH", "KMH->KOMH", "K->KO"), new_area_num_1based = c(NA, 
+    2, 3, 4, 2, 2), lost_area_num_1based = c("1", "-", "-", "-", 
+    "-", "-"), dispersal_to = c("-", "O", "M", "H", "O", "O"), 
+    extirpation_from = c("K", "-", "-", "-", "-", "-")), class = "data.frame", row.names = c("19", 
+"23", "25", "32", "321", "36"))
+	
+	return(ana_events_table)
+	} # END example_ana_events_table <- function()
+
+
+check_for_ana_events_table <- function(ana_events_table)
+	{
+	example_code='
+	ana_events_table = NA
+	check_for_ana_events_table(ana_events_table)
+
+	ana_events_table = NaN
+	check_for_ana_events_table(ana_events_table)
+
+	ana_events_table = c(NA, NaN, NA)
+	check_for_ana_events_table(ana_events_table)
+
+	ana_events_table = example_ana_events_table()
+	check_for_ana_events_table(ana_events_table)
+	'
+	
+	ana_events_table_TF = FALSE
+	if (class(ana_events_table) == "data.frame")
+		{
+		ana_events_table_TF = TRUE
+		
+		# Check for table, but with no rows
+		if (dim(ana_events_table)[1] == 0)
+			{
+			ana_events_table_TF = FALSE
+			txt = paste0("STOP ERROR in check_for_ana_events_table(): the ana_events_table is of class 'data.frame', but has 0 rows. Printing to screen:")
+			cat("\n")
+			cat(txt)
+			cat("\n")
+			cat("\nana_events_table:\n")
+			print(ana_events_table)
+			stop(txt)
+			}
+		
+		###############################################
+		# Check for NAs on each row
+		###############################################
+		all_NA_rows = rep(FALSE, times=nrow(ana_events_table))
+		for (i in 1:length(all_NA_rows))
+			{
+			NA_TF = is.na(c(unlist(ana_events_table[i,])))
+			nan_TF = is.nan(c(unlist(ana_events_table[i,])))
+			TF = (NA_TF + nan_TF) > 0
+			if (sum(TF) == length(TF))
+			all_NA_rows[i] = TRUE
+			}
+		
+		if (any(all_NA_rows == TRUE) == TRUE)
+			{
+			ana_events_table_TF = FALSE
+			error_msg = "STOP ERROR in check_for_ana_events_table(): your anagenetic events table seems to have row(s) that have all NAs. This could be due to an out of date 'BioGeoBEARS_stochastic_mapping_v1.R' file, missing this bug fix: '# NJM 2016-05-05 bug fix: add 'as.numeric'   rownums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)'.\nPrinting 'ana_events_table' to screen:"
+			cat("\n")
+			cat(error_msg)
+			cat("\n")
+			cat("\nana_events_table:\n")
+			print(ana_events_table)
+			cat("\n")
+			stop(error_msg)			
+			}
+		return(ana_events_table_TF) # Return TRUE, yes it's a data.frame
+		} # END if (class(ana_events_table) == "data.frame")
+
+	if (is.null(ana_events_table) == TRUE)
+		{
+		ana_events_table_TF = FALSE
+		txt = paste0("STOP WARNING in check_for_ana_events_table(): the ana_events_table is NOT of class 'data.frame', but is NULL.")
+		
+		return(ana_events_table_TF)
+		}
+
+
+	
+	# It's not a data.frame; what is it?
+	if (length(ana_events_table) > 1)
+		{
+		ana_events_table_TF = FALSE
+		txt = paste0("STOP WARNING in check_for_ana_events_table(): the ana_events_table is NOT of class 'data.frame', but is longer than a single element. Printing to screen:")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		cat("\nana_events_table:\n")
+		print(ana_events_table)
+		stop(txt)
+		}
+	
+	# It's not a data.frame; what is it?
+	if (length(ana_events_table) == 0)
+		{
+		ana_events_table_TF = FALSE
+		txt = paste0("STOP WARNING in check_for_ana_events_table(): the ana_events_table is NOT of class 'data.frame', but has length ZERO. Printing to screen:")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		cat("\nana_events_table:\n")
+		print(ana_events_table)
+		stop(txt)
+		}
+
+	# It's not a data.frame; what is it?
+	NA_TF = is.na(ana_events_table)
+	nan_TF = is.nan(ana_events_table)
+	TF = (NA_TF + nan_TF) > 0
+	if (TF == TRUE)
+		{
+		ana_events_table_TF = FALSE
+		return(ana_events_table_TF)
+		}
+	
+	return(ana_events_table_TF)	
+	} # END check_for_ana_events_table <- function(ana_events_table)
+
+
+
+
+#######################################################
 # Stochastic mapping on a non-stratified analysis
 #######################################################
 # 

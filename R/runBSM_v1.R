@@ -176,19 +176,20 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 			# Error trap -- if no anagenetic events, put NA
 			# 2016-05-05 bug: is.na(ana_events_table) is flagging yes when whole 
 			# row is NAs
-			if (suppressWarnings((length(ana_events_table) > 1) && (is.na(ana_events_table)==TRUE)))
-				{
-				error_msg = "STOP ERROR in runBSM(): your anagenetic events table seems to have row(s) that have multiple NAs. This could be due to an out of date 'BioGeoBEARS_stochastic_mapping_v1.R' file, missing this bug fix: '# NJM 2016-05-05 bug fix: add 'as.numeric'   rownums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)'"
-				cat("\n\n")
-				cat(error_msg)
-				cat("\n\n")
-				stop(error_msg)
-				}
+			#if (suppressWarnings((length(ana_events_table) > 1) && (is.na(ana_events_table)==TRUE)))
+# 			if (check_for_ana_events_table(ana_events_table) == TRUE)
+# 				{
+# 				error_msg = "STOP ERROR in runBSM(): your anagenetic events table seems to have row(s) that have multiple NAs. This could be due to an out of date 'BioGeoBEARS_stochastic_mapping_v1.R' file, missing this bug fix: '# NJM 2016-05-05 bug fix: add 'as.numeric'   rownums_in_trtable = as.numeric(tmptable_rows$nodenum_at_top_of_branch)'"
+# 				cat("\n\n")
+# 				cat(error_msg)
+# 				cat("\n\n")
+# 				stop(error_msg)
+# 				}
+# 			
 			
-			
-			if ( is.null(ana_events_table) || (length(ana_events_table)==1 && is.na(ana_events_table)) || (length(ana_events_table) < 1) )
+			if ( check_for_ana_events_table(ana_events_table) == TRUE )
 				{
-				cat("\nWARNING: 'ana_events_table' was null, NA or length <1. Replacing with 'NA'\n")
+				cat("\nWARNING: 'ana_events_table' was null, NA or length <1 or >1. Replacing with 'NA'\n")
 				ana_events_table = NA
 				}
 			ana_events_tables[[lnum]] = ana_events_table

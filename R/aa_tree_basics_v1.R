@@ -1005,9 +1005,9 @@ checktree <- function(tr, with_explanations=FALSE)
 	trtable = prt(tr, printflag=FALSE)
 
 	# Check for polytomies
-	if (is.binary(tr) == FALSE)
+	if (ape::is.binary(tr) == FALSE)
 		{
-		stoptxt = paste("\nchecktree() says: Your tree not bifurcating, i.e. is.binary(tr) returns FALSE.\n", 
+		stoptxt = paste("\nchecktree() says: Your tree not bifurcating, i.e. ape::is.binary(tr) returns FALSE.\n", 
 		"\nYou must fix the Newick file. APE's multi2di() function is an option.  See ?checktree for comments.\n", sep="")
 		checkTFs[(i=i+1)] = FALSE
 		checktxt[i] = stoptxt
@@ -1023,9 +1023,9 @@ checktree <- function(tr, with_explanations=FALSE)
 		}
 
 	# Check for singletons
-	if (has.singles(tr) == FALSE)
+	if (ape::has.singles(tr) == FALSE)
 		{
-		stoptxt = paste("\nchecktree() says: Your tree not bifurcating, because it as singletons (direct ancestor) nodes. I.e. has.singles(tr) returns FALSE.\n", 
+		stoptxt = paste("\nchecktree() says: Your tree not bifurcating, because it as singletons (direct ancestor) nodes. I.e. ape::has.singles(tr) returns FALSE.\n", 
 		"\nYou must fix the Newick file. APE's collapse.singles() function is an option.  See ?checktree for comments.\n", sep="")
 		checkTFs[(i=i+1)] = FALSE
 		checktxt[i] = stoptxt
