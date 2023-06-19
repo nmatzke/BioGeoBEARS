@@ -1417,8 +1417,8 @@ write.table(conditional_format_table(restable_AICc_rellike), file="restable_AICc
 #######################################################
 
 
-model_name = "DEC"
-res = resDEC
+model_name = "DEC+J_M3_timestrat"
+res = resDECj
 
 pdffn = paste0("Psychotria_", model_name, "_v1.pdf")
 pdf(pdffn, height=6, width=6)
@@ -1459,15 +1459,15 @@ lnum = 0
 BSM_inputs_fn = "BSM_inputs_file.Rdata"
 runInputsSlow = TRUE
 if (runInputsSlow)
-    {
-    # debug:
-    # cluster_already_open=FALSE; rootedge=FALSE; statenum_bottom_root_branch_1based=NULL; printlevel=1; min_branchlength=0.000001
-    stochastic_mapping_inputs_list = get_inputs_for_stochastic_mapping(res=res)
-    save(stochastic_mapping_inputs_list, file=BSM_inputs_fn)
-    } else {
-    # Loads to "stochastic_mapping_inputs_list"
-    load(BSM_inputs_fn)
-    } # END if (runInputsSlow)
+	{
+	# debug:
+	# cluster_already_open=FALSE; rootedge=FALSE; statenum_bottom_root_branch_1based=NULL; printlevel=1; min_branchlength=0.000001
+	stochastic_mapping_inputs_list = get_inputs_for_stochastic_mapping(res=res)
+	save(stochastic_mapping_inputs_list, file=BSM_inputs_fn)
+	} else {
+	# Loads to "stochastic_mapping_inputs_list"
+	load(BSM_inputs_fn)
+	} # END if (runInputsSlow)
 
 # Check inputs (doesn't work the same on unconstr)
 names(stochastic_mapping_inputs_list)
@@ -1523,7 +1523,7 @@ colors_list_for_states = get_colors_for_states_list_0based(areanames=areanames, 
 # Setup for painting a single stochastic map
 ############################################
 scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
-stratified = FALSE
+stratified = TRUE
 clado_events_table = clado_events_tables[[1]]
 ana_events_table = ana_events_tables[[1]]
 
