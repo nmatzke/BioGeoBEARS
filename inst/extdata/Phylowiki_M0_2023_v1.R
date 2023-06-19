@@ -61,7 +61,7 @@ install.packages("cladoRcpp")
 install.packages("MultinomialCI")
 
 library(devtools)
-devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
+devtools::install_github(repo="nmatzke/BioGeoBEARS")
 
 # NOTE: If you get a message like this
 # * select "2. CRAN packages only" on "3. None"
@@ -87,7 +87,7 @@ library(rexpokit)
 library(cladoRcpp)
 library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
 library(parallel)
-
+library(BioGeoBEARS)
 
 #######################################################
 # SETUP: YOUR WORKING DIRECTORY
@@ -1335,6 +1335,8 @@ if (runBSMslow == TRUE)
     {
     # Saves to: RES_clado_events_tables.Rdata
     # Saves to: RES_ana_events_tables.Rdata
+ #   source('~/HD/GitHub/BioGeoBEARS/R/stochastic_map_given_inputs.R', chdir = TRUE)
+
     BSM_output = runBSM(res, stochastic_mapping_inputs_list=stochastic_mapping_inputs_list, maxnum_maps_to_try=100, nummaps_goal=50, maxtries_per_branch=40000, save_after_every_try=TRUE, savedir=getwd(), seedval=12345, wait_before_save=0.01)
 
     RES_clado_events_tables = BSM_output$RES_clado_events_tables

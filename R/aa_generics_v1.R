@@ -4949,7 +4949,7 @@ remove_multiple_commas_from_strings_in_list <- function(list_of_strings)
 # The function is_list_not_dataframe() function gives the desired behavior.
 is_list_not_dataframe <- function(obj)
 	{
-	setup='
+	example_code='
 	# Set up a BioGeoBEARS_run_object
 	BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 
@@ -4972,15 +4972,36 @@ is_list_not_dataframe <- function(obj)
 	# Is a data.frame a list?
 	is.list(tmpdf)
 	is_list_not_dataframe(obj=tmpdf)
-	'
+
+	ana_events_table = example_ana_events_table()
+	is.list(ana_events_table)
+	is_list_not_dataframe(obj=ana_events_table)
+
+	is.list(c(NA, NA))
+	is_list_not_dataframe(obj=c(NA, NA))
+	
+	# How about a dmat
+	dmat = structure(c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), dim = c(4L, 
+4L))
+	obj = dmat
+	is_list_not_dataframe(obj)
+	
+	' # END example_code
 
 
-
-	TF1 = is.list(obj)
-	TF2 = (class(obj) == "data.frame") == FALSE
-	TF = (TF1 + TF2) == 2
+	TF1 = is.list(obj) # This can evaluate to TRUE for a data.frame
+	
+	# But this can't
+	if ( ("data.frame" %in% class(obj)) == TRUE)
+		{
+		not_a_df_TF = FALSE
+		} else {
+		not_a_df_TF = TRUE
+		}
+	
+	TF = (TF1 + not_a_df_TF) == 2
 	return(TF)
-	}
+	} # END is_list_not_dataframe <- function(obj)
 
 
 
