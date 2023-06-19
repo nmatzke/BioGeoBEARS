@@ -5961,6 +5961,7 @@ sort_list_of_lists_of_numbers <- function(state_indices_0based_all_timeperiods)
 	# Another tricky one
 	state_indices_0based_all_timeperiods = list(NA, 0L, 1L, 2L, 3L, 0:1, c(0L, 2L), c(0L, 3L), 1:2, c(1L, 3L), 2:3, 0:2, c(0L, 1L, 3L), c(0L, 2L, 3L), 1:3, 0:3)
 	sorted_state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
+	sorted_state_indices_0based_all_timeperiods
 	'
 	# Get the numbers as collapsed characters, to be sure sorting into correct order
 	state_indices_charcodes = rep("_", times=length(state_indices_0based_all_timeperiods))

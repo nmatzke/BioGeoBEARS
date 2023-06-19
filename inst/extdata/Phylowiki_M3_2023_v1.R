@@ -1412,7 +1412,9 @@ write.table(conditional_format_table(restable_AICc_rellike), file="restable_AICc
 
 
 
-
+#######################################################
+# Time-stratified Biogeographic Stochastic Mapping (BSM)
+#######################################################
 
 
 model_name = "DEC"
@@ -1458,6 +1460,8 @@ BSM_inputs_fn = "BSM_inputs_file.Rdata"
 runInputsSlow = TRUE
 if (runInputsSlow)
     {
+    # debug:
+    # cluster_already_open=FALSE; rootedge=FALSE; statenum_bottom_root_branch_1based=NULL; printlevel=1; min_branchlength=0.000001
     stochastic_mapping_inputs_list = get_inputs_for_stochastic_mapping(res=res)
     save(stochastic_mapping_inputs_list, file=BSM_inputs_fn)
     } else {
