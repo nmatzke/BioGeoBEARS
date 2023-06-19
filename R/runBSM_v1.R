@@ -110,7 +110,7 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 		# Now that stochastic_mapping_results is initialized to NA each loop, should
 		# have no weird blank results
 		#TF2 = ( (length(stochastic_mapping_results)==1) && (is.na(stochastic_mapping_results) == TRUE) )
-		success_TF = ( class(stochastic_mapping_results)== "data.frame" )
+		success_TF = ( class(stochastic_mapping_results) == "data.frame" )
 		
 		#if ( (class(try_result) != "try-error") && TF2==FALSE )
 		if ( (class(try_result) == "try-error") && (success_TF == FALSE) )
@@ -197,12 +197,12 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 # 				}
 # 			
 			
-			if ( check_for_ana_events_table(ana_events_table) == FALSE )
+			if ( check_for_ana_events_table(ana_events_table) == TRUE )
 				{
-				cat("\nNOTE: 'ana_events_table' for this BSM was null, NA or length <1 or >1; this suggests no anagenetic events in this BSM. Replacing with 'NA'.")
-				ana_events_table = NA
 				ana_events_tables[[lnum]] = ana_events_table
 				} else {
+				cat("\nNOTE: 'ana_events_table' for this BSM was null, NA or length <1 or >1; this suggests no anagenetic events in this BSM. Replacing with 'NA'.")
+				ana_events_table = NA
 				ana_events_tables[[lnum]] = ana_events_table
 				}
 			
