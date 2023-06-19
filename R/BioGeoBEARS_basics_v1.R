@@ -5957,23 +5957,32 @@ sort_list_of_lists_of_numbers <- function(state_indices_0based_all_timeperiods)
 	# Sort it
 	sorted_state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
 	sorted_state_indices_0based_all_timeperiods
+	
+	# Another tricky one
+	state_indices_0based_all_timeperiods = list(NA, 0L, 1L, 2L, 3L, 0:1, c(0L, 2L), c(0L, 3L), 1:2, c(1L, 3L), 2:3, 0:2, c(0L, 1L, 3L), c(0L, 2L, 3L), 1:3, 0:3)
+	sorted_state_indices_0based_all_timeperiods = sort_list_of_lists_of_numbers(state_indices_0based_all_timeperiods)
 	'
 	# Get the numbers as collapsed characters, to be sure sorting into correct order
 	state_indices_charcodes = rep("_", times=length(state_indices_0based_all_timeperiods))
 	lengthvals = rep(0, times=length(state_indices_0based_all_timeperiods))
 	for (ss in 1:length(state_indices_0based_all_timeperiods))
 		{
-		if (length(state_indices_0based_all_timeperiods[[ss]] == 1) && is.na(state_indices_0based_all_timeperiods[[ss]]))
+		if (length(state_indices_0based_all_timeperiods[[ss]]) == 1)
 			{
-			state_indices_charcodes[ss] = "_"
-			lengthvals[ss] = 0
-			} else {
-			# Convert e.g. 0, 1, 2 to 0000, 0001, 0002 (for sorting later)
-			charvals = sprintf("%04.0f", state_indices_0based_all_timeperiods[[ss]])
-			state_indices_charcodes[ss] = paste0(charvals, collapse=",", sep="")
-			lengthvals[ss] = length(state_indices_0based_all_timeperiods[[ss]])
-			}
-		}
+			# Yes, the list item has length 1
+			if (is.na(state_indices_0based_all_timeperiods[[ss]]))
+				{
+				state_indices_charcodes[ss] = "_"
+				lengthvals[ss] = 0
+				next() # Go to the next ss
+				}
+			} # END if (length(state_indices_0based_all_timeperiods[[ss]]) == 1)
+		# Otherwise, convert:
+		# Convert e.g. 0, 1, 2 to 0000, 0001, 0002 (for sorting later)
+		charvals = sprintf("%04.0f", state_indices_0based_all_timeperiods[[ss]])
+		state_indices_charcodes[ss] = paste0(charvals, collapse=",", sep="")
+		lengthvals[ss] = length(state_indices_0based_all_timeperiods[[ss]])
+		} # END for (ss in 1:length(state_indices_0based_all_timeperiods))
 	lengthvals = sprintf("%04.0f", lengthvals)
 	state_indices_charcodes
 	state_indices_charcodes = paste0(lengthvals, "-", state_indices_charcodes, sep="")

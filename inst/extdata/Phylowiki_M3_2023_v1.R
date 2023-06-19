@@ -243,6 +243,121 @@ max(rowSums(dfnums_to_numeric(tipranges@df)))
 # than the number of areas you set up, but it can be smaller.
 max_range_size = 4
 
+
+
+
+
+
+
+
+#######################################################
+# START MANUAL MODIFICATION OF STATES LIST
+# Manually modify the list of states (geographic ranges)
+# to disallow some ranges that are disjunct
+# (allow more complex scenarios than the area-adjacency file)
+#######################################################
+
+#######################################################
+# NOTE! "areas" and "states/ranges" are DIFFERENT THINGS
+# NOTHING WILL MAKE SENSE UNLESS you understand that a 
+# STATE/RANGE is made up of some number of areas.
+#
+# E.g.: 2 areas (A,B) equals 
+# 4 states/geographic ranges (null, A, B, AB)
+#######################################################
+
+# Get your states list (assuming, say, 4-area analysis, with max. rangesize=4)
+areas = getareas_from_tipranges_object(tipranges)
+#areas = c("A", "B", "C", "D")
+
+# This is the list of states/ranges, where each state/range
+# is a list of areas, counting from 0
+states_list_0based = rcpp_areas_list_to_states_list(areas=areas, maxareas=max_range_size, include_null_range=TRUE)
+
+# How many states/ranges, by default: 163
+length(states_list_0based)
+
+# Make the list of ranges
+ranges_list = NULL
+for (i in 1:length(states_list_0based))
+    {    
+    if ( (length(states_list_0based[[i]]) == 1) && (is.na(states_list_0based[[i]])) )
+        {
+        tmprange = "_"
+        } else {
+        tmprange = paste(areas[states_list_0based[[i]]+1], collapse="")
+        }
+    ranges_list = c(ranges_list, tmprange)
+    }
+
+# Look at the ranges list
+ranges_list
+
+# How many states/ranges, by default: 163
+length(ranges_list)
+
+# Here, we are assuming islands disappear back in time:
+# 0.5 - H sinks (Hawaii Big Island)
+# 1.9 - M sinks (Maui-Nui)
+# 3.7 - O sinks (Oahu)
+# 5.1 - K sinks (Kauai; although, we leave it up in the default Psychotria example; older islands are another setup)
+# 10  - (a time older than the root of the tree, defining the oldest time-bin)
+
+# Let's remove ranges disallowed by island disappearence:
+
+# STRATUM 1 (youngest)
+disallowed1 = c()
+keepTF1 = ranges_list %in% disallowed1 == FALSE
+ranges_list_NEW1 = ranges_list[keepTF1]
+length(ranges_list_NEW1)     # now 148
+
+# STRATUM 2
+ranges_to_lose = ranges_list_NEW1[grep(pattern="H", x=ranges_list)]
+keepTF2 = ranges_list_NEW1 %in% ranges_to_lose == FALSE
+ranges_list_NEW2 = ranges_list_NEW1[keepTF2]
+ranges_list_NEW2
+length(ranges_list_NEW2)
+
+# STRATUM 3
+ranges_to_lose = ranges_list_NEW2[grep(pattern="M", x=ranges_list_NEW2)]
+keepTF3 = ranges_list_NEW2 %in% ranges_to_lose == FALSE
+ranges_list_NEW3 = ranges_list_NEW2[keepTF3]
+ranges_list_NEW3
+length(ranges_list_NEW3)
+
+# STRATUM 4 (oldest)
+ranges_to_lose = ranges_list_NEW3[grep(pattern="O", x=ranges_list_NEW3)]
+keepTF4 = ranges_list_NEW3 %in% ranges_to_lose == FALSE
+ranges_list_NEW4 = ranges_list_NEW3[keepTF4]
+ranges_list_NEW4
+length(ranges_list_NEW4)
+
+
+# Make the stratum-specific states list
+states_list_0based_NEW1 = states_list_0based[keepTF1]
+states_list_0based_NEW2 = states_list_0based_NEW1[keepTF2]
+states_list_0based_NEW3 = states_list_0based_NEW2[keepTF3]
+states_list_0based_NEW4 = states_list_0based_NEW3[keepTF4]
+states_list_0based_NEW5 = states_list_0based_NEW4      # (copy of same, for the oldest time-bin)
+
+# INPUT the NEW states list into the BioGeoBEARS_run_object, STRATIFIED
+lists_of_states_lists_0based = list()
+lists_of_states_lists_0based[[1]] = states_list_0based_NEW1
+lists_of_states_lists_0based[[2]] = states_list_0based_NEW2
+lists_of_states_lists_0based[[3]] = states_list_0based_NEW3
+lists_of_states_lists_0based[[4]] = states_list_0based_NEW4
+lists_of_states_lists_0based[[5]] = states_list_0based_NEW5
+
+# Check it by eye (null range=NA; the islands KOMH are 0123 in 0-based numbering)
+lists_of_states_lists_0based
+#######################################################
+# END MANUAL MODIFICATION OF THE STATES LIST
+#######################################################
+
+
+
+
+
 ####################################################
 ####################################################
 # KEY HINT: The number of states (= number of different possible geographic ranges)
@@ -327,8 +442,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 #  and BioGeoBEARS Google Group posts for further hints)
 #
 # Uncomment files you wish to use in time-stratified analyses:
-#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$timesfn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/timeperiods.txt")
+BioGeoBEARS_run_object$dispersal_multipliers_fn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/dispersal_multipliers.txt")
 #BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
@@ -363,7 +478,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
@@ -384,6 +499,9 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object
 # This table contains the parameters of the model 
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
 
+# Add the manually-constructed, time-stratified list of allowed states
+BioGeoBEARS_run_object$lists_of_states_lists_0based = lists_of_states_lists_0based
+
 # Run this to check inputs. Read the error messages if you get them!
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object=BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
@@ -391,7 +509,7 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 # For a slow analysis, run once, then set runslow=FALSE to just 
 # load the saved result.
 runslow = TRUE
-resfn = "Psychotria_DEC_M0_unconstrained_v1.Rdata"
+resfn = "Psychotria_DEC_M3_time-stratified_v1.Rdata"
 if (runslow)
     {
     res = bears_optim_run(BioGeoBEARS_run_object)
@@ -421,8 +539,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Also: search script on "include_null_range" for other places to change
 
 # Set up a time-stratified analysis:
-#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$timesfn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/timeperiods.txt")
+BioGeoBEARS_run_object$dispersal_multipliers_fn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/dispersal_multipliers.txt")
 #BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
@@ -442,7 +560,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
@@ -469,10 +587,14 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = jstart
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart
 
+# Add the manually-constructed, time-stratified list of allowed states
+BioGeoBEARS_run_object$lists_of_states_lists_0based = lists_of_states_lists_0based
+
+# Run this to check inputs. Read the error messages if you get them!
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object=BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-resfn = "Psychotria_DEC+J_M0_unconstrained_v1.Rdata"
+resfn = "Psychotria_DEC+J_M3_time-stratified_v1.Rdata"
 runslow = TRUE
 if (runslow)
     {
@@ -493,13 +615,13 @@ if (runslow)
 #######################################################
 # PDF plots
 #######################################################
-pdffn = "Psychotria_DEC_vs_DEC+J_M0_unconstrained_v1.pdf"
+pdffn = "Psychotria_DEC_vs_DEC+J_M3_time-stratified_v1.pdf"
 pdf(pdffn, height=6, width=6)
 
 #######################################################
 # Plot ancestral states - DEC
 #######################################################
-analysis_titletxt ="BioGeoBEARS DEC on Psychotria M0_unconstrained"
+analysis_titletxt ="BioGeoBEARS DEC on Psychotria M3_time-stratified"
 
 # Setup
 results_object = resDEC
@@ -514,7 +636,7 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 #######################################################
 # Plot ancestral states - DECJ
 #######################################################
-analysis_titletxt ="BioGeoBEARS DEC+J on Psychotria M0_unconstrained"
+analysis_titletxt ="BioGeoBEARS DEC+J on Psychotria M3_time-stratified"
 
 # Setup
 results_object = resDECj
@@ -566,8 +688,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Also: search script on "include_null_range" for other places to change
 
 # Set up a time-stratified analysis:
-#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$timesfn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/timeperiods.txt")
+BioGeoBEARS_run_object$dispersal_multipliers_fn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/dispersal_multipliers.txt")
 #BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
@@ -587,7 +709,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
@@ -617,11 +739,15 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01v","est"] = 0.
 # BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = 0.01
 # BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = 0.01
 
+# Add the manually-constructed, time-stratified list of allowed states
+BioGeoBEARS_run_object$lists_of_states_lists_0based = lists_of_states_lists_0based
+
+# Run this to check inputs. Read the error messages if you get them!
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object=BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 runslow = TRUE
-resfn = "Psychotria_DIVALIKE_M0_unconstrained_v1.Rdata"
+resfn = "Psychotria_DIVALIKE_M3_time-stratified_v1.Rdata"
 if (runslow)
     {
     res = bears_optim_run(BioGeoBEARS_run_object)
@@ -651,8 +777,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Also: search script on "include_null_range" for other places to change
 
 # Set up a time-stratified analysis:
-#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$timesfn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/timeperiods.txt")
+BioGeoBEARS_run_object$dispersal_multipliers_fn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/dispersal_multipliers.txt")
 #BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
@@ -672,7 +798,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
@@ -718,10 +844,14 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","min"] = 0.00001
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","max"] = 1.99999
 
+# Add the manually-constructed, time-stratified list of allowed states
+BioGeoBEARS_run_object$lists_of_states_lists_0based = lists_of_states_lists_0based
+
+# Run this to check inputs. Read the error messages if you get them!
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object=BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-resfn = "Psychotria_DIVALIKE+J_M0_unconstrained_v1.Rdata"
+resfn = "Psychotria_DIVALIKE+J_M3_time-stratified_v1.Rdata"
 runslow = TRUE
 if (runslow)
     {
@@ -739,13 +869,13 @@ if (runslow)
     resDIVALIKEj = res
     }
 
-pdffn = "Psychotria_DIVALIKE_vs_DIVALIKE+J_M0_unconstrained_v1.pdf"
+pdffn = "Psychotria_DIVALIKE_vs_DIVALIKE+J_M3_time-stratified_v1.pdf"
 pdf(pdffn, height=6, width=6)
 
 #######################################################
 # Plot ancestral states - DIVALIKE
 #######################################################
-analysis_titletxt ="BioGeoBEARS DIVALIKE on Psychotria M0_unconstrained"
+analysis_titletxt ="BioGeoBEARS DIVALIKE on Psychotria M3_time-stratified"
 
 # Setup
 results_object = resDIVALIKE
@@ -760,7 +890,7 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 #######################################################
 # Plot ancestral states - DIVALIKE+J
 #######################################################
-analysis_titletxt ="BioGeoBEARS DIVALIKE+J on Psychotria M0_unconstrained"
+analysis_titletxt ="BioGeoBEARS DIVALIKE+J on Psychotria M3_time-stratified"
 
 # Setup
 results_object = resDIVALIKEj
@@ -828,8 +958,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Also: search script on "include_null_range" for other places to change
 
 # Set up a time-stratified analysis:
-#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$timesfn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/timeperiods.txt")
+BioGeoBEARS_run_object$dispersal_multipliers_fn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/dispersal_multipliers.txt")
 #BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
@@ -849,7 +979,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
@@ -885,12 +1015,16 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","type"] = "
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","init"] = 0.9999
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","est"] = 0.9999
 
+# Add the manually-constructed, time-stratified list of allowed states
+BioGeoBEARS_run_object$lists_of_states_lists_0based = lists_of_states_lists_0based
+
+# Run this to check inputs. Read the error messages if you get them!
 # Check the inputs; fixing any initial ("init") values outside min/max
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object=BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 runslow = TRUE
-resfn = "Psychotria_BAYAREALIKE_M0_unconstrained_v1.Rdata"
+resfn = "Psychotria_BAYAREALIKE_M3_time-stratified_v1.Rdata"
 if (runslow)
     {
     res = bears_optim_run(BioGeoBEARS_run_object)
@@ -920,8 +1054,8 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Also: search script on "include_null_range" for other places to change
 
 # Set up a time-stratified analysis:
-#BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
-#BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
+BioGeoBEARS_run_object$timesfn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/timeperiods.txt")
+BioGeoBEARS_run_object$dispersal_multipliers_fn = paste0(extdata_dir,"/examples/Psychotria_M3strat/BGB/dispersal_multipliers.txt")
 #BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
@@ -939,7 +1073,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-#BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
@@ -1006,10 +1140,14 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","max"] = 4.9999
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","min"] = 0.00001
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","max"] = 0.99999
 
+# Add the manually-constructed, time-stratified list of allowed states
+BioGeoBEARS_run_object$lists_of_states_lists_0based = lists_of_states_lists_0based
+
+# Run this to check inputs. Read the error messages if you get them!
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object=BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
-resfn = "Psychotria_BAYAREALIKE+J_M0_unconstrained_v1.Rdata"
+resfn = "Psychotria_BAYAREALIKE+J_M3_time-stratified_v1.Rdata"
 runslow = TRUE
 if (runslow)
     {
@@ -1025,13 +1163,13 @@ if (runslow)
     resBAYAREALIKEj = res
     }
 
-pdffn = "Psychotria_BAYAREALIKE_vs_BAYAREALIKE+J_M0_unconstrained_v1.pdf"
+pdffn = "Psychotria_BAYAREALIKE_vs_BAYAREALIKE+J_M3_time-stratified_v1.pdf"
 pdf(pdffn, height=6, width=6)
 
 #######################################################
 # Plot ancestral states - BAYAREALIKE
 #######################################################
-analysis_titletxt ="BioGeoBEARS BAYAREALIKE on Psychotria M0_unconstrained"
+analysis_titletxt ="BioGeoBEARS BAYAREALIKE on Psychotria M3_time-stratified"
 
 # Setup
 results_object = resBAYAREALIKE
@@ -1046,7 +1184,7 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 #######################################################
 # Plot ancestral states - BAYAREALIKE+J
 #######################################################
-analysis_titletxt ="BioGeoBEARS BAYAREALIKE+J on Psychotria M0_unconstrained"
+analysis_titletxt ="BioGeoBEARS BAYAREALIKE+J on Psychotria M3_time-stratified"
 
 # Setup
 results_object = resBAYAREALIKEj
@@ -1234,13 +1372,13 @@ write.table(conditional_format_table(restable_AICc_rellike), file="restable_AICc
 
 # > restable
 # 
-#                 LnL numparams            d            e         j
-# DEC           -34.5         2 3.504546e-02 2.835632e-02 0.0000000
-# DEC+J         -20.9         3 1.000000e-12 1.000000e-12 0.1142811
-# DIVALIKE      -33.1         2 4.474416e-02 1.000000e-12 0.0000000
-# DIVALIKE+J    -21.1         3 2.001000e-09 1.000000e-12 0.1157199
-# BAYAREALIKE   -40.3         2 1.738085e-02 3.040188e-01 0.0000000
-# BAYAREALIKE+J -21.6         3 1.000000e-12 1.000000e-12 0.1081158
+#                     LnL numparams          d          e         j       AIC
+# DEC           -41.71374         2 0.07445543 0.07183810 0.0000000  87.42749
+# DEC+J         -32.78173         3 0.02486813 0.04091879 0.1980793  71.56346
+# DIVALIKE      -42.07915         2 0.08494066 0.06236922 0.0000000  88.15831
+# DIVALIKE+J    -32.64996         3 0.02649726 0.04057528 0.1858708  71.29992
+# BAYAREALIKE   -48.69602         2 0.09411729 0.24572146 0.0000000 101.39205
+# BAYAREALIKE+J -32.88534         3 0.02360782 0.04062444 0.1776749  71.77069
 
 #######################################################
 # The p-value of the LRT (Likelihood Ratio Test) tells you whether or not you can reject the
@@ -1254,11 +1392,14 @@ write.table(conditional_format_table(restable_AICc_rellike), file="restable_AICc
 
 # > teststable
 # 
-#              alt        null LnLalt LnLnull DFalt DFnull DF Dstatistic    pval        test       tail  AIC1  AIC2 AICwt1  AICwt2 AICweight_ratio_model1 AICweight_ratio_model2
-# 1          DEC+J         DEC -20.95  -34.54     3      2  1      27.19 1.8e-07 chi-squared one-tailed  47.9 73.08   1.00 3.4e-06                 294893                3.4e-06
-# 11    DIVALIKE+J    DIVALIKE -21.09  -33.15     3      2  1      24.13 9.0e-07 chi-squared one-tailed 48.17  70.3   1.00 1.6e-05                  63797                1.6e-05
-# 12 BAYAREALIKE+J BAYAREALIKE -21.09  -33.15     3      2  1      24.13 9.0e-07 chi-squared one-tailed 48.17  70.3   1.00 1.6e-05                  63797                1.6e-05
-#
+#              alt        null LnLalt LnLnull DFalt DFnull DF Dstatistic    pval        test       tail  AIC1
+# 1          DEC+J         DEC -32.78  -41.71     3      2  1      17.86 2.4e-05 chi-squared one-tailed 71.56
+# 11    DIVALIKE+J    DIVALIKE -32.65  -42.08     3      2  1      18.86 1.4e-05 chi-squared one-tailed  71.3
+# 12 BAYAREALIKE+J BAYAREALIKE -32.89   -48.7     3      2  1      31.62 1.9e-08 chi-squared one-tailed 71.77
+#     AIC2 AICwt1  AICwt2 AICweight_ratio_model1 AICweight_ratio_model2
+# 1  87.43   1.00  0.0004                   2785                 0.0004
+# 11 88.16   1.00  0.0002                   4579                 0.0002
+# 12 101.4   1.00 3.7e-07                2705177                3.7e-07
 
 
 
