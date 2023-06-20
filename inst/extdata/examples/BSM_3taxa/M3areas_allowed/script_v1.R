@@ -1,27 +1,54 @@
 context("Unit-testing Biogeographic Stochastic Mapping (BSM) on a simple 3-taxon tree, and time-stratified state space")
 
 
-# Load the package (after installation, see above).
-library(GenSA)    # GenSA is better than optimx (although somewhat slower)
-library(optimx)    # GenSA is better than optimx (although somewhat slower)
-library(FD)       # for FD::maxent() (make sure this is up-to-date)
-library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
-library(parallel)
+#######################################################
+# Installing BioGeoBEARS from GitHub latest version
+#######################################################
+# CUT 2018: The old instructions to source() online upgrade .R files have been deleted,
+#         all updates are now on the GitHub version of the package, version 1.1+
+#######################################################
+# Paste the stuff below, INSIDE the single-quote (') marks
+# but NOT the single-quote marks themselves.
+install_cmds_that_work_as_of_2023='
+
+# Installation-from-scratch commands
+install.packages("devtools")
+install.packages("ape")
+install.packages("optimx")
+install.packages("GenSA")
+install.packages("rexpokit")   
+install.packages("cladoRcpp")
+install.packages("snow")
+install.packages("MultinomialCI")
+
+library(devtools)
+devtools::install_github(repo="nmatzke/BioGeoBEARS")
+
+# NOTE: If you get a message like this
+# * select "2. CRAN packages only" on "3. None"
+# * If you get asked about "binaries" vs. "source", choose "binaries" 
+#   (binaries are precompiled and easy to install; installing from source
+#    requires that your computer have the correct compilers, which can be
+#    challenging if you are not fairly expert)
+' # END install_cmds_that_work_as_of_2023
 
 #######################################################
-# 2018-10-10 update: I have been putting the 
-# updates on CRAN/GitHub
-# You should use:
-# rexpokit version 0.26.6 from CRAN
-# cladoRcpp version 0.15 from CRAN
-# BioGeoBEARS version 1.1 from GitHub, install with:
-# library(devtools)
-# devtools::install_github(repo="nmatzke/BioGeoBEARS")
 #######################################################
+
+#######################################################
+# SETUP -- libraries/BioGeoBEARS updates
+#######################################################
+
+# Load the package (after installation, see above).
+library(ape)
+library(optimx)   # optimx seems better than R's default optim()
+library(GenSA)    # GenSA seems better than optimx (but slower) on 5+ parameters, 
+                  # seems to sometimes fail on simple problems (2-3 parameters)
 library(rexpokit)
 library(cladoRcpp)
+library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
+library(parallel)
 library(BioGeoBEARS)
-
 
 
 
@@ -161,15 +188,15 @@ trfn = "tree.newick"
 moref(trfn)
 
 # Look at your phylogeny:
-pdffn = "tree.pdf"
-pdf(file=pdffn, width=6, height=6)
+#pdffn = "tree.pdf"
+#pdf(file=pdffn, width=6, height=6)
 
 tr = read.tree(trfn)
 tr
 plot(tr)
 title("Example 3-taxon tree")
 axisPhylo() # plots timescale
-dev.off()
+#dev.off()
 
 #######################################################
 # Geography file
@@ -318,7 +345,7 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Uncomment files you wish to use in time-stratified analyses:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -409,7 +436,7 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -551,7 +578,7 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -633,7 +660,7 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -807,7 +834,7 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -896,7 +923,7 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Set up a time-stratified analysis:
 BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.

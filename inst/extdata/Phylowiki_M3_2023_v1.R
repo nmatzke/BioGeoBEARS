@@ -1415,10 +1415,8 @@ write.table(conditional_format_table(restable_AICc_rellike), file="restable_AICc
 #######################################################
 # Time-stratified Biogeographic Stochastic Mapping (BSM)
 #######################################################
-
-
-model_name = "DEC+J_M3_timestrat"
-res = resDECj
+model_name = "DEC_M3_timestrat"
+res = resDEC
 
 pdffn = paste0("Psychotria_", model_name, "_v1.pdf")
 pdf(pdffn, height=6, width=6)
