@@ -66,7 +66,7 @@ library(BioGeoBEARS)
 # Set your working directory for output files
 # default here is your home directory ("~")
 # Change this as you like
-# wd = "/drives/GDrive/z_help/Furnariidae_Bio_Geo/BSM_small/M3areas_allowed/"
+# wd = "/drives/GDrive/z_help/Furnariidae_Bio_Geo/BSM_small/M3areas_allowed_wFossilBranch/"
 # setwd(wd)
 
 # Double-check your working directory with getwd()
@@ -89,7 +89,7 @@ extdata_dir
 list.files(extdata_dir)
 
 
-wd = slashslash(paste0(addslash(extdata_dir), "/examples/BSM_3taxa/M3areas_allowed/"))
+wd = slashslash(paste0(addslash(extdata_dir), "/examples/BSM_3taxa/M3areas_allowed_wFossilBranch/"))
 setwd(wd)
 
 
