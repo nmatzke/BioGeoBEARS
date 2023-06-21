@@ -1753,7 +1753,7 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 				
 				if (isblank_TF(starting_state_1based) == TRUE)
 					{
-					stop("STOP_in_stochastic_map_given_inputs.R_line_1395")
+					stop("STOP_in_stochastic_map_given_inputs.R_line_1756")
 					}
 				
 				# Find the downpass conditional likelihoods (normalized) that have
@@ -1893,23 +1893,24 @@ stochastic_mapping_on_stratified <- function(res, stochastic_mapping_inputs_list
 				#print(downpass_relprobs_at_branch_top)
 				
 				# 2019-04-29 error check
-				# Check if it's a fossil tip in the correct stratum.  If yes, treat like normal.
-				# If not, skip and set probs_branch_top=downpass_relprobs_at_branch_top
+				# Check if it's a fossil tip in the correct stratum.  If not, treat like normal.
+				# If so, skip and set probs_branch_top=downpass_relprobs_at_branch_top
 				# (pass down the branch likelihoods)
 				time_top = res$inputs$master_table$time_top[rownum_master_table]
 				time_bot = res$inputs$master_table$time_bot[rownum_master_table]
 				time_bp = res$inputs$master_table$time_bp[rownum_master_table]
 				timebin_TF1 = time_bp >= time_top
 				timebin_TF2 = time_bp < time_bot
-				timebin_TF = (timebin_TF1 + timebin_TF2) == 2
+				fossil_tip_inside_timebin_TF = (timebin_TF1 + timebin_TF2) == 2
 				
-				if (timebin_TF == TRUE)
+				# 2023-06-21 - bug check
+				if (fossil_tip_inside_timebin_TF == FALSE)
 					{
 					#print(TRUE)
 					probs_branch_top = condprobs_branch_top * downpass_relprobs_at_branch_top
 					probs_branch_top = probs_branch_top / sum(probs_branch_top)
 					}
-				if (timebin_TF == FALSE)
+				if (fossil_tip_inside_timebin_TF == TRUE)
 					{
 					#print(FALSE)
 					probs_branch_top = downpass_relprobs_at_branch_top

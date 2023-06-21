@@ -135,16 +135,20 @@ trfn = "tree.newick"
 # Look at the raw Newick file:
 moref(trfn)
 
+dev.off()
+dev.off()
+dev.off()
+
 # Look at your phylogeny:
-#pdffn = "tree.pdf"
-#pdf(file=pdffn, width=6, height=6)
+pdffn = "tree.pdf"
+pdf(file=pdffn, width=6, height=6)
 
 tr = read.tree(trfn)
 tr
 plot(tr)
 title("Example 3-taxon tree")
 axisPhylo() # plots timescale
-#dev.off()
+dev.off()
 
 #######################################################
 # Geography file
@@ -291,9 +295,9 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 #  and BioGeoBEARS Google Group posts for further hints)
 #
 # Uncomment files you wish to use in time-stratified analyses:
-BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
+BioGeoBEARS_run_object$timesfn = "timeperiods_C2.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
-BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC.txt"
+BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
 #BioGeoBEARS_run_object$distsfn = "distances_matrix.txt"
 # See notes on the distances model on PhyloWiki's BioGeoBEARS updates page.
@@ -382,7 +386,7 @@ BioGeoBEARS_run_object$include_null_range = TRUE    # set to FALSE for e.g. DEC*
 # Also: search script on "include_null_range" for other places to change
 
 # Set up a time-stratified analysis:
-BioGeoBEARS_run_object$timesfn = "timeperiods.txt"
+BioGeoBEARS_run_object$timesfn = "timeperiods_C2.txt"
 #BioGeoBEARS_run_object$dispersal_multipliers_fn = "manual_dispersal_multipliers.txt"
 BioGeoBEARS_run_object$areas_allowed_fn = "areas_allowed_noC2.txt"
 #BioGeoBEARS_run_object$areas_adjacency_fn = "areas_adjacency.txt"
@@ -487,3 +491,15 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 dev.off()  # Turn off PDF
 cmdstr = paste("open ", pdffn, sep="")
 system(cmdstr) # Plot it
+
+
+
+
+
+
+
+
+
+
+
+

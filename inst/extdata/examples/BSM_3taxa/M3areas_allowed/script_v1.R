@@ -187,16 +187,20 @@ trfn = "tree.newick"
 # Look at the raw Newick file:
 moref(trfn)
 
+dev.off()
+dev.off()
+dev.off()
+
 # Look at your phylogeny:
-#pdffn = "tree.pdf"
-#pdf(file=pdffn, width=6, height=6)
+pdffn = "tree.pdf"
+pdf(file=pdffn, width=6, height=6)
 
 tr = read.tree(trfn)
 tr
 plot(tr)
 title("Example 3-taxon tree")
 axisPhylo() # plots timescale
-#dev.off()
+dev.off()
 
 #######################################################
 # Geography file
