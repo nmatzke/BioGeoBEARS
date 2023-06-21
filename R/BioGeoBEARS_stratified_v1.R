@@ -109,7 +109,7 @@ section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, 
 	phy_as_it_is_chopped_down = original_tree
 	
 	# Make the tree table for the original tree
-	orig_tr_table = prt(original_tree, printflag=FALSE, get_tipnames=TRUE)
+	orig_tr_table = prt(original_tree, printflag=FALSE, get_tipnames=TRUE, fossils_older_than=fossils_older_than)
 	times_older_than_root_node_TF = orig_timeperiods > max(orig_tr_table$node_ht)
 	times_younger_than_root_node_TF = orig_timeperiods < max(orig_tr_table$node_ht)
 	
@@ -353,7 +353,7 @@ section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, 
 				
 				# Get the tree structure as the tree is chopped down
 				#print(i)
-				phy_chopped_down_table = prt(phy_as_it_is_chopped_down, printflag=FALSE, get_tipnames=TRUE)
+				phy_chopped_down_table = prt(phy_as_it_is_chopped_down, printflag=FALSE, get_tipnames=TRUE, fossils_older_than=fossils_older_than)
 				
 				# re-sort the tipnames
 				for (rownum in 1:nrow(phy_chopped_down_table))
@@ -379,7 +379,7 @@ section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, 
 						{
 						# Get the nodenums in the subtree that's been removed
 						tmp_subtree = chainsaw_result$return_pieces_list[[p]]
-						subtree_table = prt(tmp_subtree, printflag=FALSE, get_tipnames=TRUE)
+						subtree_table = prt(tmp_subtree, printflag=FALSE, get_tipnames=TRUE, fossils_older_than=fossils_older_than)
 						
 						# re-sort the tipnames
 						for (rownum in 1:nrow(subtree_table))
@@ -575,7 +575,8 @@ section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, 
 	inputs$master_table = master_table
 
 	return(inputs)
-	}
+	} # END section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, cut_fossils=FALSE, fossils_older_than=0.001, min_dist_between_node_and_stratum_line=0.00001, remove_root_edge=TRUE, save_phys_before_they_are_chopped=FALSE)
+
 
 
 

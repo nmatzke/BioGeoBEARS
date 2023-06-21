@@ -329,7 +329,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE, fossils_older_than=0.001, cut_fossils=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
@@ -405,7 +405,7 @@ BioGeoBEARS_run_object$force_sparse = FALSE    # force_sparse=TRUE causes pathol
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 # Divide the tree up by timeperiods/strata (uncomment this for stratified analysis)
-BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
+BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE, fossils_older_than=0.001, cut_fossils=FALSE)
 # The stratified tree is described in this table:
 #BioGeoBEARS_run_object$master_table
 
