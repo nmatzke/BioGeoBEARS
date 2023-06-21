@@ -45,3 +45,5 @@ inst/.DS_Store
 tests/.DS_Store
 .DS_Store
 .DS_Store
+.DS_Store
+inst/extdata/.DS_Store
