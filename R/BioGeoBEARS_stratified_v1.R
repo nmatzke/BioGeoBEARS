@@ -27,12 +27,12 @@
 #' @param make_master_table If desired, make an \code{inputs$master_table} containing the
 #' correspondance between the original tree and the sectioned pieces.
 #' @param plot_pieces If \code{TRUE}, plot the tree chunks (but not isolated branch segments) as they are created.
-#' @param cut_fossils If \code{TRUE} (default), the program is stopped if there are fossils, i.e. tips older than 0.6 my (default).  Users should
+#' @param cut_fossils If \code{TRUE}, the program is stopped if there are fossils, i.e. tips older than 0.001 my (default).  Default FALSE, as ideally, users should
 #' use code{\link[ape]{drop.tip}} or an external program to clip fossils out of the tree. PLEASE NOTE that several times I have experienced miserable long nights
 #' due, apparently, to \code{\link[ape]{drop.tip}} producing weird tree structures, resulting in weird Newick files, without me realizing it.  The solution is usually to 
 #' open the Newick file in something like \code{FigTree}, resort the branches, and save to a new Newick file.
 #' Fossils have now been implemented in stratified analysis; this was complicated, as it involves inserting new branches in chopped trees.
-#' @param fossils_older_than Tips that are older than \code{fossils_older_than} will be marked as \code{TRUE} in a column called \code{fossil}.
+#' @param fossils_older_than Tips that are older than \code{fossils_older_than} will be marked as \code{TRUE} in a column called \code{fossils}.
 #' This is not currently set to 0, because Newick files can have slight precision issues etc. that mean not all tips quite come to zero.  You 
 #' can attempt to fix this with \code{\link{extend_tips_to_ultrametricize}} (but make sure you do not inappropriately average in fossils!!).
 #' @param min_dist_between_node_and_stratum_line An error check is run, if any nodes are
@@ -51,7 +51,7 @@
 #'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
-section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, cut_fossils=TRUE, fossils_older_than=0.1, min_dist_between_node_and_stratum_line=0.00001, remove_root_edge=TRUE, save_phys_before_they_are_chopped=FALSE)
+section_the_tree <- function(inputs, make_master_table=FALSE, plot_pieces=TRUE, cut_fossils=FALSE, fossils_older_than=0.001, min_dist_between_node_and_stratum_line=0.00001, remove_root_edge=TRUE, save_phys_before_they_are_chopped=FALSE)
 	{
 	runjunk='
 	make_master_table=TRUE; plot_pieces=FALSE; cut_fossils=TRUE; fossils_older_than=0.6;

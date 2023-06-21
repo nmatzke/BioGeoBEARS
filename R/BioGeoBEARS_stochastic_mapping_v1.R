@@ -1524,7 +1524,7 @@ events_txt_list_into_events_table <- function(events_txt_list, trtable=NULL, rec
 					# There should only be 1 combination of master tree nodes, and time-stratum
 					if (sum(sumTFs) != 1)
 						{
-						txt = paste0("STOP ERROR in events_txt_list_into_events_table(): ", sum(sumTFs), " rows of input 'trtable' match the SUBnode nodenum, SUBedge.length, and stratum specified for this anagenetic event:")
+						txt = paste0("STOP ERROR in events_txt_list_into_events_table(). This might happen e.g. if you have time-stratified analysis with a fossil branch, but the fossil was not recognized as a fossil by the section_the_tree() function in your script. E.g. if your fossil is 0.09 million years old, but the fossils_older_than option of section_the_tree() is set to 0.1. Adjust and re-run. Specific error: ", sum(sumTFs), " rows of input 'trtable' match the SUBnode nodenum, SUBedge.length, and stratum specified for this anagenetic event:")
 						cat("\n\n")
 						cat(txt)
 						print("input 'trtable', matching rows:")
@@ -1756,6 +1756,7 @@ get_inputs_for_stochastic_mapping <- function(res, cluster_already_open=FALSE, r
 	cluster_was_open = FALSE
 	if (.Platform$GUI != "AQUA" && ((is.na(num_cores_to_use) == TRUE) || ( (is.na(num_cores_to_use)==FALSE) && (num_cores_to_use > 1))) )
 		{
+		# YES CLUSTER
 		# We are doing manual, optional processing on several cores;
 		# this seems to have less overhead/hassle/incompatibility issues
 		# than using mcmapply, mclapply, etc...
@@ -1802,6 +1803,7 @@ get_inputs_for_stochastic_mapping <- function(res, cluster_already_open=FALSE, r
 			cat("Cluster with ", num_cores_to_use, " cores already open.\n\n", sep="")
 			}
 		} else {
+		# NO CLUSTER
 		# You are using R.app and clusters don't work...
 
 		num_cores_computer_has = detectCores()
@@ -1823,7 +1825,7 @@ get_inputs_for_stochastic_mapping <- function(res, cluster_already_open=FALSE, r
 		
 		cluster_already_open = NULL
 		cluster_was_open = FALSE
-		}
+		} # END if ( is.logical(cluster_already_open) == TRUE )
 
 	cat("\n\nCurrently, cluster_already_open=")
 	print(cluster_already_open)
