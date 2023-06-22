@@ -358,6 +358,23 @@ get_Qmat_COOmat_from_res <- function(res, numstates=NULL, include_null_range=TRU
 	returned_mats = get_Qmat_COOmat_from_res(res, numstates=NULL, max_range_size=NULL)
 	returned_mats
 	names(returned_mats)
+
+
+
+
+	# Try with a time-stratified list of states:
+	
+	res$inputs$lists_of_states_lists_0based = list(list(NA, 0L, 1L, 2L, 3L, 0:1, c(0L, 2L), c(0L, 3L), 1:2, c(1L, 3L), 2:3, 0:2, c(0L, 1L, 3L), c(0L, 2L, 3L), 1:3, 0:3),
+	list(NA, 0L, 1L, 2L, 0:1, c(0L, 2L), 1:2, 0:2),
+	list(NA, 0L, 1L, 0:1),
+	list(NA, 0L), list(NA, 0L))
+
+	res$inputs$max_range_size = 4
+	returned_mats = get_Qmat_COOmat_from_res(res, numstates=NULL, max_range_size=NULL)
+	returned_mats
+	names(returned_mats)
+
+
 	'
 
 	# Error check

@@ -3904,6 +3904,7 @@ paint_stochastic_map_branches <- function(res, master_table_cladogenetic_events,
 	sum(nochange_TF)
 
 	# Plot branch histories with no change
+	rownum=1
 	for (rownum in 1:nrow(master_table_cladogenetic_events))
 		{
 		

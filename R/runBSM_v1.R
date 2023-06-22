@@ -97,6 +97,8 @@ runBSM <- function(res, stochastic_mapping_inputs_list, maxnum_maps_to_try=1, nu
 		# Run either of the options
 		#cat(" ", m, sep="")
 		#print("try_result:")
+		# maxtries=40000; seedval=12346; master_nodenum_toPrint=master_nodenum_toPrint
+		# stochastic_mapping_on_stratified
 		try_result = try(expr=eval(parse(text=cmdstr)))
 		#eval(parse(text=cmdstr))
 		#print(try_result)
