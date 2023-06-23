@@ -3874,12 +3874,12 @@ level_tree_tips <- function(tr, method="mean", printflag=FALSE, fossils_older_th
 #' 
 #' @param t A \code{\link[ape]{phylo}} tree object.
 #' @param printflag Should the table be printed to screen?  Default TRUE.
-#' @param relabel_nodes Manually renumber the internal nodes, if desired. Default FALSE.
+#' @param relabel_nodes Manually re-number the internal nodes, if desired. Default FALSE.
 #' @param time_bp_digits The number of digits to print in the time_bp (time before present) column. Default=7.
 #' @param add_root_edge Should a root edge be added?  Default \code{TRUE}.
 #' @param get_tipnames Should the list of tipnames descending from each node be printed as a string in another column?  
 #' This is slow-ish, but useful for matching up nodes between differing trees. Default \code{FALSE}.
-#' @param fossils_older_than Tips that are older than \code{fossils_older_than} will be marked as \code{TRUE} in a column called \code{fossil}.
+#' @param fossils_older_than Tips that are older than \code{fossils_older_than} will be marked as \code{TRUE} in a column called \code{fossil}. Default 0.001.
 #' @param silence_warnings Suppress warnings about missing branchlengths (prt makes each branchlength equal 1)
 #' This is not currently set to 0, because Newick files can have slight precision issues etc. that mean not all tips quite come to zero.  You 
 #' can attempt to fix this with \code{\link{average_tr_tips}} (but make sure you do not inappropriately average in fossils!!).
@@ -3895,7 +3895,7 @@ level_tree_tips <- function(tr, method="mean", printflag=FALSE, fossils_older_th
 #' 	trtable1 = prt(tr)
 #' 	trtable2 = prt(t=tr, printflag=FALSE, relabel_nodes=TRUE, get_tipnames=TRUE, fossils_older_than=0.000001)
 #' 
-prt <- function(t, printflag=FALSE, relabel_nodes = FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=TRUE, fossils_older_than=0.6, silence_warnings=FALSE)
+prt <- function(t, printflag=FALSE, relabel_nodes=FALSE, time_bp_digits=7, add_root_edge=TRUE, get_tipnames=TRUE, fossils_older_than=0.001, silence_warnings=FALSE)
 	{
 	defaults='
 	#wd = "/drives/GDrive/__classes/BIOSCI210/lab3_genome_size/"

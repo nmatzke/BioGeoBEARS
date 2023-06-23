@@ -1,4 +1,272 @@
 
+# Get ML birthrate under Yule, and corresponding loglike
+# Match Julia functions:
+# ML_yule_birthRate(tr)
+# ML_yule_birthRate_wRoot(tr)
+
+ML_yule_birthRate <- function(tr, hooks_below=1.0e-6, drop_fossils=FALSE, fossils_older_than=NULL)
+	{
+	example_code='
+	hooks_below=1.0e-6
+	drop_fossils=FALSE
+	fossils_older_than=NULL
+	
+	hooks_below=1.0e-6
+	drop_fossils=TRUE
+	fossils_older_than=0.001
+
+	tr = read.tree(file="", text="(((chimp:1,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate(tr)
+	
+	# Hook node
+	tr = read.tree(file="", text="(((chimp:0.000001,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate(tr)
+	
+	# prt() default fossils_older_than is 0.001, so this isnt a fossil
+	tr = read.tree(file="", text="(((chimp:0.9999,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate(tr)
+	ML_yule_birthRate(tr, drop_fossils=TRUE)
+	ML_yule_birthRate(tr, drop_fossils=TRUE, fossils_older_than=0.001)
+	
+	# This is
+	tr = read.tree(file="", text="(((chimp:0.998,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate(tr)
+	ML_yule_birthRate(tr, drop_fossils=TRUE)
+	ML_yule_birthRate(tr, drop_fossils=TRUE, fossils_older_than=0.001)
+	' # END example_code
+	
+	trdf = prt(tr, printflag=FALSE, get_tipnames=FALSE)
+	tipnodes = 1:length(tr$tip.label)
+	hookTF = trdf$edge.length[tipnodes] <= hooks_below
+	tipsTF1 = trdf$node.type[tipnodes] == "root"
+	tipsTF2 = trdf$node.type[tipnodes] == "internal"
+	tipsTF = (tipsTF1 + tipsTF2) == 0
+	
+	if (drop_fossils == TRUE)
+		{
+		if (is.null(fossils_older_than))
+			{
+			fossilsTF = trdf$fossils[tipnodes] == TRUE
+			} else {
+			fossilsTF = trdf$time_bp[tipnodes] >= fossils_older_than
+			}
+		} else {
+		fossilsTF = rep(FALSE, times=length(tipnodes))
+		}
+	
+	dropTF = (hookTF + fossilsTF) > 0
+	dropTF[tipsTF == FALSE] = TRUE
+	
+	tips_to_drop = trdf$label[dropTF]
+	tr2 = drop.tip(phy=tr, tip=tips_to_drop)
+	tr2
+	
+	num_sp_events = tr2$Nnode
+	total_branch_length = sum(tr2$edge.length)
+	lambda = (num_sp_events-1.0) / total_branch_length # -1.0, like yule()
+	mu = 0.0 # Yule process assumption
+	bd = bd_liks(tr2, birthRate=lambda, deathRate=mu)
+	bd
+	return(bd)
+	}
+
+
+# Get ML birthrate under Yule, and corresponding loglike
+# Match Julia functions:
+# ML_yule_birthRate(tr)
+# ML_yule_birthRate_wRoot(tr)
+
+ML_yule_birthRate_wRoot <- function(tr, hooks_below=1.0e-6, drop_fossils=FALSE, fossils_older_than=NULL)
+	{
+	example_code='
+	hooks_below=1.0e-6
+	drop_fossils=FALSE
+	fossils_older_than=NULL
+	
+	hooks_below=1.0e-6
+	drop_fossils=TRUE
+	fossils_older_than=0.001
+
+	tr = read.tree(file="", text="(((chimp:1,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate_wRoot(tr)
+	
+	# Hook node
+	tr = read.tree(file="", text="(((chimp:0.000001,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate_wRoot(tr)
+	
+	# prt() default fossils_older_than is 0.001, so this isnt a fossil
+	tr = read.tree(file="", text="(((chimp:0.9999,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate_wRoot(tr)
+	ML_yule_birthRate_wRoot(tr, drop_fossils=TRUE)
+	ML_yule_birthRate_wRoot(tr, drop_fossils=TRUE, fossils_older_than=0.001)
+	
+	# This is
+	tr = read.tree(file="", text="(((chimp:0.998,human:1):1,gorilla:2):1,orang:3);")
+	ML_yule_birthRate_wRoot(tr)
+	ML_yule_birthRate_wRoot(tr, drop_fossils=TRUE)
+	ML_yule_birthRate_wRoot(tr, drop_fossils=TRUE, fossils_older_than=0.001)
+	' # END example_code
+	
+	trdf = prt(tr, printflag=FALSE, get_tipnames=FALSE)
+	tipnodes = 1:length(tr$tip.label)
+	hookTF = trdf$edge.length[tipnodes] <= hooks_below
+	tipsTF1 = trdf$node.type[tipnodes] == "root"
+	tipsTF2 = trdf$node.type[tipnodes] == "internal"
+	tipsTF = (tipsTF1 + tipsTF2) == 0
+	
+	if (drop_fossils == TRUE)
+		{
+		if (is.null(fossils_older_than))
+			{
+			fossilsTF = trdf$fossils[tipnodes] == TRUE
+			} else {
+			fossilsTF = trdf$time_bp[tipnodes] >= fossils_older_than
+			}
+		} else {
+		fossilsTF = rep(FALSE, times=length(tipnodes))
+		}
+	
+	dropTF = (hookTF + fossilsTF) > 0
+	dropTF[tipsTF == FALSE] = TRUE
+	
+	tips_to_drop = trdf$label[dropTF]
+	tr2 = drop.tip(phy=tr, tip=tips_to_drop)
+	tr2
+	
+	num_sp_events = tr2$Nnode
+	total_branch_length = sum(tr2$edge.length)
+	lambda = (num_sp_events-0.0) / total_branch_length # -0.0, following some ClaSSE assumptions
+	mu = 0.0 # Yule process assumption
+	bd = bd_liks(tr2, birthRate=lambda, deathRate=mu)
+	bd
+	return(bd)
+	}
+
+
+
+#######################################################
+# Likelihood equation in the birthdeath function
+# (derived by pulling apart the birthdeath() function from ape)
+# This version stores all of the pieces of the calculation, for comparison
+#######################################################
+bd_liks <- function(tr, birthRate=1.0, deathRate=0.0)
+	{
+	ex='
+	trtxt = "((((((((P_hawaiiensis_WaikamoiL1:0.9665748366,P_mauiensis_Eke:0.9665748366):0.7086257935,(P_fauriei2:1.231108298,P_hathewayi_1:1.231108298):0.4440923324):0.1767115552,(P_kaduana_PuuKukuiAS:1.851022399,P_mauiensis_PepeAS:1.851022399):0.0008897862802):0.3347375986,P_kaduana_HawaiiLoa:2.186649784):0.302349378,(P_greenwelliae07:1.132253042,P_greenwelliae907:1.132253042):1.35674612):1.689170274,((((P_mariniana_MauiNui:1.99490084,P_hawaiiensis_Makaopuhi:1.99490084):0.7328279804,P_mariniana_Oahu:2.72772882):0.2574151709,P_mariniana_Kokee2:2.985143991):0.4601084855,P_wawraeDL7428:3.445252477):0.732916959):0.7345185743,(P_grandiflora_Kal2:2.480190277,P_hobdyi_Kuia:2.480190277):2.432497733):0.2873119899,((P_hexandra_K1:2.364873976,P_hexandra_M:2.364873976):0.4630447802,P_hexandra_Oahu:2.827918756):2.372081244);"
+	tr = read.tree(file="", text=trtxt)
+	branching.times(tr)
+	birthRate=0.3288164   # ML birthRate for Psychotria tree
+	deathRate=0.0					# ML deathRate for Psychotria tree
+	bd = bd_liks(tr, birthRate, deathRate)
+	bd
+	
+	trtxt = "((chimp:1,human:1):1,gorilla:2);"
+	tr = read.tree(file="", text=trtxt)
+	branching.times(tr)
+	birthRate=1.0
+	deathRate=0.0
+	bd = bd_liks(tr, birthRate, deathRate)
+	bd
+
+	trtxt = "((chimp:1,human:1):1,gorilla:2);"
+	tr = read.tree(file="", text=trtxt)
+	branching.times(tr)
+	birthRate=1.0
+	deathRate=0.999
+	bd = bd_liks(tr, birthRate, deathRate)
+	bd
+
+
+
+	# Getting the birthRate and deathRate from
+	# a = deathRate / birthRate	# relative death rate
+	# r = birthRate - deathRate	# net diversification rate
+	BD =  birthdeath(tr)
+	BD
+	names(BD)
+
+	# Calculate the birthRate and deathRate from the outputs
+	x1 = unname(BD$para["d/b"])
+	x2 = unname(BD$para["b-d"])
+	deathRate = (x2*x1) / (1-x1)
+	birthRate = deathRate+x2
+	c(birthRate, deathRate)
+	'
+	
+	
+	a = deathRate / birthRate	# relative death rate
+	r = birthRate - deathRate	# net diversification rate
+
+	N <- length(tr$tip.label)
+	nb_node = tr$Nnode - 1
+	sptimes <- c(NA, branching.times(tr)) # NA so the number of times equals number of tips?
+	x = sptimes
+	# a = "d/b"
+	# r = "b-d"
+
+	# dev <- function(a=0.1, r=0.2, N, x, return_deviance=FALSE)
+	# 	{
+	if (r < 0 || a > 1)
+		{
+		return(-1e+100)
+		}
+	
+	lnl_topology = lfactorial(tr$Nnode)
+	lnl_numBirths = nb_node * log(r)
+	lnl_Births_above_root = r * sum(sptimes[3:N])
+	
+	lnl_numtips_wOneMinusDeathRate = N * log(1 - a)
+	# Interpretation: more tips are less likely, if relativeDeathRate is >0
+	# If relativeDeathRate = 1, a=0, and lnl=-Inf... 
+	#    CLEARLY WRONG EXCEPT IN A MAXIMUM LIKELIHOOD CONTEXT!!!
+	# If relativeDeathRate = 0, a=0, and lnl=0, i.e. any number of tips is equiprobable
+	
+	lnl_branching_times = -2 * sum(log(exp(r * sptimes[2:N]) - a))
+	# For each observed branching,
+	# netDiversificationRate * timeOfEvent <- take exponent of that ; this means recorded events are less likely in the past
+	# <- subtract "a", a constant (relativeDeathRate)
+	#
+	# This would be a straight likelihood as:
+	# 1/
+	# (exp(r*branching_time)-a)^2
+	#
+	# Sum the logs of these
+	#
+	# If deathRate = 0
+	# lnl_branching_times = -2 * sum(log(exp(birthRate*sptimes[2:N]) - 0))
+	# lnl_branching_times = -2 * sum(log( exp(birthRate*sptimes[2:N]) )
+	# lnl_branching_times = -2 * sum( birthRate*sptimes[2:N] )
+	#
+	# Note: sum(X) = 9 = total branchlength of tr
+	# In BD:
+	# -2*sum(sptimes[2:N]) = -12
+	# sum(sptimes[3:N]) = 3
+	# So, lnl_branching_times + lnl_Births_above_root = yule's -lambda * X
+	lnL = lnl_topology + lnl_numBirths + lnl_Births_above_root + lnl_numtips_wOneMinusDeathRate + lnl_branching_times
+	dev =  -2 * lnL
+	
+	bd = NULL
+	bd$tr = tr
+	bd$birthRate = birthRate
+	bd$deathRate = deathRate
+	bd$relative_deathRate = a
+	bd$net_diversification_rate = r
+	bd$dev = dev
+	bd$lnl_topology = lnl_topology
+	bd$lnl_numBirths = lnl_numBirths
+	bd$lnl_Births_above_root = lnl_Births_above_root
+	bd$lnl_numtips_wOneMinusDeathRate = lnl_numtips_wOneMinusDeathRate
+	bd$lnl_branching_times = lnl_branching_times
+	bd$lnL = lnL
+	
+	return(bd)
+	}
+
+
+
+
+
+
 
 #' Get the node numbers of all tips descending from node 
 #'
