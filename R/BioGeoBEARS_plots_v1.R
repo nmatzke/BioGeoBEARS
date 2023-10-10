@@ -720,8 +720,8 @@ plot_stratum_lines=TRUE
 		# Also add the splits to the plot
 		#######################################################
 		# First, get the corner coordinates
-		coords = corner_coords(tr, tmplocation=cornercoords_loc, root.edge=root.edge)
-		coords
+		coords_df = corner_coords(tr, tmplocation=cornercoords_loc, root.edge=root.edge)
+		coords_df
 
 		# LEFT SPLITS
 		relprobs_matrix = left_ML_marginals_by_node
@@ -741,7 +741,7 @@ plot_stratum_lines=TRUE
 			par(fg=tmp_fg)	# so that user can change border externally
 			if (skiplabels == FALSE)
 				{			
-				cornerlabels(text=MLstates, coords=coords$leftcorns, bg=cols_byNode, cex=splitcex)
+				cornerlabels(text=MLstates, coords=coords_df$leftcorns, bg=cols_byNode, cex=splitcex)
 				} # END if (skiplabels == FALSE)
 
 			par(fg="black")	# set to default for most things
@@ -750,7 +750,7 @@ plot_stratum_lines=TRUE
 		if (plotwhat == "pie")
 			{
 			par(fg=tmp_fg)	# so that user can change border externally
-			cornerpies(pievals=relprobs_matrix, coords$leftcorns, piecol=colors_list_for_states, cex=splitcex)
+			cornerpies(pievals=relprobs_matrix, coords=coords_df$leftcorns, piecol=colors_list_for_states, cex=splitcex)
 			par(fg="black")	# set to default for most things
 			}
 
@@ -774,7 +774,7 @@ plot_stratum_lines=TRUE
 			par(fg=tmp_fg)	# so that user can change border externally
 			if (skiplabels == FALSE)
 				{
-				cornerlabels(text=MLstates, coords=coords$rightcorns, bg=cols_byNode, cex=splitcex)
+				cornerlabels(text=MLstates, coords=coords_df$rightcorns, bg=cols_byNode, cex=splitcex)
 				} # END if (skiplabels == FALSE)
 			par(fg="black")	# set to default for most things
 			}
@@ -782,7 +782,7 @@ plot_stratum_lines=TRUE
 		if (plotwhat == "pie")
 			{
 			par(fg=tmp_fg)	# so that user can change border externally
-			cornerpies(pievals=relprobs_matrix, coords$rightcorns, piecol=colors_list_for_states, cex=splitcex)			
+			cornerpies(pievals=relprobs_matrix, coords=coords_df$rightcorns, piecol=colors_list_for_states, cex=splitcex)			
 			par(fg="black")	# set to default for most things
 			}
 		}
@@ -1646,6 +1646,10 @@ cornerpies <- function(pievals, coords, piecol, adj=c(0.5,0.5), ...)
 	{
 	#require(ape)	# for ape:::floating.pie.asp
 	
+	# Make sure pievals, i.e. the ancestral state probabilities,
+	# are a numeric matrix instead of a data.frame
+	pievals = unname(as.matrix(pievals))
+	
 	args <- list(...)
     CEX <- if ("cex" %in% names(args)) 
     	{
@@ -1688,7 +1692,7 @@ cornerpies <- function(pievals, coords, piecol, adj=c(0.5,0.5), ...)
 			{
 			next()
 			}
-		ape_floating_pie_asp(XX[i], YY[i], pievals[i, ], radius = xrad[i], col = piecol, ...)
+		ape_floating_pie_asp(XX[i], YY[i], pievals[i, ], radius = xrad[i], col = piecol)
 		}
 	
 	
@@ -5315,13 +5319,17 @@ plot_phylo3_nodecoords_APE5 <- function (x, type = "phylogram", use.edge.length 
 ape_floating_pie_asp <- function (xpos, ypos, x, edges = 200, radius = 1, col = NULL, 
     startpos = 0, ...) 
 {
+    
+    # Correction in case x, i.e. the ancestral states table, is a data.frame
+    x = unname(matrix(x))
+    
     u <- par("usr")
     user.asp <- diff(u[3:4])/diff(u[1:2])
     p <- par("pin")
     inches.asp <- p[2]/p[1]
     asp <- user.asp/inches.asp
     if (!is.numeric(x) || any(is.na(x) | x < 0)) 
-        stop("floating.pie: x values must be non-negative")
+        stop("floating.pie: x values must be non-negative. You may get this error because 'pievals', i.e. the ancestral state probabilities, is a data.frame instead of a matrix.")
     x <- c(0, cumsum(x)/sum(x))
     dx <- diff(x)
     nx <- length(dx)
