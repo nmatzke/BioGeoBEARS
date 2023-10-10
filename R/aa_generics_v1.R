@@ -3555,6 +3555,25 @@ get_max_height_tree <- function(obj)
 	return(max_height)
 	}
 
+get_tree_height <- function(obj)
+	{
+	get_max_height_tree(obj)
+	}
+
+get_tr_height <- function(obj)
+	{
+	get_max_height_tree(obj)
+	}
+
+get_treeheight <- function(obj)
+	{
+	get_max_height_tree(obj)
+	}
+
+get_trht <- function(obj)
+	{
+	get_max_height_tree(obj)
+	}
 
 
 #######################################################
