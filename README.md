@@ -22,6 +22,12 @@ install.packages("rexpokit")
 install.packages("cladoRcpp")
 ```
 
+**NOTE:** If a [rexpokit](https://CRAN.R-project.org/package=rexpokit) pre-compiled executable is not available on CRAN, this may mean that CRAN took the package down temporarily, and/or required a revision, due to some update of its (constantly changing) FORTRAN standards. I will endeavor to fix these as soon as possible, but I have also archived the previous pre-compiled binaries here:
+
+https://github.com/nmatzke/Matzke_R_binaries
+
+...you will need to match your operating system (e.g. Windows vs. Mac) and perhaps chip type (e.g. x86 Intel vs. amd64; on a Mac, click upper-left Apple Symbol -> About This Mac to get this information).
+
 **2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [devtools](https://CRAN.R-project.org/package=devtools):
 
 ```
