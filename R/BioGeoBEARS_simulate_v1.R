@@ -740,12 +740,22 @@ infprobs_to_probs_of_each_area <- function(relprobs_matrix, states_list)
 	area_probs = matrix(0, nrow=nrow(relprobs_matrix), ncol=length(areas))
 
 	# Go through the states
+	# 2023-11-01_NJM robustness edit for multi-area states
 	for (i in 1:length(states_list))
 		{
-		if (is.na(states_list[[i]] && (length(states_list[[i]]==1)) ))
+		# Check for NA
+		NA_check = FALSE
+		if (length(states_list[[i]]) == 1)
 			{
-			next()
-			} else {
+			if (is.na(states_list[[i]]) == TRUE)
+				{
+				NA_check = TRUE
+				next()
+				}
+			}
+		
+		if (NA_check == FALSE)
+			{
 			# Convert 0-based states to 1-based states
 			areas_in_this_state = states_list[[i]] + 1
 
@@ -754,12 +764,12 @@ infprobs_to_probs_of_each_area <- function(relprobs_matrix, states_list)
 				{
 				# Prob of a particular state
 				tmpprob = relprobs_matrix[rownum,i]
-				
+			
 				# Every area in this state gets this probability
 				area_probs[rownum,areas_in_this_state] = area_probs[rownum,areas_in_this_state] + tmpprob
 				}
 			}
-		}
+		} # END for (i in 1:length(states_list))
 	
 	return(area_probs)
 	}
@@ -783,27 +793,36 @@ infprobs_to_probs_of_each_rangesize <- function(relprobs_matrix, states_list)
 	area_probs = matrix(0, nrow=nrow(relprobs_matrix), ncol=length(rangesizes))
 
 	# Go through the states
+	# 2023-11-01_NJM robustness edit for multi-area states
 	for (i in 1:length(states_list))
 		{
-		if (is.na(states_list[[i]] && (length(states_list[[i]]==1)) ))
+		# Check for NA
+		NA_check = FALSE
+		if (length(states_list[[i]]) == 1)
 			{
-			next()
-			} else {
+			if (is.na(states_list[[i]]) == TRUE)
+				{
+				NA_check = TRUE
+				next()
+				}
+			}
+		
+		if (NA_check == FALSE)
+			{
 			# Convert 0-based states to 1-based states
-			areas_in_this_state = length(states_list[[i]])
+			areas_in_this_state = states_list[[i]] + 1
 
 			# Go through the rows (the ancestral nodes)
 			for (rownum in 1:nrow(relprobs_matrix))
 				{
 				# Prob of a particular state
 				tmpprob = relprobs_matrix[rownum,i]
-				
+			
 				# Every area in this state gets this probability
 				area_probs[rownum,areas_in_this_state] = area_probs[rownum,areas_in_this_state] + tmpprob
 				}
 			}
-		}
-	
+		} # END for (i in 1:length(states_list))
 	return(area_probs)
 	}
 
@@ -852,12 +871,22 @@ infprobs_to_probs_of_each_area_from_relprobs <- function(relprobs_matrix, states
 	area_probs = matrix(0, nrow=nrow(relprobs_matrix), ncol=length(areas))
 
 	# Go through the states
+	# 2023-11-01_NJM robustness edit for multi-area states
 	for (i in 1:length(states_list))
 		{
-		if (is.na(states_list[[i]] && (length(states_list[[i]]==1)) ))
+		# Check for NA
+		NA_check = FALSE
+		if (length(states_list[[i]]) == 1)
 			{
-			next()
-			} else {
+			if (is.na(states_list[[i]]) == TRUE)
+				{
+				NA_check = TRUE
+				next()
+				}
+			}
+		
+		if (NA_check == FALSE)
+			{
 			# Convert 0-based states to 1-based states
 			areas_in_this_state = states_list[[i]] + 1
 
@@ -866,12 +895,12 @@ infprobs_to_probs_of_each_area_from_relprobs <- function(relprobs_matrix, states
 				{
 				# Prob of a particular state
 				tmpprob = relprobs_matrix[rownum,i]
-				
+			
 				# Every area in this state gets this probability
 				area_probs[rownum,areas_in_this_state] = area_probs[rownum,areas_in_this_state] + tmpprob
 				}
 			}
-		}
+		} # END for (i in 1:length(states_list))
 	
 	return(area_probs)
 	}
@@ -924,8 +953,21 @@ simstates_to_probs_of_each_area <- function(simulated_states_by_node, states_lis
 		# Convert 0-based states to 1-based states
 		tmpstate = simulated_states_by_node_1based[rownum]
 		tmp_states_list = states_list[[tmpstate]] + 1
+
+		# 2023-11-01_NJM robustness edit for multi-area states
+		# Check for NA
+		NA_check = FALSE
+		if (length(tmp_states_list) == 1)
+			{
+			if (is.na(tmp_states_list) == TRUE)
+				{
+				NA_check = TRUE
+				next()
+				}
+			}
+
 		
-		if (is.na(tmp_states_list) && (length(tmp_states_list)==1) )
+		if ( NA_check == FALSE )
 			{
 			next()
 			} else {
