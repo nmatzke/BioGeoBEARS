@@ -919,7 +919,11 @@ dfn2n <- function(dtf, max_NAs=0.5, printout=FALSE, roundval=NULL, disallow_dupl
 	dfnums_to_numeric(dtf=dtf, max_NAs=max_NAs, printout=printout, roundval=roundval, disallow_duplicate_colnames=disallow_duplicate_colnames)
 	}
 
-
+# Force everything to numeric
+df_to_numeric <- function(dtf, max_NAs=1.0, printout=FALSE, roundval=NULL, disallow_duplicate_colnames=FALSE)
+	{
+	dfnums_to_numeric(dtf=dtf, max_NAs=max_NAs, printout=printout, roundval=roundval, disallow_duplicate_colnames=disallow_duplicate_colnames)
+	}
 
 
 # dfnums_to_numeric: convert each column to a non-list of type numeric, where possible
