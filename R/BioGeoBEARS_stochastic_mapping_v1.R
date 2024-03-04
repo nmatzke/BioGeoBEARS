@@ -1688,6 +1688,8 @@ add_cladogenetic_events_to_trtable <- function(trtable, BioGeoBEARS_run_object, 
 		ranges_list
 		ranges = unlist(ranges_list)
 		ranges
+		
+		# Otherwise
 		} else {
 		
 		state_indices_0based = BioGeoBEARS_run_object$states_list
@@ -1697,17 +1699,22 @@ add_cladogenetic_events_to_trtable <- function(trtable, BioGeoBEARS_run_object, 
 		ranges_list = list()
 		for (i in 1:length(states_list))
 			{
-			if ( is.na(states_list[[i]]) )
+			if (length(states_list[[i]]) == 1)
 				{
-				ranges_list[[i]] = "_"
+				if (is.na(states_list[[i]])==TRUE) 
+					{
+					ranges_list[[i]] = "_"
+					} else {
+					ranges_list[[i]] = paste(areas[ 1+states_list[[i]] ], sep="", collapse="")
+					} # END if (is.na(states_list[[i]])==TRUE) 
 				} else {
 				ranges_list[[i]] = paste(areas[ 1+states_list[[i]] ], sep="", collapse="")
-				}
-			}
+				} # END if (length(states_list[[i]]) == 1)
+			} # END for (i in 1:length(states_list))
 		ranges_list
 		ranges = unlist(ranges_list)
 		ranges		
-		}
+		} # END if (is.null(BioGeoBEARS_run_object$states_list))
 
 
 	# Build the output table
@@ -2055,17 +2062,18 @@ get_inputs_for_stochastic_mapping_from_results_object <- function(res, cluster_a
 			ranges_list = list()
 			for (i in 1:length(states_list))
 				{
-				if ( is.na(states_list[[i]]) )
+				if (length(states_list[[i]]) == 1)
 					{
-					ranges_list[[i]] = "_"
+					if (is.na(states_list[[i]])==TRUE) 
+						{
+						ranges_list[[i]] = "_"
+						} else {
+						ranges_list[[i]] = paste(areas[ 1+states_list[[i]] ], sep="", collapse="")
+						} # END if (is.na(states_list[[i]])==TRUE) 
 					} else {
 					ranges_list[[i]] = paste(areas[ 1+states_list[[i]] ], sep="", collapse="")
-					}
-				}
-			ranges_list
-			ranges = unlist(ranges_list)
-			ranges	
-			}
+					} # END if (length(states_list[[i]]) == 1)
+				} # END for (i in 1:length(states_list))
 		} # END if (is.null(res$inputs$lists_of_states_lists_0based) == TRUE)
 
 

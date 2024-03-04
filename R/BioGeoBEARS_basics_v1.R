@@ -1338,15 +1338,22 @@ states_list_0based_to_ranges_txt_list <- function(state_indices_0based, areaname
 	
 	# Get the list of text ranges
 	ranges_list = list()
+
 	for (i in 1:length(states_list))
 		{
-		if ( ( length(states_list[[i]]) == 1) && (is.na(states_list[[i]])) )
+		if (length(states_list[[i]]) == 1)
 			{
-			ranges_list[[i]] = "_"
+			if (is.na(states_list[[i]])==TRUE) 
+				{
+				ranges_list[[i]] = "_"
+				} else {
+				ranges_list[[i]] = paste(areanames[ 1+states_list[[i]] ], sep="", collapse="")
+				} # END if (is.na(states_list[[i]])==TRUE) 
 			} else {
 			ranges_list[[i]] = paste(areanames[ 1+states_list[[i]] ], sep="", collapse="")
-			}
-		}
+			} # END if (length(states_list[[i]]) == 1)
+		} # END for (i in 1:length(states_list))
+
 	ranges_list
 	
 	return(ranges_list)

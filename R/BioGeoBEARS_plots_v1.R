@@ -2197,7 +2197,7 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 	add_per_area_probs_to_nodes(tr, probs_each_area, cols_each_area=cols_each_area, barwidth_proportion=barwidth_proportion, barheight_proportion=barheight_proportion, offset_nodenums=offset_nodenums, offset_xvals=offset_xvals, offset_yvals=offset_yvals, border=border)
 	
 	return(probs_each_area)
-	}
+	} # END plot_per_area_probs
 
 
 
