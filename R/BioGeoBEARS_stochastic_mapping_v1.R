@@ -2074,6 +2074,7 @@ get_inputs_for_stochastic_mapping_from_results_object <- function(res, cluster_a
 					ranges_list[[i]] = paste(areas[ 1+states_list[[i]] ], sep="", collapse="")
 					} # END if (length(states_list[[i]]) == 1)
 				} # END for (i in 1:length(states_list))
+			} # END for (i in 1:length(states_list))
 		} # END if (is.null(res$inputs$lists_of_states_lists_0based) == TRUE)
 
 
