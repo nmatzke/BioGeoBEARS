@@ -989,10 +989,13 @@ stochastic_map_branch <- function(nodenum_at_top_of_branch, trtable, Qmat, state
 							{
 							break_condition = FALSE
 							# Double-check (null range OK at the end of the events, if end state is null)
-							if ( is.na(area_indices_0based_branch_top) && (mm == nrow(sorted_manual_table)) )
+							if (length(area_indices_0based_branch_top) == 1)
 								{
-								break_condition = TRUE
-								}
+								if ( is.na(area_indices_0based_branch_top) && (mm == nrow(sorted_manual_table)) )
+									{
+									break_condition = TRUE
+									}
+								} # END if (length(area_indices_0based_branch_top) == 1)
 							} # END if (length(tmp_area_indices) == 0)
 
 						# tmp_area_indices has been updated and has positive length,
