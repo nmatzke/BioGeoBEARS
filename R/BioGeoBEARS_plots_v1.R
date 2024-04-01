@@ -2203,6 +2203,8 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 
 
 
+
+
 #######################################################
 # add_per_area_probs_to_nodes
 #######################################################
@@ -2242,7 +2244,7 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 #' @examples
 #' test=1
 #'
-add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default")
+add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default", nodes_to_plot=NULL)
 	{
 	defaults='
 	cols_each_area=NULL
@@ -2291,7 +2293,11 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 	offsets_nodes = (areanums - middle)*barwidth
 	offsets_tips = (areanums - 0)*barwidth
 	offset_tiplabels = max(offsets_tips) + barwidth/1
-
+	
+	# If *specific* nodes (internal or tips) are desired, edit:
+	nodes_to_plot
+	
+	
 	# Draw the empty boxes
 
 	# xcoords for tips

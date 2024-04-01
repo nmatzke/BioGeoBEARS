@@ -1,4 +1,70 @@
 
+
+
+# tnn: tip node numbers
+tnn <- function(tr)
+	{
+	tipnums = 1:length(tr$tip.label)
+	return(tipnums)
+	} # END
+
+# ann: all node numbers
+ann <- function(tr)
+	{
+	all_nodenums = 1:(length(tr$tip.label)+tr$Nnode)
+	return(all_nodenums)
+	} # END
+
+
+# inn: internal node numbers
+inn <- function(tr)
+	{
+	nodenums = (length(tr$tip.label)+1):(length(tr$tip.label)+tr$Nnode)
+	return(nodenums)
+	} # END
+
+# enn: edges for node numbers
+enn <- function(tr)
+	{
+	nodenums = inn(tr)
+	edgenums_for_nodenums = match(x=nodenums, table=tr$edge[,2])
+
+	# node labels going on each edge
+	nl = tr$node.label
+	
+	# Remove any NA, e.g. for no branch below root node
+	TF1 = !is.na(edgenums_for_nodenums)
+	TF2 = nl != ""
+	TF = (TF1 + TF2) == 2 
+	
+	nodenums = nodenums[TF]
+	edgenums_for_nodenums = edgenums_for_nodenums[TF]
+	nl = nl[TF]
+	
+	# node and edge numbers
+	nens = cbind(nodenums, edgenums_for_nodenums, nl)
+	nens = as.data.frame(nens, stringsAsFactors=FALSE)
+	names(nens) = c("n", "e", "nl")
+	return(nens)
+	}
+
+plot_nodelabels_on_edges <- function(tr, cex=1)
+	{
+	nens = enn(tr)
+	edgelabels(text=nens$nl, edge=as.numeric(nens$e), adj=c(0.5,0.0), frame="none", bg="white", cex=cex)
+	}
+
+plot_nodelabels_on_nodes <- function(tr, cex=1)
+	{
+	nodenums = inn(tr)
+	nodelabels(text=tr$node.label, node=nodenums, adj=c(0.0,0.5), frame="none", bg="white", cex=cex)
+	}
+
+
+
+
+
+
 # Get ML birthrate under Yule, and corresponding loglike
 # Match Julia functions:
 # ML_yule_birthRate(tr)
