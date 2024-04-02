@@ -325,8 +325,9 @@ if (runslow)
     }
 
 
-source("/Users/nmat471/HD/GitHub/BioGeoBEARS/R/aa_tree_basics_v1.R")
-source("/Users/nmat471/HD/GitHub/BioGeoBEARS/R/BioGeoBEARS_plots_v1.R")
+# Added to package
+#source("/Users/nmat471/HD/GitHub/BioGeoBEARS/R/aa_tree_basics_v1.R")
+#source("/Users/nmat471/HD/GitHub/BioGeoBEARS/R/BioGeoBEARS_plots_v1.R")
 
 
 
