@@ -2091,7 +2091,7 @@ node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="au
 #' there is no color specified (that is, cols_each_area=NULL, which means bars 
 #' will be "gray70"), and borders will be "black" if color is 
 #' specified.  By changing the box borders and the tree color (see 
-#' parameter \code{plot_per_area_probs} in \code{plot_per_area_probs}, 
+#' parameters \code{border} or  \code{trcol} in \code{plot_per_area_probs}, 
 #' or \code{edge.color} in \code{ape::plot.phylo}).
 #' the user can emphasize or de-emphasize one or the other.
 #' @param trcol The color of the lines in the phylogeny when plotted.  
@@ -2105,7 +2105,7 @@ node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="au
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
 #' @examples
 #' test=1
-plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="", cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default", trcol="black", plot_rangesizes=FALSE)
+plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="", cols_each_area=NULL, barwidth_proportion=0.02, barheight_proportion=0.025, offset_nodenums=NULL, offset_xvals=NULL, offset_yvals=NULL, root.edge=TRUE, border="default", trcol="black", plot_rangesizes=FALSE, nodes_to_plot=NULL)
 	{
 	defaults='
 	areas = getareas_from_tipranges_object(tipranges)
@@ -2122,6 +2122,7 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 	border="default"
 	trcol="black"
 	plot_rangesizes=FALSE
+	nodes_to_plot=NULL
 	' # END defaults
 	
 	
@@ -2194,7 +2195,7 @@ plot_per_area_probs <- function(tr, res, areas, states_list_0based, titletxt="",
 	title(titletxt)
 
 	# Add the areas boxes
-	add_per_area_probs_to_nodes(tr, probs_each_area, cols_each_area=cols_each_area, barwidth_proportion=barwidth_proportion, barheight_proportion=barheight_proportion, offset_nodenums=offset_nodenums, offset_xvals=offset_xvals, offset_yvals=offset_yvals, border=border)
+	add_per_area_probs_to_nodes(tr, probs_each_area, cols_each_area=cols_each_area, barwidth_proportion=barwidth_proportion, barheight_proportion=barheight_proportion, offset_nodenums=offset_nodenums, offset_xvals=offset_xvals, offset_yvals=offset_yvals, border=border, nodes_to_plot=nodes_to_plot)
 	
 	return(probs_each_area)
 	} # END plot_per_area_probs
@@ -2277,6 +2278,7 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 	nodes_xy = node_coords(tr, root.edge=root.edge, tmplocation=tmplocation)
 	nodes_xy
 
+
 	# Make bar width a proportion of the width of the plot in x
 	#barwidth_proportion = 0.02
 	barwidth = (max(nodes_xy$x) - min(nodes_xy$x)) * barwidth_proportion
@@ -2294,8 +2296,23 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 	offsets_tips = (areanums - 0)*barwidth
 	offset_tiplabels = max(offsets_tips) + barwidth/1
 	
+
+
 	# If *specific* nodes (internal or tips) are desired, edit:
-	nodes_to_plot
+	if (is.null(nodes_to_plot) == FALSE)
+		{
+		# tip nodes
+		TF = nodes_to_plot <= max(tipnums)
+		tipnums_to_use = tipnums[TF]
+		
+		# internal nodes
+		TF = nodes_to_plot > max(tipnums)
+		nodenums_to_use = nodenums[TF]
+		
+		all_nodenums_to_use = c(tipnums_to_use, nodenums_to_use)
+		#nodes_xy
+		}
+
 	
 	
 	# Draw the empty boxes
@@ -2350,6 +2367,20 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 		}
 	
 
+	# If *specific* nodes (internal or tips) are desired, edit:
+	if (is.null(nodes_to_plot) == FALSE)
+		{
+		# Convert these into plain lists
+		xlefts = c(xlefts_matrix[all_nodenums_to_use,])
+		xrights = c(xrights_matrix[all_nodenums_to_use,])
+
+		ybottoms = rep(ybottoms_per_node[all_nodenums_to_use], times=numareas)
+		ytops = rep(ytops_per_node[all_nodenums_to_use], times=numareas)
+
+
+		ytops_probs = ytops_probs_node[all_nodenums_to_use,]
+		}
+	
 	
 	# Default color is darkgray
 	if (is.null(cols_each_area))
@@ -2385,6 +2416,12 @@ add_per_area_probs_to_nodes <- function(tr, probs_each_area, cols_each_area=NULL
 		
 		# Otherwise, expand colors to each box
 		cols_each_area_matrix = matrix(data=cols_each_area, nrow=(ntips+numnodes), ncol=length(cols_each_area), byrow=TRUE)
+
+		# If *specific* nodes (internal or tips) are desired, edit:
+		if (is.null(nodes_to_plot) == FALSE)
+			{
+			cols_each_area_matrix = cols_each_area_matrix[all_nodenums_to_use,]
+			}
 		
 		
 		# Plot with different internal box colors
