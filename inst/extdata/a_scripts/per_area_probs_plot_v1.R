@@ -453,21 +453,18 @@ pdf(pdffn, height=6, width=6)
 
 plot(tr, label.offset=0.1)
 axisPhylo()
+mtext("Millions of years ago (Ma)", side=1, line=2)
+
 tiplabels(text=MLstates[tips], tip=tips, bg=cols_byNode[tips], cex=statecex, adj=tiplabel_adj)
 
 # Add per-area probs internally
 add_per_area_probs_to_nodes(tr, probs_each_area, nodes_to_plot=intnodes)
-dev.off()  # Turn off PDF
-cmdstr = paste("open ", pdffn, sep="")
-system(cmdstr) # Plot it
 
-
-
-pdffn = "Psychotria_DEC_per-area_probs2.pdf"
-pdf(pdffn, height=6, width=6)
 
 plot(tr, label.offset=0.1)
 axisPhylo()
+mtext("Millions of years ago (Ma)", side=1, line=2)
+
 tiplabels(text=MLstates[tips], tip=tips, bg=cols_byNode[tips], cex=statecex, adj=tiplabel_adj)
 
 # Add per-area probs internally
@@ -476,9 +473,12 @@ cols_each_area = c("blue", "green", "yellow", "red")
 add_per_area_probs_to_nodes(tr, probs_each_area, cols_each_area=cols_each_area, barwidth_proportion=0.03, barheight_proportion=0.025, offset_nodenums=c(34,35), offset_xvals=c(-0.0,-0.0), offset_yvals=c(-0.0,-0.0), nodes_to_plot=intnodes)
 
 
+
 # Move node labels
 plot(tr, label.offset=0.1)
 axisPhylo()
+mtext("Millions of years ago (Ma)", side=1, line=2)
+
 tiplabels(text=MLstates[tips], tip=tips, bg=cols_byNode[tips], cex=statecex, adj=tiplabel_adj)
 
 # Add per-area probs internally
@@ -490,6 +490,7 @@ add_per_area_probs_to_nodes(tr, probs_each_area, cols_each_area=cols_each_area, 
 dev.off()  # Turn off PDF
 cmdstr = paste("open ", pdffn, sep="")
 system(cmdstr) # Plot it
+
 
 
 
