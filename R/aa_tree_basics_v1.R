@@ -54,14 +54,34 @@ plot_nodelabels_on_edges <- function(tr, cex=1)
 	edgelabels(text=nens$nl, edge=as.numeric(nens$e), adj=c(0.5,0.0), frame="none", bg="white", cex=cex)
 	}
 
-plot_nodelabels_on_nodes <- function(tr, cex=1)
+plot_nodelabels_on_nodes_right <- function(tr, cex=1)
 	{
 	nodenums = inn(tr)
 	nodelabels(text=tr$node.label, node=nodenums, adj=c(0.0,0.5), frame="none", bg="white", cex=cex)
 	}
 
+plot_nodelabels_on_nodes <- function(tr, cex=1)
+	{
+	nodenums = inn(tr)
+	# par(fg="black")	# to change the color of the border box, if desired
+	nodelabels(text=tr$node.label, node=nodenums, adj=c(0.5,0.5), frame="rect", bg="white", cex=cex)
+	}
+
+plot_tiplabels_on_tips <- function(tr, cex=1)
+	{
+	tipnums = tnn(tr)
+	# par(fg="black")	# to change the color of the border box, if desired
+	tiplabels(text=tipnums, tip=tipnums, adj=c(0.5,0.5), frame="rect", bg="white", cex=cex)
+	}
 
 
+plot_tree_nodenums_tipnums <- function(tr, label.offset=0.05*get_max_height_tree(tr), cex=1)
+	{
+	plot(tr, label.offset=label.offset)
+	plot_nodelabels_on_nodes(tr, cex=cex)
+	plot_tiplabels_on_tips(tr, cex=cex)
+	title("Tree with node numbers for internal and tip nodes\naccording to the R package 'ape'")
+	}
 
 
 

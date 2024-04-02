@@ -332,6 +332,8 @@ if (runslow)
 
 
 # Get some info:
+results_object = resDEC
+
 # Basic areas info
 areas = getareas_from_tipranges_object(tipranges)
 areas
@@ -385,7 +387,26 @@ if (is.null(ranges_list))
 	possible_ranges_list_txt = ranges_list
 	} # if (is.null(ranges_list))
 
+
+# Just tip states, by hand
+tipnodes = tnn(tr)
+intnodes = inn(tr)
+relprobs_matrix = results_object$ML_marginal_prob_each_state_at_branch_top_AT_node
+MLprobs = get_ML_probs(relprobs_matrix)
+MLprobs
+MLstates = get_ML_states_from_relprobs(relprobs_matrix, statenames, returnwhat="states", if_ties="takefirst")
+MLstates
+states_list_0based = states_list_0based_index
+probs_each_area = infprobs_to_probs_of_each_area(relprobs_matrix, states_list=states_list_0based)
+
 cols_byNode = rangestxt_to_colors(possible_ranges_list_txt, colors_list_for_states, MLstates)
+
+
+tips = tipnodes
+statecex = 0.6
+tiplabel_adj=c(0.5)
+
+
 
 
 
@@ -409,29 +430,18 @@ scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
 # States, tips and internal
 res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
-
-# Just tip states, by hand
-tipnodes = tnn(tr)
-intnodes = inn(tr)
-relprobs_matrix = results_object$ML_marginal_prob_each_state_at_branch_top_AT_node
-MLprobs = get_ML_probs(relprobs_matrix)
-MLprobs
-MLstates = get_ML_states_from_relprobs(relprobs_matrix, statenames, returnwhat="states", if_ties="takefirst")
-MLstates
-states_list_0based = states_list_0based_index
-probs_each_area = infprobs_to_probs_of_each_area(relprobs_matrix, states_list=states_list_0based)
-
-tips = tipnodes
-statecex = 0.6
-tiplabel_adj=c(0.5)
+dev.off()
+cmdstr = paste0("open ", pdffn)
+system(cmdstr)
 
 
+#######################################################
+# Plot just node labels
+#######################################################
 pdffn = "nodelabels.pdf"
 pdf(file=pdffn, width=6, height=6)
 
-plot(tr)
-title("tree with nodelabels")
-plot_nodelabels_on_nodes(tr, cex=1)
+plot_tree_nodenums_tipnums(tr)
 
 dev.off()
 cmdstr = paste0("open ", pdffn)
