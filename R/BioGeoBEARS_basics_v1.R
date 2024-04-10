@@ -893,7 +893,7 @@ tipranges_to_tip_condlikes_of_data_on_each_state <- function(tipranges, phy, sta
 			# Error check added 2015-04-03
 			if (sum(state_match_TF) == 0)
 				{
-				error_txt = paste0("STOP ERROR in tipranges_to_tip_condlikes_of_data_on_each_state():\n\nYour geography file has a tip range which is not allowed in your specified state space (states_list).\n\nThe tip is: ", phy$tip.label[rownum], "\nThe 0-based areas in the range is/are: '", temp_state, "'\nThe letter codes in the range are: '", temp_state_txt, "'\n\n\nTry editing either the geography file, the areas_allowed or areas_adjacency matrices, or the states_list (non-stratified) / lists_of_states_lists_0based (stratified).\n")
+				error_txt = paste0("STOP ERROR in tipranges_to_tip_condlikes_of_data_on_each_state():\n\nYour geography file has a tip range which is not allowed in your specified state space (states_list).\n\nThe tip is: ", phy$tip.label[rownum], "\nThe 0-based areas in the range is/are: '", temp_state, "'\nThe letter codes in the range are: '", temp_state_txt, "'\n\n\nTry editing either the geography file, the areas_allowed or areas_adjacency matrices, or the states_list (non-stratified) / lists_of_states_lists_0based (stratified).\n\nOR, another thing that might work, if you have '?' data: BioGeoBEARS_run_object$useAmbiguities = TRUE\n\n")
 				cat("\n\n")
 				cat(error_txt)
 				cat("\n")
