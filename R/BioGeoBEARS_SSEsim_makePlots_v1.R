@@ -145,7 +145,7 @@ plot_simDEC_DECJ_inferences <- function(simdir=NULL, sim_params_Rdata_table="/si
 	if (BioGeoBEARS_run_object$use_optimx == TRUE)
 		{
 		# Using optimx() results
-		if (packageVersion("optimx") < 2013)
+		if (packageVersion("optimx") < "2013")
 			{
 			# optimx 2012
 			LnL_2 = as.numeric(resDEC$optim_result$fvalues)
