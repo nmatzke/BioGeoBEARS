@@ -1870,8 +1870,8 @@ corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="
 	# Set up the command as a string
 	# trcoords = plot_phylo3_nodecoords(tr, plot=FALSE)
 
-	# 2017-11-02_edit for new versino of APE
-	if (packageVersion("ape") < 5.0)
+	# 2017-11-02_edit for new version of APE
+	if (packageVersion("ape") < "5.0")
 		{
 		# Set up the command as a string
 		# trcoords = plot_phylo3_nodecoords(tr, plot=FALSE)
@@ -1886,7 +1886,7 @@ corner_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="
 		
 		# X and Y coords for nodes, 1-37
 		nodecoords = cbind(trcoords$xx, trcoords$yy)
-		} # END if (packageVersion("ape") < 5.0)
+		} # END if (packageVersion("ape") < "5.0")
 	
 	# Go through the edge matrix from the root, take the x coord of the node,
 	# and the y coord of the descendant
@@ -2018,7 +2018,7 @@ node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="au
 	# trcoords = plot_phylo3_nodecoords(tr, plot=FALSE)
 
 	# 2017-11-02_edit for new versino of APE
-	if (packageVersion("ape") < 5.0)
+	if (packageVersion("ape") < "5.0")
 		{
 		# Set up the command as a string
 		# trcoords = plot_phylo3_nodecoords(tr, plot=FALSE)
@@ -2033,7 +2033,7 @@ node_coords <- function(tr, coords_fun="plot_phylo3_nodecoords", tmplocation="au
 		
 		# X and Y coords for nodes, 1-37
 		nodecoords = cbind(trcoords$xx, trcoords$yy)
-		} # END if (packageVersion("ape") < 5.0)
+		} # END if (packageVersion("ape") < "5.0")
 
 
 	nodes_xy = adf(nodecoords)

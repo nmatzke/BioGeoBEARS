@@ -1215,7 +1215,7 @@ get_params_from_optim_or_optimx_result <- function(optimx_result, use_optimx=TRU
 		# optimx 2013 has different output; params are in p1, p2, etc.
 		
 		# Check for optimx 2012 or 2013, and extract parameters accordingly
-		if (packageVersion("optimx") < 2013)
+		if (packageVersion("optimx") < "2013")
 			{
 			# optimx 2012
 			params_from_ML = get_params_from_optimx2012(optimx_result)
@@ -1338,7 +1338,7 @@ put_params_into_optim_or_optimx_result <- function(BioGeoBEARS_model_object, tot
 		# optimx 2013 has different output; params are in p1, p2, etc.
 		
 		# Check for optimx 2012 or 2013, and extract parameters accordingly
-		if (packageVersion("optimx") < 2013)
+		if (packageVersion("optimx") < "2013")
 			{
 			###########################
 			# optimx 2012
@@ -1493,7 +1493,7 @@ get_LnL_from_optim_result <- function(optimx_result, use_optimx=TRUE)
 	if ( (use_optimx == TRUE) || (use_optimx == "optimx") )
 		{
 		# Using optimx() results
-		if (packageVersion("optimx") < 2013)
+		if (packageVersion("optimx") < "2013")
 			{
 			# optimx 2012
 			LnL = get_LnL_from_optimx2012(optimx_result)

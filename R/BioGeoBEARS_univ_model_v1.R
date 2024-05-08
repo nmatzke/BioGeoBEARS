@@ -1586,7 +1586,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 				minqa_TF = is.element("minqa", installed.packages()[,1])
 				if (minqa_TF == FALSE)
 					{
-					if (packageVersion("optimx") > 2017)
+					if (packageVersion("optimx") > "2017")
 						{
 						txt = "Warning in bears_optim_run(): optimx version 2018.7.10 requires package 'minqa' to do optimx ML optimization with the 'bobyqa' method (optimization with mix/max limits on parameters). However, optimx 2018.7.10 doesn't load 'minqa' automatically, so you may have to do:\n\ninstall.packages('minqa')\n\n...and re-run, to get rid of this warning, and/or the error where optimx returns NA for the parameter inferences after one step, and crashes the resulting uppass calculations."
 						cat("\n\n")
@@ -1594,7 +1594,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 						cat("\n\n")
 						warning(txt)
 						requireNamespace("minqa")
-						} # END if (packageVersion("optimx") > 2017)
+						} # END if (packageVersion("optimx") > "2017")
 					} # END if (minqa_TF == FALSE)
 
 				optim_result2 = optimx(par=params, fn=calc_loglike_for_optim_stratified, lower=lower, upper=upper, itnmax=itnmax, method=c("bobyqa"), control=control_list, BioGeoBEARS_run_object=inputs, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open)# method="L-BFGS-B", control=list(fnscale=-1, trace=2, maxit=500))
@@ -1890,7 +1890,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 					}
 				} else {
 				# optimx 2012 versus 2013
-				if (packageVersion("optimx") < 2013)
+				if (packageVersion("optimx") < "2013")
 					{
 					# optimx 2012
 					optim_result2 = optimx(par=params, fn=calc_loglike_for_optim, gr=NULL, hess=NULL, lower=lower, upper=upper, method=c("bobyqa"), itnmax=itnmax, hessian=NULL, control=control_list, BioGeoBEARS_run_object=BioGeoBEARS_run_object, phy=phy, tip_condlikes_of_data_on_each_state=tip_condlikes_of_data_on_each_state, print_optim=print_optim, areas_list=areas_list, states_list=states_list, force_sparse=force_sparse, cluster_already_open=cluster_already_open, return_what="loglike", calc_ancprobs=FALSE)
@@ -1907,7 +1907,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 					minqa_TF = is.element("minqa", installed.packages()[,1])
 					if (minqa_TF == FALSE)
 						{
-						if (packageVersion("optimx") > 2017)
+						if (packageVersion("optimx") > "2017")
 							{
 							txt = "Warning in bears_optim_run(): optimx version 2018.7.10 requires package 'minqa' to do optimx ML optimization with the 'bobyqa' method (optimization with mix/max limits on parameters). However, optimx 2018.7.10 doesn't load 'minqa' automatically, so you may have to do:\n\ninstall.packages('minqa')\n\n...and re-run, to get rid of this warning, and/or the error where optimx returns NA for the parameter inferences after one step, and crashes the resulting uppass calculations."
 							cat("\n\n")
@@ -1915,7 +1915,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 							cat("\n\n")
 							warning(txt)
 							requireNamespace("minqa")
-							} # END if (packageVersion("optimx") > 2017)
+							} # END if (packageVersion("optimx") > "2017")
 						} # END if (minqa_TF == FALSE)
 
 					# optimx 2013
@@ -2089,7 +2089,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 		if ( (BioGeoBEARS_run_object$use_optimx == TRUE) || (BioGeoBEARS_run_object$use_optimx == "optimx") )
 			{
 			# optimx 2013+
-			if (packageVersion("optimx") >= 2013)
+			if (packageVersion("optimx") >= "2013")
 				{
 				param_names = names(optim_result2)
 				param_1st_letter = substr(x=param_names, start=1, stop=1)
@@ -2099,7 +2099,7 @@ bears_optim_run <- function(BioGeoBEARS_run_object = define_BioGeoBEARS_run(), s
 				optim_result2[param_names] = BioGeoBEARS_model_object@params_table$est[BioGeoBEARS_model_object@params_table$type=="free"]
 				}
 			# optimx 2012
-			if (packageVersion("optimx") < 2013)
+			if (packageVersion("optimx") < "2013")
 				{
 				optim_result2$par[[1]] = BioGeoBEARS_model_object@params_table$est[BioGeoBEARS_model_object@params_table$type=="free"]
 				}
