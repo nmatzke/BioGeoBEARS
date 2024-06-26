@@ -1,70 +1,63 @@
 
+# permanently remove .DS_Store from GitHub Desktop commits:
+# https://brandoncaples.com/martech/2022/git-remove-ds-store
+# Terminal in the root of the particular GitHub archive:
+# find . -name .DS_Store -print0 | xargs -0 git rm --ignore-unmatch
+#
+# 
+# open .gitignore
+**/.DS_Store
+
+
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+.RDataTmp
+
+# User-specific files
+.Ruserdata
+
+# Example code in package build process
+*-Ex.R
+
+# Output files from R CMD build
+/*.tar.gz
+
+# Output files from R CMD check
+/*.Rcheck/
+
+# RStudio files
+.Rproj.user/
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+.httr-oauth
+
+# knitr and R markdown default cache directories
+*_cache/
+/cache/
+
+# Temporary files created by R markdown
+*.utf8.md
+*.knit.md
+
+# R Environment Variables
+.Renviron
+
+# pkgdown site
+docs/
+
+# translation temp files
+po/*~
+
+# RStudio Connect folder
+rsconnect/
 .DS_Store
-inst/extdata/.DS_Store
-inst/extdata/examples/.DS_Store
-inst/extdata/examples/.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-inst/.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-inst/.DS_Store
-inst/extdata/.DS_Store
-inst/extdata/examples/.DS_Store
-tests/testthat/.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-inst/.DS_Store
-tests/.DS_Store
-tests/testthat/.DS_Store
-.DS_Store
-inst/.DS_Store
-tests/.DS_Store
-.DS_Store
-inst/.DS_Store
-tests/.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-inst/.DS_Store
-.DS_Store
-tests/.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-inst/extdata/.DS_Store
-.DS_Store
-.DS_Store
-inst/.DS_Store
-tests/.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-inst/.DS_Store
-tests/.DS_Store
-.DS_Store
-inst/.DS_Store
-inst/extdata/.DS_Store
-inst/extdata/examples/.DS_Store
-.DS_Store
-inst/.DS_Store
-.DS_Store
-inst/.DS_Store
-.DS_Store
-inst/.DS_Store
+_pdfs/.DS_Store
+
