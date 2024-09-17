@@ -18,16 +18,33 @@ install.packages("rexpokit")
 install.packages("cladoRcpp")
 
 install.packages("phytools")
-install.packages("phangorn")
+install.packa
+ges("phangorn")
 install.packages("phylobase")
 install.packages("optimx")
 install.packages("GenSA")
 
+
+################################################
+# OLD:
 # Install BioGeoBEARS from GitHub
+################################################
 # (BioGeoBEARS is pure R, so installation is easy *if* the above 
 #  packages have been installed)
-library(devtools)
-install_github(repo="nmatzke/BioGeoBEARS", upgrade="never")
+#library(devtools)
+#install_github(repo="nmatzke/BioGeoBEARS", upgrade="never")
+
+
+################################################
+# NEW:
+# To avoid GitHub overload, download BioGeoBEARS from Canvas, then install locally:
+################################################
+# Download from:
+# Canvas -> BIOSCI 395 -> Files -> Southern_Conifer_Biogeog
+# https://canvas.auckland.ac.nz/courses/106014/files/folder/Southern_conifer_biogeog
+# BioGeoBEARS_1.1.3.tar.gz
+install.packages("BioGeoBEARS_1.1.3.tar.gz", repos=NULL, type="source")
+
 ' # END installation commands
 
 
@@ -85,8 +102,8 @@ library(BioGeoBEARS)
 
 # Set working directory
 #wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC_traits_models/"
-# wd = "~/Downloads/395lab23/"
-# setwd(wd)
+wd = "~/Downloads/395lab23/"
+setwd(wd)
 
 # Get 395 locations in GitHub install
 extdata_dir = np(system.file("extdata", package="BioGeoBEARS"))
@@ -894,14 +911,6 @@ resDECj$total_loglikelihood
 resDEC_t12_t21_m2$total_loglikelihood
 resDECj_t12_t21_m2$total_loglikelihood
 
-# 2023-10-05 results:
-# -25.67922
-# -25.08393
-# -317.2742
-# -306.6455
-# -342.2195
-# -331.6915
-
 
 
 #######################################################
@@ -931,55 +940,6 @@ param_ests_table_df = adf(param_ests_table)
 row.names(param_ests_table_df) = NULL
 param_ests_table_df
 
-# 2023-10-05 results:
-#           d            e          j x         t12         t21        m2
-# 0.000000000 0.0000000000 0.00000000 0 0.004071375 0.004071375 1.0000000
-# 0.000000000 0.0000000000 0.00000000 0 0.005386846 0.001570499 1.0000000
-# 0.008125191 0.0051194388 0.00000000 0          NA          NA        NA
-# 0.003292240 0.0009028732 0.02219126 0          NA          NA        NA
-# 0.008220396 0.0051485428 0.00000000 0 0.005295523 0.001407604 0.9729404
-# 0.003306221 0.0009058607 0.02234889 0 0.005383800 0.001578812 0.9870885
-
-
-
-# Several independent re-runs to check optimizations
-# (not needed for lab exercise)
-# 
-# Rdata_fn = "DEC+t12+t21+m2_inf_v3a.Rdata"
-# rerun_optim_table_DEC = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
-
-# Printing 'DECx+t12+t21+m2_inf_rerun_optim_table_v3a.txt':
-#                 lnL nparam          d           e         t12         t21
-# orig_inf  -340.8115      5 0.01034183 0.005231394 0.005421375 0.001655103
-# orig_redo -340.8115      5 0.01034183 0.005231394 0.005421375 0.001655103
-# lowstart  -340.8115      5 0.01034150 0.005227692 0.005418389 0.001654252
-# histart   -340.8115      5 0.01034248 0.005229084 0.005419540 0.001654969
-#                  m2
-# orig_inf  0.5586105
-# orig_redo 0.5586105
-# lowstart  0.5583762
-# histart   0.5585244
-
-# 
-# Rdata_fn = "DECJ+t12+t21+m2_inf_v3a.Rdata"
-# rerun_optim_table_DECj = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
-# 
-# Rdata_fn = "DECJx+t12+t21+m2_rep2_inf.Rdata"
-# rerun_optim_table_DECj_rep2 = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
-# 
-
-
-#Printing 'DECJx+t12+t21+m2_inf_rerun_optim_table_v3a.txt':
-#                lnL nparam           d           e          j         t12
-#orig_inf  -331.2819      6 0.003864892 0.001079285 0.02369789 0.005386595
-#orig_redo -331.2819      6 0.003864892 0.001079285 0.02369789 0.005386595
-#lowstart  -331.4525      6 0.004388316 0.001407872 0.02378079 0.005292009
-#histart   -331.2820      6 0.003882719 0.001085877 0.02365480 0.005392460
-#                  t21        m2
-#orig_inf  0.001718709 0.7390989
-#orig_redo 0.001718709 0.7390989
-#lowstart  0.001679263 0.6121937
-#histart   0.001715623 0.7351255
 
 
 cat("\n\n")

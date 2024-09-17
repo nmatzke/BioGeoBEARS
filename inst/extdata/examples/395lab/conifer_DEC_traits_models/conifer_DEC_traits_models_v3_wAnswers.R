@@ -67,11 +67,11 @@ labpt1c = paste(extdata_dir, "examples/395lab/Psychotria_M4_DistanceDispersal/",
 labpt2a = paste(extdata_dir, "examples/395lab/conifer_DEC_traits_models/", sep="/")
 labpt2b = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models/", sep="/")
 
-labpt1a_script = paste(extdata_dir, "examples/395lab/Psychotria_M0_equalRates/Psychotria_M0_v3b.R", sep="/")
-labpt1b_script = paste(extdata_dir, "examples/395lab/Psychotria_M2_oneWayDispersal/Psychotria_M2_oneWayDispersal_v3b.R", sep="/")
-labpt1c_script = paste(extdata_dir, "examples/395lab/Psychotria_M4_DistanceDispersal/Psychotria_M4_DistanceDispersal_v3b.R/", sep="/")
-labpt2a_script = paste(extdata_dir, "examples/395lab/conifer_DEC_traits_models/conifer_DEC_traits_models_v3b.R", sep="/")
-labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models/conifer_DEC+x_traits_models_v3b.R", sep="/")
+labpt1a_script = paste(extdata_dir, "examples/395lab/Psychotria_M0_equalRates/Psychotria_M0_v3a.R", sep="/")
+labpt1b_script = paste(extdata_dir, "examples/395lab/Psychotria_M2_oneWayDispersal/Psychotria_M2_oneWayDispersal_v3a.R", sep="/")
+labpt1c_script = paste(extdata_dir, "examples/395lab/Psychotria_M4_DistanceDispersal/Psychotria_M4_DistanceDispersal_v3a.R/", sep="/")
+labpt2a_script = paste(extdata_dir, "examples/395lab/conifer_DEC_traits_models/conifer_DEC_traits_models_v3a.R", sep="/")
+labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models/conifer_DEC+x_traits_models_v3a.R", sep="/")
 
 #######################################################
 # Setup - ENDing
@@ -83,7 +83,6 @@ labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models
 #######################################################
 # Close any open graphics
 dev.off(); dev.off(); dev.off(); dev.off(); dev.off(); 
-
 
 # Load the package (after installation, see above).
 library(ape)						# for read.tree
@@ -100,6 +99,7 @@ library(parallel)
 library(BioGeoBEARS)
 
 
+
 # Set working directory
 #wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC_traits_models/"
 wd = "~/Downloads/395lab23/"
@@ -111,7 +111,7 @@ scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
 extdata_dir
 list.files(extdata_dir)
 
-trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
+trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
 tr = read.tree(trfn)
 tr
 plot(tr, show.tip.label=FALSE)
@@ -147,7 +147,6 @@ states_list_0based_NEW = states_list_0based[c(1:22,33)]
 
 
 
-
 #######################################################
 # Traits-only model -- 1 rate
 #######################################################
@@ -155,11 +154,11 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = 1
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
-BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog_1area.data", sep="/"))
-BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
+BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog_1area.data", sep="/"))
+BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE
 BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE
@@ -223,10 +222,9 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","est"] = 0.
 tr = read.tree(BioGeoBEARS_run_object$trfn)
 #plot(tr); axisPhylo()
 
-trait_fn = slashslash(paste(labpt2b, "trait.data", sep="/"))
+trait_fn = slashslash(paste(labpt2a, "trait.data", sep="/"))
 geog_values = getranges_from_LagrangePHYLIP(trait_fn)
 
-trait_fn = slashslash(paste(labpt2b, "trait.data", sep="/"))
 trait_values = getranges_from_LagrangePHYLIP(lgdata_fn=trait_fn)
 trait_values
 
@@ -271,7 +269,7 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 # For a slow analysis, run once, then set runslow=FALSE to just 
 # load the saved result.
 runslow = TRUE
-resfn = "traitsOnly_1rate_v3b.Rdata"
+resfn = "traitsOnly_1rate_v3a.Rdata"
 if (runslow)
 		{
 		res = bears_optim_run(BioGeoBEARS_run_object)
@@ -294,11 +292,11 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = 1
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
-BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog_1area.data", sep="/"))
-BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
+BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog_1area.data", sep="/"))
+BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE
 BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE
@@ -362,7 +360,7 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["mx01y","est"] = 0.
 tr = read.tree(BioGeoBEARS_run_object$trfn)
 #plot(tr); axisPhylo()
 
-trait_fn = slashslash(paste(labpt2b, "trait.data", sep="/"))
+trait_fn = slashslash(paste(labpt2a, "trait.data", sep="/"))
 trait_values = getranges_from_LagrangePHYLIP(lgdata_fn=trait_fn)
 trait_values
 
@@ -407,7 +405,7 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 # For a slow analysis, run once, then set runslow=FALSE to just 
 # load the saved result.
 runslow = TRUE
-resfn = "traitsOnly_2rates_v3b.Rdata"
+resfn = "traitsOnly_2rates_v3a.Rdata"
 if (runslow)
 		{
 		res = bears_optim_run(BioGeoBEARS_run_object)
@@ -430,13 +428,13 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
-BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
-BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
+BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog.data", sep="/"))
+BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
 #BioGeoBEARS_run_object$timesfn = "times_v2.txt"
-BioGeoBEARS_run_object$distsfn = slashslash(paste(labpt2b, "modern_distances_subset.txt", sep="/"))
+#BioGeoBEARS_run_object$distsfn = "modern_distances_subset.txt"
 #BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE
@@ -444,35 +442,33 @@ BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE
 BioGeoBEARS_run_object$calc_ancprobs = TRUE
 BioGeoBEARS_run_object$on_NaN_error = -1000000
 BioGeoBEARS_run_object$force_sparse = FALSE
-
+BioGeoBEARS_run_object$states_list = states_list_0based_NEW
 #tr = read.tree(BioGeoBEARS_run_object$trfn)
 
 
 # Add x as a free parameter
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = 0
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = 0
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = 0
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = 0
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
 
-
-BioGeoBEARS_run_object$states_list = states_list_0based_NEW
 
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 runslow = TRUE
-resfn = "DECx_inf_v3b.Rdata"
+resfn = "DEC_inf_v3a.Rdata"
 if (runslow)
 	{
 	res = bears_optim_run(BioGeoBEARS_run_object)
 	res    
 
 	save(res, file=resfn)
-	resDECx = res
+	resDEC = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDECx = res
+	resDEC = res
 	}
 
 
@@ -483,13 +479,13 @@ BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
-BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
-BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
+BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog.data", sep="/"))
+BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
 #BioGeoBEARS_run_object$timesfn = "times_v2.txt"
-BioGeoBEARS_run_object$distsfn = slashslash(paste(labpt2b, "modern_distances_subset.txt", sep="/"))
+#BioGeoBEARS_run_object$distsfn = "modern_distances_subset.txt"
 #BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE
@@ -500,25 +496,22 @@ BioGeoBEARS_run_object$force_sparse = FALSE
 
 #tr = read.tree(BioGeoBEARS_run_object$trfn)
 
-dstart = resDECx$outputs@params_table["d","est"]
-estart = resDECx$outputs@params_table["e","est"]
+dstart = resDEC$outputs@params_table["d","est"]
+estart = resDEC$outputs@params_table["e","est"]
 jstart = 0.0001
-xstart = resDECx$outputs@params_table["x","est"]
+#xstart = resDEC$outputs@params_table["x","est"]
 
 # Add j as a free parameter
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","type"] = "free"
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = jstart
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart
-
-# Add x as a free parameter
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = xstart
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = xstart
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
-
 BioGeoBEARS_run_object$states_list = states_list_0based_NEW
 
-
+# Add x as a free parameter
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = xstart
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = xstart
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
 BioGeoBEARS_run_object = fix_BioGeoBEARS_params_minmax(BioGeoBEARS_run_object)
 check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
@@ -526,18 +519,18 @@ print("Printing warnings: 'warnings()':")
 print(warnings())
 
 runslow = TRUE
-resfn = "DECxj_inf_v3b.Rdata"
+resfn = "DECj_inf_v3a.Rdata"
 if (runslow)
 	{
 	res = bears_optim_run(BioGeoBEARS_run_object)
 	res    
 
 	save(res, file=resfn)
-	resDECxj = res
+	resDECj = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDECxj = res
+	resDECj = res
 	}
 
 
@@ -546,19 +539,19 @@ if (runslow)
 
 
 #######################################################
-# Run DEC + x + t12 + t21 + m2, starting from DEC-geog and 2rates
+# Run DEC + t12 + t21 + m2, starting from DEC-geog and 2rates
 #######################################################
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
-BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
-BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
+BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog.data", sep="/"))
+BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
 #BioGeoBEARS_run_object$timesfn = "times_v2.txt"
-BioGeoBEARS_run_object$distsfn = slashslash(paste(labpt2b, "modern_distances_subset.txt", sep="/"))
+#BioGeoBEARS_run_object$distsfn = "modern_distances_subset.txt"
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 #BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE
@@ -566,16 +559,12 @@ BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE
 BioGeoBEARS_run_object$calc_ancprobs = TRUE
 BioGeoBEARS_run_object$on_NaN_error = -1000000
 BioGeoBEARS_run_object$force_sparse = FALSE
-
 BioGeoBEARS_run_object$states_list = states_list_0based_NEW
-
 
 tr = read.tree(BioGeoBEARS_run_object$trfn)
 #plot(tr); axisPhylo()
 
-
-
-trait_fn = slashslash(paste(labpt2b, "trait.data", sep="/"))
+trait_fn = slashslash(paste(labpt2a, "trait.data", sep="/"))
 trait_values = getranges_from_LagrangePHYLIP(lgdata_fn=trait_fn)
 trait_values
 
@@ -591,14 +580,10 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table
 t12_start = resTrait_2rates$outputs@params_table["t12","est"]
 t21_start = resTrait_2rates$outputs@params_table["t21","est"]
 m2_start = 1
-#dstart = resDECx$outputs@params_table["d","est"]
-#estart = max(c(resDECx$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
-#jstart = 0.0001
-#xstart = resDECx$outputs@params_table["x","est"]
-dstart = 0.2
-estart = 0.004
+dstart = resDEC$outputs@params_table["d","est"]
+estart = max(c(resDEC$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
 jstart = 0.0001
-xstart = -1.2
+#xstart = resDEC$outputs@params_table["x","est"]
 
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "init"] = dstart
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "est"] = dstart
@@ -606,11 +591,11 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e", "init"] = esta
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e", "est"] = estart
 
 # Add x as a free parameter
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = xstart
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = xstart
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","min"] = -2
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = xstart
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = xstart
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","min"] = -2
 
 
 #######################################################
@@ -651,41 +636,39 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 
 
-# Calculate the lnL for the parameters, and store in text file
 
 
 runslow = TRUE
-resfn = "DECx+t12+t21+m2_inf_v3b.Rdata"
+resfn = "DEC+t12+t21+m2_inf_v3a.Rdata"
 if (runslow)
 	{
 	# Calculate the lnL for the parameters, and store in text file
 	res = bears_optim_run(BioGeoBEARS_run_object, skip_optim=FALSE, skip_optim_option="return_all")
-
 	save(res, file=resfn)
-	resDECx_t12_t21_m2 = res
+	resDEC_t12_t21_m2 = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDECx_t12_t21_m2 = res
+	resDEC_t12_t21_m2 = res
 	}
 
 
 
 
 #######################################################
-# Run DECj + x + t12 + t21 + m2, starting from DECj-geog and 2rates
+# Run DECj + t12 + t21 + m2, starting from DECj-geog and 2rates
 #######################################################
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
 BioGeoBEARS_run_object$calc_ancprobs=TRUE        # get ancestral states from optim run
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 1
 BioGeoBEARS_run_object$use_optimx=TRUE
 BioGeoBEARS_run_object$speedup=TRUE
-BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2b, "geog.data", sep="/"))
-BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2b, "tree.newick", sep="/"))
+BioGeoBEARS_run_object$geogfn = slashslash(paste(labpt2a, "geog.data", sep="/"))
+BioGeoBEARS_run_object$trfn = slashslash(paste(labpt2a, "tree.newick", sep="/"))
 #BioGeoBEARS_run_object$timesfn = "times_v2.txt"
-BioGeoBEARS_run_object$distsfn = slashslash(paste(labpt2b, "modern_distances_subset.txt", sep="/"))
+#BioGeoBEARS_run_object$distsfn = "modern_distances_subset.txt"
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 #BioGeoBEARS_run_object = section_the_tree(inputs=BioGeoBEARS_run_object, make_master_table=TRUE, plot_pieces=FALSE)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE
@@ -693,14 +676,12 @@ BioGeoBEARS_run_object$calc_TTL_loglike_from_condlikes_table = TRUE
 BioGeoBEARS_run_object$calc_ancprobs = TRUE
 BioGeoBEARS_run_object$on_NaN_error = -1000000
 BioGeoBEARS_run_object$force_sparse = FALSE
-
 BioGeoBEARS_run_object$states_list = states_list_0based_NEW
-
 
 tr = read.tree(BioGeoBEARS_run_object$trfn)
 #plot(tr); axisPhylo()
 
-trait_fn = slashslash(paste(labpt2b, "trait.data", sep="/"))
+trait_fn = slashslash(paste(labpt2a, "trait.data", sep="/"))
 trait_values = getranges_from_LagrangePHYLIP(lgdata_fn=trait_fn)
 trait_values
 
@@ -712,15 +693,12 @@ BioGeoBEARS_run_object = add_trait_to_BioGeoBEARS_run_object(BioGeoBEARS_run_obj
 # Starting values from ML results of simpler run
 t12_start = resTrait_2rates$outputs@params_table["t12","est"]
 t21_start = resTrait_2rates$outputs@params_table["t21","est"]
-m2_start = 0.5
-#dstart = resDECxj$outputs@params_table["d","est"]
-#estart = max(c(resDECxj$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
-#jstart = resDECxj$outputs@params_table["j","est"]
-#xstart = resDECxj$outputs@params_table["x","est"]
-dstart = 0.08
-estart = 0.00001
-jstart = 0.6
-xstart = -1
+m2_start = 1
+dstart = resDECj$outputs@params_table["d","est"]
+estart = max(c(resDECj$outputs@params_table["e","est"], 1.1*BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["e","min"]))
+jstart = resDECj$outputs@params_table["j","est"]
+#xstart = resDECj$outputs@params_table["x","est"]
+
 
 # Set up DEC+J model
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["d", "init"] = dstart
@@ -734,11 +712,11 @@ BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","init"] = jstar
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","est"] = jstart
 
 # Add x as a free parameter
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = xstart
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = xstart
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
-BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","min"] = -2
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","type"] = "free"
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","init"] = xstart
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","est"] = xstart
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","max"] = 0
+# BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["x","min"] = -2
 
 # Crash fix
 BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table["j","min"] = 0.0001
@@ -785,7 +763,7 @@ check_BioGeoBEARS_run(BioGeoBEARS_run_object)
 
 
 
-resfn = "DECJx+t12+t21+m2_inf_v3b.Rdata"
+resfn = "DECJ+t12+t21+m2_inf_v3a.Rdata"
 runslow = TRUE
 if (runslow)
 	{
@@ -793,12 +771,19 @@ if (runslow)
 	res = bears_optim_run(BioGeoBEARS_run_object, skip_optim=FALSE, skip_optim_option="return_all")
 	save(res, file=resfn)
 
-	resDECxj_t12_t21_m2 = res
+	resDECj_t12_t21_m2 = res
 	} else {
 	# Loads to "res"
 	load(resfn)
-	resDECxj_t12_t21_m2 = res
+	resDECj_t12_t21_m2 = res
 	}
+
+
+
+
+
+
+
 
 
 
@@ -806,25 +791,24 @@ if (runslow)
 # Plot: best model to screen (may look squashed)
 #######################################################
 
-pdffn = "southern_conifers_DEC+J+x+trait_v3b.pdf"
-#pdf(file=pdffn, width=10, height=30)
-
+# pdffn = "southern_conifers_DEC+J+trait_v3a.pdf"
+# pdf(file=pdffn, width=10, height=30)
 
 #######################################################
 # Extract just geography ancestral states from geog+trait ancestral states
 #######################################################
-geog_res = get_geog_from_traitgeog_results(res=resDECxj_t12_t21_m2, num_trait_states=2)
+geog_res = get_geog_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
 
 #######################################################
 # Extract just trait ancestral states from geog+trait ancestral states
 #######################################################
-trait_res = get_trait_from_traitgeog_results(res=resDECxj_t12_t21_m2, num_trait_states=2)
+trait_res = get_trait_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
 tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2a, "geog.data", sep="/")))
 
 #######################################################
 # Plot the geographic ancestral states
 #######################################################
-analysis_titletxt = "Southern conifers: Geog reconstruction under DEC+J+x+trait"
+analysis_titletxt = "Southern conifers: Geog reconstruction under DEC+J+trait"
 
 scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
 results_object = geog_res
@@ -837,7 +821,7 @@ res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 #######################################################
 # Plot the trait ancestral states
 #######################################################
-analysis_titletxt = "Southern conifers: Trait reconstruction under DEC+J+x+trait"
+analysis_titletxt = "Southern conifers: Trait reconstruction under DEC+J+trait"
 results_object = trait_res
 res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
@@ -845,9 +829,16 @@ res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 # plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
 
-#dev.off()
+# dev.off()
 # cmdstr = paste0("open ", pdffn)
 # system(cmdstr)
+
+
+
+
+
+
+
 
 
 
@@ -861,25 +852,24 @@ res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 #######################################################
 dev.off(); dev.off(); # (close previous graphics devices to make way for the PDF)
 
-pdffn = "southern_conifers_DEC+J+x+trait_v3b.pdf"
+pdffn = "southern_conifers_DEC+J+trait_v3a.pdf"
 pdf(file=pdffn, width=10, height=30)
-
 
 #######################################################
 # Extract just geography ancestral states from geog+trait ancestral states
 #######################################################
-geog_res = get_geog_from_traitgeog_results(res=resDECxj_t12_t21_m2, num_trait_states=2)
+geog_res = get_geog_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
 
 #######################################################
 # Extract just trait ancestral states from geog+trait ancestral states
 #######################################################
-trait_res = get_trait_from_traitgeog_results(res=resDECxj_t12_t21_m2, num_trait_states=2)
+trait_res = get_trait_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
 tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2a, "geog.data", sep="/")))
 
 #######################################################
 # Plot the geographic ancestral states
 #######################################################
-analysis_titletxt = "Southern conifers: Geog reconstruction under DEC+J+x+trait"
+analysis_titletxt = "Southern conifers: Geog reconstruction under DEC+J+trait"
 
 scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
 results_object = geog_res
@@ -892,13 +882,12 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 #######################################################
 # Plot the trait ancestral states
 #######################################################
-analysis_titletxt = "Southern conifers: Trait reconstruction under DEC+J+x+trait"
+analysis_titletxt = "Southern conifers: Trait reconstruction under DEC+J+trait"
 results_object = trait_res
 res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
 # Pie chart
 plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
-
 
 dev.off()
 cmdstr = paste0("open ", pdffn)
@@ -910,27 +899,33 @@ system(cmdstr)
 
 
 
-
-
-
-
 #######################################################
-# Extract maximized log-likelihoods
+# Extract parameters, lnLs, etc. like you did for
+# Psychotria, and calculate AICs & AIC weights
 #######################################################
 
-# t12=t21 - Binary trait only (1=Fleshy cone, 2=non-fleshy cone), 1-rate model
 resTrait_1rate$total_loglikelihood
-# t12+t21 -- Binary trait only, 2-rate model
 resTrait_2rates$total_loglikelihood
-# DEC+x (distance-dependent dispersal) model on geography only
-resDECx$total_loglikelihood
-# DEC+x+j (distance-dependent, with jump dispersal) model on geography only
-resDECxj$total_loglikelihood
-# Trait+geography joint model, DEC+x+t12+t21+m2
-resDECx_t12_t21_m2$total_loglikelihood
-# Trait+geography joint model, DEC+x+j+t12+t21+m2
-resDECxj_t12_t21_m2$total_loglikelihood
+resDEC$total_loglikelihood
+resDECj$total_loglikelihood
+resDEC_t12_t21_m2$total_loglikelihood
+resDECj_t12_t21_m2$total_loglikelihood
 
+# 2023-10-05 results:
+# -25.67922
+# -25.08393
+# -317.2742
+# -306.6455
+# -342.2195
+# -331.6915
+
+# 2024 results:
+-33.0481
+-33.04532
+-317.2742
+-306.6455
+-349.9282
+-339.6597
 
 
 #######################################################
@@ -948,19 +943,105 @@ print_param_ests <- function(res, params_to_get)
 	}
 
 
-
 # Print to screen for pasting into table
 param_ests_table = rbind(print_param_ests(resTrait_1rate, params_to_get=params_to_get), 
 print_param_ests(resTrait_2rates, params_to_get=params_to_get), 
-print_param_ests(resDECx, params_to_get=params_to_get), 
-print_param_ests(resDECxj, params_to_get=params_to_get), 
-print_param_ests(resDECx_t12_t21_m2, params_to_get=params_to_get), 
-print_param_ests(resDECxj_t12_t21_m2, params_to_get=params_to_get))
+print_param_ests(resDEC, params_to_get=params_to_get), 
+print_param_ests(resDECj, params_to_get=params_to_get), 
+print_param_ests(resDEC_t12_t21_m2, params_to_get=params_to_get), 
+print_param_ests(resDECj_t12_t21_m2, params_to_get=params_to_get))
 
 param_ests_table_df = adf(param_ests_table)
 row.names(param_ests_table_df) = NULL
 param_ests_table_df
 
+# 2023-10-05 results:
+#           d            e          j x         t12         t21        m2
+# 0.000000000 0.0000000000 0.00000000 0 0.004071375 0.004071375 1.0000000
+# 0.000000000 0.0000000000 0.00000000 0 0.005386846 0.001570499 1.0000000
+# 0.008125191 0.0051194388 0.00000000 0          NA          NA        NA
+# 0.003292240 0.0009028732 0.02219126 0          NA          NA        NA
+# 0.008220396 0.0051485428 0.00000000 0 0.005295523 0.001407604 0.9729404
+# 0.003306221 0.0009058607 0.02234889 0 0.005383800 0.001578812 0.9870885
+
+# 2024 results
+
+           d            e          j x         t12         t21        m2
+1 0.000000000 0.0000000000 0.00000000 0 0.005377814 0.005377814 1.0000000
+2 0.000000000 0.0000000000 0.00000000 0 0.005249353 0.005535828 1.0000000
+3 0.008125191 0.0051194388 0.00000000 0          NA          NA        NA
+4 0.003292240 0.0009028732 0.02219126 0          NA          NA        NA
+5 0.008270975 0.0050883564 0.00000000 0 0.004855206 0.005329870 0.9406884
+6 0.003309525 0.0009071340 0.02220648 0 0.005263905 0.005523028 0.9935914
+
+
+
+
+
+# 2023 results
+
+# Several independent re-runs to check optimizations
+# (not needed for lab exercise)
+# 
+Rdata_fn = "DEC+t12+t21+m2_inf_v3a.Rdata"
+rerun_optim_table_DEC = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
+
+# Printing 'DECx+t12+t21+m2_inf_rerun_optim_table_v3a.txt':
+#                 lnL nparam          d           e         t12         t21
+# orig_inf  -340.8115      5 0.01034183 0.005231394 0.005421375 0.001655103
+# orig_redo -340.8115      5 0.01034183 0.005231394 0.005421375 0.001655103
+# lowstart  -340.8115      5 0.01034150 0.005227692 0.005418389 0.001654252
+# histart   -340.8115      5 0.01034248 0.005229084 0.005419540 0.001654969
+#                  m2
+# orig_inf  0.5586105
+# orig_redo 0.5586105
+# lowstart  0.5583762
+# histart   0.5585244
+
+
+# 2024 results
+                lnL nparam           d           e         t12         t21        m2
+orig_inf  -349.9282      5 0.008270975 0.005088356 0.004855206 0.005329870 0.9406884
+orig_redo -349.5127      5 0.008526136 0.005080355 0.005068585 0.005437392 0.8809768
+lowstart  -348.3451      5 0.009476611 0.005128892 0.005478922 0.005656355 0.6939391
+histart   -349.9282      5 0.008270975 0.005088356 0.004855206 0.005329870 0.9406884
+
+
+
+
+# 
+Rdata_fn = "DECJ+t12+t21+m2_inf_v3a.Rdata"
+rerun_optim_table_DECj = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
+# 
+# Rdata_fn = "DECJx+t12+t21+m2_rep2_inf.Rdata"
+# rerun_optim_table_DECj_rep2 = rerun_optimization_w_HiLow(res=NULL, Rdata_fn=Rdata_fn, runslow=FALSE)
+# 
+
+
+
+# 2023 results
+
+#Printing 'DECJx+t12+t21+m2_inf_rerun_optim_table_v3a.txt':
+#                lnL nparam           d           e          j         t12
+#orig_inf  -331.2819      6 0.003864892 0.001079285 0.02369789 0.005386595
+#orig_redo -331.2819      6 0.003864892 0.001079285 0.02369789 0.005386595
+#lowstart  -331.4525      6 0.004388316 0.001407872 0.02378079 0.005292009
+#histart   -331.2820      6 0.003882719 0.001085877 0.02365480 0.005392460
+#                  t21        m2
+#orig_inf  0.001718709 0.7390989
+#orig_redo 0.001718709 0.7390989
+#lowstart  0.001679263 0.6121937
+#histart   0.001715623 0.7351255
+
+# 2024 results
+orig_redo -339.5688      6 0.003332787 0.0009024553 0.02239647 0.005213762 0.005560563
+lowstart  -338.5928      6 0.003930777 0.0010312059 0.02380770 0.005079437 0.005690770
+histart   -339.6284      6 0.003324506 0.0009214150 0.02218179 0.005242328 0.005489278
+                 m2
+orig_inf  0.9935914
+orig_redo 0.9747074
+lowstart  0.7331812
+histart   0.9870709
 
 
 cat("\n\n")
