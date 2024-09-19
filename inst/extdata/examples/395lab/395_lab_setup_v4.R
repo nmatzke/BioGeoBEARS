@@ -1,10 +1,18 @@
 
 
+#######################################################
+# Setup - beginning
+#######################################################
+
 # Install some necessary R packages from CRAN (these are precompiled,
 # so easy to install on all systems)
+
+# Run the "install.packages" commands inside the '' marks
+# (but WITHOUT the '' marks ONCE.
+run_text_inside_quote_once = '
+install.packages("ape")
 install.packages("devtools")
 install.packages("Rcpp")
-install.packages("ape")
 install.packages("FD")
 install.packages("snow")
 install.packages("rexpokit")
@@ -15,13 +23,30 @@ install.packages("phangorn")
 install.packages("phylobase")
 install.packages("optimx")
 install.packages("GenSA")
-
-
+################################################
+# OLD:
 # Install BioGeoBEARS from GitHub
+################################################
 # (BioGeoBEARS is pure R, so installation is easy *if* the above 
 #  packages have been installed)
-library(devtools)
-install_github(repo="nmatzke/BioGeoBEARS", upgrade="never")
+#library(devtools)
+#install_github(repo="nmatzke/BioGeoBEARS", dependencies=TRUE, upgrade="never")
+################################################
+# NEW:
+# To avoid GitHub overload, download BioGeoBEARS from Canvas, then install locally:
+################################################
+# Download from:
+# Canvas -> BIOSCI 395 -> Files -> Southern_Conifer_Biogeog
+# https://canvas.auckland.ac.nz/courses/106014/files/folder/Southern_conifer_biogeog
+# BioGeoBEARS_1.1.3.tar.gz
+
+# Install additional dependencies
+install.packages(c("plotrix","gdata","minqa","fdrtool","statmod","SparseM","spam","MultinomialCI"))
+
+# Install BioGeoBEARS from Canvas-downloaded zipfile
+install.packages("BioGeoBEARS_1.1.3.tar.gz", repos=NULL, type="source", dependencies=TRUE)
+
+' # END run_text_inside_quote_once
 
 # Check that your BioGeoBEARS installation loads
 library(BioGeoBEARS)
@@ -49,6 +74,5 @@ labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models
 
 # Open an R script in R Studio
 file.edit(labpt1a_script)
-
-file.edit(labpt2a_script)
+# ONCE LINE 70 WORKS, TAKE A BREAK, WE WILL CONTINUE ONCE EVERYONE IS HERE
 

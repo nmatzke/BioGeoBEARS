@@ -1004,10 +1004,20 @@ plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"
 
 # You can get the maximized log-likelihood like this:
 resDEC$total_loglikelihood
+resDECj$total_loglikelihood
+resDIVALIKE$total_loglikelihood
+resDIVALIKEj$total_loglikelihood
+resBAYAREALIKE$total_loglikelihood
+resBAYAREALIKEj$total_loglikelihood
 
 # You can see which parameters were "free" parameters by
 # looking at the output parameters table, column "type":
-resDEC$output@params_table
+resDEC$output@params_table[c("d","e","j","x"),"est"]
+resDECj$output@params_table[c("d","e","j","x"),"est"]
+resDIVALIKE$output@params_table[c("d","e","j","x"),"est"]
+resDIVALIKEj$output@params_table[c("d","e","j","x"),"est"]
+resBAYAREALIKE$output@params_table[c("d","e","j","x"),"est"]
+resBAYAREALIKEj$output@params_table[c("d","e","j","x"),"est"]
 
 # The "est" column contains the maximum-likelihood
 # estimates of the free parameters
