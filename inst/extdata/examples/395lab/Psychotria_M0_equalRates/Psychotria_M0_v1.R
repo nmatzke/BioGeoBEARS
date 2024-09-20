@@ -1,25 +1,15 @@
 
 #######################################################
-# Installing BioGeoBEARS
-#######################################################
-# Uncomment this command to get everything
-# Please use the "0-cloud" R repository at "http://cran.rstudio.com" as it is 
-# the only one that keeps download statistics
-#######################################################
-#
-#
-
-#######################################################
 # SETUP -- libraries/BioGeoBEARS updates
 #######################################################
-
 # Load the package (after installation, see above).
 library(FD)       # for FD::maxent() (make sure this is up-to-date)
 library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
 library(parallel)
 
 #######################################################
-# Install BioGeoBEARS from devtools - only needs to be done once
+# If not already installed, install BioGeoBEARS from devtools
+# - only needs to be done once
 # (University computers may need to repeat installation
 #  after each login)
 library(devtools)
@@ -236,7 +226,7 @@ numstates_from_numareas(numareas=10, maxareas=2, include_null_range=TRUE)
 # Run DEC
 #######################################################
 
-# Intitialize a default model (DEC model)
+# Initialize a default model (DEC model)
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 
 # Give BioGeoBEARS the location of the phylogeny Newick file
@@ -1025,16 +1015,3 @@ resBAYAREALIKEj$output@params_table[c("d","e","j","x"),"est"]
 # For each model, add the results into a 
 # results table. In the end, you will 
 # calculate AICs and AIC weights for all models.
-
-
-
-
-
-
-
-
-
-
-
-
-
