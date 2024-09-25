@@ -102,7 +102,7 @@ library(BioGeoBEARS)
 
 # Set working directory
 #wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC_traits_models/"
-wd = "~/Downloads/395lab23/"
+wd = "~/Downloads/"
 setwd(wd)
 
 # Get 395 locations in GitHub install
@@ -807,61 +807,6 @@ if (runslow)
 #######################################################
 
 pdffn = "southern_conifers_DEC+J+x+trait_v3b.pdf"
-#pdf(file=pdffn, width=10, height=30)
-
-
-#######################################################
-# Extract just geography ancestral states from geog+trait ancestral states
-#######################################################
-geog_res = get_geog_from_traitgeog_results(res=resDECxj_t12_t21_m2, num_trait_states=2)
-
-#######################################################
-# Extract just trait ancestral states from geog+trait ancestral states
-#######################################################
-trait_res = get_trait_from_traitgeog_results(res=resDECxj_t12_t21_m2, num_trait_states=2)
-tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2a, "geog.data", sep="/")))
-
-#######################################################
-# Plot the geographic ancestral states
-#######################################################
-analysis_titletxt = "Southern conifers: Geog reconstruction under DEC+J+x+trait"
-
-scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
-results_object = geog_res
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
-
-# Pie chart
-# plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
-
-
-#######################################################
-# Plot the trait ancestral states
-#######################################################
-analysis_titletxt = "Southern conifers: Trait reconstruction under DEC+J+x+trait"
-results_object = trait_res
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
-
-# Pie chart
-# plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
-
-
-#dev.off()
-# cmdstr = paste0("open ", pdffn)
-# system(cmdstr)
-
-
-
-
-
-#######################################################
-# Plot: best model to PDF (should look better; but you may have to open the PDF
-#       manually, if system(cmdstr) does not successfully open PDF; if you are
-#       Rstudio Cloud in a browser, you will have to download the PDF to your 
-#       hard drive to view it.)
-#######################################################
-dev.off(); dev.off(); # (close previous graphics devices to make way for the PDF)
-
-pdffn = "southern_conifers_DEC+J+x+trait_v3b.pdf"
 pdf(file=pdffn, width=10, height=30)
 
 
@@ -909,11 +854,6 @@ system(cmdstr)
 
 
 
-
-
-
-
-
 #######################################################
 # Extract maximized log-likelihoods
 #######################################################
@@ -922,6 +862,14 @@ system(cmdstr)
 resTrait_1rate$total_loglikelihood
 # t12+t21 -- Binary trait only, 2-rate model
 resTrait_2rates$total_loglikelihood
+# DEC model on geography only
+resDECx$total_loglikelihood
+# DEC+j (with jump dispersal) model on geography only
+resDECj$total_loglikelihood
+# Trait+geography joint model, DEC+t12+t21+m2
+resDEC_t12_t21_m2$total_loglikelihood
+# Trait+geography joint model, DEC+j+t12+t21+m2
+resDECj_t12_t21_m2$total_loglikelihood
 # DEC+x (distance-dependent dispersal) model on geography only
 resDECx$total_loglikelihood
 # DEC+x+j (distance-dependent, with jump dispersal) model on geography only
@@ -938,28 +886,15 @@ resDECxj_t12_t21_m2$total_loglikelihood
 #######################################################
 params_to_get = c("d", "e", "j", "x", "t12", "t21", "m2")
 # Column "est" has the estimates
-resTrait_1rate$output@params_table[params_to_get,]
-
-print_param_ests <- function(res, params_to_get)
-	{
-	paramvals_to_print = res$output@params_table[params_to_get,]$est
-	names(paramvals_to_print) = params_to_get
-	print(paramvals_to_print)
-	}
-
-
-
-# Print to screen for pasting into table
-param_ests_table = rbind(print_param_ests(resTrait_1rate, params_to_get=params_to_get), 
-print_param_ests(resTrait_2rates, params_to_get=params_to_get), 
-print_param_ests(resDECx, params_to_get=params_to_get), 
-print_param_ests(resDECxj, params_to_get=params_to_get), 
-print_param_ests(resDECx_t12_t21_m2, params_to_get=params_to_get), 
-print_param_ests(resDECxj_t12_t21_m2, params_to_get=params_to_get))
-
-param_ests_table_df = adf(param_ests_table)
-row.names(param_ests_table_df) = NULL
-param_ests_table_df
+resTrait_2rates$output@params_table[params_to_get,"est"]
+resDEC$output@params_table[params_to_get,"est"]
+resDECj$output@params_table[params_to_get,"est"]
+resDEC_t12_t21_m2$output@params_table[params_to_get,"est"]
+resDECj_t12_t21_m2$output@params_table[params_to_get,"est"]
+resDECx$output@params_table[params_to_get,"est"]
+resDECxj$output@params_table[params_to_get,"est"]
+resDECx_t12_t21_m2$output@params_table[params_to_get,"est"]
+resDECxj_t12_t21_m2$output@params_table[params_to_get,"est"]
 
 
 

@@ -102,7 +102,7 @@ library(BioGeoBEARS)
 
 # Set working directory
 #wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC_traits_models/"
-wd = "~/Downloads/395lab23/"
+wd = "~/Downloads/"
 setwd(wd)
 
 # Get 395 locations in GitHub install
@@ -791,8 +791,8 @@ if (runslow)
 # Plot: best model to screen (may look squashed)
 #######################################################
 
-# pdffn = "southern_conifers_DEC+J+trait_v3a.pdf"
-# pdf(file=pdffn, width=10, height=30)
+pdffn = "southern_conifers_DEC+J+trait_v3a.pdf"
+pdf(file=pdffn, width=10, height=30)
 
 #######################################################
 # Extract just geography ancestral states from geog+trait ancestral states
@@ -815,7 +815,7 @@ results_object = geog_res
 res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
 # Pie chart
-# plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
 
 
 #######################################################
@@ -826,12 +826,12 @@ results_object = trait_res
 res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
 # Pie chart
-# plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
 
-# dev.off()
-# cmdstr = paste0("open ", pdffn)
-# system(cmdstr)
+dev.off()
+cmdstr = paste0("open ", pdffn)
+system(cmdstr)
 
 
 

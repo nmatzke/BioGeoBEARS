@@ -1,0 +1,19 @@
+Areas in the reduced conifer dataset for class (6 areas total):
+A = South America = blue
+D = Indonesia + Africa / Asia / PNG = Cyan (light blue)
+F = Fiji & surrounding = green
+G = Australia = yellow
+H = New Caledonia = red
+I = New Zealand = Pink
+
+Areas in the full conifer dataset, in Klaus & Matzke 2020, Systematic Biology (9 areas total)
+A = South America = red
+B = Africa = orange
+C = Asia = light green
+D = Indonesia region = green
+E = PNG = dark green
+F = Fiji & surrounding = light blue
+G = Australia = dark blue
+H = New Caledonia = purple
+I = New Zealand = yellow
+
