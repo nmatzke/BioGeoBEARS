@@ -23,25 +23,27 @@ install.packages("phangorn")
 install.packages("phylobase")
 install.packages("optimx")
 install.packages("GenSA")
+
+# Install additional dependencies
+install.packages(c("plotrix","gdata","minqa","fdrtool","statmod","SparseM","spam","MultinomialCI"))
+
 ################################################
-# OLD:
+# Small numbers of students:
 # Install BioGeoBEARS from GitHub
 ################################################
 # (BioGeoBEARS is pure R, so installation is easy *if* the above 
 #  packages have been installed)
-#library(devtools)
-#install_github(repo="nmatzke/BioGeoBEARS", dependencies=TRUE, upgrade="never")
+library(devtools)
+install_github(repo="nmatzke/BioGeoBEARS", dependencies=TRUE, upgrade="never")
+
 ################################################
-# NEW:
+# Large numbers of students (eg a university class)
 # To avoid GitHub overload, download BioGeoBEARS from Canvas, then install locally:
 ################################################
 # Download from:
 # Canvas -> BIOSCI 395 -> Files -> Southern_Conifer_Biogeog
 # https://canvas.auckland.ac.nz/courses/106014/files/folder/Southern_conifer_biogeog
 # BioGeoBEARS_1.1.3.tar.gz
-
-# Install additional dependencies
-install.packages(c("plotrix","gdata","minqa","fdrtool","statmod","SparseM","spam","MultinomialCI"))
 
 # Install BioGeoBEARS from Canvas-downloaded zipfile
 install.packages("BioGeoBEARS_1.1.3.tar.gz", repos=NULL, type="source", dependencies=TRUE)
