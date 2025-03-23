@@ -71,19 +71,19 @@ sourceall_git <- function(repo, subdir="", continue_recursion=FALSE)
   # Filter by subdirectory
   if (subdir != "")
   	{
-	# Add a slash at the end of subdir, if needed
-	string_to_startwith = addslash(subdir)
-
-	# Remove first slash, if needed
-	if (startsWith(string_to_startwith, prefix="/") == TRUE)
-		{
-		string_to_startwith = substr(x=string_to_startwith, start=2, stop=nchar(string_to_startwith))
-		}
+		# Add a slash at the end of subdir, if needed
+		string_to_startwith = addslash(subdir)
+	
+		# Remove first slash, if needed
+		if (startsWith(string_to_startwith, prefix="/") == TRUE)
+			{
+			string_to_startwith = substr(x=string_to_startwith, start=2, stop=nchar(string_to_startwith))
+			}
   	
   	# Go through filelist and subset
   	TF = startsWith(x=filelist, prefix=string_to_startwith)
   	filelist = filelist[TF]
-  	}
+  	} # END if (subdir != "")
   
   # Remove deeper subdirectories, if desired
   if (continue_recursion == FALSE)
@@ -115,6 +115,18 @@ sourceall_git <- function(repo, subdir="", continue_recursion=FALSE)
   filelist = filelist[keepTF]
   rawurl = paste0("https://raw.githubusercontent.com/", repo, "/master/")
   Rfiles = paste0(rawurl, filelist)
+
+	# Error check for no files
+	if (length(Rfiles) == 0)
+		{
+		txt = "STOP ERROR in sourceall_git(): zero (0) .R files were found, so there is no code to source(). Change the input directory to one with some .R code files. Have a nice day!"
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		stop(txt)
+		} # END if (length(Rfiles) == 0)
+
+
   cat("\nAttempting to source all *.R files in ", rawurl, ":\n", sep="")
   for (i in 1:length(Rfiles))
     {
@@ -166,7 +178,17 @@ sourceall <- function(path=path, pattern="\\.R", ...)
 	Rfiles_remove_TF = (Rfiles_remove_TF1 + Rfiles_remove_TF2 + Rfiles_remove_TF3) >= 1
 	
 	Rfiles = Rfiles[Rfiles_remove_TF == FALSE]
-
+	
+	# Error check for no files
+	if (length(Rfiles) == 0)
+		{
+		txt = "STOP ERROR in sourceall(): zero (0) .R files were found, so there is no code to source(). Change the input directory to one with some .R code files. Have a nice day!"
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		stop(txt)
+		} # END if (length(Rfiles) == 0)
+	
 	cat("\nSourcing Rfiles in ", path, "...\n", sep="")
 
 	
