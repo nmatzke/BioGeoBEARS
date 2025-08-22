@@ -1318,6 +1318,7 @@ count_ana_clado_events <- function(clado_events_tables, ana_events_tables, arean
 				{
 				e_counts_rectangle[i,] = as.matrix(e_counts_df)
 				e_totals_list[i] = sum(e_counts_df)
+				ana_totals_list[i] = ana_totals_list[i] + e_totals_list[i]
 				} else {
 				e_counts_rectangle[i,] = 0
 				e_totals_list[i] = 0
