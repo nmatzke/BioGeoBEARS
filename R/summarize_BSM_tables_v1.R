@@ -583,7 +583,7 @@ count_ana_dispersal_events <- function(ana_events_table, areanames, actual_names
 			} # END for (j in 1:length(areanames))
 
 		# Extinction/extirpation vector
-		TF = events_df2$extirpation_from == areanames[i]
+		TF = extirp_df2$extirpation_from == areanames[i]
 		if (sum(TF) > 0)
 			{
 			e_counts_list[,i] = sum(TF)
