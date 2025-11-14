@@ -2665,13 +2665,13 @@ BSM_to_phytools_SM <- function(res, clado_events_table, ana_events_table=NA)
 	} # END BSM_to_phytools_SM
 
 
-	# Get the sum of one state
-	get_sum_statetime_on_branch <- function(statename_to_sum, branch_history_map)
-		{
-		TF = names(branch_history_map) == statename_to_sum
-		total_residence_time = sum(branch_history_map[TF])
-		return(total_residence_time)
-		}
+# Get the sum of one state
+get_sum_statetime_on_branch <- function(statename_to_sum, branch_history_map)
+	{
+	TF = names(branch_history_map) == statename_to_sum
+	total_residence_time = sum(branch_history_map[TF])
+	return(total_residence_time)
+	}
 
 
 
