@@ -3601,6 +3601,16 @@ get_trht <- function(obj)
 	get_max_height_tree(obj)
 	}
 
+max_tree_height <- function(obj)
+	{
+	get_max_height_tree(obj)
+	}
+
+tree_height <- function(obj)
+	{
+	get_max_height_tree(obj)
+	}
+
 
 #######################################################
 # get_root_age
