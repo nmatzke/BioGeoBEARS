@@ -1706,6 +1706,6 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE)
 		} else {
 		tr = tr_orig
 		}
-	tr = ladderize(x=tr, right=right)
+	tr = ape::ladderize(phy=tr, right=right)
 	return(tr)
 	}
