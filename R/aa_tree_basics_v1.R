@@ -1679,3 +1679,33 @@ nodenums_to_check
 	} # END checktree
 	
 
+
+
+
+
+
+root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE)
+	{
+	setup='
+	trstr = "((((Cyanidioschyzon:0.08922485932,(((Saccharomyces:0.01408877057,Yarrowia:0.0538621412)99.7/100:0.02958404532,Schizosaccharomyces:0.05568842327)88.3/89:0.01093470154,Ustilago:0.0539014849)86.1/81:0.04585228615)17.6/24:0.01427567914,(Ostreococcus:0.03163816199,Arabidopsis:0.04275665746)91.8/92:0.02307835779)88.8/67:0.008591788139,(((((JakobaLibera:0.03590790663,Seculamonas:0.01617689322)24.4/35:0.003236040635,JakobaBahamiensis:0.02541034097)87.7/57:0.006094794197,(Reclinomonas:0.01518849877,Histiona:0.02006258123)95.4/96:0.006958797479)95.4/96:0.01136500824,Vermamoeba:0.129706213)77.9/77:0.004434689596,Andalucia:0.03586272806)80.7/38:0.004237721586)86.3/49:0.01081700356,(((Methylobacterium:0.01253397512,Agrobacterium:0.02092230423)91/83:0.006266215546,Rhodospirillum:0.01520937063)58.4/55:0.004404296458,Sphingomonas:0.02777602193)91.3/72:0.006984184806,((Caulobacter:0.02297231457,Pelagibacter:0.04361436182)43.7/58:0.00512969683,Rickettsia:0.03099468165)87/66:0.004256002407)98.1/97;"
+	tr = read.tree(file="", text=trstr)
+	
+	outgroup = c("Rickettsia", "Sphingomonas", "Rhodospirillium", "Methylobacterium", "Agrobacterium", "Caulobacter", "Pelagibacter", "Wolbachia")
+	right=TRUE
+	
+	'
+	tr_orig = tr
+	tr = unroot(tr)
+	outgroup_tips_found_TF = tr$tip.label %in% outgroup
+	outgroup_tips_found = tr$tip.label[outgroup_tips_found_TF]
+	outgroup_node = getMRCA(phy=tr, tip=outgroup_tips_found)
+	tmptr = try(root(phy=tr, node=outgroup_node))
+	if (("try-error" %in% class(tmptr)) == TRUE)
+		{
+		tr = tmptr
+		} else {
+		tr = tr_orig
+		}
+	tr = ladderize(x=tr, right=right)
+	return(tr)
+	}
