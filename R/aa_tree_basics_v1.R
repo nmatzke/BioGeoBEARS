@@ -1851,6 +1851,9 @@ count_matches_list <- function(biparts, outgroup)
 root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_choice="max_from_outgroup")
 	{
 	setup='
+	outgroup_choice="max_pure_outgroup"
+	outgroup_choice="max_from_outgroup"
+	
 	trstr = "((((Cyanidioschyzon:0.08922485932,(((Saccharomyces:0.01408877057,Yarrowia:0.0538621412)99.7/100:0.02958404532,Schizosaccharomyces:0.05568842327)88.3/89:0.01093470154,Ustilago:0.0539014849)86.1/81:0.04585228615)17.6/24:0.01427567914,(Ostreococcus:0.03163816199,Arabidopsis:0.04275665746)91.8/92:0.02307835779)88.8/67:0.008591788139,(((((JakobaLibera:0.03590790663,Seculamonas:0.01617689322)24.4/35:0.003236040635,JakobaBahamiensis:0.02541034097)87.7/57:0.006094794197,(Reclinomonas:0.01518849877,Histiona:0.02006258123)95.4/96:0.006958797479)95.4/96:0.01136500824,Vermamoeba:0.129706213)77.9/77:0.004434689596,Andalucia:0.03586272806)80.7/38:0.004237721586)86.3/49:0.01081700356,(((Methylobacterium:0.01253397512,Agrobacterium:0.02092230423)91/83:0.006266215546,Rhodospirillum:0.01520937063)58.4/55:0.004404296458,Sphingomonas:0.02777602193)91.3/72:0.006984184806,((Caulobacter:0.02297231457,Pelagibacter:0.04361436182)43.7/58:0.00512969683,Rickettsia:0.03099468165)87/66:0.004256002407)98.1/97;"
 	tr = read.tree(file="", text=trstr)
 	
@@ -1869,50 +1872,57 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	# Get the number of matches to the outgroups
 	num_matches_to_outgroups = count_matches_list(biparts=all_biparts, outgroup=outgroup)
 	
-	if (outgroup_choice == "max_from_outgroup")
+	if (max(num_matches_to_outgroups) > 0)
 		{
-		# smallest bipartition containing the maximum number of outgroup taxa
-		maxTF = num_matches_to_outgroups == max(num_matches_to_outgroups)
-		maxTF_nums = (1:length(maxTF))[maxTF]
-		lengths_biparts_with_max_matches = sapply(X=all_biparts[maxTF_nums], FUN=length)
-		maxTF_num_with_min_bipart = maxTF_nums[lengths_biparts_with_max_matches == min(lengths_biparts_with_max_matches)]
-		maxTF_num_with_min_bipart
-		
-		if (length(maxTF_num_with_min_bipart) > 1)
+		if (outgroup_choice == "max_from_outgroup")
 			{
-			maxTF_num_with_min_bipart = maxTF_num_with_min_bipart[1] # choose 1st
-			}
+			# smallest bipartition containing the maximum number of outgroup taxa
+			maxTF = num_matches_to_outgroups == max(num_matches_to_outgroups)
+			maxTF_nums = (1:length(maxTF))[maxTF]
+			lengths_biparts_with_max_matches = sapply(X=all_biparts[maxTF_nums], FUN=length)
+			maxTF_num_with_min_bipart = maxTF_nums[lengths_biparts_with_max_matches == min(lengths_biparts_with_max_matches)]
+			maxTF_num_with_min_bipart
+			
+			if (length(maxTF_num_with_min_bipart) > 1)
+				{
+				maxTF_num_with_min_bipart = maxTF_num_with_min_bipart[1] # choose 1st
+				}
+			
+			best_outgroup = unlist(all_biparts[maxTF_num_with_min_bipart])
+			} # END if (outgroup_choice == "max_from_outgroup")
 		
-		best_outgroup = unlist(all_biparts[maxTF_num_with_min_bipart])
-		} # END if (outgroup_choice == "max_from_outgroup")
-	
-	if (outgroup_choice == "max_pure_outgroup")
-		{
-		# smallest bipartition containing the maximum number of outgroup taxa
-		maxTF = num_matches_to_outgroups == max(num_matches_to_outgroups)
-		lengths_biparts = sapply(X=all_biparts, FUN=length)
-		
-		# Take only cases where the number of matched outgroups equals the length of the bipartition
-		outgroup_matches_equals_bipart_length_TF = lengths_biparts == num_matches_to_outgroups
-		outgroup_matches_equals_bipart_length_TF_nums = (1:length(outgroup_matches_equals_bipart_length_TF))[outgroup_matches_equals_bipart_length_TF]
-		
-		# Now take the longest matching one(s)
-		longest_outgroup_matches_equals_bipart_length_TF = lengths_biparts[outgroup_matches_equals_bipart_length_TF_nums] == max(lengths_biparts[outgroup_matches_equals_bipart_length_TF_nums])
-		longest_outgroup_matches_equals_bipart_length_TF_num = outgroup_matches_equals_bipart_length_TF_nums[longest_outgroup_matches_equals_bipart_length_TF]
-		
-		if (length(longest_outgroup_matches_equals_bipart_length_TF_num) > 1)
+		if (outgroup_choice == "max_pure_outgroup")
 			{
-			longest_outgroup_matches_equals_bipart_length_TF_num = longest_outgroup_matches_equals_bipart_length_TF_num[1] # choose the 1st
-			}
-		best_outgroup = unlist(all_biparts[longest_outgroup_matches_equals_bipart_length_TF_num])
-		best_outgroup
-		} # END if (outgroup_choice == "max_pure_outgroup")
-		
-	#outgroup_tips_found_TF = tr2$tip.label %in% outgroup
-	#outgroup_tips_found = tr2$tip.label[outgroup_tips_found_TF]
-	#outgroup_node = getMRCA(phy=tr2, tip=outgroup_tips_found)
-	#tmptr = try(root(phy=tr2, outgroup=outgroup_tips_found))
-	tmptr = try(root(phy=tr2, outgroup=best_outgroup, resolve.root=TRUE))
+			# smallest bipartition containing the maximum number of outgroup taxa
+			maxTF = num_matches_to_outgroups == max(num_matches_to_outgroups)
+			lengths_biparts = sapply(X=all_biparts, FUN=length)
+			
+			# Take only cases where the number of matched outgroups equals the length of the bipartition
+			outgroup_matches_equals_bipart_length_TF = lengths_biparts == num_matches_to_outgroups
+			outgroup_matches_equals_bipart_length_TF_nums = (1:length(outgroup_matches_equals_bipart_length_TF))[outgroup_matches_equals_bipart_length_TF]
+			
+			# Now take the longest matching one(s)
+			longest_outgroup_matches_equals_bipart_length_TF = lengths_biparts[outgroup_matches_equals_bipart_length_TF_nums] == max(lengths_biparts[outgroup_matches_equals_bipart_length_TF_nums])
+			longest_outgroup_matches_equals_bipart_length_TF_num = outgroup_matches_equals_bipart_length_TF_nums[longest_outgroup_matches_equals_bipart_length_TF]
+			
+			if (length(longest_outgroup_matches_equals_bipart_length_TF_num) > 1)
+				{
+				longest_outgroup_matches_equals_bipart_length_TF_num = longest_outgroup_matches_equals_bipart_length_TF_num[1] # choose the 1st
+				}
+			best_outgroup = unlist(all_biparts[longest_outgroup_matches_equals_bipart_length_TF_num])
+			best_outgroup
+			} # END if (outgroup_choice == "max_pure_outgroup")
+
+		#outgroup_tips_found_TF = tr2$tip.label %in% outgroup
+		#outgroup_tips_found = tr2$tip.label[outgroup_tips_found_TF]
+		#outgroup_node = getMRCA(phy=tr2, tip=outgroup_tips_found)
+		#tmptr = try(root(phy=tr2, outgroup=outgroup_tips_found))
+		tmptr = try(root(phy=tr2, outgroup=best_outgroup, resolve.root=TRUE))
+		} else {
+		# If no outgroups found, just midpoint root
+		tmptr = phytools::midpoint.root(tr_orig)
+		}# END if (max(num_matches_to_outgroups) > 0)
+			
 	# gree
 	if (("try-error" %in% class(tmptr)) == FALSE)
 		{
