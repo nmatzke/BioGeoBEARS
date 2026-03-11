@@ -1850,7 +1850,7 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	'
 	#trtable = prt(tr)
 	
-	#tr_orig = tr
+	tr_orig = tr
 	tr2 = unroot(tr, collapse.singles=TRUE)
 	
 	all_biparts = get_all_bipartitions(phy=tr2, exclude_singletons=FALSE, unroot_phy_to_avoid_duplicates=TRUE) 
