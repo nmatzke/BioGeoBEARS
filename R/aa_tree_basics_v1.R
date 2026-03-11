@@ -1857,7 +1857,7 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	outgroup = c("Rickettsia", "Sphingomonas", "Rhodospirillum", "Methylobacterium", "Agrobacterium", "Caulobacter", "Pelagibacter", "Wolbachia")
 	right=TRUE
 	'
-	trtable = prt(tr)
+	#trtable = prt(tr)
 	
 	# Keep the tr_original
 	tr_orig = tr
@@ -1913,7 +1913,7 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	#outgroup_node = getMRCA(phy=tr2, tip=outgroup_tips_found)
 	#tmptr = try(root(phy=tr2, outgroup=outgroup_tips_found))
 	tmptr = try(root(phy=tr2, outgroup=best_outgroup))
-	if (("try-error" %in% class(tmptr)) == TRUE)
+	if (("try-error" %in% class(tmptr)) == FALSE)
 		{
 		tr = tmptr
 		} else {
