@@ -1839,9 +1839,9 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	outgroup = c("Rickettsia", "Sphingomonas", "Rhodospirillum", "Methylobacterium", "Agrobacterium", "Caulobacter", "Pelagibacter", "Wolbachia")
 	right=TRUE
 	'
-	trtable = prt(tr)
+	#trtable = prt(tr)
 	
-	tr_orig = tr
+	#tr_orig = tr
 	tr2 = unroot(tr, collapse.singles=TRUE)
 	
 	all_biparts = get_all_bipartitions(phy=tr2, exclude_singletons=FALSE, unroot_phy_to_avoid_duplicates=TRUE) 
@@ -1864,7 +1864,7 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 			maxTF_num_with_min_bipart = maxTF_num_with_min_bipart[1] # choose 1st
 			}
 		
-		best_outgroup = all_biparts[maxTF_num_with_min_bipart]
+		best_outgroup = unlist(all_biparts[maxTF_num_with_min_bipart])
 		} # END if (outgroup_choice == "max_from_outgroup")
 	
 	if (outgroup_choice == "max_pure_outgroup")
