@@ -1713,6 +1713,15 @@ hutan_tips <- function(phy)
 	return(t)
 	}
 
+hutan_tips2 <- function(phy) 
+	{
+	t <- phy$edge[!phy$edge[, 2] %in% phy$edge[, 1], 2]
+	t <- t[order(t)]
+	names(t) <- phy$tip.label
+	return(t)
+	}
+
+
 # Modified from hutan::tip_descendants
 hutan_tip_descendants <- function(phy, a) 
 	{
