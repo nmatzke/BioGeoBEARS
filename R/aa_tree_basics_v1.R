@@ -1848,7 +1848,7 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	outgroup = c("Rickettsia", "Sphingomonas", "Rhodospirillum", "Methylobacterium", "Agrobacterium", "Caulobacter", "Pelagibacter", "Wolbachia")
 	right=TRUE
 	'
-	#trtable = prt(tr)
+	trtable = prt(tr)
 	
 	# Keep the tr_original
 	tr_orig = tr
