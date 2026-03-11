@@ -1915,11 +1915,11 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	tmptr = try(root(phy=tr2, outgroup=best_outgroup))
 	if (("try-error" %in% class(tmptr)) == FALSE)
 		{
-		tr = tmptr
+		tr_out = tmptr
 		} else {
-		tr = tr_orig
+		tr_out = tr_orig
 		}
-	tr = ape::ladderize(phy=tr, right=right)
-	return(tr)
+	tr_out = ape::ladderize(phy=tr_out, right=right)
+	return(tr_out)
 	}
 
