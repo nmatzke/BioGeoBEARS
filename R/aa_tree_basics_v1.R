@@ -1850,6 +1850,7 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	'
 	#trtable = prt(tr)
 	
+	# Keep the tr_original
 	tr_orig = tr
 	tr2 = unroot(tr, collapse.singles=TRUE)
 	
