@@ -1912,7 +1912,7 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	#outgroup_tips_found = tr2$tip.label[outgroup_tips_found_TF]
 	#outgroup_node = getMRCA(phy=tr2, tip=outgroup_tips_found)
 	#tmptr = try(root(phy=tr2, outgroup=outgroup_tips_found))
-	tmptr = try(root(phy=tr2, outgroup=best_outgroup))
+	tmptr = try(root(phy=tr2, outgroup=best_outgroup, resolve.root=TRUE))
 	# gree
 	if (("try-error" %in% class(tmptr)) == FALSE)
 		{
