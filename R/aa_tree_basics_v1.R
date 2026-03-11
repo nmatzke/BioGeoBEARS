@@ -1704,6 +1704,15 @@ hutan_descendants <- function(phy, a, keep_node = FALSE)
 	return(d)
 	}
 
+# Modified from hutan::tips
+hutan_tips <- function(phy) 
+	{
+	t <- phy$edge[!phy$edge[, 2] %in% phy$edge[, 1], 2]
+	t <- t[order(t)]
+	names(t) <- phy$tip.label
+	return(t)
+	}
+
 # Modified from hutan::tip_descendants
 hutan_tip_descendants <- function(phy, a) 
 	{
@@ -1903,3 +1912,4 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	tr = ape::ladderize(phy=tr, right=right)
 	return(tr)
 	}
+
