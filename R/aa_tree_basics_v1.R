@@ -1716,7 +1716,7 @@ hutan_tips <- function(phy)
 # Modified from hutan::tip_descendants
 hutan_tip_descendants <- function(phy, a) 
 	{
-  t <- tips(phy)
+  t <- hutan_tips(phy)
   return(t[t %in% hutan_descendants(phy, a, keep_node = TRUE)])
 	}
 
