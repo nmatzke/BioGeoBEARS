@@ -1685,8 +1685,152 @@ nodenums_to_check
 # UPDATE: FIND LARGEST CLADE MATCHING OUTGROUP WITH PRT()
 #######################################################
 
+# Modified from hutan::descendants
+hutan_descendants <- function(phy, a, keep_node = FALSE) 
+	{
+	q <- c(a)
+	d <- c()
+	while (length(q) > 0)
+		{
+		n <- q[1]
+		q <- q[q != n]
+		d <- append(d, n)
+		q <- append(q, phy$edge[phy$edge[, 1] == n, 2])
+		}
+	if (!keep_node)
+		{
+		d <- d[d != a]
+		}
+	return(d)
+	}
 
-root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE)
+# Modified from hutan::tip_descendants
+hutan_tip_descendants <- function(phy, a) 
+	{
+  t <- tips(phy)
+  return(t[t %in% hutan_descendants(phy, a, keep_node = TRUE)])
+	}
+
+# Modified from hutan::bipartition_for_edge
+hutan_bipartition_for_edge <- function (phy, edge) 
+	{
+	left_node <- phy$edge[edge, 1]
+	right_node <- phy$edge[edge, 2]
+	left_tips <- hutan_tip_descendants(phy, left_node)
+	right_tips <- hutan_tip_descendants(phy, right_node)
+	if (length(left_tips) < length(right_tips))
+		{
+		return(left_tips)
+		} else {
+		return(right_tips)
+		}
+	}
+
+# Modified from hutan::bipartition_for_edge_by_label
+hutan_bipartition_for_edge_by_label <- function (edge, phy) 
+	{
+  return(phy$tip.label[hutan_bipartition_for_edge(phy, edge)])
+	}
+
+# Get the other half of a bipartition of a tree
+get_other_bipartition <- function(bipart1, tipnames)
+	{
+	bipart2 = tipnames[(tipnames %in% bipart1) == FALSE]
+	}
+
+# Modified from: hutan::get_bipartitions
+# bipartitions gets all of the bipartitions on one side, but not
+# the other
+get_all_bipartitions <- function(phy, exclude_singletons=FALSE, unroot_phy_to_avoid_duplicates=TRUE) 
+	{
+	setup='
+	mitoCOG_ATP1_trstr = "((((((((((Oryza:0.001675680405,Sorghum:0.0005833431914)15.3/54:0.001366760144,(Vitis:0.002450489639,Arabidopsis:0.004984924846)61.9/78:0.0007098417982)100/100:0.0179266108,Selaginella:0.02822476908)97.4/99:0.008177677436,Chlamydomonas:0.05684547694)99.3/93:0.01017573661,(((((Reclinomonas:0.005356158503,Histiona:0.006120755418)100/100:0.009747206387,Seculamonas:0.008466338363)69.2/70:0.002579612853,JakobaBahamiensis:0.01586052318)27.4/48:0.002440302124,JakobaLibera:0.0150250876)98.2/99:0.005728637914,Andalucia:0.01465967042)91.3/86:0.003535930713)92.3/65:0.00537063151,((((((Xenopus:0.002416033638,Homo:0.003334316822)99.4/100:0.005477081937,Drosophila:0.01112951055)50.7/63:0.001162188904,Trichoplax:0.01122223721)99.9/100:0.01042473496,(((Saccharomyces:0.009942612283,Yarrowia:0.01150159678)98.9/100:0.008853514273,Schizosaccharomyces:0.01818059276)50.5/63:0.003618498252,Ustilago:0.02369723979)99.6/100:0.009586098342)65.9/62:0.00281137462,(Phaeodactylum:0.04905185353,Tetrahymena:0.03278624001)89.9/60:0.00530368709)62.2/39:0.001277326891,Babesia:0.03974497658)86.4/71:0.003219436995)75.5/69:0.004663684931,(((((Agrobacterium:0.01094188688,Methylobacterium:0.01105050969)97.6/95:0.006090741612,Caulobacter:0.01353931533)71.7/64:0.001952109228,Rhodospirillum:0.01837567469)63.6/42:0.002238375761,Sphingomonas:0.01449001103)65.2/59:0.005395386413,Pelagibacter:0.02905270556)73.5/39:0.003085967867)94.2/63:0.009044797677,Wolbachia:0.06802107415)67.7/49:0.004938350789,Rickettsia:0.03703290328)91.1/77:0.06888732464,Naegleria:0.1984458624);"
+	tr = read.tree(file="", text=mitoCOG_ATP1_trstr)
+	phy=tr
+	exclude_singletons=FALSE
+	
+	all_biparts = get_all_bipartitions(phy=tr, exclude_singletons=FALSE, unroot_phy_to_avoid_duplicates=FALSE) 
+	head(all_biparts)
+	length(all_biparts)
+	
+	all_biparts = get_all_bipartitions(phy=tr, exclude_singletons=TRUE, unroot_phy_to_avoid_duplicates=FALSE) 
+	head(all_biparts)
+	length(all_biparts)
+
+
+	all_biparts2 = get_all_bipartitions(phy=unroot(tr), exclude_singletons=FALSE) 
+	head(all_biparts2)
+	length(all_biparts2)
+	
+	all_biparts2 = get_all_bipartitions(phy=unroot(tr), exclude_singletons=TRUE) 
+	head(all_biparts2)
+	length(all_biparts2)
+
+	# There is a duplicate bipartition, when tree is rooted
+	all_biparts %in% all_biparts2
+	
+	rev(sort(table(sapply(X=all_biparts, FUN=paste, sep="", collapse=","))))[1:5]
+	rev(sort(table(sapply(X=all_biparts2, FUN=paste, sep="", collapse=","))))[1:5]
+	
+	non_unique_allparts2 = "Agrobacterium,Andalucia,Arabidopsis,Babesia,Caulobacter,Chlamydomonas,Drosophila,Histiona,Homo,JakobaBahamiensis,JakobaLibera,Methylobacterium,Oryza,Pelagibacter,Phaeodactylum,Reclinomonas,Rhodospirillum,Rickettsia,Saccharomyces,Schizosaccharomyces,Seculamonas,Selaginella,Sorghum,Sphingomonas,Tetrahymena,Trichoplax,Ustilago,Vitis,Wolbachia,Xenopus,Yarrowia"
+	TF = sapply(X=all_biparts, FUN=paste, sep="", collapse=",") == non_unique_allparts2
+	listnums = (1:length(TF))[TF]
+	listnums
+	# 59 91
+	
+	all_biparts[listnums]
+
+	tipnames = phy$tip.label
+	length(tipnames)
+	# 32
+	
+  edge_nums = as.list(1:nrow(phy$edge))
+  biparts1 = lapply(X=edge_nums, FUN=hutan_bipartition_for_edge_by_label, phy=phy)
+  TF1 = sapply(X=sapply(X=biparts1, FUN=sort), FUN=paste, sep="", collapse=",") == non_unique_allparts2
+  biparts2 = lapply(X=biparts1, FUN=get_other_bipartition, tipnames=tipnames)
+  TF2 = sapply(X=sapply(X=biparts2, FUN=sort), FUN=paste, sep="", collapse=",") == non_unique_allparts2
+	
+	biparts1[(1:length(TF1))[TF1]]
+	biparts2[(1:length(TF2))[TF2]]
+	
+	' # END setup
+	
+	if (unroot_phy_to_avoid_duplicates == TRUE)
+		{
+		phy = ape::unroot(phy)
+		}
+	
+	tipnames = phy$tip.label
+  edge_nums = as.list(1:nrow(phy$edge))
+  biparts1 = lapply(X=edge_nums, FUN=hutan_bipartition_for_edge_by_label, phy=phy)
+  biparts2 = lapply(X=biparts1, FUN=get_other_bipartition, tipnames=tipnames)
+  
+  all_biparts = c(biparts1, biparts2)
+  length_biparts = sapply(X=all_biparts, FUN=length)
+  all_biparts = all_biparts[order(length_biparts)]
+  all_biparts = sapply(X=all_biparts, FUN=sort)
+  length_biparts = length_biparts[order(length_biparts)]
+  
+  if (exclude_singletons == TRUE)
+  	{
+  	all_biparts = all_biparts[length_biparts > 1]
+  	}
+  return(all_biparts)
+	} # END get_all_bipartitions(phy, exclude_singletons=FALSE, unroot_phy_to_avoid_duplicates=TRUE) 
+
+
+count_matches <- function(bipart, outgroup)
+	{
+	num_matches = sum(bipart %in% outgroup)
+	return(num_matches)
+	}
+
+count_matches_list <- function(biparts, outgroup)
+	{
+	num_matches_list = sapply(X=biparts, FUN=count_matches, outgroup=outgroup)
+	}
+
+root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_choice="max_from_outgroup")
 	{
 	setup='
 	trstr = "((((Cyanidioschyzon:0.08922485932,(((Saccharomyces:0.01408877057,Yarrowia:0.0538621412)99.7/100:0.02958404532,Schizosaccharomyces:0.05568842327)88.3/89:0.01093470154,Ustilago:0.0539014849)86.1/81:0.04585228615)17.6/24:0.01427567914,(Ostreococcus:0.03163816199,Arabidopsis:0.04275665746)91.8/92:0.02307835779)88.8/67:0.008591788139,(((((JakobaLibera:0.03590790663,Seculamonas:0.01617689322)24.4/35:0.003236040635,JakobaBahamiensis:0.02541034097)87.7/57:0.006094794197,(Reclinomonas:0.01518849877,Histiona:0.02006258123)95.4/96:0.006958797479)95.4/96:0.01136500824,Vermamoeba:0.129706213)77.9/77:0.004434689596,Andalucia:0.03586272806)80.7/38:0.004237721586)86.3/49:0.01081700356,(((Methylobacterium:0.01253397512,Agrobacterium:0.02092230423)91/83:0.006266215546,Rhodospirillum:0.01520937063)58.4/55:0.004404296458,Sphingomonas:0.02777602193)91.3/72:0.006984184806,((Caulobacter:0.02297231457,Pelagibacter:0.04361436182)43.7/58:0.00512969683,Rickettsia:0.03099468165)87/66:0.004256002407)98.1/97;"
@@ -1695,12 +1839,61 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE)
 	outgroup = c("Rickettsia", "Sphingomonas", "Rhodospirillum", "Methylobacterium", "Agrobacterium", "Caulobacter", "Pelagibacter", "Wolbachia")
 	right=TRUE
 	'
+	trtable = prt(tr)
+	
 	tr_orig = tr
-	tr = unroot(tr, collapse.singles=TRUE)
-	outgroup_tips_found_TF = tr$tip.label %in% outgroup
-	outgroup_tips_found = tr$tip.label[outgroup_tips_found_TF]
-	outgroup_node = getMRCA(phy=tr, tip=outgroup_tips_found)
-	tmptr = try(root(phy=tr, outgroup=outgroup_tips_found))
+	tr2 = unroot(tr, collapse.singles=TRUE)
+	
+	all_biparts = get_all_bipartitions(phy=tr2, exclude_singletons=FALSE, unroot_phy_to_avoid_duplicates=TRUE) 
+	len_all_biparts = sapply(X=all_biparts, FUN=length)
+	
+	# Get the number of matches to the outgroups
+	num_matches_to_outgroups = count_matches_list(biparts=all_biparts, outgroup=outgroup)
+	
+	if (outgroup_choice == "max_from_outgroup")
+		{
+		# smallest bipartition containing the maximum number of outgroup taxa
+		maxTF = num_matches_to_outgroups == max(num_matches_to_outgroups)
+		maxTF_nums = (1:length(maxTF))[maxTF]
+		lengths_biparts_with_max_matches = sapply(X=all_biparts[maxTF_nums], FUN=length)
+		maxTF_num_with_min_bipart = maxTF_nums[lengths_biparts_with_max_matches == min(lengths_biparts_with_max_matches)]
+		maxTF_num_with_min_bipart
+		
+		if (length(maxTF_num_with_min_bipart) > 1)
+			{
+			maxTF_num_with_min_bipart = maxTF_num_with_min_bipart[1] # choose 1st
+			}
+		
+		best_outgroup = all_biparts[maxTF_num_with_min_bipart]
+		} # END if (outgroup_choice == "max_from_outgroup")
+	
+	if (outgroup_choice == "max_pure_outgroup")
+		{
+		# smallest bipartition containing the maximum number of outgroup taxa
+		maxTF = num_matches_to_outgroups == max(num_matches_to_outgroups)
+		lengths_biparts = sapply(X=all_biparts, FUN=length)
+		
+		# Take only cases where the number of matched outgroups equals the length of the bipartition
+		outgroup_matches_equals_bipart_length_TF = lengths_biparts == num_matches_to_outgroups
+		outgroup_matches_equals_bipart_length_TF_nums = (1:length(outgroup_matches_equals_bipart_length_TF))[outgroup_matches_equals_bipart_length_TF]
+		
+		# Now take the longest matching one(s)
+		longest_outgroup_matches_equals_bipart_length_TF = lengths_biparts[outgroup_matches_equals_bipart_length_TF_nums] == max(lengths_biparts[outgroup_matches_equals_bipart_length_TF_nums])
+		longest_outgroup_matches_equals_bipart_length_TF_num = outgroup_matches_equals_bipart_length_TF_nums[longest_outgroup_matches_equals_bipart_length_TF]
+		
+		if (length(longest_outgroup_matches_equals_bipart_length_TF_num) > 1)
+			{
+			longest_outgroup_matches_equals_bipart_length_TF_num = longest_outgroup_matches_equals_bipart_length_TF_num[1] # choose the 1st
+			}
+		best_outgroup = unlist(all_biparts[longest_outgroup_matches_equals_bipart_length_TF_num])
+		best_outgroup
+		} # END if (outgroup_choice == "max_pure_outgroup")
+		
+	#outgroup_tips_found_TF = tr2$tip.label %in% outgroup
+	#outgroup_tips_found = tr2$tip.label[outgroup_tips_found_TF]
+	#outgroup_node = getMRCA(phy=tr2, tip=outgroup_tips_found)
+	#tmptr = try(root(phy=tr2, outgroup=outgroup_tips_found))
+	tmptr = try(root(phy=tr2, outgroup=best_outgroup))
 	if (("try-error" %in% class(tmptr)) == TRUE)
 		{
 		tr = tmptr
