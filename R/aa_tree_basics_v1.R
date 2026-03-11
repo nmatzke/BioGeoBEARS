@@ -1916,11 +1916,14 @@ root_on_outgroup_and_ladderize <- function(tr, outgroup, right=TRUE, outgroup_ch
 	# gree
 	if (("try-error" %in% class(tmptr)) == FALSE)
 		{
-		tr_out = tmptr
+		# Write out, read in
+		tr_out = read.tree(file="", text=write.tree(tmptr, file=""))
 		} else {
 		tr_out = tr_orig
 		}
 	tr_out = ape::ladderize(phy=tr_out, right=right)
+	# Write out, read in, again
+	tr_out = read.tree(file="", text=write.tree(tr_out, file=""))
 	return(tr_out)
 	}
 
