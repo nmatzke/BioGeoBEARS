@@ -418,6 +418,27 @@ np <- function(path=path, mustWork=FALSE, ...)
 	}
 
 
+# Check for mins greater than 0
+min_GTzero <- function(x, na.rm=TRUE, minval=0.0)
+	{
+	minx = min(x, na.rm=na.rm)
+	if (minx <= minval)
+		{
+		minx = min(x[x>minval], na.rm=na.rm)
+		}
+	return(minx)
+	}
+
+# Check for maxes greater than maxval
+max_LTlots <- function(x, na.rm=TRUE, maxval=10)
+	{
+	maxx = max(x, na.rm=na.rm)
+	if (maxx >= maxval)
+		{
+		maxx = max(x[x<maxval], na.rm=na.rm)
+		}
+	return(maxx)
+	}
 
 
 
