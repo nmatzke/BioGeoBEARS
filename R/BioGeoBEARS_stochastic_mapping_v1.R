@@ -1845,7 +1845,7 @@ get_inputs_for_stochastic_mapping <- function(res, cluster_already_open=FALSE, r
 
 	
 	# Stratified or non-stratified -- is there a times filename? (timesfn)
-	if (is.na(res$inputs$timesfn) == TRUE)
+	if ( (is.na(res$inputs$timesfn) == TRUE) || (res$inputs$timesfn == "") )
 		{
 		# Non-stratified inputs
 		stratified = FALSE
