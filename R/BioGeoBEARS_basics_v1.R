@@ -4712,6 +4712,12 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 
 	# rows = number of areas in ancestor
 	# cols = number of areas in subset daughter
+	print("max_numareas")
+	print(max_numareas)
+	print("maxent_constraint_01:")
+	print(maxent_constraint_01)
+	print("NA_val:")
+	print(NA_val)
 	
 	relprob_subsets_matrix = matrix(NA_val, nrow=max_numareas, ncol=max_numareas)
 	
@@ -4719,6 +4725,8 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 	rownum=max_numareas
 	for (rownum in 1:max_numareas)
 		{
+		print("rownum:")
+		print(rownum)
 		numcols = rownum
 		tmpstates = seq(1, numcols, by=1)
 
@@ -4728,8 +4736,11 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 		maxent_constraint = quantile(x=seq(0,length(tmpstates)+1,1), probs=maxent_constraint_01)
 
 		# Apply Maxent constraint to weight the different numbers of areas
-		print(maxent_constraint)
+		print("tmpstates:")
 		print(tmpstates)
+		print("maxent_constraint:")
+		print(maxent_constraint)
+
 		maxent_result = rexpokit::maxent(constr=maxent_constraint, states=tmpstates)
 		probs_of_subset_ranges = maxent_result$prob
 		probs_of_subset_ranges
