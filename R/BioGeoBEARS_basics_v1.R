@@ -4745,8 +4745,8 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 	rownum=max_numareas
 	for (rownum in 1:max_numareas)
 		{
-		print("rownum:")
-		print(rownum)
+		#print("rownum:")
+		#print(rownum)
 		numcols = rownum
 		tmpstates = seq(1, numcols, by=1)
 
