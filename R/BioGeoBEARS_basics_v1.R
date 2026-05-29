@@ -4712,12 +4712,32 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 
 	# rows = number of areas in ancestor
 	# cols = number of areas in subset daughter
-	print("max_numareas")
-	print(max_numareas)
-	print("maxent_constraint_01:")
-	print(maxent_constraint_01)
-	print("NA_val:")
-	print(NA_val)
+	#print("max_numareas")
+	#print(max_numareas)
+	#print("maxent_constraint_01:")
+	#print(maxent_constraint_01)
+	#print("NA_val:")
+	#print(NA_val)
+	
+	# Error checks
+	if (maxent_constraint_01 < 0.00001)
+		{
+		txt = paste0("STOP ERROR in relative_probabilities_of_subsets(). Your input maxent_constraint_01=", maxent_constraint_01, ". The minimum is 0.00001. Probably you should go fix BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table['mx01s','est'] at input.\n   (Or, similar for mx01y, mx01j, mx01.)")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		stop(txt)
+		}
+
+	if (maxent_constraint_01 > 0.99999)
+		{
+		txt = paste0("STOP ERROR in relative_probabilities_of_subsets(). Your input maxent_constraint_01=", maxent_constraint_01, ". The maximum is 0.99999. Probably you should go fix BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table['mx01s','est'] at input.\n   (Or, similar for mx01y, mx01j, mx01.)")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		stop(txt)
+		}
+	
 	
 	relprob_subsets_matrix = matrix(NA_val, nrow=max_numareas, ncol=max_numareas)
 	
@@ -4736,10 +4756,10 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 		maxent_constraint = quantile(x=seq(0,length(tmpstates)+1,1), probs=maxent_constraint_01)
 
 		# Apply Maxent constraint to weight the different numbers of areas
-		print("tmpstates:")
-		print(tmpstates)
-		print("maxent_constraint:")
-		print(maxent_constraint)
+		#print("tmpstates:")
+		#print(tmpstates)
+		#print("maxent_constraint:")
+		#print(maxent_constraint)
 
 		maxent_result = rexpokit::maxent(constr=maxent_constraint, states=tmpstates)
 		probs_of_subset_ranges = maxent_result$prob
@@ -4872,6 +4892,26 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 	maxent_constraint_v = quantile(x=seq(0,max_numareas+1,1), probs=maxent_constraint_01v)
 	maxent_constraint_v
 	' # END defaults
+
+	# Error checks
+	if (maxent_constraint_01v < 0.00001)
+		{
+		txt = paste0("STOP ERROR in relative_probabilities_of_subsets(). Your input maxent_constraint_01v=", maxent_constraint_01v, ". The minimum is 0.00001. Probably you should go fix BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table['mx01v','est'] at input.")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		stop(txt)
+		}
+
+	if (maxent_constraint_01v > 0.99999)
+		{
+		txt = paste0("STOP ERROR in relative_probabilities_of_subsets(). Your input maxent_constraint_01v=", maxent_constraint_01v, ". The maximum is 0.99999. Probably you should go fix BioGeoBEARS_run_object$BioGeoBEARS_model_object@params_table['mx01v','est'] at input.")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		stop(txt)
+		}
+
 	
 	# Require FD for maxent function
 	# FD::maxent
