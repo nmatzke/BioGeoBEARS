@@ -3173,14 +3173,14 @@ readfiles_BioGeoBEARS_run <- function(inputs)
 			{
 			inputs$detects_df = read_detections(inputs$detects_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
 			}
-		if (is.character(inputs$detects_fn))
+		if (is.character(inputs$controls_fn))
 			{
 			inputs$controls_df = read_controls(inputs$controls_fn, OTUnames=NULL, areanames=NULL, tmpskip=0, phy=phy)
 			}
 		}
 		
 	return(inputs)
-	}
+	} # END readfiles_BioGeoBEARS_run <- function(inputs)
 
 
 

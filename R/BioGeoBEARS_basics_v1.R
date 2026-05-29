@@ -4728,7 +4728,9 @@ relative_probabilities_of_subsets <- function(max_numareas=6, maxent_constraint_
 		maxent_constraint = quantile(x=seq(0,length(tmpstates)+1,1), probs=maxent_constraint_01)
 
 		# Apply Maxent constraint to weight the different numbers of areas
-		maxent_result = FD::maxent(constr=maxent_constraint, states=tmpstates)
+		print(maxent_constraint)
+		print(tmpstates)
+		maxent_result = rexpokit::maxent(constr=maxent_constraint, states=tmpstates)
 		probs_of_subset_ranges = maxent_result$prob
 		probs_of_subset_ranges
 		
@@ -4911,7 +4913,7 @@ relative_probabilities_of_vicariants <- function(max_numareas=6, maxent_constrai
 		maxent_constraint = quantile(x=seq(0,length(possible_vicariance_smaller_rangesizes)+1,1), probs=maxent_constraint_01v)
 		
 		# Apply Maxent constraint to weight the different numbers of areas
-		maxent_result = FD::maxent(constr=maxent_constraint, states=possible_vicariance_smaller_rangesizes)
+		maxent_result = rexpokit::maxent(constr=maxent_constraint, states=possible_vicariance_smaller_rangesizes)
 		probs_of_subset_ranges = maxent_result$prob
 		probs_of_subset_ranges
 		
