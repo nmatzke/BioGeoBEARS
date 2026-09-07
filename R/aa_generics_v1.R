@@ -4033,6 +4033,13 @@ prt <- function(t, printflag=FALSE, relabel_nodes=FALSE, time_bp_digits=7, add_r
 		t$node.label = new_node_labels
 		}
 	
+	if (length(tr$node.label) == 0)
+		{
+		txt = paste0("WARNING in prt(): length(t$node.label)==0, so filling in with '' vector.")
+		warning(txt)
+		t$node.label = rep("", times=t$Nnode)
+		}
+	
 	labels = c(t$tip.label, t$node.label)
 	ordered_nodenames = get_nodenums(t)
 	#nodenums = 1:length(labels)
