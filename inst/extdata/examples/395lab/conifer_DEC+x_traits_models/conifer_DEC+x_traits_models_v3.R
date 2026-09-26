@@ -83,10 +83,6 @@ labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models
 #######################################################
 # Loading packages
 #######################################################
-# Close any open graphics
-dev.off(); dev.off(); dev.off(); dev.off(); dev.off(); 
-
-
 # Load the package (after installation, see above).
 library(ape)						# for read.tree
 library(GenSA)
@@ -96,11 +92,12 @@ library(optimx)         # You need to have some version of optimx available
                         # you can set:
                         # BioGeoBEARS_run_object$use_optimx = FALSE
                         # ...everything should work either way -- NJM 2014-01-08
-library(FD)       # for FD::maxent() (make sure this is up-to-date)
-library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
-library(parallel)
+library(rexpokit)
+library(cladoRcpp)
 library(BioGeoBEARS)
 
+# Close any open graphics (if needed)
+# dev.off(); dev.off(); 
 
 # Set working directory
 #wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC_traits_models/"
@@ -151,7 +148,7 @@ states_list_0based_NEW = states_list_0based[c(1:22,33)]
 
 
 #######################################################
-# Traits-only model -- 1 rate
+# Traits-only model -- 1 rate -- EXAMPLE, NOT FOR FINAL TABLE
 #######################################################
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
@@ -286,6 +283,12 @@ if (runslow)
 		load(resfn)
 		resTrait_1rate = res
 		} # END if (runslow)
+
+
+# Parameter results: Traits-only model -- 1 rate -- EXAMPLE, NOT FOR FINAL TABLE
+# p1 = t12 (and t21 is forced to equal t12)
+# value = lnL
+resTrait_1rate$optim_result
 
 
 
@@ -423,10 +426,16 @@ if (runslow)
 		resTrait_2rates = res
 		} # END if (runslow)
 
+# Parameter results: Traits-only model -- 2 rates
+# USE FOR THE TRAIT-ONLY lnL in the trait-independent dispersal models (1st, 2nd, 5th, 6th line of table)
+# p1 = t12
+# p2 = t21
+# value = lnL
+resTrait_2rates$optim_result
 
 
 #######################################################
-# Run DEC (on geography only)
+# Run DEC+x (on geography only)
 #######################################################
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 BioGeoBEARS_run_object$print_optim = TRUE
@@ -476,6 +485,13 @@ if (runslow)
 	load(resfn)
 	resDECx = res
 	}
+
+# Parameter results: Geography-only model -- DEC+x
+# USE FOR THE GEOGRAPHY-ONLY lnL in the trait-independent dispersal models (5th line of table)
+# p1 = d
+# p2 = e
+# value = lnL
+resDECx$optim_result
 
 
 #######################################################
@@ -542,6 +558,14 @@ if (runslow)
 	resDECxj = res
 	}
 
+# Parameter results: Geography-only model -- DEC+J+x
+# USE FOR THE GEOGRAPHY-ONLY lnL in the trait-independent dispersal models (5th line of table)
+# p1 = d
+# p2 = e
+# p3 = x
+# p4 = j
+# value = lnL
+resDECxj$optim_result
 
 
 
@@ -670,6 +694,16 @@ if (runslow)
 	load(resfn)
 	resDECx_t12_t21_m2 = res
 	}
+
+# Parameter results: Traits+Geography, trait-dependent and distance-dependent dispersal model, DEC+x+t12+t21+m2
+# p1 = d
+# p2 = e
+# p3 = x
+# p4 = t12
+# p5 = t21
+# p6 = m2
+# value = lnL
+resDECx_t12_t21_m2$optim_result
 
 
 
@@ -802,13 +836,23 @@ if (runslow)
 	resDECxj_t12_t21_m2 = res
 	}
 
+# Parameter results: Traits+Geography, trait-dependent and distance-dependent dispersal model, DEC+J+x+t12+t21+m2
+# p1 = d
+# p2 = e
+# p3 = x
+# p4 = j
+# p5 = t12
+# p6 = t21
+# p7 = m2
+# value = lnL
+resDECxj_t12_t21_m2$optim_result
 
 
 #######################################################
 # Plot: best model to screen (may look squashed)
 #######################################################
 
-pdffn = "southern_conifers_DEC+J+x+trait_v3b.pdf"
+pdffn = "southern_conifers_DEC+J+x+trait_v3.pdf"
 pdf(file=pdffn, width=10, height=30)
 
 
@@ -861,7 +905,9 @@ system(cmdstr)
 #######################################################
 
 # t12=t21 - Binary trait only (1=Fleshy cone, 2=non-fleshy cone), 1-rate model
+# (This is an EXAMPLE model, don't use in table)
 resTrait_1rate$total_loglikelihood
+
 # t12+t21 -- Binary trait only, 2-rate model
 resTrait_2rates$total_loglikelihood
 # DEC model on geography only
@@ -881,7 +927,16 @@ resDECx_t12_t21_m2$total_loglikelihood
 # Trait+geography joint model, DEC+x+j+t12+t21+m2
 resDECxj_t12_t21_m2$total_loglikelihood
 
-
+lnLs = c(resTrait_2rates$total_loglikelihood,
+resDECx$total_loglikelihood,
+resDECj$total_loglikelihood,
+resDEC_t12_t21_m2$total_loglikelihood,
+resDECj_t12_t21_m2$total_loglikelihood,
+resDECx$total_loglikelihood,
+resDECxj$total_loglikelihood,
+resDECx_t12_t21_m2$total_loglikelihood,
+resDECxj_t12_t21_m2$total_loglikelihood)
+lnLs
 
 #######################################################
 # Extract M.L. parameter values
@@ -898,6 +953,47 @@ resDECxj$output@params_table[params_to_get,"est"]
 resDECx_t12_t21_m2$output@params_table[params_to_get,"est"]
 resDECxj_t12_t21_m2$output@params_table[params_to_get,"est"]
 
+
+
+
+#######################################################
+# Extract M.L. parameter values
+#######################################################
+params_to_get = c("d", "e", "j", "x", "t12", "t21", "m2")
+# Column "est" has the estimates
+resTrait_1rate$output@params_table[params_to_get,]
+
+print_param_ests <- function(res, params_to_get)
+	{
+	paramvals_to_print = res$output@params_table[params_to_get,]$est
+	names(paramvals_to_print) = params_to_get
+	print(paramvals_to_print)
+	}
+
+
+# Print to screen for pasting into table
+param_ests_table2 = rbind(print_param_ests(resTrait_2rates, params_to_get=params_to_get), 
+print_param_ests(resDEC, params_to_get=params_to_get), 
+print_param_ests(resDECj, params_to_get=params_to_get), 
+print_param_ests(resDEC_t12_t21_m2, params_to_get=params_to_get), 
+print_param_ests(resDECj_t12_t21_m2, params_to_get=params_to_get),
+print_param_ests(resDECx, params_to_get=params_to_get), 
+print_param_ests(resDECxj, params_to_get=params_to_get), 
+print_param_ests(resDECx_t12_t21_m2, params_to_get=params_to_get), 
+print_param_ests(resDECxj_t12_t21_m2, params_to_get=params_to_get))
+
+param_ests_table_df2 = adf(param_ests_table2)
+row.names(param_ests_table_df2) = NULL
+param_ests_table_df2
+
+nparams = c(2,2,3,5,6,3,4,6,7)
+
+param_ests_table_df3 = cbind(lnLs, nparams, param_ests_table_df2)
+row.names(param_ests_table_df3) = c("trait-only, 2-rates", "DEC", "DEC+J", "DEC+traits", "DEC+J+traits", "DEC+x", "DEC+J+x", "DEC+x+traits", "DEC+J+x+traits")
+param_ests_table_df3
+
+# Write to a tab-delimited text file
+write.table(param_ests_table_df3, file="param_ests_table_df3.txt", sep="\t", append=FALSE, quote=FALSE, row.names=TRUE, col.names=TRUE)
 
 
 cat("\n\n")

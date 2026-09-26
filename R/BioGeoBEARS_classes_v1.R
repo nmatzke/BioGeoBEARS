@@ -1304,6 +1304,8 @@ update_BioGeoBEARS_model_object_w_optimx_result <- function(BioGeoBEARS_model_ob
 #' @author Nicholas J. Matzke \email{matzke@@berkeley.edu}
 #' @examples
 #' test=1
+#' put_params_into_optim_or_optimx_result(resTrait_2rates$output, total_loglikelihood=resTrait_2rates$total_loglikelihood, use_optimx=FALSE)
+#' 
 put_params_into_optim_or_optimx_result <- function(BioGeoBEARS_model_object, total_loglikelihood, use_optimx)
 	{
 
@@ -1397,6 +1399,49 @@ put_params_into_optim_or_optimx_result <- function(BioGeoBEARS_model_object, tot
 	} # END put_params_into_optim_or_optimx_result <- function(res=NA, BioGeoBEARS_model_object=NA, use_optimx=NA, total_loglikelihood=NA)
 
 
+
+
+
+
+'
+data(Psychotria_ML_DEC)
+optimx_result = Psychotria_ML_DEC$optim_result
+BioGeoBEARS_model_object = Psychotria_ML_DEC$outputs
+label_optimx_result(optimx_result, BioGeoBEARS_model_object)
+'
+label_optimx_result <- function(optimx_result, BioGeoBEARS_model_object)
+	{
+	TF = BioGeoBEARS_model_object@params_table$type == "free"
+	free_param_ests = BioGeoBEARS_model_object@params_table$est[TF]
+	free_param_ests
+	
+	free_param_names = rownames(BioGeoBEARS_model_object@params_table)[TF]
+	free_param_names
+	
+	# Search by the optimx_result names
+	param_nums = grep(pattern="^p\\d+$", x=names(optimx_result), value=FALSE)
+	
+	if (length(param_nums) != length(free_param_names))
+		{
+		txt = paste0("STOP ERROR in label_optimx_result(): the length of the params in param_nums is ", length(param_nums), ", the length(free_param_names) from BioGeoBEARS_model_object is ", length(free_param_names), ". These must match!")
+		cat("\n")
+		cat(txt)
+		cat("optimx_result:\n")
+		print(optimx_result)
+		cat("free_param_names:\n")
+		print(free_param_names)
+		stop(txt)
+		} # END if (length(param_nums) != length(free_param_names))
+	
+	optimx_result_labeled = optimx_result
+	names(optimx_result_labeled)[param_nums] = free_param_names
+	
+	TF = names(optimx_result_labeled) == "value"
+	names(optimx_result_labeled)[TF] = "lnL"
+	return(optimx_result_labeled)
+	}
+
+Psychotria_ML_DEC
 
 
 

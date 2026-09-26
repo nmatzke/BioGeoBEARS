@@ -81,9 +81,6 @@ labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models
 #######################################################
 # Loading packages
 #######################################################
-# Close any open graphics
-dev.off(); dev.off(); dev.off(); dev.off(); dev.off(); 
-
 # Load the package (after installation, see above).
 library(ape)						# for read.tree
 library(GenSA)
@@ -93,12 +90,12 @@ library(optimx)         # You need to have some version of optimx available
                         # you can set:
                         # BioGeoBEARS_run_object$use_optimx = FALSE
                         # ...everything should work either way -- NJM 2014-01-08
-library(FD)       # for FD::maxent() (make sure this is up-to-date)
-library(snow)     # (if you want to use multicore functionality; some systems/R versions prefer library(parallel), try either)
-library(parallel)
+library(rexpokit)
+library(cladoRcpp)
 library(BioGeoBEARS)
 
-
+# Close any open graphics (if needed)
+# dev.off(); dev.off(); 
 
 # Set working directory
 #wd = "/drives/GDrive/__classes/BIOSCI395/lab/BGBlab/conifer_DEC_traits_models/"
@@ -283,6 +280,10 @@ if (runslow)
 		resTrait_1rate = res
 		} # END if (runslow)
 
+# Parameter results: Traits-only model -- 1 rate -- EXAMPLE, NOT FOR FINAL TABLE
+# p1 = t12 (and t21 is forced to equal t12)
+# value = lnL
+resTrait_1rate$optim_result
 
 
 #######################################################
@@ -419,6 +420,12 @@ if (runslow)
 		resTrait_2rates = res
 		} # END if (runslow)
 
+# Parameter results: Traits-only model -- 2 rates
+# USE FOR THE TRAIT-ONLY lnL in the trait-independent dispersal models (1st, 2nd, 5th, 6th line of table)
+# p1 = t12
+# p2 = t21
+# value = lnL
+resTrait_2rates$optim_result
 
 
 #######################################################
@@ -470,6 +477,14 @@ if (runslow)
 	load(resfn)
 	resDEC = res
 	}
+
+# Parameter results: Geography-only model -- DEC
+# USE FOR THE GEOGRAPHY-ONLY lnL in the trait-independent dispersal models (1st line of table)
+# p1 = d
+# p2 = e
+# value = lnL
+resDEC$optim_result
+
 
 
 #######################################################
@@ -533,6 +548,13 @@ if (runslow)
 	resDECj = res
 	}
 
+# Parameter results: Geography-only model -- DEC+J
+# USE FOR THE GEOGRAPHY-ONLY lnL in the trait-independent dispersal models (2nd line of table)
+# p1 = d
+# p2 = e
+# p3 = j
+# value = lnL
+resDECj$optim_result
 
 
 
@@ -652,6 +674,14 @@ if (runslow)
 	resDEC_t12_t21_m2 = res
 	}
 
+# Parameter results: Traits+Geography, trait-dependent dispersal model, DEC+t12+t21+m2
+# p1 = d
+# p2 = e
+# p3 = t12
+# p4 = t21
+# p5 = m2
+# value = lnL
+resDEC_t12_t21_m2$optim_result
 
 
 
@@ -778,62 +808,15 @@ if (runslow)
 	resDECj_t12_t21_m2 = res
 	}
 
-
-
-
-
-
-
-
-
-
-#######################################################
-# Plot: best model to screen (may look squashed)
-#######################################################
-
-pdffn = "southern_conifers_DEC+J+trait_v3a.pdf"
-pdf(file=pdffn, width=10, height=30)
-
-#######################################################
-# Extract just geography ancestral states from geog+trait ancestral states
-#######################################################
-geog_res = get_geog_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
-
-#######################################################
-# Extract just trait ancestral states from geog+trait ancestral states
-#######################################################
-trait_res = get_trait_from_traitgeog_results(res=resDECj_t12_t21_m2, num_trait_states=2)
-tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=slashslash(paste(labpt2a, "geog.data", sep="/")))
-
-#######################################################
-# Plot the geographic ancestral states
-#######################################################
-analysis_titletxt = "Southern conifers: Geog reconstruction under DEC+J+trait"
-
-scriptdir = np(system.file("extdata/a_scripts", package="BioGeoBEARS"))
-results_object = geog_res
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
-
-# Pie chart
-plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=TRUE, tr=tr, tipranges=tipranges)
-
-
-#######################################################
-# Plot the trait ancestral states
-#######################################################
-analysis_titletxt = "Southern conifers: Trait reconstruction under DEC+J+trait"
-results_object = trait_res
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("t12","t21"), plotwhat="text", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
-
-# Pie chart
-plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
-
-
-dev.off()
-cmdstr = paste0("open ", pdffn)
-system(cmdstr)
-
-
+# Parameter results: Traits+Geography, trait-dependent dispersal model, DEC+J+t12+t21+m2
+# p1 = d
+# p2 = e
+# p3 = j
+# p4 = t12
+# p5 = t21
+# p6 = m2
+# value = lnL
+resDECj_t12_t21_m2$optim_result
 
 
 
@@ -845,14 +828,14 @@ system(cmdstr)
 
 
 #######################################################
-# Plot: best model to PDF (should look better; but you may have to open the PDF
+# Plot: best model to PDF (should look better than plotting to an R window; 
+#       but you may have to open the PDF
 #       manually, if system(cmdstr) does not successfully open PDF; if you are
 #       Rstudio Cloud in a browser, you will have to download the PDF to your 
 #       hard drive to view it.)
 #######################################################
-dev.off(); dev.off(); # (close previous graphics devices to make way for the PDF)
 
-pdffn = "southern_conifers_DEC+J+trait_v3a.pdf"
+pdffn = "southern_conifers_DEC+J+trait_v3.pdf"
 pdf(file=pdffn, width=10, height=30)
 
 #######################################################
@@ -889,9 +872,11 @@ res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=l
 # Pie chart
 plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params=list("j"), plotwhat="pie", label.offset=0.45, tipcex=0.7, statecex=0.7, splitcex=0.6, titlecex=0.8, plotsplits=TRUE, cornercoords_loc=scriptdir, include_null_range=FALSE, tr=tr, tipranges=trait_values)
 
+
 dev.off()
 cmdstr = paste0("open ", pdffn)
 system(cmdstr)
+
 
 
 
@@ -904,7 +889,7 @@ system(cmdstr)
 # Psychotria, and calculate AICs & AIC weights
 #######################################################
 
-resTrait_1rate$total_loglikelihood
+resTrait_1rate$total_loglikelihood # This was just an example, don't use in the table
 resTrait_2rates$total_loglikelihood
 resDEC$total_loglikelihood
 resDECj$total_loglikelihood
@@ -939,6 +924,8 @@ print_param_ests(resDECj_t12_t21_m2, params_to_get=params_to_get))
 param_ests_table_df = adf(param_ests_table)
 row.names(param_ests_table_df) = NULL
 param_ests_table_df
+
+
 
 
 

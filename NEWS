@@ -1,3 +1,17 @@
+CHANGES in BioGeoBEARS VERSION 1.1.4
+
+NEW FEATURES
+
+    o added a few small utilities
+    o various accumulated bug fixes (see GitHub commits)
+
+OTHER CHANGES
+
+    o removed dependency on FD::maxent (now in rexpokit), devtools
+    o MultinomialCI is now a Suggests (currently off CRAN)
+
+
+
 CHANGES in BioGeoBEARS VERSION 1.1.3
 
 NEW FEATURES

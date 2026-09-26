@@ -11,6 +11,7 @@
 # (but WITHOUT the '' marks ONCE.
 run_text_inside_quote_once = '
 install.packages("ape")
+install.packages("remotes")
 install.packages("devtools")
 install.packages("Rcpp")
 install.packages("FD")
@@ -23,21 +24,16 @@ install.packages("phangorn")
 install.packages("phylobase")
 install.packages("optimx")
 install.packages("GenSA")
-
-# Install additional dependencies
-install.packages(c("plotrix","gdata","minqa","fdrtool","statmod","SparseM","spam","MultinomialCI"))
-
 ################################################
-# Small numbers of students:
+# OLD:
 # Install BioGeoBEARS from GitHub
 ################################################
 # (BioGeoBEARS is pure R, so installation is easy *if* the above 
 #  packages have been installed)
-library(devtools)
-install_github(repo="nmatzke/BioGeoBEARS", dependencies=TRUE, upgrade="never")
-
+#library(remotes)
+#remotes::install_github(repo="nmatzke/BioGeoBEARS", dependencies=TRUE, upgrade="never")
 ################################################
-# Large numbers of students (eg a university class)
+# NEW:
 # To avoid GitHub overload, download BioGeoBEARS from Canvas, then install locally:
 ################################################
 # Download from:
@@ -45,8 +41,15 @@ install_github(repo="nmatzke/BioGeoBEARS", dependencies=TRUE, upgrade="never")
 # https://canvas.auckland.ac.nz/courses/106014/files/folder/Southern_conifer_biogeog
 # BioGeoBEARS_1.1.3.tar.gz
 
+# Install additional dependencies
+install.packages(c("plotrix","gdata","minqa","fdrtool","statmod","SparseM","spam"))
+install.packages("MultinomialCI") # 2026: this may not work, if so, see below
+
+# If MultinomialCI doesnt work (wasnt updated in 2026), use local zipfile from Canvas:
+install.packages("MultinomialCI_1.2.tar.gz", repos=NULL, type="source", dependencies=TRUE)
+
 # Install BioGeoBEARS from Canvas-downloaded zipfile
-install.packages("BioGeoBEARS_1.1.3.tar.gz", repos=NULL, type="source", dependencies=TRUE)
+install.packages("BioGeoBEARS_1.1.4.tar.gz", repos=NULL, type="source", dependencies=TRUE)
 
 ' # END run_text_inside_quote_once
 
@@ -69,7 +72,7 @@ labpt2b = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models/", sep
 
 labpt1a_script = paste(extdata_dir, "examples/395lab/Psychotria_M0_equalRates/Psychotria_M0_v1.R", sep="/")
 labpt1b_script = paste(extdata_dir, "examples/395lab/Psychotria_M2_oneWayDispersal/Psychotria_M2_oneWayDispersal_v1.R", sep="/")
-labpt1c_script = paste(extdata_dir, "examples/395lab/Psychotria_M4_DistanceDispersal/Psychotria_M4_DistanceDispersal_v1.R/", sep="/")
+labpt1c_script = paste(extdata_dir, "examples/395lab/Psychotria_M4_DistanceDispersal/Psychotria_M4_DistanceDispersal_v1.R", sep="/")
 labpt2a_script = paste(extdata_dir, "examples/395lab/conifer_DEC_traits_models/conifer_DEC_traits_models_v3.R", sep="/")
 labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models/conifer_DEC+x_traits_models_v3.R", sep="/")
 
@@ -77,4 +80,14 @@ labpt2b_script = paste(extdata_dir, "examples/395lab/conifer_DEC+x_traits_models
 # Open an R script in R Studio
 file.edit(labpt1a_script)
 # ONCE LINE 70 WORKS, TAKE A BREAK, WE WILL CONTINUE ONCE EVERYONE IS HERE
+
+# If time:
+# One-way dispersal
+file.edit(labpt1b_script)
+# Distance-dependent dispersal
+file.edit(labpt1c_script)
+
+# Long scripts (includes parameter extraction code) from BioGeoBEARS package:
+file.edit(labpt2a_script)
+file.edit(labpt2b_script)
 
