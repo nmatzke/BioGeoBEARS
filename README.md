@@ -143,7 +143,12 @@ Matzke, Nicholas J. (2014). "Model Selection in Historical Biogeography Reveals 
 
 Matzke, Nicholas J. (2013). "Probabilistic historical biogeography: new models for founder-event speciation, imperfect detection, and fossils allow improved accuracy and model-testing." _Frontiers of Biogeography_, 5(4), 242-248. doi: 10.21425/F5FBG19694 ![DOI](http://dx.doi.org/10.21425/F5FBG19694)](http://dx.doi.org/10.21425/F5FBG19694)
 
-Matzke, Nicholas J. (2026). BioGeoBEARS: BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts. version 1.1.4, published on GitHub on September 30, 2026. DOI: 
+Matzke, Nicholas J. (2026). BioGeoBEARS: BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts. version 1.1.4, published on GitHub on September 30, 2026. doi: 10.5281/zenodo.1463215 ![DOI](http://dx.doi.org/10.5281/zenodo.1463215)](http://dx.doi.org/10.5281/zenodo.1463215)
+
+**Release v1.1.4** registered on Zenodo: [![DOI](https://zenodo.org/badge/9406671.svg)](https://zenodo.org/records/23047822)
+https://zenodo.org/records/23047822
+
+**Zenodo DOI for release:** http://dx.doi.org/10.5281/zenodo.23047822
 
 Matzke, Nicholas J. (2018). BioGeoBEARS: BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts. version 1.1.1, published on GitHub on November 6, 2018. DOI: http://dx.doi.org/10.5281/zenodo.1478250
 
