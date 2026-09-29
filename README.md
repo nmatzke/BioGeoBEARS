@@ -34,7 +34,7 @@ https://github.com/nmatzke/Matzke_R_binaries
 
 ...you will need to match your operating system (e.g. Windows vs. Mac) and perhaps chip type (e.g. x86 Intel vs. amd64; on a Mac, click upper-left Apple Symbol -> About This Mac to get this information).
 
-**2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [devtools](https://CRAN.R-project.org/package=devtools):
+**2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [pak](https://CRAN.R-project.org/package=pak) (as [devtools](https://CRAN.R-project.org/package=devtools)::install_github is deprecated):
 
 ```
 library(pak)
