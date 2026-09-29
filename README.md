@@ -3,7 +3,7 @@ BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts
 
 # UPDATES, September 2026
 
-Various small updates keep getting added, e.g. to reduce dependencies on other packages.
+Various small updates keep getting added, e.g. to reduce dependencies on other packages. Put update to 1.1.4 on zenodo.
 
 
 # UPDATES, September 2018
@@ -127,9 +127,7 @@ BioGeoBEARS allows probabilistic inference of both historical biogeography (ance
 
 # UNIT TESTS
 
-Current build status (excluding all slow tests): [![Build Status](https://travis-ci.org/nmatzke/BioGeoBEARS.svg?branch=master)](https://travis-ci.org/nmatzke/BioGeoBEARS) (2019-04-29 build error due to R package quadprog, a dependency of some dependency that won't install on Travis-CI's current version of R.)
-
-BioGeoBEARS version 1.1.1 also includes 156+ unit-tests in the "tests" directory, using the R package "testthat". These check the likelihood calculations, ancestral state probabilities, and ML optimizations for regular, time-stratified, and trait-dependent models.
+BioGeoBEARS version 1.1.1+ also includes 156+ unit-tests in the "tests" directory, using the R package "testthat". These check the likelihood calculations, ancestral state probabilities, and ML optimizations for regular, time-stratified, and trait-dependent models.
 
 The tests all run successfully on my Mac, but they take too long to build in Travis-CI (which has a time-limit of 50 minutes). See [Build #24](https://travis-ci.org/nmatzke/BioGeoBEARS/builds/439942601) or [Build #52](https://travis-ci.org/nmatzke/BioGeoBEARS/builds/451188909) for successful builds that do only some of the tests.
 
@@ -138,6 +136,15 @@ I have also noticed that builds that were working fine suddenly started to fail,
 (The present version of BioGeoBEARS will install from GitHub regardless of the unit-tests issue.)
 
 # CITATION INFORMATION
+
+
+
+Matzke, Nicholas J. (2014). "Model Selection in Historical Biogeography Reveals that Founder-event Speciation is a Crucial Process in Island Clades." _Systematic Biology_, 63(6), 951–970. doi: 10.1093/sysbio/syu056 ![DOI](http://dx.doi.org/10.1093/sysbio/syu056)](http://dx.doi.org/10.1093/sysbio/syu056)
+
+Matzke, Nicholas J. (2013). "Probabilistic historical biogeography: new models for founder-event speciation, imperfect detection, and fossils allow improved accuracy and model-testing." _Frontiers of Biogeography_, 5(4), 242-248. doi: 10.21425/F5FBG19694 ![DOI](http://dx.doi.org/10.21425/F5FBG19694)](http://dx.doi.org/10.21425/F5FBG19694)
+
+Matzke, Nicholas J. (2026). BioGeoBEARS: BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts. version 1.1.4, published on GitHub on September 30, 2026. DOI: 
+
 Matzke, Nicholas J. (2018). BioGeoBEARS: BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts. version 1.1.1, published on GitHub on November 6, 2018. DOI: http://dx.doi.org/10.5281/zenodo.1478250
 
 **Release v1.1.1** registered on Zenodo: [![DOI](https://zenodo.org/badge/9406671.svg)](https://zenodo.org/badge/latestdoi/9406671)

@@ -2,12 +2,13 @@ CHANGES in BioGeoBEARS VERSION 1.1.4
 
 NEW FEATURES
 
+    o added a /data/ directory to hold example objects
     o added a few small utilities
     o various accumulated bug fixes (see GitHub commits)
 
 OTHER CHANGES
 
-    o removed dependency on FD::maxent (now in rexpokit), devtools
+    o removed dependencies on FD::maxent (now in rexpokit), devtools
     o MultinomialCI is now a Suggests (currently off CRAN)
 
 
