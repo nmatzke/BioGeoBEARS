@@ -1,6 +1,11 @@
 # BioGeoBEARS
 BioGeography with Bayesian (and likelihood) Evolutionary Analysis with R Scripts
 
+# UPDATES, September 2026
+
+Various small updates keep getting added, e.g. to reduce dependencies on other packages.
+
+
 # UPDATES, September 2018
 
 The GitHub repository now contains all updates formerly posted on PhyloWiki. This includes functions for Biogeographical Stochastic Mapping (BSM) and trait-dependent dispersal models. Further updates will be posted to GitHub. **Benefit:** you will no longer have to use the tedious source() commands that were in the BioGeoBEARS example script.
@@ -18,6 +23,7 @@ To install the GitHub version of BioGeoBEARS, first:
 **1.** Install the new versions of [rexpokit](https://CRAN.R-project.org/package=rexpokit) and [cladoRcpp](https://CRAN.R-project.org/package=cladoRcpp), both available on CRAN (which gives you binaries for easy installation; the GitHub versions have to be compiled from source):
 
 ```
+install.packages("pak")
 install.packages("rexpokit")
 install.packages("cladoRcpp")
 ```
@@ -31,21 +37,26 @@ https://github.com/nmatzke/Matzke_R_binaries
 **2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [devtools](https://CRAN.R-project.org/package=devtools):
 
 ```
-library(devtools)
-devtools::install_github(repo="nmatzke/BioGeoBEARS")
+library(pak)
+pak::pak(repo="nmatzke/BioGeoBEARS")
 ```
 
 Or, if you want to see if byte-compiling leads to a speedup:
 
 ```
-library(devtools)
-devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
+library(pak)
+options(pkg.configure_args = c(BioGeoBEARS = "--byte-compile"))
+pak::pak(pkg="nmatzke/BioGeoBEARS")
+
+# (OLD; devtools::install_github is deprecated)
+# library(devtools)
+# devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
 ```
 
 If step #2 keeps trying to reinstall rexpokit and cladoRcpp from scratch (including demanding a compiler like gcc or gfortran) even though they are already installed, try adding "dependencies=FALSE":
 
 ```
-devtools::install_github(repo="nmatzke/BioGeoBEARS", dependencies=FALSE)
+pak::pak(pkg="nmatzke/BioGeoBEARS", dependencies=FALSE)
 ```
 
 ...if you hit other needed dependencies, install them individually from CRAN, then re-run the command above.
