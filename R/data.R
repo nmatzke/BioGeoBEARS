@@ -20,11 +20,11 @@ list.files()
 # A brief description of what the dataset contains and its purpose.
 #
 # @format A data frame with 5 rows and 2 variables:
-# \describe{
-#   \item{x}{Integer values representing a sequence.}
-#   \item{y}{Character values representing letters.}
+# \\describe{
+#   \\item{x}{Integer values representing a sequence.}
+#   \\item{y}{Character values representing letters.}
 # }
-# @source \url{https://yourdatasource.com}
+# @source \\url{https://yourdatasource.com}
 # @examples
 # data(my_dataset)
 "my_dataset"

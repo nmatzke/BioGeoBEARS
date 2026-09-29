@@ -1441,7 +1441,6 @@ label_optimx_result <- function(optimx_result, BioGeoBEARS_model_object)
 	return(optimx_result_labeled)
 	}
 
-Psychotria_ML_DEC
 
 
 
