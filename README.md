@@ -23,7 +23,7 @@ To install the GitHub version of BioGeoBEARS, first:
 **1.** Install the new versions of [rexpokit](https://CRAN.R-project.org/package=rexpokit) and [cladoRcpp](https://CRAN.R-project.org/package=cladoRcpp), both available on CRAN (which gives you binaries for easy installation; the GitHub versions have to be compiled from source):
 
 ```
-install.packages("pak")
+install.packages("remotes")
 install.packages("rexpokit")
 install.packages("cladoRcpp")
 ```
@@ -37,26 +37,36 @@ https://github.com/nmatzke/Matzke_R_binaries
 **2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [pak](https://CRAN.R-project.org/package=pak) (as [devtools](https://CRAN.R-project.org/package=devtools)::install_github is deprecated):
 
 ```
-library(pak)
-pak::pak(repo="nmatzke/BioGeoBEARS")
+library(remotes)
+Sys.setenv(R_REMOTES_UPGRADE = "cran")
+remotes::install_github("nmatzke/BioGeoBEARS")
+
+# This: Sys.setenv(R_REMOTES_UPGRADE = "cran") 
+# ...avoids this pause & keystroke:
+# These packages have more recent versions available.
+# It is recommended to update all of them.
+# Which would you like to update?
+# 
+# 1: All                                          
+# 2: CRAN packages only                           
+# 3: None                                         
+# ...
 ```
 
 Or, if you want to see if byte-compiling leads to a speedup:
 
 ```
-library(pak)
-options(pkg.configure_args = c(BioGeoBEARS = "--byte-compile"))
-pak::pak(pkg="nmatzke/BioGeoBEARS")
-
-# (OLD; devtools::install_github is deprecated)
-# library(devtools)
-# devtools::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
+library(remotes)
+Sys.setenv(R_REMOTES_UPGRADE = "cran")
+remotes::install_github(repo="nmatzke/BioGeoBEARS", INSTALL_opts="--byte-compile")
 ```
 
 If step #2 keeps trying to reinstall rexpokit and cladoRcpp from scratch (including demanding a compiler like gcc or gfortran) even though they are already installed, try adding "dependencies=FALSE":
 
 ```
-pak::pak(pkg="nmatzke/BioGeoBEARS", dependencies=FALSE)
+library(remotes)
+Sys.setenv(R_REMOTES_UPGRADE = "cran")
+remotes::install_github(repo="nmatzke/BioGeoBEARS", dependencies=FALSE)
 ```
 
 ...if you hit other needed dependencies, install them individually from CRAN, then re-run the command above.

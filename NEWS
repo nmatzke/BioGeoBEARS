@@ -2,8 +2,10 @@ CHANGES in BioGeoBEARS VERSION 1.1.4
 
 NEW FEATURES
 
+    o changed README.md to install using remotes::install_github, rather than pak::pak which causes install issues/complexity
     o added a /data/ directory to hold example objects
     o added a few small utilities
+    o changed README.md to install using pak::pak, as devtools::install_github is deprecating
     o various accumulated bug fixes (see GitHub commits)
 
 OTHER CHANGES
