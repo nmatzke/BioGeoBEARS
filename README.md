@@ -41,6 +41,8 @@ library(pak)
 pak::pkg_install(pkg="nmatzke/BioGeoBEARS", lib=NULL, upgrade=FALSE, ask=FALSE, dependencies=NA)
 ```
 
+**FURTHER NOTES AND HINTS ON INSTALLATION**
+
 Older instructions:
 ```
 library(remotes)
@@ -78,7 +80,15 @@ remotes::install_github(repo="nmatzke/BioGeoBEARS", dependencies=FALSE)
 
 ...if you hit other needed dependencies, install them individually from CRAN, then re-run the command above.
 
-**3. NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. Instructions for removing old versions:
+
+**3.** If you get a "git credential" / "bad credential" issues - likely due to a expired, invalid, or improperly scoped GitHub Personal Access Token (PAT). Possible solution is to add this to (often hidden) file .Rprofile in your home directory:
+
+```
+Sys.setenv(GITHUB_PAT = "insert_new_classic_token_copied_from_github.com/settings/tokens")
+```
+
+
+**4. NOTE:** Sometimes, users have extra installations of old versions of R packages. It can take a little work to make sure they are all removed. Instructions for removing old versions:
 
 ```
 # library BioGeoBEARS to load whatever you have currently installed
