@@ -34,11 +34,18 @@ https://github.com/nmatzke/Matzke_R_binaries
 
 ...you will need to match your operating system (e.g. Windows vs. Mac) and perhaps chip type (e.g. x86 Intel vs. amd64; on a Mac, click upper-left Apple Symbol -> About This Mac to get this information).
 
-**2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [pak](https://CRAN.R-project.org/package=pak) (as [devtools](https://CRAN.R-project.org/package=devtools)::install_github is deprecated):
+**2.** Install the new version of [BioGeoBEARS from GitHub](https://github.com/nmatzke/BioGeoBEARS), using [pak](https://CRAN.R-project.org/package=pak) (as [devtools](https://CRAN.R-project.org/package=devtools)::install_github is deprecated and has ridiculous numbers of dependencies, and [remotes](https://CRAN.R-project.org/package=remotes)::install_github is apparently also legacy):
 
 ```
+library(pak)
+pak::pkg_install(pkg="nmatzke/BioGeoBEARS", lib=NULL, upgrade=FALSE, ask=FALSE, dependencies=NA)
+```
+
+Older instructions:
+```
 library(remotes)
-Sys.setenv(R_REMOTES_UPGRADE = "cran")
+Sys.unsetenv("GITHUB_PAT") # If you are getting git credential issues
+Sys.setenv(R_REMOTES_UPGRADE = "cran")  # avoid manual choice for 2: CRAN packages only (see below)
 remotes::install_github("nmatzke/BioGeoBEARS")
 
 # This: Sys.setenv(R_REMOTES_UPGRADE = "cran") 
