@@ -1712,6 +1712,10 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' @param numdigits_for_superhigh_scientific Number of digits after the '.' for scientific notation of large numbers.
 #' @param numdigits_inbetween_have_fixed_digits Numbers of medium size have this many fixed digits.  Note that other cutoffs are specified
 #' in the code, and \code{\link[base]{signif}} is used to make e.g. integers appear as 0, 1, 2..
+#' @param digits The "digits" argument overrides the "numdigits_inbetween_have_fixed_digits" argument, 
+#' replacing it with digits+2 (e.g. digits=4 means numdigits_inbetween_have_fixed_digits=6
+#' which means 0.12 will print 0.01234 instead.
+#' @param list_of_colnames If NULL (default), previous colnames used if available, if not, col1, col2 etc. used. Otherwise, use the user-given list_of_colnames.
 #' NOTE: "numdigits_inbetween_have_fixed_digits"
 #' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
 #' to 3 + 1 (the dot) + typical number of integer digits.
@@ -1729,11 +1733,12 @@ conditional_format_cell <- function(cellval, numbers_below_this_get_scientific=0
 #' 0.0000, 0.0001, 0.00001, 0.0000111))
 #' conditional_format_table(input_table=input_table)
 #' 
-conditional_format_table <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4, digits=NULL)
+conditional_format_table <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4, digits=NULL, list_of_colnames=NULL)
 	{
 	defaults='
 	input_table = adf(c(143514514514532, -42.235235, -42.0000000, 0.0000, 0.0001, 0.00001, 0.0000111))
 	conditional_format_table(input_table=input_table)
+	list_of_colnames = NULL
 	'
 	
 	# The "digits" argument overrides the "numdigits_inbetween_have_fixed_digits" argument, 
@@ -1768,11 +1773,16 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 	names(output_table) = names(input_table)
 	rownames(output_table) = rownames(input_table)
 	
-	if (is.null(names(output_table)))
+	if (is.null(list_of_colnames) == TRUE)
 		{
-		numcols = ncol(input_table)
-		nums = 1:numcols
-		names(output_table) = paste0("col", nums)
+		if (is.null(names(output_table)))
+			{
+			numcols = ncol(input_table)
+			nums = 1:numcols
+			names(output_table) = paste0("col", nums)
+			}
+		} else {
+		names(output_table) = list_of_colnames
 		}
 	
 	return(output_table)
@@ -1800,6 +1810,10 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #' @param numdigits_for_superhigh_scientific Number of digits after the '.' for scientific notation of large numbers.
 #' @param numdigits_inbetween_have_fixed_digits Numbers of medium size have this many fixed digits.  Note that other cutoffs are specified
 #' in the code, and \code{\link[base]{signif}} is used to make e.g. integers appear as 0, 1, 2..
+#' @param digits The "digits" argument overrides the "numdigits_inbetween_have_fixed_digits" argument, 
+#' replacing it with digits+2 (e.g. digits=4 means numdigits_inbetween_have_fixed_digits=6
+#' which means 0.12 will print 0.01234 instead.
+#' @param list_of_colnames If NULL (default), previous colnames used if available, if not, col1, col2 etc. used. Otherwise, use the user-given list_of_colnames.
 #' NOTE: "numdigits_inbetween_have_fixed_digits"
 #' is the closest to "round()" -- i.e., to round to 3 decimals, set "numdigits_inbetween_have_fixed_digits" 
 #' to 3 + 1 (the dot) + typical number of integer digits.
@@ -1816,14 +1830,14 @@ conditional_format_table <- function(input_table, numbers_below_this_get_scienti
 #' 0.0000, 0.0001, 0.00001, 0.0000111))
 #' conditional_format_table(input_table=input_table)
 #' 
-cft <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4, digits=NULL)
+cft <- function(input_table, numbers_below_this_get_scientific=0.0001, numdigits_for_superlow_scientific=1, numbers_above_this_get_scientific=10000000, numdigits_for_superhigh_scientific=2, numdigits_inbetween_have_fixed_digits=4, digits=NULL, list_of_colnames=NULL)
 	{	
 	return(conditional_format_table(input_table, 
 		numbers_below_this_get_scientific=numbers_below_this_get_scientific,
 		numdigits_for_superlow_scientific=numdigits_for_superlow_scientific,
 		numbers_above_this_get_scientific=numbers_above_this_get_scientific,
 		numdigits_for_superhigh_scientific=numdigits_for_superhigh_scientific,
-		numdigits_inbetween_have_fixed_digits=numdigits_inbetween_have_fixed_digits, digits=digits))
+		numdigits_inbetween_have_fixed_digits=numdigits_inbetween_have_fixed_digits, digits=digits, list_of_colnames=list_of_colnames))
 	} # END cft
 
 
