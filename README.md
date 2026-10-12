@@ -38,7 +38,7 @@ https://github.com/nmatzke/Matzke_R_binaries
 
 ```
 library(pak)
-pak::pkg_install(pkg="nmatzke/BioGeoBEARS", lib=NULL, upgrade=FALSE, ask=FALSE, dependencies=NA)
+pak::pkg_install(pkg="nmatzke/BioGeoBEARS", lib=NULL, upgrade=FALSE, ask=FALSE, dependencies=FALSE)
 ```
 
 **FURTHER NOTES AND HINTS ON INSTALLATION**
