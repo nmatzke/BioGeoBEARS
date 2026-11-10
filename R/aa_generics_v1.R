@@ -4471,7 +4471,7 @@ isblank_TF <- function(items)
 	# Catch a single integer(0)
 	if (length(items) == 0)
 		{
-		blank_TF = FALSE
+		blank_TF = TRUE
 		return(blank_TF)
 		}
 	
