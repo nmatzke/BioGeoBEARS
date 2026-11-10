@@ -4468,6 +4468,13 @@ isblank_TF <- function(items)
 	items = c(NA, NaN, "NA", "NaN", "na", "n/a", "nan", 0, " ", "", "\t", "\t\t")
 	isblank_TF(items)
 	'
+	# Catch a single integer(0)
+	if (length(items) == 0)
+		{
+		blank_TF = FALSE
+		return(blank_TF)
+		}
+	
 	TF0 = is.null(items)
 	if (TF0 == TRUE)
 		{
